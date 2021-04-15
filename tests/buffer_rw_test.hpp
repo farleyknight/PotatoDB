@@ -22,11 +22,19 @@ TEST(BufferRWTest, RWInt16ToBuffer) {
   EXPECT_EQ(BufferRW::read_int16(buff), val);
 }
 
-TEST(BufferRWTest, RWInt32ToBuffer) {
+TEST(BufferRWTest, RWInt32ToBufferByteEnc) {
   Buffer buff(4);
   const int32_t val = 24 * 1000 * 1000;
 
-  BufferRW::write_int32(buff, val);
+  BufferRW::write_int32<BufferEnc::BYTE>(buff, val);
+  EXPECT_EQ(BufferRW::read_int32(buff), val);
+}
+
+TEST(BufferRWTest, RWInt32ToBufferCastEnc) {
+  Buffer buff(4);
+  const int32_t val = 24 * 1000 * 1000;
+
+  BufferRW::write_int32<BufferEnc::CAST>(buff, val);
   EXPECT_EQ(BufferRW::read_int32(buff), val);
 }
 
@@ -43,7 +51,7 @@ TEST(BufferRWTest, BufferToHexString) {
   Buffer buff(4);
   const int32_t val = 103303;
 
-  BufferRW::write_int32(buff, val);
+  BufferRW::write_int32<BufferEnc::BYTE>(buff, val);
   EXPECT_EQ(BufferRW::to_hex_string(buff), "87930100");
 }
 

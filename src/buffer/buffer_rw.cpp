@@ -22,11 +22,17 @@ void BufferRW::write_int16(MutRef<Buffer> buff, int16_t n) {
   }
 }
 
-void BufferRW::write_int32(MutRef<Buffer> buff, int32_t n) {
+template<>
+void BufferRW::write_int32<BufferEnc::BYTE>(MutRef<Buffer> buff, int32_t n) {
   size_t num_bytes = 4;
   for (int i = 0; i < num_bytes; ++i) {
     buff.data_[i] = (n >> (i*bits_in_a_byte));
   }
+}
+
+template<>
+void BufferRW::write_int32<BufferEnc::CAST>(MutRef<Buffer> buff, int32_t n) {
+  *reinterpret_cast<int32_t*>(buff.data()) = n;
 }
 
 void BufferRW::write_int64(MutRef<Buffer> buff, int64_t n) {

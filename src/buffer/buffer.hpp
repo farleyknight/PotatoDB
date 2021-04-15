@@ -17,6 +17,10 @@ public:
   // No copy assign
   MutRef<Buffer> operator=(Ref<Buffer>) = delete;
 
+  uint8_t* data() {
+    return data_.data();
+  }
+
 private:
   Data data_;
 };

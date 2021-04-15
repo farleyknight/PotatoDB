@@ -1,27 +1,32 @@
-// Taken from:
-// https://github.com/NAThompson/using_googlebenchmark
 
-#include <cmath>
-#include <ostream>
 #include <random>
 #include <benchmark/benchmark.h>
 
-template<typename Real>
-static void BM_PowTemplate(benchmark::State& state) {
+#include "buffer/buffer.hpp"
+#include "buffer/buffer_rw.hpp"
+
+template<BufferEnc enc>
+static void BM_BufferRW(benchmark::State& state) {
   std::random_device rd;
   std::mt19937 gen(rd());
-  std::uniform_real_distribution<Real> dis(1, 10);
-  auto s = dis(gen);
-  auto t = dis(gen);
-  Real y;
+  const int32_t max_range = 1000;
+  std::uniform_real_distribution<int32_t> dis(1, max_range);
+
+  Buffer buff(4);
+  auto n = dis(gen);
+  int32_t val;
+
   while (state.KeepRunning()) {
-    benchmark::DoNotOptimize(y = std::pow(s, t));
+    BufferRW::write_int32<enc>(buff, n);
+    benchmark::DoNotOptimize(val = BufferRW::read_int32(buff));
+    assert(n == val);
   }
-  std::ostream cnull(nullptr);
-  cnull << y;
+
+  std::ostream cnull(0);
+  cnull << val;
 }
-BENCHMARK_TEMPLATE(BM_PowTemplate, float);
-BENCHMARK_TEMPLATE(BM_PowTemplate, double);
-BENCHMARK_TEMPLATE(BM_PowTemplate, long double);
+
+BENCHMARK_TEMPLATE(BM_BufferRW, BufferEnc::BYTE);
+BENCHMARK_TEMPLATE(BM_BufferRW, BufferEnc::CAST);
 
 BENCHMARK_MAIN();
