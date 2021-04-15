@@ -85,14 +85,20 @@ TYPED_TEST(BufferRWTest, BufferToHexString) {
   EXPECT_EQ(this->encoder_.to_hex_string(buff), hex_string);
 }
 
+TYPED_TEST(BufferRWTest, RWStringsToBuffer) {
+  String val = "hello, world!";
+
+  size_t buffer_size = val.size() + sizeof(Buffer::string_size_t);
+  Buffer buff(buffer_size);
+
+  this->encoder_.write_string(buff, val);
+  EXPECT_EQ(this->encoder_.read_string(buff), val);
+}
+
 TEST(BufferRWTest, DISABLED_RWFloatsToBuffer) {
   // TODO
 }
 
 TEST(BufferRWTest, DISABLED_RWDoublesToBuffer) {
-  // TODO
-}
-
-TEST(BufferRWTest, DISABLED_RWStringsToBuffer) {
   // TODO
 }

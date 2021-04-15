@@ -5,7 +5,9 @@
 
 class Buffer {
 public:
-  using Data = std::vector<uint8_t>;
+  using byte_t = uint8_t;
+  using Data = std::vector<byte_t>;
+  using string_size_t = byte_t;
 
   Buffer(size_t size) {
     data_.resize(size);

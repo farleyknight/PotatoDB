@@ -3,6 +3,8 @@
 template<typename EncT>
 class BufferRW {
 public:
+  using string_size_t = int8_t;
+
   BufferRW() {}
 
   void write_string(MutRef<Buffer> buff, String s) {
@@ -10,7 +12,7 @@ public:
   }
 
   MutString read_string(Ref<Buffer> buff) {
-    return encoding_._read_string(buff);
+    return encoding_.read_string(buff);
   }
 
   template<typename IntT>
