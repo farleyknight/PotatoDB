@@ -6,7 +6,6 @@
 class Buffer {
 public:
   using Data = std::vector<uint8_t>;
-  friend class BufferRW;
 
   Buffer(size_t size) {
     data_.resize(size);
@@ -21,7 +20,10 @@ public:
     return data_.data();
   }
 
-private:
+  const uint8_t* data() const {
+    return data_.data();
+  }
+
   Data data_;
 };
 

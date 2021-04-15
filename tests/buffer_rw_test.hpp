@@ -1,58 +1,88 @@
 #pragma once
 
 #include <limits>
-
+ 
 #include "common/types.hpp"
 #include "buffer/buffer.hpp"
 #include "buffer/buffer_rw.hpp"
+#include "buffer/byte_encoder.hpp"
+#include "buffer/cast_encoder.hpp"
 
-TEST(BufferRWTest, RWInt8ToBuffer) {
-  Buffer buff(1);
-  const int8_t val = 24;
+template<typename EncT>
+class BufferRWTest : public testing::Test {
+public:
+  BufferRW<EncT> encoder_;
+};
 
-  BufferRW::write_int8(buff, val);
-  EXPECT_EQ(BufferRW::read_int8(buff), val);
+using Encodings = testing::Types<CastEncoder, ByteEncoder>;
+
+TYPED_TEST_SUITE(BufferRWTest, Encodings);
+
+TYPED_TEST(BufferRWTest, RWInt8ToBuffer) {
+  using IntT = int8_t;
+
+  Buffer buff(sizeof(IntT));
+
+  const IntT max = std::numeric_limits<IntT>::max();
+  this->encoder_.template write_int<IntT>(buff, max);
+  EXPECT_EQ(this->encoder_.template read_int<IntT>(buff), max);
+
+  const IntT min = std::numeric_limits<IntT>::min();
+  this->encoder_.template write_int<IntT>(buff, min);
+  EXPECT_EQ(this->encoder_.template read_int<IntT>(buff), min);
 }
 
-TEST(BufferRWTest, RWInt16ToBuffer) {
-  Buffer buff(2);
-  const int16_t val = std::numeric_limits<int16_t>::max();
+TYPED_TEST(BufferRWTest, RWInt16ToBuffer) {
+  using IntT = int16_t;
 
-  BufferRW::write_int16(buff, val);
-  EXPECT_EQ(BufferRW::read_int16(buff), val);
+  Buffer buff(sizeof(IntT));
+
+  const IntT max = std::numeric_limits<IntT>::max();
+  this->encoder_.template write_int<IntT>(buff, max);
+  EXPECT_EQ(this->encoder_.template read_int<IntT>(buff), max);
+
+  const IntT min = std::numeric_limits<IntT>::min();
+  this->encoder_.template write_int<IntT>(buff, min);
+  EXPECT_EQ(this->encoder_.template read_int<IntT>(buff), min);
 }
 
-TEST(BufferRWTest, RWInt32ToBufferByteEnc) {
-  Buffer buff(4);
-  const int32_t val = 24 * 1000 * 1000;
+TYPED_TEST(BufferRWTest, RWInt32ToBuffer) {
+  using IntT = int32_t;
 
-  BufferRW::write_int32<BufferEnc::BYTE>(buff, val);
-  EXPECT_EQ(BufferRW::read_int32(buff), val);
+  Buffer buff(sizeof(IntT));
+
+  const IntT max = std::numeric_limits<IntT>::max();
+  this->encoder_.template write_int<IntT>(buff, max);
+  EXPECT_EQ(this->encoder_.template read_int<IntT>(buff), max);
+
+  const IntT min = std::numeric_limits<IntT>::min();
+  this->encoder_.template write_int<IntT>(buff, min);
+  EXPECT_EQ(this->encoder_.template read_int<IntT>(buff), min);
 }
 
-TEST(BufferRWTest, RWInt32ToBufferCastEnc) {
-  Buffer buff(4);
-  const int32_t val = 24 * 1000 * 1000;
 
-  BufferRW::write_int32<BufferEnc::CAST>(buff, val);
-  EXPECT_EQ(BufferRW::read_int32(buff), val);
+TYPED_TEST(BufferRWTest, RWInt64ToBuffer) {
+  using IntT = int64_t;
+
+  Buffer buff(sizeof(IntT));
+
+  const IntT max = std::numeric_limits<IntT>::max();
+  this->encoder_.template write_int<IntT>(buff, max);
+  EXPECT_EQ(this->encoder_.template read_int<IntT>(buff), max);
+
+  const IntT min = std::numeric_limits<IntT>::min();
+  this->encoder_.template write_int<IntT>(buff, min);
+  EXPECT_EQ(this->encoder_.template read_int<IntT>(buff), min);
 }
 
-TEST(BufferRWTest, RWInt64ToBuffer) {
-  Buffer buff(8);
-  int64_t val = 24 * 1000 * 1000;
-  val = val * 1000;
 
-  BufferRW::write_int64(buff, val);
-  EXPECT_EQ(BufferRW::read_int64(buff), val);
-}
-
-TEST(BufferRWTest, BufferToHexString) {
+TYPED_TEST(BufferRWTest, BufferToHexString) {
   Buffer buff(4);
   const int32_t val = 103303;
+  String hex_string = "87930100";
 
-  BufferRW::write_int32<BufferEnc::BYTE>(buff, val);
-  EXPECT_EQ(BufferRW::to_hex_string(buff), "87930100");
+  this->encoder_.write_int32(buff, val);
+  EXPECT_EQ(this->encoder_.to_hex_string(buff), hex_string);
 }
 
 TEST(BufferRWTest, DISABLED_RWFloatsToBuffer) {

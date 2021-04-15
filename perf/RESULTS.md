@@ -2,9 +2,7 @@
 
 ### BM_BufferRW
 
-Based on initial tests for `int32_t` the C++ built-in casting `reinterpret_cast` seems to be about 5x-10x faster than byte-by-byte hand written encodings.
-
-This is not surprising, given the low-level nature of `reinterpret_cast`. Further study is necessary for non-integer types, like strings, floats, doubles, and nulls.
+According to the implementation for `BufferRW`, both CastEncoder and ByteEncoder perform the same for integers. Further tests need to be done for strings.
 
 ## Parsing SQL via different parsers
 
