@@ -18,7 +18,7 @@ static void BM_BufferRW(benchmark::State& state) {
 
   while (state.KeepRunning()) {
     BufferRW::write_int32<enc>(buff, n);
-    benchmark::DoNotOptimize(val = BufferRW::read_int32(buff));
+    benchmark::DoNotOptimize(val = BufferRW::read_int32<enc>(buff));
     assert(n == val);
   }
 
