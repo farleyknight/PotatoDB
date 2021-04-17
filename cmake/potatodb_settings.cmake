@@ -35,6 +35,7 @@ add_definitions(
 
 include_directories(src)
 include_directories(tests)
+include_directories(perf)
 
 file(GLOB_RECURSE MAIN_SOURCES   "src/*.cpp")
 file(GLOB_RECURSE TEST_SOURCES   "tests/*.cpp")

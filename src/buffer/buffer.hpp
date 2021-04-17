@@ -3,6 +3,12 @@
 #include "common/types.hpp"
 #include <vector>
 
+// TODO: Let's add:
+// * seek method
+// * operator[] for access to the buffer
+// The seek method sets an offset
+// The operator[] reads data, starting at the offset.
+
 class Buffer {
 public:
   using byte_t = uint8_t;
@@ -12,6 +18,9 @@ public:
   Buffer(size_t size) {
     data_.resize(size);
   }
+
+  // TODO: Write perf tests to see if `move`-ed Buffers are
+  // faster than implicitly copied buffers.
 
   // No copy
   Buffer(Ref<Buffer>) = delete;
