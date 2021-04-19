@@ -19,7 +19,7 @@ public:
     throw NotImplementedException("type_id not implemented!");
   }
 
-  virtual bool eq(Ref<Value> left, Ref<Value> right) const {
+  virtual bool eq(UNUSED Ref<Value> left, UNUSED Ref<Value> right) const {
     throw NotImplementedException("eq not implemented!");
   }
 
@@ -27,7 +27,7 @@ public:
     throw NotImplementedException("size not implemented!");
   }
 
-  virtual bool is_castable_from(TypeId type_id) const {
+  virtual bool is_castable_from(UNUSED TypeId type_id) const {
     throw NotImplementedException("is_castable_from not implemented!");
   }
 

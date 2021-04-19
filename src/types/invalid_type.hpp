@@ -9,11 +9,11 @@ public:
     return TypeId::INVALID;
   }
 
-  Value deserialize_from(Ref<Buffer> buff) const override {
+  Value deserialize_from(UNUSED Ref<Buffer> buff) const override {
     throw Exception("No deserialize_from for InvalidType");
   }
 
-  bool is_castable_from(TypeId type_id) const override {
+  bool is_castable_from(UNUSED TypeId type_id) const override {
     return false;
   }
 

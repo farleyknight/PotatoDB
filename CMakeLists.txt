@@ -5,14 +5,14 @@
 cmake_minimum_required(VERSION 3.19)
 project(potatodb VERSION 0.1.0)
 
-set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 # Project level settings
 include(potatodb_settings)
 # C++ packages via vcpkg
 include(potatodb_vcpkg)
-# Set up SQL grammer generator with ANTLR4
-# include(potatodb_antlr_parser)
+# TODO: Set up SQL grammer generator with ANTLR4
+# include(potatodb_antlr)
 
 # Debug Build
 set(CMAKE_BUILD_TYPE "Debug")

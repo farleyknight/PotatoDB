@@ -25,6 +25,8 @@ add_definitions(
   #######################################################
   "-ferror-limit=50"
   "-Wall"
+  "-Wextra"
+  "-pedantic"
   "-g"
   "-fexceptions"
   )

@@ -29,7 +29,7 @@ public:
     return Value::make(Type::rw().read_int8(buff));
   }
 
-  bool is_castable_from(TypeId type_id) const override {
+  bool is_castable_from(UNUSED TypeId type_id) const override {
     return true;
   }
 

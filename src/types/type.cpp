@@ -38,17 +38,17 @@ Value Type::max() const {
 }
 
 
-void Type::serialize_to(MutRef<Buffer> buff, Value val) const {
+void Type::serialize_to(UNUSED MutRef<Buffer> buff, UNUSED Value val) const {
   throw NotImplementedException("serialize_to not implemented!");
 }
 
 
-Value Type::deserialize_from(Ref<Buffer> buff) const {
+Value Type::deserialize_from(UNUSED Ref<Buffer> buff) const {
   throw NotImplementedException("deserialize_from not implemented!");
 }
 
 
-MutString Type::to_string(const Value val) const {
+MutString Type::to_string(UNUSED const Value val) const {
   throw NotImplementedException("to_string not implemented!");
 }
 
