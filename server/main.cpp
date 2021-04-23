@@ -20,10 +20,11 @@ int main() {
   server.on_read([&](WPtr<ClientSocket> socket_ptr) {
     if (auto socket = socket_ptr.lock()) {
       auto data = socket->read();
+      std::cout << "Socket got data " << data << std::endl;
       socket->write(data);
       // TODO: We might NOT want to be closing the connection
       // immediately. However, this is enough for now.
-      socket->shutdown();
+      // socket->shutdown();
     }
   });
 

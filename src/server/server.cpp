@@ -1,6 +1,6 @@
 #include <errno.h>
 #include <string.h>
-
+#include <iostream>
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
@@ -32,7 +32,7 @@ void Server::set_port(int port) {
 
 void Server::shutdown() {
   if (main_socket_ != 0) {
-    close_socket(main_socket_);
+    close(main_socket_);
   }
 
   for (auto socket : sockets_) {
@@ -98,7 +98,7 @@ void Server::accept_new_connection() {
   auto client_socket = make_shared<ClientSocket>(client_fd, *this);
 
   if (accept_func_) {
-    std::async(std::launch::async, accept_func_, client_socket);
+    auto task = std::async(std::launch::async, accept_func_, client_socket);
   }
 
   sockets_.push_back(client_socket);
@@ -113,11 +113,10 @@ void Server::read_from_connection(file_desc_t fd) {
   int result = recv(fd, buffer, 1, MSG_PEEK);
 
   if( result <= 0 ) {
-    // It would be easier to use erase-remove here, but this leads
-    // to a deadlock. Instead, the current socket will be added to
-    // the list of stale sockets and be closed later on.
-    close_socket(fd);
+    std::cout << "Stale socket FD : " << fd << std::endl;
+    stale_fds_.push_back(fd);
   } else {
+    std::cout << "Read socket FD : " << fd << std::endl;
     if (read_func_) {
       fire_read_event(fd);
     }
@@ -127,16 +126,23 @@ void Server::read_from_connection(file_desc_t fd) {
 void Server::prep_main_socket_set() {
   FD_ZERO(&main_socket_set_);
   FD_SET(main_socket_, &main_socket_set_);
+  curr_high_fd_ = main_socket_;
 }
 
+const int one_second = 1;
+const int one_minute = 60;
+
 bool Server::update_socket_set() {
+  struct timeval timeout = {one_second, 0};  // Sleep for one minute
+
   int fd_count = select(curr_high_fd_ + 1,
                         &client_socket_set_,
                         nullptr,  // no descriptors to write into
                         nullptr,  // no descriptors with exceptions
-                        nullptr); // no timeout
-  
-  return (fd_count == -1);
+                        &timeout); // no timeout
+
+  std::cout << "FD count: " << fd_count << std::endl;
+  return (fd_count != -1);
 }
 
 void Server::accept_connections() {
@@ -171,23 +177,37 @@ void Server::accept_connections() {
       if (fd == main_socket_) {
         // Main server socket has data.
         // Read from it to connect a new client
+        std::cout << "Reading main socket" << std::endl;
         accept_new_connection();
       } else {
         // Known client socket sending request
         // Time to read!
-        read_from_connection(fd); 
+        std::cout << "Read from client" << std::endl;
+        read_from_connection(fd);
       }
     }
     curr_high_fd_ = max(new_high_fd_, curr_high_fd_);
 
+    // finish_tasks();
     stale_socket_cleanup();
   }
+}
+
+void Server::finish_tasks() {
+  std::for_each(tasks_.begin(), tasks_.end(), [](Ref<Task> task) {
+    task.wait();
+  });
+  tasks_.clear();
 }
 
 void Server::fire_read_event(file_desc_t fd) {
   for (auto &socket : sockets_) {
     if (socket->file_desc() == fd) {
-      std::async(std::launch::async, read_func_, socket);
+      std::cout << "Reading from socket FD : " << fd << std::endl;
+      // TODO: We may need to store the results (futures)
+      // and `future.wait()` for them to finish. Otherwise
+      // they might not be getting called?
+      auto task = std::async(std::launch::async, read_func_, socket);
     }
   }
 }
@@ -196,14 +216,16 @@ void Server::stale_socket_cleanup() {
   std::lock_guard<Mutex> lock(stale_fd_mutex_);
 
   for (auto fd : stale_fds_) {
+    std::cout << "Clearing FD : " << fd << std::endl;
     FD_CLR(fd, &main_socket_set_);
-    close_socket(fd);
+    close(fd);
   }
 
   stale_fds_.clear();
 }
 
-void Server::close_socket(file_desc_t fd) {
+void Server::remove_socket(file_desc_t fd) {
+  std::cout << "Closing socket FD : " << fd << std::endl;
   std::lock_guard<Mutex> lock(stale_fd_mutex_);
 
   auto match_fd = [&](SPtr<ClientSocket> socket) {

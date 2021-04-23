@@ -6,6 +6,7 @@
 #include <limits>
 #include <mutex>
 #include <vector>
+#include <future>
 
 /************************************************
  * Macros
@@ -93,3 +94,9 @@ template<typename T>
 using Vec      = const vector<T>;
 template<typename T>
 using MutVec   = vector<T>;
+
+
+using std::future;
+template<typename T>
+using Future = future<T>;
+using Task = Future<void>;

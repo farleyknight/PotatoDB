@@ -13,7 +13,7 @@ endif()
 if(DEFINED VCPKG_ROOT)
   message(STATUS "VCPKG_ROOT is set to ${VCPKG_ROOT}")
 else()
-  message(FATAL_ERROR "VCPKG_ROOT is not set! Please set it before continuing")
+  message(FATAL_ERROR "VCPKG_ROOT is not set! Please set it before continuing.")
 endif()
 
 if(NOT DEFINED ENV{VCPKG_FEATURE_FLAGS})

@@ -54,3 +54,5 @@ DartConfiguration.tcl
 
 # Project ignores
 builds/
+*.zip
+antlr_generated/

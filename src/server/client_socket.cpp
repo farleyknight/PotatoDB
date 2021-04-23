@@ -12,7 +12,7 @@ int ClientSocket::file_desc() const {
 }
 
 void ClientSocket::shutdown() {
-  server_.close_socket(file_desc_);
+  server_.remove_socket(file_desc_);
 }
 
 void ClientSocket::write(Ref<String> data) const {
