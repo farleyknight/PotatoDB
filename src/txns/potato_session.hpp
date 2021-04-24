@@ -1,6 +1,16 @@
 
 #include "parser/potato_sql.hpp"
 
+class Resources {
+public:
+  DiskMgr
+  BuffMgr
+  LockMgr
+  TxnMgr
+  ExecCtx
+  ExecEngine
+}
+
 class PotatoSession {
 public:
   PotatoSession(String file_name, const int bp_size = 32)

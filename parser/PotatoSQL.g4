@@ -154,20 +154,37 @@ factored_select_stmt
    ( K_LIMIT expr ( ( K_OFFSET | ',' ) expr )? )?
  ;
 
+insert_prefix
+    : K_INSERT
+    | K_REPLACE
+    | K_INSERT K_OR K_REPLACE
+    | K_INSERT K_OR K_ROLLBACK
+    | K_INSERT K_OR K_ABORT
+    | K_INSERT K_OR K_FAIL
+    | K_INSERT K_OR K_IGNORE
+    ;
+
+insert_tuple
+    : '(' expr ( ',' expr )* ')'
+    ;
+
+insert_tuples
+    : insert_tuple ( ',' insert_tuple )*
+    ;
+
+insert_columns
+    : '(' column_name ( ',' column_name )* ')'
+    ;
+
 insert_stmt
- : with_clause? ( K_INSERT 
-                | K_REPLACE
-                | K_INSERT K_OR K_REPLACE
-                | K_INSERT K_OR K_ROLLBACK
-                | K_INSERT K_OR K_ABORT
-                | K_INSERT K_OR K_FAIL
-                | K_INSERT K_OR K_IGNORE ) K_INTO
-   ( database_name '.' )? table_name ( '(' column_name ( ',' column_name )* ')' )?
-   ( K_VALUES '(' expr ( ',' expr )* ')' ( ',' '(' expr ( ',' expr )* ')' )*
-   | select_stmt
-   | K_DEFAULT K_VALUES
-   )
- ;
+    : with_clause? insert_prefix K_INTO
+        ( database_name '.' )?
+        table_name insert_columns?
+        ( K_VALUES insert_tuples
+        | select_stmt
+        | K_DEFAULT K_VALUES
+        )
+    ;
 
 pragma_stmt
  : K_PRAGMA ( database_name '.' )? pragma_name ( '=' pragma_value
@@ -398,8 +415,10 @@ join_constraint
    | K_USING '(' column_name ( ',' column_name )* ')' )?
  ;
 
+column_list: result_column ( ',' result_column )*;
+
 select_core
- : K_SELECT ( K_DISTINCT | K_ALL )? result_column ( ',' result_column )*
+ : K_SELECT ( K_DISTINCT | K_ALL )? column_list
    ( K_FROM ( table_or_subquery ( ',' table_or_subquery )* | join_clause ) )?
    ( K_WHERE expr )?
    ( K_GROUP K_BY expr ( ',' expr )* ( K_HAVING expr )? )?

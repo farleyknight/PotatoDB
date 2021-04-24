@@ -85,6 +85,18 @@ public:
   virtual void enterFactored_select_stmt(PotatoSQLParser::Factored_select_stmtContext *ctx) = 0;
   virtual void exitFactored_select_stmt(PotatoSQLParser::Factored_select_stmtContext *ctx) = 0;
 
+  virtual void enterInsert_prefix(PotatoSQLParser::Insert_prefixContext *ctx) = 0;
+  virtual void exitInsert_prefix(PotatoSQLParser::Insert_prefixContext *ctx) = 0;
+
+  virtual void enterInsert_tuple(PotatoSQLParser::Insert_tupleContext *ctx) = 0;
+  virtual void exitInsert_tuple(PotatoSQLParser::Insert_tupleContext *ctx) = 0;
+
+  virtual void enterInsert_tuples(PotatoSQLParser::Insert_tuplesContext *ctx) = 0;
+  virtual void exitInsert_tuples(PotatoSQLParser::Insert_tuplesContext *ctx) = 0;
+
+  virtual void enterInsert_columns(PotatoSQLParser::Insert_columnsContext *ctx) = 0;
+  virtual void exitInsert_columns(PotatoSQLParser::Insert_columnsContext *ctx) = 0;
+
   virtual void enterInsert_stmt(PotatoSQLParser::Insert_stmtContext *ctx) = 0;
   virtual void exitInsert_stmt(PotatoSQLParser::Insert_stmtContext *ctx) = 0;
 
@@ -177,6 +189,9 @@ public:
 
   virtual void enterJoin_constraint(PotatoSQLParser::Join_constraintContext *ctx) = 0;
   virtual void exitJoin_constraint(PotatoSQLParser::Join_constraintContext *ctx) = 0;
+
+  virtual void enterColumn_list(PotatoSQLParser::Column_listContext *ctx) = 0;
+  virtual void exitColumn_list(PotatoSQLParser::Column_listContext *ctx) = 0;
 
   virtual void enterSelect_core(PotatoSQLParser::Select_coreContext *ctx) = 0;
   virtual void exitSelect_core(PotatoSQLParser::Select_coreContext *ctx) = 0;

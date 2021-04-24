@@ -39,9 +39,11 @@ find_package(ANTLR REQUIRED)
 # -----------------------------------------------------------------------------
 
 
-antlr_target(PotatoSQL "parser/PotatoSQL.g4" LEXER PARSER LISTENER
+antlr_target(PotatoSQL "parser/PotatoSQL.g4" LEXER PARSER LISTENER VISITOR
   PACKAGE potatosql
   OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+
+message(STATUS "The output files for PotatoSQL are ${ANTLR_PotatoSQL_CXX_OUTPUTS}")
 
 # -----------------------------------------------------------------------------
 # SQL Parser target binary
@@ -49,11 +51,15 @@ antlr_target(PotatoSQL "parser/PotatoSQL.g4" LEXER PARSER LISTENER
 
 set(PARSER_BINARY "${CMAKE_PROJECT_NAME}_parser")
 
-message(STATUS "Parser binary target is ${PARSE_BINARY}")
+message(STATUS "Parser binary target is ${PARSER_BINARY}")
+
+message(STATUS "Parser sources are ${PARSER_SOURCES}")
 
 # add generated grammar to demo binary target
 add_executable(${PARSER_BINARY} "parser/main.cpp"
-  ${ANTLR_PotatoSQL_CXX_OUTPUTS}
+  ${PARSER_SOURCES}
   )
 
-target_link_libraries(${PARSER_BINARY} antlr4_static)
+target_link_libraries(${PARSER_BINARY}
+  PRIVATE -fstandalone-debug # So we can see full parse results in lldb
+  PRIVATE antlr4_static)

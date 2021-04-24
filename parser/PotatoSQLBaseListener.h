@@ -87,6 +87,18 @@ public:
   virtual void enterFactored_select_stmt(PotatoSQLParser::Factored_select_stmtContext * /*ctx*/) override { }
   virtual void exitFactored_select_stmt(PotatoSQLParser::Factored_select_stmtContext * /*ctx*/) override { }
 
+  virtual void enterInsert_prefix(PotatoSQLParser::Insert_prefixContext * /*ctx*/) override { }
+  virtual void exitInsert_prefix(PotatoSQLParser::Insert_prefixContext * /*ctx*/) override { }
+
+  virtual void enterInsert_tuple(PotatoSQLParser::Insert_tupleContext * /*ctx*/) override { }
+  virtual void exitInsert_tuple(PotatoSQLParser::Insert_tupleContext * /*ctx*/) override { }
+
+  virtual void enterInsert_tuples(PotatoSQLParser::Insert_tuplesContext * /*ctx*/) override { }
+  virtual void exitInsert_tuples(PotatoSQLParser::Insert_tuplesContext * /*ctx*/) override { }
+
+  virtual void enterInsert_columns(PotatoSQLParser::Insert_columnsContext * /*ctx*/) override { }
+  virtual void exitInsert_columns(PotatoSQLParser::Insert_columnsContext * /*ctx*/) override { }
+
   virtual void enterInsert_stmt(PotatoSQLParser::Insert_stmtContext * /*ctx*/) override { }
   virtual void exitInsert_stmt(PotatoSQLParser::Insert_stmtContext * /*ctx*/) override { }
 
@@ -179,6 +191,9 @@ public:
 
   virtual void enterJoin_constraint(PotatoSQLParser::Join_constraintContext * /*ctx*/) override { }
   virtual void exitJoin_constraint(PotatoSQLParser::Join_constraintContext * /*ctx*/) override { }
+
+  virtual void enterColumn_list(PotatoSQLParser::Column_listContext * /*ctx*/) override { }
+  virtual void exitColumn_list(PotatoSQLParser::Column_listContext * /*ctx*/) override { }
 
   virtual void enterSelect_core(PotatoSQLParser::Select_coreContext * /*ctx*/) override { }
   virtual void exitSelect_core(PotatoSQLParser::Select_coreContext * /*ctx*/) override { }
