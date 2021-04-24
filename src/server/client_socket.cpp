@@ -1,8 +1,9 @@
 #include "common/types.hpp"
+
 #include "server/client_socket.hpp"
 #include "server/server.hpp"
 
-#include "parser/potato_sql.hpp"
+#include "txns/potato_session.hpp"
 
 ClientSocket::ClientSocket(file_desc_t file_desc,
                            MRef<Server> server)
@@ -30,8 +31,16 @@ void ClientSocket::write(CRef<String> data) const {
 
 const size_t buffer_size = 256;
 
-MutString ClientSocket::parse_message(MutString message) const {
-  return PotatoSQL::parse(message);
+MutString ClientSocket::process_request(MutString message) const {
+  // TODO: We should NOT be hard-coding the filename like this.
+  // In the future, we have a way to create a session without
+  // having to specify a file. Perhaps we default to a sub-directory
+  // under the user's home directory? We can place any DB files
+  // under ~/.potatodb and use that for the catalog, the table heaps
+  // and whatnot?
+  PotatoSession session("local_file.db", 32);
+
+  return session.execute(message);
 }
 
 MutString ClientSocket::read() const {
@@ -47,7 +56,5 @@ MutString ClientSocket::read() const {
     bytes = recv(file_desc_, buffer, sizeof(buffer), MSG_DONTWAIT);
   }
 
-  auto response = parse_message(message);
-
-  return response;
+  return process_request(message);
 }
