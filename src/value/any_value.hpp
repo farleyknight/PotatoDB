@@ -8,7 +8,7 @@ struct AnyValue {
   using store_t = std::any;
 
   template<typename T>
-  static T cast_as(Ref<store_t> data) {
+  static T cast_as(CRef<store_t> data) {
     return std::any_cast<T>(data);
   }
 };

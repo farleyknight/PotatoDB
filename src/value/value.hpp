@@ -12,10 +12,10 @@ public:
   using DataStoreT = typename ValueBase<>::DataStoreT;
   using StoreT     = typename ValueBase<>::StoreClass;
 
-  void serialize_to(MutRef<Buffer> buff);
-  void deserialize_from(Ref<Buffer> buff);
-  bool eq(Ref<Value> other) const;
-  Ref<Ptr<Type>> value_type() const;
+  void serialize_to(MRef<Buffer> buff);
+  void deserialize_from(CRef<Buffer> buff);
+  bool eq(CRef<Value> other) const;
+  CRef<Ptr<Type>> value_type() const;
 
   template<typename target_t>
   target_t as() const {

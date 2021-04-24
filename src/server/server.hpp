@@ -19,7 +19,7 @@ public:
   void shutdown();
   void accept_connections();
   void accept_new_connection();
-  void close_socket(file_desc_t fd);
+  void remove_socket(file_desc_t fd);
 
   template<class F>
   void on_accept(Move<F> func) {
@@ -39,6 +39,7 @@ private:
   void prep_main_socket_set();
   bool update_socket_set();
   void stale_socket_cleanup();
+  void finish_tasks();
 
   int         backlog_     =  5;
   int         port_        = -1;
@@ -50,6 +51,8 @@ private:
 
   SocketFunc accept_func_, read_func_;
   MutVec<MutSPtr<ClientSocket>> sockets_;
+
+  MutVec<Task> tasks_;
 
   // NOTE: Stale file descriptors are connections that can be dropped
   // Since another thread may be already accessing this vector, we

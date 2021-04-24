@@ -11,8 +11,9 @@ set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(potatodb_settings)
 # C++ packages via vcpkg
 include(potatodb_vcpkg)
-# TODO: Set up SQL grammer generator with ANTLR4
+# TODO: Set up SQL grammar generator with ANTLR4
 # include(potatodb_antlr)
+include(potatodb_sqlite_parser)
 
 # Debug Build
 set(CMAKE_BUILD_TYPE "Debug")

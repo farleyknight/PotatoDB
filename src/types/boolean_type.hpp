@@ -21,11 +21,11 @@ public:
     return Value::make(true);
   }
 
-  void serialize_to(MutRef<Buffer> buff, Value val) const override {
+  void serialize_to(MRef<Buffer> buff, Value val) const override {
     Type::rw().write_int8(buff, val.as<bool>());
   }
 
-  Value deserialize_from(Ref<Buffer> buff) const override {
+  Value deserialize_from(CRef<Buffer> buff) const override {
     return Value::make(Type::rw().read_int8(buff));
   }
 
@@ -33,7 +33,7 @@ public:
     return true;
   }
 
-  bool eq(Ref<Value> left, Ref<Value> right) const override {
+  bool eq(CRef<Value> left, CRef<Value> right) const override {
     if (left.is_null() && right.is_null()) {
       return true;
     } else if (left.is_null() || right.is_null()) {

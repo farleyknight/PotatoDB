@@ -5,5 +5,5 @@ puts PotatoDB.version
 
 client = PotatoDB::Client.new("localhost")
 
-response = client.request("hello!\n")
+response = client.request("SELECT * FROM foobar")
 puts response

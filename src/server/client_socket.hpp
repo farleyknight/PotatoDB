@@ -14,20 +14,21 @@ class Server;
 class ClientSocket {
 public:
   ClientSocket(file_desc_t file_desc,
-               MutRef<Server> server);
+               MRef<Server> server);
   ~ClientSocket() = default;
 
   int file_desc() const;
 
   void shutdown();
-  void write(Ref<string> data) const;
+  void write(CRef<string> data) const;
   string read() const;
+  MutString parse_message(MutString message) const;
 
   // No copy
-  ClientSocket(Ref<ClientSocket>) = delete;
+  ClientSocket(CRef<ClientSocket>) = delete;
   // No copy assign
-  MutRef<ClientSocket> operator=(Ref<ClientSocket>) = delete;
+  MRef<ClientSocket> operator=(CRef<ClientSocket>) = delete;
 private:
   file_desc_t file_desc_ = -1;
-  MutRef<Server> server_;
+  MRef<Server> server_;
 };

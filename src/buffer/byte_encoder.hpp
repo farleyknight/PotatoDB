@@ -13,7 +13,7 @@ private:
   ByteEncoder() = default;
 
   template<typename IntT>
-  void write_int(MutRef<Buffer> buff, IntT n)  const{
+  void write_int(MRef<Buffer> buff, IntT n)  const{
     size_t num_bytes = sizeof(IntT);
     for (size_t i = 0; i < num_bytes; ++i) {
       buff.data_[i] = (n >> (i*bits_in_a_byte));
@@ -21,7 +21,7 @@ private:
   }
 
   template<typename IntT>
-  IntT read_int(Ref<Buffer> buff) const {
+  IntT read_int(CRef<Buffer> buff) const {
     size_t num_bytes = sizeof(IntT);
     IntT n = 0;
     for (size_t i = 0; i < num_bytes; ++i) {
@@ -38,7 +38,7 @@ private:
     unsigned char bytes[sizeof(float)];
   };
 
-  void write_float(MutRef<Buffer> buff, float f) const {
+  void write_float(MRef<Buffer> buff, float f) const {
     float_bytes_t data;
     data.val = f;
     for (size_t i = 0; i < sizeof(float); ++i) {
@@ -46,7 +46,7 @@ private:
     }
   }
 
-  float read_float(Ref<Buffer> buff) const {
+  float read_float(CRef<Buffer> buff) const {
     float_bytes_t data;
     for (size_t i = 0; i < sizeof(float); ++i) {
       data.bytes[i] = buff.data_[i];
@@ -59,7 +59,7 @@ private:
     unsigned char bytes[sizeof(double)];
   };
 
-  void write_double(MutRef<Buffer> buff, double d) const {
+  void write_double(MRef<Buffer> buff, double d) const {
     double_bytes_t data;
     data.val = d;
     for (size_t i = 0; i < sizeof(double); ++i) {
@@ -67,7 +67,7 @@ private:
     }
   }
 
-  float read_double(Ref<Buffer> buff) const {
+  float read_double(CRef<Buffer> buff) const {
     double_bytes_t data;
     for (size_t i = 0; i < sizeof(double); ++i) {
       data.bytes[i] = buff.data_[i];
@@ -77,7 +77,7 @@ private:
 
   using string_size_t = Buffer::string_size_t;
 
-  void write_string(MutRef<Buffer> buff, String s) {
+  void write_string(MRef<Buffer> buff, String s) {
     assert(s.size() < std::numeric_limits<string_size_t>::max());
     int8_t string_size = s.size();
 
@@ -90,7 +90,7 @@ private:
     }
   }
 
-  MutString read_string(Ref<Buffer> buff) {
+  MutString read_string(CRef<Buffer> buff) {
     string_size_t size = buff.data_[0];
 
     MutString new_string(size, 0);

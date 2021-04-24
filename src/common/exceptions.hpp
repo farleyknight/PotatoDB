@@ -29,13 +29,13 @@ enum class ExceptionType {
 
 class Exception : public std::runtime_error {
 public:
-  explicit Exception(Ref<String> message)
+  explicit Exception(CRef<String> message)
   : std::runtime_error(message), type_(ExceptionType::INVALID) {
     String exception_message = "Message :: " + message + "\n";
     std::cerr << exception_message;
   }
 
-  Exception(ExceptionType exception_type, Ref<String> message)
+  Exception(ExceptionType exception_type, CRef<String> message)
   : std::runtime_error(message), type_(exception_type) {
     String exception_message =
     "\nException Type :: " + to_string(type_) + "\nMessage :: " + message + "\n";
