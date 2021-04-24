@@ -13,7 +13,7 @@ struct UnionValue {
   };
 
   template<typename T>
-  static T cast_as(Ref<store_t> data) {
+  static T cast_as(CRef<store_t> data) {
     return *reinterpret_cast<T*>(data);
   }
 };

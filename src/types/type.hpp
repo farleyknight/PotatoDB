@@ -19,7 +19,7 @@ public:
     throw NotImplementedException("type_id not implemented!");
   }
 
-  virtual bool eq(UNUSED Ref<Value> left, UNUSED Ref<Value> right) const {
+  virtual bool eq(UNUSED CRef<Value> left, UNUSED CRef<Value> right) const {
     throw NotImplementedException("eq not implemented!");
   }
 
@@ -34,15 +34,15 @@ public:
   virtual Value min() const;
   virtual Value max() const;
 
-  virtual void serialize_to(MutRef<Buffer> buff, Value val) const;
-  virtual Value deserialize_from(Ref<Buffer> buff) const;
+  virtual void serialize_to(MRef<Buffer> buff, Value val) const;
+  virtual Value deserialize_from(CRef<Buffer> buff) const;
 
   virtual MutString to_string(const Value val) const;
 
-  static Ref<Ptr<Type>> instance(const TypeId type_id);
+  static CRef<Ptr<Type>> instance(const TypeId type_id);
   static MutString as_string(const TypeId type_id);
 
-  static Ref<BufferRW<>> rw() {
+  static CRef<BufferRW<>> rw() {
     static const BufferRW rw_;
     return rw_;
   }

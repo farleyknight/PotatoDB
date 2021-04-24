@@ -27,7 +27,7 @@ public:
     return false;
   }
 
-  bool eq(Ref<Value> left, Ref<Value> right) const override {
+  bool eq(CRef<Value> left, CRef<Value> right) const override {
     if (left.is_null() && right.is_null()) {
       return true;
     } else if (left.is_null() || right.is_null()) {
@@ -37,11 +37,11 @@ public:
     }
   }
 
-  void serialize_to(MutRef<Buffer> buff, Value val) const override {
+  void serialize_to(MRef<Buffer> buff, Value val) const override {
     Type::rw().write_int<numeric_t>(buff, val.as<numeric_t>());
   }
 
-  Value deserialize_from(Ref<Buffer> buff) const override {
+  Value deserialize_from(CRef<Buffer> buff) const override {
     return Value::make(Type::rw().read_int<numeric_t>(buff));
   }
 

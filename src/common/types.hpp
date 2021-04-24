@@ -53,12 +53,12 @@ using Mutex         = mutex;
 // By default, all references should be const.
 // This prevents us from accidentially modifying references.
 template<class T>
-using Ref       = T const&;
+using CRef      = T const&;
 
 // To make a non-const reference, we borrow the `mut` keyword
 // from Rust, giving us `MutRef`.
 template<class T>
-using MutRef    = T&;
+using MRef      = T&;
 
 template<typename T>
 using Move      = T&&;

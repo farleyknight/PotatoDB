@@ -1,7 +1,8 @@
 #pragma once
 
-#include "common/types.hpp"
 #include <vector>
+
+#include "common/types.hpp"
 
 // TODO: Let's add:
 // * seek method
@@ -23,9 +24,9 @@ public:
   // faster than implicitly copied buffers.
 
   // No copy
-  Buffer(Ref<Buffer>) = delete;
+  Buffer(CRef<Buffer>) = delete;
   // No copy assign
-  MutRef<Buffer> operator=(Ref<Buffer>) = delete;
+  MRef<Buffer> operator=(CRef<Buffer>) = delete;
 
   uint8_t* data() {
     return data_.data();

@@ -15,7 +15,7 @@ struct VariantValue {
                                >;
 
   template<typename T>
-  static T cast_as(Ref<store_t> data) {
+  static T cast_as(CRef<store_t> data) {
     return std::get<T>(data);
   }
 };

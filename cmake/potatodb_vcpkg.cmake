@@ -2,6 +2,8 @@
 # Bootstrap - Handle environment variables, print them for debugging
 # -----------------------------------------------------------------------------
 
+
+
 if(EXISTS "$ENV{HOME}/.vcpkg/vcpkg.path.txt")
   message(STATUS "Found vcpkg root path via local .vcpkg/")
   file(READ "$ENV{HOME}/.vcpkg/vcpkg.path.txt" VCPKG_ROOT)
@@ -9,6 +11,9 @@ elseif(EXISTS ENV{VCPKG_ROOT})
   message(STATUS "Found vcpkg root path via ENV variable.")
   set(VCPKG_ROOT ENV{VCPKG_ROOT})
 endif()
+
+
+set(VCPKG_ROOT "/Users/farleyknight/code/vcpkg/")
 
 if(DEFINED VCPKG_ROOT)
   message(STATUS "VCPKG_ROOT is set to ${VCPKG_ROOT}")

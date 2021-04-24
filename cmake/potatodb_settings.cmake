@@ -9,7 +9,7 @@ set(CMAKE_CXX_CPPCHECK "cppcheck")
 
 set(BUILD_SHARED_LIBS ON)
 
-set(CMAKE_CXX_CLANG_TIDY clang-tidy -checks=-*,readability-*)
+# set(CMAKE_CXX_CLANG_TIDY clang-tidy -checks=-*)
 
 # All target binaries are placed under the directory `builds/`
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/builds)
@@ -21,7 +21,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/builds)
 add_definitions(
   #######################################################
   # NOTE: If you want to see the entire list of errors,
-  # change the next line from =1 to =0
+  # change the next line from =N to =0
   #######################################################
   "-ferror-limit=50"
   "-Wall"
@@ -38,8 +38,10 @@ add_definitions(
 include_directories(src)
 include_directories(tests)
 include_directories(perf)
+include_directories(parser)
 
 file(GLOB_RECURSE MAIN_SOURCES   "src/*.cpp")
 file(GLOB_RECURSE TEST_SOURCES   "tests/*.cpp")
 file(GLOB_RECURSE PERF_SOURCES   "perf/*cpp")
 file(GLOB_RECURSE SERVER_SOURCES "server/*.cpp")
+file(GLOB_RECURSE PARSER_SOURCES "parser/PotatoSQL*.cpp")

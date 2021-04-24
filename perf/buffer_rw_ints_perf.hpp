@@ -1,3 +1,5 @@
+#include <string>
+#include <fstream>
 
 template<typename IntT>
 void BM_DirectCastEncoding(benchmark::State& state) {

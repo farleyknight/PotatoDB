@@ -35,52 +35,13 @@ find_package(ANTLR REQUIRED)
 # Call macro to add lexer and grammar to your build dependencies.
 
 # -----------------------------------------------------------------------------
-# PotatoSQLLexer
+# ANTLR target directive
 # -----------------------------------------------------------------------------
 
-antlr_target(PotatoSQLLexer "parser/PotatoSQLLexer.g4" LEXER
+
+antlr_target(PotatoSQL "parser/PotatoSQL.g4" LEXER PARSER
   PACKAGE potatosql
   OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-
-if(DEFINED ANTLR_PotatoSQLLexer_OUTPUT_DIR)
-  message(STATUS "The ANTLR Lexer will go to the following OUTPUT DIR: ${ANTLR_PotatoSQLLexer_OUTPUT_DIR}")
-else()
-  message(FATAL_ERROR "No OUTPUT DIR for ANTLR PotatoSQLLexer!")
-endif()
-
-if(DEFINED ANTLR_PotatoSQLLexer_CXX_OUTPUTS)
-  message(STATUS "The ANTLR Lexer has the following CXX OUTPUTS: ${ANTLR_PotatoSQLLexer_CXX_OUTPUTS}")
-else()
-  message(FATAL_ERROR "No CXX OUTPUTS for ANTLR PotatoSQLLexer!")
-endif()
-
-# include generated files in project environment
-include_directories(${ANTLR_PotatoSQLLexer_OUTPUT_DIR})
-include_directories(${ANTLR_PotatoSQLLexer_OUTPUT_DIR}/parser)
-# -----------------------------------------------------------------------------
-# PotatoSQLParser
-# -----------------------------------------------------------------------------
-
-antlr_target(PotatoSQLParser "parser/PotatoSQLParser.g4" PARSER
-  DEPENDS_ANTLR PotatoSQLLexer
-  PACKAGE potatosql
-  OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-  COMPILE_FLAGS "-lib;${ANTLR_PotatoSQLLexer_OUTPUT_DIR}/parser")
-
-if(DEFINED ANTLR_PotatoSQLParser_OUTPUT_DIR)
-  message(STATUS "The ANTLR Parser will go to the following OUTPUT DIR: ${ANTLR_PotatoSQLParser_OUTPUT_DIR}")
-else()
-  message(FATAL_ERROR "No OUTPUT DIR for ANTLR PotatoSQLParser!")
-endif()
-
-if(DEFINED ANTLR_PotatoSQLParser_CXX_OUTPUTS)
-  message(STATUS "The ANTLR Parser has the following CXX OUTPUTS: ${ANTLR_PotatoSQLParser_CXX_OUTPUTS}")
-else()
-  message(FATAL_ERROR "No CXX OUTPUTS for ANTLR PotatoSQLParser!")
-endif()
-
-# include generated files in project environment
-include_directories(${ANTLR_PotatoSQLParser_OUTPUT_DIR})
 
 # -----------------------------------------------------------------------------
 # SQL Parser target binary
@@ -88,14 +49,11 @@ include_directories(${ANTLR_PotatoSQLParser_OUTPUT_DIR})
 
 set(PARSER_BINARY "${CMAKE_PROJECT_NAME}_parser")
 
-message(STATUS "Parser binary target is ${PARSER_BINARY}")
+message(STATUS "Parser binary target is ${PARSE_BINARY}")
 
 # add generated grammar to demo binary target
 add_executable(${PARSER_BINARY} "parser/main.cpp"
-  ${ANTLR_PotatoSQLLexer_CXX_OUTPUTS}
-  ${ANTLR_PotatoSQLParser_CXX_OUTPUTS}
-  "parser/PotatoSQLLexer.cpp"
-  "parser/PotatoSQLParser.cpp"
+  ${ANTLR_PotatoSQL_CXX_OUTPUTS}
   )
 
 target_link_libraries(${PARSER_BINARY} antlr4_static)

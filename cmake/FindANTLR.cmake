@@ -64,20 +64,20 @@ if(ANTLR_EXECUTABLE AND Java_JAVA_EXECUTABLE)
     if((ANTLR_TARGET_LEXER AND NOT ANTLR_TARGET_PARSER) OR
         (ANTLR_TARGET_PARSER AND NOT ANTLR_TARGET_LEXER))
       list(APPEND ANTLR_${Name}_CXX_OUTPUTS
-        ${ANTLR_${Name}_OUTPUT_DIR}/${ANTLR_INPUT}.h
-        ${ANTLR_${Name}_OUTPUT_DIR}/${ANTLR_INPUT}.cpp)
+        ${ANTLR_${Name}_OUTPUT_DIR}/parser/${ANTLR_INPUT}.h
+        ${ANTLR_${Name}_OUTPUT_DIR}/parser/${ANTLR_INPUT}.cpp)
       set(ANTLR_${Name}_OUTPUTS
-        ${ANTLR_${Name}_OUTPUT_DIR}/${ANTLR_INPUT}.interp
-        ${ANTLR_${Name}_OUTPUT_DIR}/${ANTLR_INPUT}.tokens)
+        ${ANTLR_${Name}_OUTPUT_DIR}/parser/${ANTLR_INPUT}.interp
+        ${ANTLR_${Name}_OUTPUT_DIR}/parser/${ANTLR_INPUT}.tokens)
     else()
       list(APPEND ANTLR_${Name}_CXX_OUTPUTS
-        ${ANTLR_${Name}_OUTPUT_DIR}/${ANTLR_INPUT}Lexer.h
-        ${ANTLR_${Name}_OUTPUT_DIR}/${ANTLR_INPUT}Lexer.cpp
-        ${ANTLR_${Name}_OUTPUT_DIR}/${ANTLR_INPUT}Parser.h
-        ${ANTLR_${Name}_OUTPUT_DIR}/${ANTLR_INPUT}Parser.cpp)
+        ${ANTLR_${Name}_OUTPUT_DIR}/parser/${ANTLR_INPUT}Lexer.h
+        ${ANTLR_${Name}_OUTPUT_DIR}/parser/${ANTLR_INPUT}Lexer.cpp
+        ${ANTLR_${Name}_OUTPUT_DIR}/parser/${ANTLR_INPUT}Parser.h
+        ${ANTLR_${Name}_OUTPUT_DIR}/parser/${ANTLR_INPUT}Parser.cpp)
       list(APPEND ANTLR_${Name}_OUTPUTS
-        ${ANTLR_${Name}_OUTPUT_DIR}/${ANTLR_INPUT}Lexer.interp
-        ${ANTLR_${Name}_OUTPUT_DIR}/${ANTLR_INPUT}Lexer.tokens)
+        ${ANTLR_${Name}_OUTPUT_DIR}/parser/${ANTLR_INPUT}Lexer.interp
+        ${ANTLR_${Name}_OUTPUT_DIR}/parser/${ANTLR_INPUT}Lexer.tokens)
     endif()
 
     if(ANTLR_TARGET_LISTENER)
@@ -129,7 +129,7 @@ if(ANTLR_EXECUTABLE AND Java_JAVA_EXECUTABLE)
       DEPENDS ${InputFile}
       ${ANTLR_TARGET_DEPENDS}
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-      COMMENT "Building ${Name} with ANTLR ${ANTLR_VERSION}")
+      COMMENT "Building ${Name} with ANTLR ${ANTLR_VERSION}\n Target compile flags: ${ANTLR_TARGET_COMPILE_FLAGS}")
   endmacro(ANTLR_TARGET)
 
 endif(ANTLR_EXECUTABLE AND Java_JAVA_EXECUTABLE)

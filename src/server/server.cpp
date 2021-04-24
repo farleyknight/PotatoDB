@@ -194,7 +194,7 @@ void Server::accept_connections() {
 }
 
 void Server::finish_tasks() {
-  std::for_each(tasks_.begin(), tasks_.end(), [](Ref<Task> task) {
+  std::for_each(tasks_.begin(), tasks_.end(), [](CRef<Task> task) {
     task.wait();
   });
   tasks_.clear();

@@ -22,9 +22,6 @@ int main() {
       auto data = socket->read();
       std::cout << "Socket got data " << data << std::endl;
       socket->write(data);
-      // TODO: We might NOT want to be closing the connection
-      // immediately. However, this is enough for now.
-      // socket->shutdown();
     }
   });
 
