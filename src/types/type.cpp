@@ -11,7 +11,7 @@
 
 #include "value/value.hpp"
 
-Ref<Ptr<Type>> Type::instance(TypeId type_id) {
+CRef<Ptr<Type>> Type::instance(TypeId type_id) {
   static MutMap<TypeId, Ptr<Type>> types_;
   if (types_.empty()) {
     types_.emplace(TypeId::BOOLEAN,  make_unique<BooleanType>());
@@ -38,12 +38,12 @@ Value Type::max() const {
 }
 
 
-void Type::serialize_to(UNUSED MutRef<Buffer> buff, UNUSED Value val) const {
+void Type::serialize_to(UNUSED MRef<Buffer> buff, UNUSED Value val) const {
   throw NotImplementedException("serialize_to not implemented!");
 }
 
 
-Value Type::deserialize_from(UNUSED Ref<Buffer> buff) const {
+Value Type::deserialize_from(UNUSED CRef<Buffer> buff) const {
   throw NotImplementedException("deserialize_from not implemented!");
 }
 

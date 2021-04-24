@@ -9,7 +9,7 @@ public:
     return TypeId::INVALID;
   }
 
-  Value deserialize_from(UNUSED Ref<Buffer> buff) const override {
+  Value deserialize_from(UNUSED CRef<Buffer> buff) const override {
     throw Exception("No deserialize_from for InvalidType");
   }
 
