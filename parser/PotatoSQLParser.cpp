@@ -2,6 +2,7 @@
 // Generated from parser/PotatoSQL.g4 by ANTLR 4.9.2
 
 
+#include "PotatoSQLListener.h"
 
 #include "PotatoSQLParser.h"
 
@@ -62,6 +63,17 @@ size_t PotatoSQLParser::MainContext::getRuleIndex() const {
   return PotatoSQLParser::RuleMain;
 }
 
+void PotatoSQLParser::MainContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterMain(this);
+}
+
+void PotatoSQLParser::MainContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitMain(this);
+}
 
 PotatoSQLParser::MainContext* PotatoSQLParser::main() {
   MainContext *_localctx = _tracker.createInstance<MainContext>(_ctx, getState());
@@ -179,6 +191,17 @@ size_t PotatoSQLParser::ErrorContext::getRuleIndex() const {
   return PotatoSQLParser::RuleError;
 }
 
+void PotatoSQLParser::ErrorContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterError(this);
+}
+
+void PotatoSQLParser::ErrorContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitError(this);
+}
 
 PotatoSQLParser::ErrorContext* PotatoSQLParser::error() {
   ErrorContext *_localctx = _tracker.createInstance<ErrorContext>(_ctx, getState());
@@ -236,6 +259,17 @@ size_t PotatoSQLParser::Sql_stmt_listContext::getRuleIndex() const {
   return PotatoSQLParser::RuleSql_stmt_list;
 }
 
+void PotatoSQLParser::Sql_stmt_listContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterSql_stmt_list(this);
+}
+
+void PotatoSQLParser::Sql_stmt_listContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitSql_stmt_list(this);
+}
 
 PotatoSQLParser::Sql_stmt_listContext* PotatoSQLParser::sql_stmt_list() {
   Sql_stmt_listContext *_localctx = _tracker.createInstance<Sql_stmt_listContext>(_ctx, getState());
@@ -452,6 +486,17 @@ size_t PotatoSQLParser::Sql_stmtContext::getRuleIndex() const {
   return PotatoSQLParser::RuleSql_stmt;
 }
 
+void PotatoSQLParser::Sql_stmtContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterSql_stmt(this);
+}
+
+void PotatoSQLParser::Sql_stmtContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitSql_stmt(this);
+}
 
 PotatoSQLParser::Sql_stmtContext* PotatoSQLParser::sql_stmt() {
   Sql_stmtContext *_localctx = _tracker.createInstance<Sql_stmtContext>(_ctx, getState());
@@ -737,6 +782,17 @@ size_t PotatoSQLParser::Alter_table_stmtContext::getRuleIndex() const {
   return PotatoSQLParser::RuleAlter_table_stmt;
 }
 
+void PotatoSQLParser::Alter_table_stmtContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterAlter_table_stmt(this);
+}
+
+void PotatoSQLParser::Alter_table_stmtContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitAlter_table_stmt(this);
+}
 
 PotatoSQLParser::Alter_table_stmtContext* PotatoSQLParser::alter_table_stmt() {
   Alter_table_stmtContext *_localctx = _tracker.createInstance<Alter_table_stmtContext>(_ctx, getState());
@@ -847,6 +903,17 @@ size_t PotatoSQLParser::Analyze_stmtContext::getRuleIndex() const {
   return PotatoSQLParser::RuleAnalyze_stmt;
 }
 
+void PotatoSQLParser::Analyze_stmtContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterAnalyze_stmt(this);
+}
+
+void PotatoSQLParser::Analyze_stmtContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitAnalyze_stmt(this);
+}
 
 PotatoSQLParser::Analyze_stmtContext* PotatoSQLParser::analyze_stmt() {
   Analyze_stmtContext *_localctx = _tracker.createInstance<Analyze_stmtContext>(_ctx, getState());
@@ -934,6 +1001,17 @@ size_t PotatoSQLParser::Attach_stmtContext::getRuleIndex() const {
   return PotatoSQLParser::RuleAttach_stmt;
 }
 
+void PotatoSQLParser::Attach_stmtContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterAttach_stmt(this);
+}
+
+void PotatoSQLParser::Attach_stmtContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitAttach_stmt(this);
+}
 
 PotatoSQLParser::Attach_stmtContext* PotatoSQLParser::attach_stmt() {
   Attach_stmtContext *_localctx = _tracker.createInstance<Attach_stmtContext>(_ctx, getState());
@@ -1015,6 +1093,17 @@ size_t PotatoSQLParser::Begin_stmtContext::getRuleIndex() const {
   return PotatoSQLParser::RuleBegin_stmt;
 }
 
+void PotatoSQLParser::Begin_stmtContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterBegin_stmt(this);
+}
+
+void PotatoSQLParser::Begin_stmtContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitBegin_stmt(this);
+}
 
 PotatoSQLParser::Begin_stmtContext* PotatoSQLParser::begin_stmt() {
   Begin_stmtContext *_localctx = _tracker.createInstance<Begin_stmtContext>(_ctx, getState());
@@ -1112,6 +1201,17 @@ size_t PotatoSQLParser::Commit_stmtContext::getRuleIndex() const {
   return PotatoSQLParser::RuleCommit_stmt;
 }
 
+void PotatoSQLParser::Commit_stmtContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterCommit_stmt(this);
+}
+
+void PotatoSQLParser::Commit_stmtContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitCommit_stmt(this);
+}
 
 PotatoSQLParser::Commit_stmtContext* PotatoSQLParser::commit_stmt() {
   Commit_stmtContext *_localctx = _tracker.createInstance<Commit_stmtContext>(_ctx, getState());
@@ -1265,6 +1365,17 @@ size_t PotatoSQLParser::Compound_select_stmtContext::getRuleIndex() const {
   return PotatoSQLParser::RuleCompound_select_stmt;
 }
 
+void PotatoSQLParser::Compound_select_stmtContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterCompound_select_stmt(this);
+}
+
+void PotatoSQLParser::Compound_select_stmtContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitCompound_select_stmt(this);
+}
 
 PotatoSQLParser::Compound_select_stmtContext* PotatoSQLParser::compound_select_stmt() {
   Compound_select_stmtContext *_localctx = _tracker.createInstance<Compound_select_stmtContext>(_ctx, getState());
@@ -1483,6 +1594,17 @@ size_t PotatoSQLParser::Create_index_stmtContext::getRuleIndex() const {
   return PotatoSQLParser::RuleCreate_index_stmt;
 }
 
+void PotatoSQLParser::Create_index_stmtContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterCreate_index_stmt(this);
+}
+
+void PotatoSQLParser::Create_index_stmtContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitCreate_index_stmt(this);
+}
 
 PotatoSQLParser::Create_index_stmtContext* PotatoSQLParser::create_index_stmt() {
   Create_index_stmtContext *_localctx = _tracker.createInstance<Create_index_stmtContext>(_ctx, getState());
@@ -1686,6 +1808,17 @@ size_t PotatoSQLParser::Create_table_stmtContext::getRuleIndex() const {
   return PotatoSQLParser::RuleCreate_table_stmt;
 }
 
+void PotatoSQLParser::Create_table_stmtContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterCreate_table_stmt(this);
+}
+
+void PotatoSQLParser::Create_table_stmtContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitCreate_table_stmt(this);
+}
 
 PotatoSQLParser::Create_table_stmtContext* PotatoSQLParser::create_table_stmt() {
   Create_table_stmtContext *_localctx = _tracker.createInstance<Create_table_stmtContext>(_ctx, getState());
@@ -2013,6 +2146,17 @@ size_t PotatoSQLParser::Create_trigger_stmtContext::getRuleIndex() const {
   return PotatoSQLParser::RuleCreate_trigger_stmt;
 }
 
+void PotatoSQLParser::Create_trigger_stmtContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterCreate_trigger_stmt(this);
+}
+
+void PotatoSQLParser::Create_trigger_stmtContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitCreate_trigger_stmt(this);
+}
 
 PotatoSQLParser::Create_trigger_stmtContext* PotatoSQLParser::create_trigger_stmt() {
   Create_trigger_stmtContext *_localctx = _tracker.createInstance<Create_trigger_stmtContext>(_ctx, getState());
@@ -2324,6 +2468,17 @@ size_t PotatoSQLParser::Create_view_stmtContext::getRuleIndex() const {
   return PotatoSQLParser::RuleCreate_view_stmt;
 }
 
+void PotatoSQLParser::Create_view_stmtContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterCreate_view_stmt(this);
+}
+
+void PotatoSQLParser::Create_view_stmtContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitCreate_view_stmt(this);
+}
 
 PotatoSQLParser::Create_view_stmtContext* PotatoSQLParser::create_view_stmt() {
   Create_view_stmtContext *_localctx = _tracker.createInstance<Create_view_stmtContext>(_ctx, getState());
@@ -2490,6 +2645,17 @@ size_t PotatoSQLParser::Create_virtual_table_stmtContext::getRuleIndex() const {
   return PotatoSQLParser::RuleCreate_virtual_table_stmt;
 }
 
+void PotatoSQLParser::Create_virtual_table_stmtContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterCreate_virtual_table_stmt(this);
+}
+
+void PotatoSQLParser::Create_virtual_table_stmtContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitCreate_virtual_table_stmt(this);
+}
 
 PotatoSQLParser::Create_virtual_table_stmtContext* PotatoSQLParser::create_virtual_table_stmt() {
   Create_virtual_table_stmtContext *_localctx = _tracker.createInstance<Create_virtual_table_stmtContext>(_ctx, getState());
@@ -2619,6 +2785,17 @@ size_t PotatoSQLParser::Delete_stmtContext::getRuleIndex() const {
   return PotatoSQLParser::RuleDelete_stmt;
 }
 
+void PotatoSQLParser::Delete_stmtContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterDelete_stmt(this);
+}
+
+void PotatoSQLParser::Delete_stmtContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitDelete_stmt(this);
+}
 
 PotatoSQLParser::Delete_stmtContext* PotatoSQLParser::delete_stmt() {
   Delete_stmtContext *_localctx = _tracker.createInstance<Delete_stmtContext>(_ctx, getState());
@@ -2740,6 +2917,17 @@ size_t PotatoSQLParser::Delete_stmt_limitedContext::getRuleIndex() const {
   return PotatoSQLParser::RuleDelete_stmt_limited;
 }
 
+void PotatoSQLParser::Delete_stmt_limitedContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterDelete_stmt_limited(this);
+}
+
+void PotatoSQLParser::Delete_stmt_limitedContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitDelete_stmt_limited(this);
+}
 
 PotatoSQLParser::Delete_stmt_limitedContext* PotatoSQLParser::delete_stmt_limited() {
   Delete_stmt_limitedContext *_localctx = _tracker.createInstance<Delete_stmt_limitedContext>(_ctx, getState());
@@ -2866,6 +3054,17 @@ size_t PotatoSQLParser::Detach_stmtContext::getRuleIndex() const {
   return PotatoSQLParser::RuleDetach_stmt;
 }
 
+void PotatoSQLParser::Detach_stmtContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterDetach_stmt(this);
+}
+
+void PotatoSQLParser::Detach_stmtContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitDetach_stmt(this);
+}
 
 PotatoSQLParser::Detach_stmtContext* PotatoSQLParser::detach_stmt() {
   Detach_stmtContext *_localctx = _tracker.createInstance<Detach_stmtContext>(_ctx, getState());
@@ -2947,6 +3146,17 @@ size_t PotatoSQLParser::Drop_index_stmtContext::getRuleIndex() const {
   return PotatoSQLParser::RuleDrop_index_stmt;
 }
 
+void PotatoSQLParser::Drop_index_stmtContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterDrop_index_stmt(this);
+}
+
+void PotatoSQLParser::Drop_index_stmtContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitDrop_index_stmt(this);
+}
 
 PotatoSQLParser::Drop_index_stmtContext* PotatoSQLParser::drop_index_stmt() {
   Drop_index_stmtContext *_localctx = _tracker.createInstance<Drop_index_stmtContext>(_ctx, getState());
@@ -3047,6 +3257,17 @@ size_t PotatoSQLParser::Drop_table_stmtContext::getRuleIndex() const {
   return PotatoSQLParser::RuleDrop_table_stmt;
 }
 
+void PotatoSQLParser::Drop_table_stmtContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterDrop_table_stmt(this);
+}
+
+void PotatoSQLParser::Drop_table_stmtContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitDrop_table_stmt(this);
+}
 
 PotatoSQLParser::Drop_table_stmtContext* PotatoSQLParser::drop_table_stmt() {
   Drop_table_stmtContext *_localctx = _tracker.createInstance<Drop_table_stmtContext>(_ctx, getState());
@@ -3147,6 +3368,17 @@ size_t PotatoSQLParser::Drop_trigger_stmtContext::getRuleIndex() const {
   return PotatoSQLParser::RuleDrop_trigger_stmt;
 }
 
+void PotatoSQLParser::Drop_trigger_stmtContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterDrop_trigger_stmt(this);
+}
+
+void PotatoSQLParser::Drop_trigger_stmtContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitDrop_trigger_stmt(this);
+}
 
 PotatoSQLParser::Drop_trigger_stmtContext* PotatoSQLParser::drop_trigger_stmt() {
   Drop_trigger_stmtContext *_localctx = _tracker.createInstance<Drop_trigger_stmtContext>(_ctx, getState());
@@ -3247,6 +3479,17 @@ size_t PotatoSQLParser::Drop_view_stmtContext::getRuleIndex() const {
   return PotatoSQLParser::RuleDrop_view_stmt;
 }
 
+void PotatoSQLParser::Drop_view_stmtContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterDrop_view_stmt(this);
+}
+
+void PotatoSQLParser::Drop_view_stmtContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitDrop_view_stmt(this);
+}
 
 PotatoSQLParser::Drop_view_stmtContext* PotatoSQLParser::drop_view_stmt() {
   Drop_view_stmtContext *_localctx = _tracker.createInstance<Drop_view_stmtContext>(_ctx, getState());
@@ -3379,6 +3622,17 @@ size_t PotatoSQLParser::Factored_select_stmtContext::getRuleIndex() const {
   return PotatoSQLParser::RuleFactored_select_stmt;
 }
 
+void PotatoSQLParser::Factored_select_stmtContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterFactored_select_stmt(this);
+}
+
+void PotatoSQLParser::Factored_select_stmtContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitFactored_select_stmt(this);
+}
 
 PotatoSQLParser::Factored_select_stmtContext* PotatoSQLParser::factored_select_stmt() {
   Factored_select_stmtContext *_localctx = _tracker.createInstance<Factored_select_stmtContext>(_ctx, getState());
@@ -3591,6 +3845,17 @@ size_t PotatoSQLParser::Insert_stmtContext::getRuleIndex() const {
   return PotatoSQLParser::RuleInsert_stmt;
 }
 
+void PotatoSQLParser::Insert_stmtContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterInsert_stmt(this);
+}
+
+void PotatoSQLParser::Insert_stmtContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitInsert_stmt(this);
+}
 
 PotatoSQLParser::Insert_stmtContext* PotatoSQLParser::insert_stmt() {
   Insert_stmtContext *_localctx = _tracker.createInstance<Insert_stmtContext>(_ctx, getState());
@@ -3851,6 +4116,17 @@ size_t PotatoSQLParser::Pragma_stmtContext::getRuleIndex() const {
   return PotatoSQLParser::RulePragma_stmt;
 }
 
+void PotatoSQLParser::Pragma_stmtContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterPragma_stmt(this);
+}
+
+void PotatoSQLParser::Pragma_stmtContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitPragma_stmt(this);
+}
 
 PotatoSQLParser::Pragma_stmtContext* PotatoSQLParser::pragma_stmt() {
   Pragma_stmtContext *_localctx = _tracker.createInstance<Pragma_stmtContext>(_ctx, getState());
@@ -3983,6 +4259,17 @@ size_t PotatoSQLParser::Reindex_stmtContext::getRuleIndex() const {
   return PotatoSQLParser::RuleReindex_stmt;
 }
 
+void PotatoSQLParser::Reindex_stmtContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterReindex_stmt(this);
+}
+
+void PotatoSQLParser::Reindex_stmtContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitReindex_stmt(this);
+}
 
 PotatoSQLParser::Reindex_stmtContext* PotatoSQLParser::reindex_stmt() {
   Reindex_stmtContext *_localctx = _tracker.createInstance<Reindex_stmtContext>(_ctx, getState());
@@ -4083,6 +4370,17 @@ size_t PotatoSQLParser::Release_stmtContext::getRuleIndex() const {
   return PotatoSQLParser::RuleRelease_stmt;
 }
 
+void PotatoSQLParser::Release_stmtContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterRelease_stmt(this);
+}
+
+void PotatoSQLParser::Release_stmtContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitRelease_stmt(this);
+}
 
 PotatoSQLParser::Release_stmtContext* PotatoSQLParser::release_stmt() {
   Release_stmtContext *_localctx = _tracker.createInstance<Release_stmtContext>(_ctx, getState());
@@ -4160,6 +4458,17 @@ size_t PotatoSQLParser::Rollback_stmtContext::getRuleIndex() const {
   return PotatoSQLParser::RuleRollback_stmt;
 }
 
+void PotatoSQLParser::Rollback_stmtContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterRollback_stmt(this);
+}
+
+void PotatoSQLParser::Rollback_stmtContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitRollback_stmt(this);
+}
 
 PotatoSQLParser::Rollback_stmtContext* PotatoSQLParser::rollback_stmt() {
   Rollback_stmtContext *_localctx = _tracker.createInstance<Rollback_stmtContext>(_ctx, getState());
@@ -4251,6 +4560,17 @@ size_t PotatoSQLParser::Savepoint_stmtContext::getRuleIndex() const {
   return PotatoSQLParser::RuleSavepoint_stmt;
 }
 
+void PotatoSQLParser::Savepoint_stmtContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterSavepoint_stmt(this);
+}
+
+void PotatoSQLParser::Savepoint_stmtContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitSavepoint_stmt(this);
+}
 
 PotatoSQLParser::Savepoint_stmtContext* PotatoSQLParser::savepoint_stmt() {
   Savepoint_stmtContext *_localctx = _tracker.createInstance<Savepoint_stmtContext>(_ctx, getState());
@@ -4339,6 +4659,17 @@ size_t PotatoSQLParser::Simple_select_stmtContext::getRuleIndex() const {
   return PotatoSQLParser::RuleSimple_select_stmt;
 }
 
+void PotatoSQLParser::Simple_select_stmtContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterSimple_select_stmt(this);
+}
+
+void PotatoSQLParser::Simple_select_stmtContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitSimple_select_stmt(this);
+}
 
 PotatoSQLParser::Simple_select_stmtContext* PotatoSQLParser::simple_select_stmt() {
   Simple_select_stmtContext *_localctx = _tracker.createInstance<Simple_select_stmtContext>(_ctx, getState());
@@ -4497,6 +4828,17 @@ size_t PotatoSQLParser::Select_stmtContext::getRuleIndex() const {
   return PotatoSQLParser::RuleSelect_stmt;
 }
 
+void PotatoSQLParser::Select_stmtContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterSelect_stmt(this);
+}
+
+void PotatoSQLParser::Select_stmtContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitSelect_stmt(this);
+}
 
 PotatoSQLParser::Select_stmtContext* PotatoSQLParser::select_stmt() {
   Select_stmtContext *_localctx = _tracker.createInstance<Select_stmtContext>(_ctx, getState());
@@ -4697,6 +5039,17 @@ size_t PotatoSQLParser::Select_or_valuesContext::getRuleIndex() const {
   return PotatoSQLParser::RuleSelect_or_values;
 }
 
+void PotatoSQLParser::Select_or_valuesContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterSelect_or_values(this);
+}
+
+void PotatoSQLParser::Select_or_valuesContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitSelect_or_values(this);
+}
 
 PotatoSQLParser::Select_or_valuesContext* PotatoSQLParser::select_or_values() {
   Select_or_valuesContext *_localctx = _tracker.createInstance<Select_or_valuesContext>(_ctx, getState());
@@ -4993,6 +5346,17 @@ size_t PotatoSQLParser::Update_stmtContext::getRuleIndex() const {
   return PotatoSQLParser::RuleUpdate_stmt;
 }
 
+void PotatoSQLParser::Update_stmtContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterUpdate_stmt(this);
+}
+
+void PotatoSQLParser::Update_stmtContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitUpdate_stmt(this);
+}
 
 PotatoSQLParser::Update_stmtContext* PotatoSQLParser::update_stmt() {
   Update_stmtContext *_localctx = _tracker.createInstance<Update_stmtContext>(_ctx, getState());
@@ -5223,6 +5587,17 @@ size_t PotatoSQLParser::Update_stmt_limitedContext::getRuleIndex() const {
   return PotatoSQLParser::RuleUpdate_stmt_limited;
 }
 
+void PotatoSQLParser::Update_stmt_limitedContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterUpdate_stmt_limited(this);
+}
+
+void PotatoSQLParser::Update_stmt_limitedContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitUpdate_stmt_limited(this);
+}
 
 PotatoSQLParser::Update_stmt_limitedContext* PotatoSQLParser::update_stmt_limited() {
   Update_stmt_limitedContext *_localctx = _tracker.createInstance<Update_stmt_limitedContext>(_ctx, getState());
@@ -5410,6 +5785,17 @@ size_t PotatoSQLParser::Vacuum_stmtContext::getRuleIndex() const {
   return PotatoSQLParser::RuleVacuum_stmt;
 }
 
+void PotatoSQLParser::Vacuum_stmtContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterVacuum_stmt(this);
+}
+
+void PotatoSQLParser::Vacuum_stmtContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitVacuum_stmt(this);
+}
 
 PotatoSQLParser::Vacuum_stmtContext* PotatoSQLParser::vacuum_stmt() {
   Vacuum_stmtContext *_localctx = _tracker.createInstance<Vacuum_stmtContext>(_ctx, getState());
@@ -5464,6 +5850,17 @@ size_t PotatoSQLParser::Column_defContext::getRuleIndex() const {
   return PotatoSQLParser::RuleColumn_def;
 }
 
+void PotatoSQLParser::Column_defContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterColumn_def(this);
+}
+
+void PotatoSQLParser::Column_defContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitColumn_def(this);
+}
 
 PotatoSQLParser::Column_defContext* PotatoSQLParser::column_def() {
   Column_defContext *_localctx = _tracker.createInstance<Column_defContext>(_ctx, getState());
@@ -5563,6 +5960,17 @@ size_t PotatoSQLParser::Type_nameContext::getRuleIndex() const {
   return PotatoSQLParser::RuleType_name;
 }
 
+void PotatoSQLParser::Type_nameContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterType_name(this);
+}
+
+void PotatoSQLParser::Type_nameContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitType_name(this);
+}
 
 PotatoSQLParser::Type_nameContext* PotatoSQLParser::type_name() {
   Type_nameContext *_localctx = _tracker.createInstance<Type_nameContext>(_ctx, getState());
@@ -5733,6 +6141,17 @@ size_t PotatoSQLParser::Column_constraintContext::getRuleIndex() const {
   return PotatoSQLParser::RuleColumn_constraint;
 }
 
+void PotatoSQLParser::Column_constraintContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterColumn_constraint(this);
+}
+
+void PotatoSQLParser::Column_constraintContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitColumn_constraint(this);
+}
 
 PotatoSQLParser::Column_constraintContext* PotatoSQLParser::column_constraint() {
   Column_constraintContext *_localctx = _tracker.createInstance<Column_constraintContext>(_ctx, getState());
@@ -5936,6 +6355,17 @@ size_t PotatoSQLParser::Conflict_clauseContext::getRuleIndex() const {
   return PotatoSQLParser::RuleConflict_clause;
 }
 
+void PotatoSQLParser::Conflict_clauseContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterConflict_clause(this);
+}
+
+void PotatoSQLParser::Conflict_clauseContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitConflict_clause(this);
+}
 
 PotatoSQLParser::Conflict_clauseContext* PotatoSQLParser::conflict_clause() {
   Conflict_clauseContext *_localctx = _tracker.createInstance<Conflict_clauseContext>(_ctx, getState());
@@ -6248,6 +6678,17 @@ size_t PotatoSQLParser::ExprContext::getRuleIndex() const {
   return PotatoSQLParser::RuleExpr;
 }
 
+void PotatoSQLParser::ExprContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterExpr(this);
+}
+
+void PotatoSQLParser::ExprContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitExpr(this);
+}
 
 
 PotatoSQLParser::ExprContext* PotatoSQLParser::expr() {
@@ -7208,6 +7649,17 @@ size_t PotatoSQLParser::Foreign_key_clauseContext::getRuleIndex() const {
   return PotatoSQLParser::RuleForeign_key_clause;
 }
 
+void PotatoSQLParser::Foreign_key_clauseContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterForeign_key_clause(this);
+}
+
+void PotatoSQLParser::Foreign_key_clauseContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitForeign_key_clause(this);
+}
 
 PotatoSQLParser::Foreign_key_clauseContext* PotatoSQLParser::foreign_key_clause() {
   Foreign_key_clauseContext *_localctx = _tracker.createInstance<Foreign_key_clauseContext>(_ctx, getState());
@@ -7434,6 +7886,17 @@ size_t PotatoSQLParser::Raise_functionContext::getRuleIndex() const {
   return PotatoSQLParser::RuleRaise_function;
 }
 
+void PotatoSQLParser::Raise_functionContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterRaise_function(this);
+}
+
+void PotatoSQLParser::Raise_functionContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitRaise_function(this);
+}
 
 PotatoSQLParser::Raise_functionContext* PotatoSQLParser::raise_function() {
   Raise_functionContext *_localctx = _tracker.createInstance<Raise_functionContext>(_ctx, getState());
@@ -7530,6 +7993,17 @@ size_t PotatoSQLParser::Indexed_columnContext::getRuleIndex() const {
   return PotatoSQLParser::RuleIndexed_column;
 }
 
+void PotatoSQLParser::Indexed_columnContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterIndexed_column(this);
+}
+
+void PotatoSQLParser::Indexed_columnContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitIndexed_column(this);
+}
 
 PotatoSQLParser::Indexed_columnContext* PotatoSQLParser::indexed_column() {
   Indexed_columnContext *_localctx = _tracker.createInstance<Indexed_columnContext>(_ctx, getState());
@@ -7670,6 +8144,17 @@ size_t PotatoSQLParser::Table_constraintContext::getRuleIndex() const {
   return PotatoSQLParser::RuleTable_constraint;
 }
 
+void PotatoSQLParser::Table_constraintContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterTable_constraint(this);
+}
+
+void PotatoSQLParser::Table_constraintContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitTable_constraint(this);
+}
 
 PotatoSQLParser::Table_constraintContext* PotatoSQLParser::table_constraint() {
   Table_constraintContext *_localctx = _tracker.createInstance<Table_constraintContext>(_ctx, getState());
@@ -7832,6 +8317,17 @@ size_t PotatoSQLParser::With_clauseContext::getRuleIndex() const {
   return PotatoSQLParser::RuleWith_clause;
 }
 
+void PotatoSQLParser::With_clauseContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterWith_clause(this);
+}
+
+void PotatoSQLParser::With_clauseContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitWith_clause(this);
+}
 
 PotatoSQLParser::With_clauseContext* PotatoSQLParser::with_clause() {
   With_clauseContext *_localctx = _tracker.createInstance<With_clauseContext>(_ctx, getState());
@@ -7926,6 +8422,17 @@ size_t PotatoSQLParser::Qualified_table_nameContext::getRuleIndex() const {
   return PotatoSQLParser::RuleQualified_table_name;
 }
 
+void PotatoSQLParser::Qualified_table_nameContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterQualified_table_name(this);
+}
+
+void PotatoSQLParser::Qualified_table_nameContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitQualified_table_name(this);
+}
 
 PotatoSQLParser::Qualified_table_nameContext* PotatoSQLParser::qualified_table_name() {
   Qualified_table_nameContext *_localctx = _tracker.createInstance<Qualified_table_nameContext>(_ctx, getState());
@@ -8056,6 +8563,17 @@ size_t PotatoSQLParser::Ordering_termContext::getRuleIndex() const {
   return PotatoSQLParser::RuleOrdering_term;
 }
 
+void PotatoSQLParser::Ordering_termContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterOrdering_term(this);
+}
+
+void PotatoSQLParser::Ordering_termContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitOrdering_term(this);
+}
 
 PotatoSQLParser::Ordering_termContext* PotatoSQLParser::ordering_term() {
   Ordering_termContext *_localctx = _tracker.createInstance<Ordering_termContext>(_ctx, getState());
@@ -8136,6 +8654,17 @@ size_t PotatoSQLParser::Pragma_valueContext::getRuleIndex() const {
   return PotatoSQLParser::RulePragma_value;
 }
 
+void PotatoSQLParser::Pragma_valueContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterPragma_value(this);
+}
+
+void PotatoSQLParser::Pragma_valueContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitPragma_value(this);
+}
 
 PotatoSQLParser::Pragma_valueContext* PotatoSQLParser::pragma_value() {
   Pragma_valueContext *_localctx = _tracker.createInstance<Pragma_valueContext>(_ctx, getState());
@@ -8242,6 +8771,17 @@ size_t PotatoSQLParser::Common_table_expressionContext::getRuleIndex() const {
   return PotatoSQLParser::RuleCommon_table_expression;
 }
 
+void PotatoSQLParser::Common_table_expressionContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterCommon_table_expression(this);
+}
+
+void PotatoSQLParser::Common_table_expressionContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitCommon_table_expression(this);
+}
 
 PotatoSQLParser::Common_table_expressionContext* PotatoSQLParser::common_table_expression() {
   Common_table_expressionContext *_localctx = _tracker.createInstance<Common_table_expressionContext>(_ctx, getState());
@@ -8337,6 +8877,17 @@ size_t PotatoSQLParser::Result_columnContext::getRuleIndex() const {
   return PotatoSQLParser::RuleResult_column;
 }
 
+void PotatoSQLParser::Result_columnContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterResult_column(this);
+}
+
+void PotatoSQLParser::Result_columnContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitResult_column(this);
+}
 
 PotatoSQLParser::Result_columnContext* PotatoSQLParser::result_column() {
   Result_columnContext *_localctx = _tracker.createInstance<Result_columnContext>(_ctx, getState());
@@ -8502,6 +9053,17 @@ size_t PotatoSQLParser::Table_or_subqueryContext::getRuleIndex() const {
   return PotatoSQLParser::RuleTable_or_subquery;
 }
 
+void PotatoSQLParser::Table_or_subqueryContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterTable_or_subquery(this);
+}
+
+void PotatoSQLParser::Table_or_subqueryContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitTable_or_subquery(this);
+}
 
 PotatoSQLParser::Table_or_subqueryContext* PotatoSQLParser::table_or_subquery() {
   Table_or_subqueryContext *_localctx = _tracker.createInstance<Table_or_subqueryContext>(_ctx, getState());
@@ -8948,6 +9510,17 @@ size_t PotatoSQLParser::Join_clauseContext::getRuleIndex() const {
   return PotatoSQLParser::RuleJoin_clause;
 }
 
+void PotatoSQLParser::Join_clauseContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterJoin_clause(this);
+}
+
+void PotatoSQLParser::Join_clauseContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitJoin_clause(this);
+}
 
 PotatoSQLParser::Join_clauseContext* PotatoSQLParser::join_clause() {
   Join_clauseContext *_localctx = _tracker.createInstance<Join_clauseContext>(_ctx, getState());
@@ -9035,6 +9608,17 @@ size_t PotatoSQLParser::Join_operatorContext::getRuleIndex() const {
   return PotatoSQLParser::RuleJoin_operator;
 }
 
+void PotatoSQLParser::Join_operatorContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterJoin_operator(this);
+}
+
+void PotatoSQLParser::Join_operatorContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitJoin_operator(this);
+}
 
 PotatoSQLParser::Join_operatorContext* PotatoSQLParser::join_operator() {
   Join_operatorContext *_localctx = _tracker.createInstance<Join_operatorContext>(_ctx, getState());
@@ -9175,6 +9759,17 @@ size_t PotatoSQLParser::Join_constraintContext::getRuleIndex() const {
   return PotatoSQLParser::RuleJoin_constraint;
 }
 
+void PotatoSQLParser::Join_constraintContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterJoin_constraint(this);
+}
+
+void PotatoSQLParser::Join_constraintContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitJoin_constraint(this);
+}
 
 PotatoSQLParser::Join_constraintContext* PotatoSQLParser::join_constraint() {
   Join_constraintContext *_localctx = _tracker.createInstance<Join_constraintContext>(_ctx, getState());
@@ -9381,6 +9976,17 @@ size_t PotatoSQLParser::Select_coreContext::getRuleIndex() const {
   return PotatoSQLParser::RuleSelect_core;
 }
 
+void PotatoSQLParser::Select_coreContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterSelect_core(this);
+}
+
+void PotatoSQLParser::Select_coreContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitSelect_core(this);
+}
 
 PotatoSQLParser::Select_coreContext* PotatoSQLParser::select_core() {
   Select_coreContext *_localctx = _tracker.createInstance<Select_coreContext>(_ctx, getState());
@@ -9617,6 +10223,17 @@ size_t PotatoSQLParser::Compound_operatorContext::getRuleIndex() const {
   return PotatoSQLParser::RuleCompound_operator;
 }
 
+void PotatoSQLParser::Compound_operatorContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterCompound_operator(this);
+}
+
+void PotatoSQLParser::Compound_operatorContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitCompound_operator(this);
+}
 
 PotatoSQLParser::Compound_operatorContext* PotatoSQLParser::compound_operator() {
   Compound_operatorContext *_localctx = _tracker.createInstance<Compound_operatorContext>(_ctx, getState());
@@ -9700,6 +10317,17 @@ size_t PotatoSQLParser::Signed_numberContext::getRuleIndex() const {
   return PotatoSQLParser::RuleSigned_number;
 }
 
+void PotatoSQLParser::Signed_numberContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterSigned_number(this);
+}
+
+void PotatoSQLParser::Signed_numberContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitSigned_number(this);
+}
 
 PotatoSQLParser::Signed_numberContext* PotatoSQLParser::signed_number() {
   Signed_numberContext *_localctx = _tracker.createInstance<Signed_numberContext>(_ctx, getState());
@@ -9786,6 +10414,17 @@ size_t PotatoSQLParser::Literal_valueContext::getRuleIndex() const {
   return PotatoSQLParser::RuleLiteral_value;
 }
 
+void PotatoSQLParser::Literal_valueContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterLiteral_value(this);
+}
+
+void PotatoSQLParser::Literal_valueContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitLiteral_value(this);
+}
 
 PotatoSQLParser::Literal_valueContext* PotatoSQLParser::literal_value() {
   Literal_valueContext *_localctx = _tracker.createInstance<Literal_valueContext>(_ctx, getState());
@@ -9855,6 +10494,17 @@ size_t PotatoSQLParser::Unary_operatorContext::getRuleIndex() const {
   return PotatoSQLParser::RuleUnary_operator;
 }
 
+void PotatoSQLParser::Unary_operatorContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterUnary_operator(this);
+}
+
+void PotatoSQLParser::Unary_operatorContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitUnary_operator(this);
+}
 
 PotatoSQLParser::Unary_operatorContext* PotatoSQLParser::unary_operator() {
   Unary_operatorContext *_localctx = _tracker.createInstance<Unary_operatorContext>(_ctx, getState());
@@ -9908,6 +10558,17 @@ size_t PotatoSQLParser::Error_messageContext::getRuleIndex() const {
   return PotatoSQLParser::RuleError_message;
 }
 
+void PotatoSQLParser::Error_messageContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterError_message(this);
+}
+
+void PotatoSQLParser::Error_messageContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitError_message(this);
+}
 
 PotatoSQLParser::Error_messageContext* PotatoSQLParser::error_message() {
   Error_messageContext *_localctx = _tracker.createInstance<Error_messageContext>(_ctx, getState());
@@ -9954,6 +10615,17 @@ size_t PotatoSQLParser::Module_argumentContext::getRuleIndex() const {
   return PotatoSQLParser::RuleModule_argument;
 }
 
+void PotatoSQLParser::Module_argumentContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterModule_argument(this);
+}
+
+void PotatoSQLParser::Module_argumentContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitModule_argument(this);
+}
 
 PotatoSQLParser::Module_argumentContext* PotatoSQLParser::module_argument() {
   Module_argumentContext *_localctx = _tracker.createInstance<Module_argumentContext>(_ctx, getState());
@@ -10017,6 +10689,17 @@ size_t PotatoSQLParser::Column_aliasContext::getRuleIndex() const {
   return PotatoSQLParser::RuleColumn_alias;
 }
 
+void PotatoSQLParser::Column_aliasContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterColumn_alias(this);
+}
+
+void PotatoSQLParser::Column_aliasContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitColumn_alias(this);
+}
 
 PotatoSQLParser::Column_aliasContext* PotatoSQLParser::column_alias() {
   Column_aliasContext *_localctx = _tracker.createInstance<Column_aliasContext>(_ctx, getState());
@@ -10561,6 +11244,17 @@ size_t PotatoSQLParser::KeywordContext::getRuleIndex() const {
   return PotatoSQLParser::RuleKeyword;
 }
 
+void PotatoSQLParser::KeywordContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterKeyword(this);
+}
+
+void PotatoSQLParser::KeywordContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitKeyword(this);
+}
 
 PotatoSQLParser::KeywordContext* PotatoSQLParser::keyword() {
   KeywordContext *_localctx = _tracker.createInstance<KeywordContext>(_ctx, getState());
@@ -10735,6 +11429,17 @@ size_t PotatoSQLParser::NameContext::getRuleIndex() const {
   return PotatoSQLParser::RuleName;
 }
 
+void PotatoSQLParser::NameContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterName(this);
+}
+
+void PotatoSQLParser::NameContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitName(this);
+}
 
 PotatoSQLParser::NameContext* PotatoSQLParser::name() {
   NameContext *_localctx = _tracker.createInstance<NameContext>(_ctx, getState());
@@ -10777,6 +11482,17 @@ size_t PotatoSQLParser::Function_nameContext::getRuleIndex() const {
   return PotatoSQLParser::RuleFunction_name;
 }
 
+void PotatoSQLParser::Function_nameContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterFunction_name(this);
+}
+
+void PotatoSQLParser::Function_nameContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitFunction_name(this);
+}
 
 PotatoSQLParser::Function_nameContext* PotatoSQLParser::function_name() {
   Function_nameContext *_localctx = _tracker.createInstance<Function_nameContext>(_ctx, getState());
@@ -10819,6 +11535,17 @@ size_t PotatoSQLParser::Database_nameContext::getRuleIndex() const {
   return PotatoSQLParser::RuleDatabase_name;
 }
 
+void PotatoSQLParser::Database_nameContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterDatabase_name(this);
+}
+
+void PotatoSQLParser::Database_nameContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitDatabase_name(this);
+}
 
 PotatoSQLParser::Database_nameContext* PotatoSQLParser::database_name() {
   Database_nameContext *_localctx = _tracker.createInstance<Database_nameContext>(_ctx, getState());
@@ -10861,6 +11588,17 @@ size_t PotatoSQLParser::Schema_nameContext::getRuleIndex() const {
   return PotatoSQLParser::RuleSchema_name;
 }
 
+void PotatoSQLParser::Schema_nameContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterSchema_name(this);
+}
+
+void PotatoSQLParser::Schema_nameContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitSchema_name(this);
+}
 
 PotatoSQLParser::Schema_nameContext* PotatoSQLParser::schema_name() {
   Schema_nameContext *_localctx = _tracker.createInstance<Schema_nameContext>(_ctx, getState());
@@ -10903,6 +11641,17 @@ size_t PotatoSQLParser::Table_function_nameContext::getRuleIndex() const {
   return PotatoSQLParser::RuleTable_function_name;
 }
 
+void PotatoSQLParser::Table_function_nameContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterTable_function_name(this);
+}
+
+void PotatoSQLParser::Table_function_nameContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitTable_function_name(this);
+}
 
 PotatoSQLParser::Table_function_nameContext* PotatoSQLParser::table_function_name() {
   Table_function_nameContext *_localctx = _tracker.createInstance<Table_function_nameContext>(_ctx, getState());
@@ -10945,6 +11694,17 @@ size_t PotatoSQLParser::Table_nameContext::getRuleIndex() const {
   return PotatoSQLParser::RuleTable_name;
 }
 
+void PotatoSQLParser::Table_nameContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterTable_name(this);
+}
+
+void PotatoSQLParser::Table_nameContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitTable_name(this);
+}
 
 PotatoSQLParser::Table_nameContext* PotatoSQLParser::table_name() {
   Table_nameContext *_localctx = _tracker.createInstance<Table_nameContext>(_ctx, getState());
@@ -10987,6 +11747,17 @@ size_t PotatoSQLParser::Table_or_index_nameContext::getRuleIndex() const {
   return PotatoSQLParser::RuleTable_or_index_name;
 }
 
+void PotatoSQLParser::Table_or_index_nameContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterTable_or_index_name(this);
+}
+
+void PotatoSQLParser::Table_or_index_nameContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitTable_or_index_name(this);
+}
 
 PotatoSQLParser::Table_or_index_nameContext* PotatoSQLParser::table_or_index_name() {
   Table_or_index_nameContext *_localctx = _tracker.createInstance<Table_or_index_nameContext>(_ctx, getState());
@@ -11029,6 +11800,17 @@ size_t PotatoSQLParser::New_table_nameContext::getRuleIndex() const {
   return PotatoSQLParser::RuleNew_table_name;
 }
 
+void PotatoSQLParser::New_table_nameContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterNew_table_name(this);
+}
+
+void PotatoSQLParser::New_table_nameContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitNew_table_name(this);
+}
 
 PotatoSQLParser::New_table_nameContext* PotatoSQLParser::new_table_name() {
   New_table_nameContext *_localctx = _tracker.createInstance<New_table_nameContext>(_ctx, getState());
@@ -11071,6 +11853,17 @@ size_t PotatoSQLParser::Column_nameContext::getRuleIndex() const {
   return PotatoSQLParser::RuleColumn_name;
 }
 
+void PotatoSQLParser::Column_nameContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterColumn_name(this);
+}
+
+void PotatoSQLParser::Column_nameContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitColumn_name(this);
+}
 
 PotatoSQLParser::Column_nameContext* PotatoSQLParser::column_name() {
   Column_nameContext *_localctx = _tracker.createInstance<Column_nameContext>(_ctx, getState());
@@ -11113,6 +11906,17 @@ size_t PotatoSQLParser::Collation_nameContext::getRuleIndex() const {
   return PotatoSQLParser::RuleCollation_name;
 }
 
+void PotatoSQLParser::Collation_nameContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterCollation_name(this);
+}
+
+void PotatoSQLParser::Collation_nameContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitCollation_name(this);
+}
 
 PotatoSQLParser::Collation_nameContext* PotatoSQLParser::collation_name() {
   Collation_nameContext *_localctx = _tracker.createInstance<Collation_nameContext>(_ctx, getState());
@@ -11155,6 +11959,17 @@ size_t PotatoSQLParser::Foreign_tableContext::getRuleIndex() const {
   return PotatoSQLParser::RuleForeign_table;
 }
 
+void PotatoSQLParser::Foreign_tableContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterForeign_table(this);
+}
+
+void PotatoSQLParser::Foreign_tableContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitForeign_table(this);
+}
 
 PotatoSQLParser::Foreign_tableContext* PotatoSQLParser::foreign_table() {
   Foreign_tableContext *_localctx = _tracker.createInstance<Foreign_tableContext>(_ctx, getState());
@@ -11197,6 +12012,17 @@ size_t PotatoSQLParser::Index_nameContext::getRuleIndex() const {
   return PotatoSQLParser::RuleIndex_name;
 }
 
+void PotatoSQLParser::Index_nameContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterIndex_name(this);
+}
+
+void PotatoSQLParser::Index_nameContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitIndex_name(this);
+}
 
 PotatoSQLParser::Index_nameContext* PotatoSQLParser::index_name() {
   Index_nameContext *_localctx = _tracker.createInstance<Index_nameContext>(_ctx, getState());
@@ -11239,6 +12065,17 @@ size_t PotatoSQLParser::Trigger_nameContext::getRuleIndex() const {
   return PotatoSQLParser::RuleTrigger_name;
 }
 
+void PotatoSQLParser::Trigger_nameContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterTrigger_name(this);
+}
+
+void PotatoSQLParser::Trigger_nameContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitTrigger_name(this);
+}
 
 PotatoSQLParser::Trigger_nameContext* PotatoSQLParser::trigger_name() {
   Trigger_nameContext *_localctx = _tracker.createInstance<Trigger_nameContext>(_ctx, getState());
@@ -11281,6 +12118,17 @@ size_t PotatoSQLParser::View_nameContext::getRuleIndex() const {
   return PotatoSQLParser::RuleView_name;
 }
 
+void PotatoSQLParser::View_nameContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterView_name(this);
+}
+
+void PotatoSQLParser::View_nameContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitView_name(this);
+}
 
 PotatoSQLParser::View_nameContext* PotatoSQLParser::view_name() {
   View_nameContext *_localctx = _tracker.createInstance<View_nameContext>(_ctx, getState());
@@ -11323,6 +12171,17 @@ size_t PotatoSQLParser::Module_nameContext::getRuleIndex() const {
   return PotatoSQLParser::RuleModule_name;
 }
 
+void PotatoSQLParser::Module_nameContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterModule_name(this);
+}
+
+void PotatoSQLParser::Module_nameContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitModule_name(this);
+}
 
 PotatoSQLParser::Module_nameContext* PotatoSQLParser::module_name() {
   Module_nameContext *_localctx = _tracker.createInstance<Module_nameContext>(_ctx, getState());
@@ -11365,6 +12224,17 @@ size_t PotatoSQLParser::Pragma_nameContext::getRuleIndex() const {
   return PotatoSQLParser::RulePragma_name;
 }
 
+void PotatoSQLParser::Pragma_nameContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterPragma_name(this);
+}
+
+void PotatoSQLParser::Pragma_nameContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitPragma_name(this);
+}
 
 PotatoSQLParser::Pragma_nameContext* PotatoSQLParser::pragma_name() {
   Pragma_nameContext *_localctx = _tracker.createInstance<Pragma_nameContext>(_ctx, getState());
@@ -11407,6 +12277,17 @@ size_t PotatoSQLParser::Savepoint_nameContext::getRuleIndex() const {
   return PotatoSQLParser::RuleSavepoint_name;
 }
 
+void PotatoSQLParser::Savepoint_nameContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterSavepoint_name(this);
+}
+
+void PotatoSQLParser::Savepoint_nameContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitSavepoint_name(this);
+}
 
 PotatoSQLParser::Savepoint_nameContext* PotatoSQLParser::savepoint_name() {
   Savepoint_nameContext *_localctx = _tracker.createInstance<Savepoint_nameContext>(_ctx, getState());
@@ -11465,6 +12346,17 @@ size_t PotatoSQLParser::Table_aliasContext::getRuleIndex() const {
   return PotatoSQLParser::RuleTable_alias;
 }
 
+void PotatoSQLParser::Table_aliasContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterTable_alias(this);
+}
+
+void PotatoSQLParser::Table_aliasContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitTable_alias(this);
+}
 
 PotatoSQLParser::Table_aliasContext* PotatoSQLParser::table_alias() {
   Table_aliasContext *_localctx = _tracker.createInstance<Table_aliasContext>(_ctx, getState());
@@ -11535,6 +12427,17 @@ size_t PotatoSQLParser::Transaction_nameContext::getRuleIndex() const {
   return PotatoSQLParser::RuleTransaction_name;
 }
 
+void PotatoSQLParser::Transaction_nameContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterTransaction_name(this);
+}
+
+void PotatoSQLParser::Transaction_nameContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitTransaction_name(this);
+}
 
 PotatoSQLParser::Transaction_nameContext* PotatoSQLParser::transaction_name() {
   Transaction_nameContext *_localctx = _tracker.createInstance<Transaction_nameContext>(_ctx, getState());
@@ -11597,6 +12500,17 @@ size_t PotatoSQLParser::Any_nameContext::getRuleIndex() const {
   return PotatoSQLParser::RuleAny_name;
 }
 
+void PotatoSQLParser::Any_nameContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterAny_name(this);
+}
+
+void PotatoSQLParser::Any_nameContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<PotatoSQLListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitAny_name(this);
+}
 
 PotatoSQLParser::Any_nameContext* PotatoSQLParser::any_name() {
   Any_nameContext *_localctx = _tracker.createInstance<Any_nameContext>(_ctx, getState());

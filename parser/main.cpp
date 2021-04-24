@@ -5,6 +5,7 @@
 #include "antlr4-runtime.h"
 #include "PotatoSQLLexer.h"
 #include "PotatoSQLParser.h"
+#include "PotatoSQLListener.h"
 
 using namespace potatosql;
 using namespace antlr4;

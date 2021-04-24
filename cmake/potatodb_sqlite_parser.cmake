@@ -39,7 +39,7 @@ find_package(ANTLR REQUIRED)
 # -----------------------------------------------------------------------------
 
 
-antlr_target(PotatoSQL "parser/PotatoSQL.g4" LEXER PARSER
+antlr_target(PotatoSQL "parser/PotatoSQL.g4" LEXER PARSER LISTENER
   PACKAGE potatosql
   OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 

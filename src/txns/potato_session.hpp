@@ -1,7 +1,6 @@
 
 #include "parser/potato_sql.hpp"
 
-
 class PotatoSession {
 public:
   PotatoSession(String file_name, const int bp_size = 32)
