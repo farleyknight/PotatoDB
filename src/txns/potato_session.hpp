@@ -1,14 +1,17 @@
+#pragma once
 
-#include "parser/potato_sql.hpp"
+#include "parser/sql_parser.hpp"
 
 class Resources {
 public:
-  DiskMgr
-  BuffMgr
-  LockMgr
-  TxnMgr
-  ExecCtx
-  ExecEngine
+  Resources() {
+    DiskMgr
+      BuffMgr
+      LockMgr
+      TxnMgr
+      ExecCtx
+      ExecEngine
+  }
 }
 
 class PotatoSession {

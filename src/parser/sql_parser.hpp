@@ -20,15 +20,14 @@ class ErrorListener : public BaseErrorListener {
                            size_t line,
                            size_t charPositionInLine,
                            const std::string &msg,
-                           std::exception_ptr e) override {
-    std::ostrstream stream;
+                           UNUSED std::exception_ptr e)
+    override
+  {
     std::string message(msg);
+    std::string full_message = "Line(" + std::to_string(line) + ":" +
+      std::to_string(charPositionInLine) + ") Error(" + message + ")";
 
-    stream << "Line(" << line << ":" << charPositionInLine <<
-      ") Error(" << message << ")";
-    //std::string response(stream.str());
-
-    throw std::invalid_argument(message);
+    throw std::invalid_argument(full_message);
   }
 };
 
@@ -84,7 +83,7 @@ public:
     }
   }
 
-  static MutVec<MutPtr<Expr>> as_exprs(MutString input) {
+  static MutVec<MutPtr<BaseExpr>> as_exprs(MutString input) {
     ANTLRInputStream stream(input);
 
     PotatoSQLLexer lexer(&stream);
@@ -104,12 +103,12 @@ public:
       if (visitor.exprs.size() > 0) {
         return move(visitor.exprs);
       } else {
-        MutVec<MutPtr<Expr>> results;
+        MutVec<MutPtr<BaseExpr>> results;
         return results;
       }
 
     } catch (UNUSED std::invalid_argument &e) {
-      MutVec<MutPtr<Expr>> results;
+      MutVec<MutPtr<BaseExpr>> results;
       return results;
     }
   }

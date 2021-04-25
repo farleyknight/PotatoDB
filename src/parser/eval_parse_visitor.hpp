@@ -3,7 +3,8 @@
 #include "PotatoSQLBaseVisitor.h"
 
 #include "common/types.hpp"
-#include "parser/expr.hpp"
+#include "exprs/insert_expr.hpp"
+#include "exprs/select_expr.hpp"
 
 using antlrcpp::Any;
 using potatosql::PotatoSQLBaseVisitor;
@@ -12,7 +13,7 @@ using potatosql::PotatoSQLParser;
 class EvalParseVisitor : public PotatoSQLBaseVisitor {
 public:
   MutVec<MutString> results;
-  MutVec<MutPtr<Expr>> exprs;
+  MutVec<MutPtr<BaseExpr>> exprs;
 
   Any visitSql_stmt(PotatoSQLParser::Sql_stmtContext *ctx)
     override

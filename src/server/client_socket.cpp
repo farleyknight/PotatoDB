@@ -3,7 +3,7 @@
 #include "server/client_socket.hpp"
 #include "server/server.hpp"
 
-#include "txns/potato_session.hpp"
+// #include "txns/potato_session.hpp"
 
 ClientSocket::ClientSocket(file_desc_t file_desc,
                            MRef<Server> server)
@@ -38,9 +38,11 @@ MutString ClientSocket::process_request(MutString message) const {
   // under the user's home directory? We can place any DB files
   // under ~/.potatodb and use that for the catalog, the table heaps
   // and whatnot?
-  PotatoSession session("local_file.db", 32);
+  // PotatoSession session("local_file.db", 32);
 
-  return session.execute(message);
+  // return session.execute(message);
+
+  return message;
 }
 
 MutString ClientSocket::read() const {

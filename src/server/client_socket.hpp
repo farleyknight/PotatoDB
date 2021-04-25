@@ -22,7 +22,7 @@ public:
   void shutdown();
   void write(CRef<string> data) const;
   string read() const;
-  MutString parse_message(MutString message) const;
+  MutString process_request(MutString message) const;
 
   // No copy
   ClientSocket(CRef<ClientSocket>) = delete;
