@@ -5,6 +5,7 @@
 #include "common/types.hpp"
 #include "exprs/insert_expr.hpp"
 #include "exprs/select_expr.hpp"
+#include "exprs/create_table_expr.hpp"
 
 using antlrcpp::Any;
 using potatosql::PotatoSQLBaseVisitor;
@@ -15,15 +16,34 @@ public:
   MutVec<MutString> results;
   MutVec<MutPtr<BaseExpr>> exprs;
 
-  Any visitSql_stmt(PotatoSQLParser::Sql_stmtContext *ctx)
-    override
-  {
-    return visitChildren(ctx);
-  }
-
   Any visitSelect_stmt(PotatoSQLParser::Select_stmtContext *ctx)
     override
   {
+    // TODO?
+    return visitChildren(ctx);
+  }
+
+  Any visitCreate_table_stmt(PotatoSQLParser::Create_table_stmtContext *ctx)
+    override
+  {
+    CreateTableExpr create_table;
+    assert(ctx->table_name());
+
+    TableExpr table(ctx->table_name()->getText());
+    create_table.set_table(table);
+
+    const auto &col_def_list_ctx = ctx->column_def();
+    ColumnDefListExpr def_list;
+    for (auto &col_def_ctx : col_def_list_ctx) {
+      auto col_name = col_def_ctx->column_name()->getText();
+      auto type_name = col_def_ctx->type_name()->getText();
+      def_list.push_back(ColumnDefExpr(col_name, type_name));
+    }
+
+    create_table.set_column_defs(def_list);
+
+    exprs.emplace_back(make_unique<CreateTableExpr>(create_table));
+
     return visitChildren(ctx);
   }
 

@@ -4,6 +4,8 @@ enum class ExprType {
   // Statement fragments/exprs
   COLUMN,
   COLUMN_LIST,
+  COLUMN_DEF,
+  COLUMN_DEF_LIST,
   TABLE,
   TABLE_LIST,
   VALUE,
@@ -18,7 +20,9 @@ enum class ExprType {
   GROUP_BY,
   HAVING,
 
-  INSERT
+  INSERT,
+
+  CREATE_TABLE,
 };
 
 
