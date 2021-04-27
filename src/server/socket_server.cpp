@@ -16,21 +16,25 @@
 #include <string>
 
 #include "server/client_socket.hpp"
-#include "server/server.hpp"
+#include "server/socket_server.hpp"
 
-Server::~Server() {
+SocketServer::SocketServer(CRef<Resources> resources)
+  : resources_ (resources)
+{}
+
+SocketServer::~SocketServer() {
   shutdown();
 }
 
-void Server::set_backlog(int backlog) {
+void SocketServer::set_backlog(int backlog) {
   backlog_ = backlog;
 }
 
-void Server::set_port(int port) {
+void SocketServer::set_port(int port) {
   port_ = port;
 }
 
-void Server::shutdown() {
+void SocketServer::shutdown() {
   if (main_socket_ != 0) {
     close(main_socket_);
   }
@@ -42,7 +46,7 @@ void Server::shutdown() {
   sockets_.clear();
 }
 
-void Server::reuse_main_socket() const {
+void SocketServer::reuse_main_socket() const {
   int option = 1;
 
   setsockopt(main_socket_,
@@ -52,7 +56,7 @@ void Server::reuse_main_socket() const {
              sizeof(option));
 }
 
-void Server::bind_main_socket_to_port() {
+void SocketServer::bind_main_socket_to_port() {
   sockaddr_in socket_addr;
 
   std::fill(reinterpret_cast<char*>(&socket_addr),
@@ -72,7 +76,7 @@ void Server::bind_main_socket_to_port() {
   }
 }
 
-void Server::begin_accepting_connections() const {
+void SocketServer::begin_accepting_connections() const {
   int result = listen(main_socket_, backlog_);
 
   if (result == -1) {
@@ -80,13 +84,14 @@ void Server::begin_accepting_connections() const {
   }
 }
 
-void Server::accept_new_connection() {
+void SocketServer::accept_new_connection() {
   sockaddr_in client_addr;
   auto client_addr_length = sizeof(client_addr);
 
-  file_desc_t client_fd = accept(main_socket_,
-                                 reinterpret_cast<sockaddr*>(&client_addr),
-                                 reinterpret_cast<socklen_t*>(&client_addr_length));
+  auto &addr = reinterpret_cast<sockaddr*>(&client_addr);
+  auto &len  = reinterpret_cast<socklen_t*>(&client_addr_length);
+
+  file_desc_t client_fd = accept(main_socket_, addr, len);
 
   if (client_fd == -1) {
     return;
@@ -95,16 +100,24 @@ void Server::accept_new_connection() {
   FD_SET(client_fd, &main_socket_set_);
   new_high_fd_ = max(curr_high_fd_, client_fd);
 
-  auto client_socket = make_shared<ClientSocket>(client_fd, *this);
+  auto client_socket = make_client_socket(client_fd);
 
   if (accept_func_) {
-    auto task = std::async(std::launch::async, accept_func_, client_socket);
+    auto task = std::async(std::launch::async,
+                           accept_func_,
+                           client_socket);
   }
 
   sockets_.push_back(client_socket);
 }
 
-void Server::read_from_connection(file_desc_t fd) {
+MutSPtr<ClientSocket> SocketServer::make_client_socket() {
+  return make_shared<ClientSocket>(client_fd,
+                                   *this,
+                                   instance.make_session());
+}
+ 
+void SocketServer::read_from_connection(file_desc_t fd) {
   char buffer[2] = {0,0};
 
   // Let's attempt to read at least one byte from the connection, but
@@ -145,7 +158,7 @@ bool Server::update_socket_set() {
   return (fd_count != -1);
 }
 
-void Server::accept_connections() {
+void SocketServer::accept_connections() {
   main_socket_ = socket(AF_INET, SOCK_STREAM, 0);
   if (main_socket_ == -1) {
     throw std::runtime_error(string(strerror(errno)));
@@ -193,14 +206,14 @@ void Server::accept_connections() {
   }
 }
 
-void Server::finish_tasks() {
+void SocketServer::finish_tasks() {
   std::for_each(tasks_.begin(), tasks_.end(), [](CRef<Task> task) {
     task.wait();
   });
   tasks_.clear();
 }
 
-void Server::fire_read_event(file_desc_t fd) {
+void SocketServer::fire_read_event(file_desc_t fd) {
   for (auto &socket : sockets_) {
     if (socket->file_desc() == fd) {
       std::cout << "Reading from socket FD : " << fd << std::endl;
@@ -212,7 +225,7 @@ void Server::fire_read_event(file_desc_t fd) {
   }
 }
 
-void Server::stale_socket_cleanup() {
+void SocketServer::stale_socket_cleanup() {
   std::lock_guard<Mutex> lock(stale_fd_mutex_);
 
   for (auto fd : stale_fds_) {
@@ -224,8 +237,10 @@ void Server::stale_socket_cleanup() {
   stale_fds_.clear();
 }
 
-void Server::remove_socket(file_desc_t fd) {
-  std::cout << "Closing socket FD : " << fd << std::endl;
+void SocketServer::remove_socket(file_desc_t fd) {
+  // TODO: When we get a logging system working, add
+  // the line below:
+  // std::cout << "Closing socket FD : " << fd << std::endl;
   std::lock_guard<Mutex> lock(stale_fd_mutex_);
 
   auto match_fd = [&](SPtr<ClientSocket> socket) {

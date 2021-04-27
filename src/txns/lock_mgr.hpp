@@ -30,28 +30,29 @@ public:
   ~LockMgr();
 
   // No copy
-  LockMgr(Ref<LockMgr>) = delete;
+  LockMgr(CRef<LockMgr>) = delete;
   // No copy assign
-  MutRef<LockMgr> operator=(Ref<LockMgr>) = delete;
+  MRef<LockMgr> operator=(CRef<LockMgr>) = delete;
 
   /**********************************************
   * Instance methods
   **********************************************/
 
-  bool lock_shared(MutRef<Txn> txn, Ref<RID> rid);
+  bool lock_shared(MRef<Txn> txn, CRef<RID> rid);
   bool lock_exclusive(MRef<Txn> txn, CRef<RID> rid);
-  bool lock_upgrade(MutRef<Txn> txn, Ref<RID> rid);
-  bool unlock(MutRef<Txn> txn, Ref<RID> rid);
-  void add_edge(txn_id_t t1, txn_id_t t2) const {
-    // TODO
-  }
-  void remove_edge(txn_id_t t1, txn_id_t t2) const {
-    // TODO
-  }
-  bool has_cycle(txn_id_t *txn_id) {
-    // TODO
-    return false;
-  }
+  bool lock_upgrade(MRef<Txn> txn, CRef<RID> rid);
+  bool unlock(MRef<Txn> txn, CRef<RID> rid);
+
+  // void add_edge(txn_id_t t1, txn_id_t t2) const {
+  //   // TODO
+  // }
+  // void remove_edge(txn_id_t t1, txn_id_t t2) const {
+  //   // TODO
+  // }
+  // bool has_cycle(txn_id_t *txn_id) {
+  //   // TODO
+  //   return false;
+  // }
 
   Vec<std::pair<txn_id_t, txn_id_t>> edge_list() {
     return Vec<std::pair<txn_id_t, txn_id_t>>();
@@ -86,7 +87,7 @@ private:
   bool remove_request(MutList<LockRequest>::iterator it,
                       MRef<LockRequestQueue> queue,
                       MRef<Txn> txn,
-                      Ref<RID> rid) const;
+                      CRef<RID> rid) const;
 
   bool can_obtain_lock(MRef<Txn> txn);
   bool can_unlock(MRef<Txn> txn);

@@ -7,6 +7,8 @@
 
 #include "common/config.hpp"
 
+#include "page/page_id.hpp"
+
 class RID {
 public:
   /**********************************************
@@ -15,48 +17,61 @@ public:
 
   RID() = default;
 
-  explicit RID(page_id_t page_id, uint32_t slot_num) {
+  explicit RID(PageId page_id, slot_id_t slot_id) {
     // TODO: Make slot number it's own type: slot_id_t
     page_id_ = page_id;
-    slot_num_ = slot_num;
+    slot_id_ = slot_id;
   }
 
   explicit RID(int64_t rid)  {
-    page_id_ = static_cast<page_id_t>(rid >> 32);
-    slot_num_ = static_cast<uint32_t>(rid);
+    // TODO: Maybe find a way to get a PageId (now two numbers)
+    // From a 64 bit number?
+    page_id_ = PageId::from(static_cast<page_id_t>(rid >> 32));
+
+    // NOTE: Each page has around 4KB, right?
+    // The maximum for a 16 bit number is 65536
+    // or about 65K, so we don't have to worry about
+    // slot_id being enough.
+    slot_id_ = static_cast<slot_id_t>(rid);
   }
 
-  RID(Ref<RID>) = default; // Default copy
-  MutRef<RID> operator=(Ref<RID>) = default; // Default copy assign
-  ~RID() = default; // Default delete
+  // Default copy
+  RID(CRef<RID>) = default;
+  // Default copy assign
+  MRef<RID> operator=(CRef<RID>) = default;
+  // Default delete
+  ~RID() = default;
 
-  static Option<RID> make_opt(page_id_t page_id, uint32_t slot_num) {
-    return make_optional<RID>(page_id, slot_num);
+  static Option<RID> make_opt(PageId page_id, slot_id_t slot_id) {
+    return make_optional<RID>(page_id, slot_id);
   }
 
   /**********************************************
    * Instance methods
    **********************************************/
 
-  int64_t get() const {
-    return (static_cast<int64_t>(page_id_)) << 32 | slot_num_;
+  uint64_t get() const {
+    uint64_t result = static_cast<uint64_t>(page_id_.as_uint32());
+    result = result << 32;
+    result = result | slot_id_;
+    return result;
   }
 
-  page_id_t page_id() const {
+  PageId page_id() const {
     return page_id_;
   }
 
-  uint32_t slot_num() const {
-    return slot_num_;
+  slot_id_t slot_id() const {
+    return slot_id_;
   }
 
-  void set(page_id_t page_id, uint32_t slot_num) {
+  void set(PageId page_id, slot_id_t slot_id) {
     page_id_ = page_id;
-    slot_num_ = slot_num;
+    slot_id_ = slot_id;
   }
 
-  bool operator==(const RID &other) const {
-    return page_id_ == other.page_id_ && slot_num_ == other.slot_num_;
+  bool operator==(CRef<RID> other) const {
+    return page_id_ == other.page_id_ && slot_id_ == other.slot_id_;
   }
 
   /**********************************************
@@ -66,26 +81,27 @@ public:
   // TODO: No move b/c RVO?
   String to_string() const {
     std::stringstream os;
-    os << "page_id: " << page_id_;
-    os << " slot_num: " << slot_num_ << "\n";
+    os << "file_id: " << page_id_.file_id();
+    os << "block_id: " << page_id_.block_id();
+    os << " slot_num: " << slot_id_ << "\n";
 
     return os.str();
   }
 
-  friend std::ostream &operator<<(std::ostream &os, const RID &rid) {
+  friend std::ostream &operator<<(std::ostream &os, CRef<RID> rid) {
     os << rid.to_string();
     return os;
   }
 
 private:
-  page_id_t page_id_    = INVALID_PAGE_ID;
-  uint32_t slot_num_ = 0;  // logical offset from 0, 1...
+  PageId page_id_;
+  slot_id_t slot_id_ = 0;  // logical offset from 0, 1...
 };
 
 namespace std {
   template <>
   struct hash<RID> {
-    size_t operator()(const RID &obj) const {
+    size_t operator()(CRef<RID> obj) const {
       return hash<int64_t>()(obj.get());
     }
   };

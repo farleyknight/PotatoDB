@@ -4,6 +4,9 @@
 #include <optional>
 
 #include "common/config.hpp"
+
+#include "buffer/buffer.hpp"
+
 #include "txns/rw_latch.hpp"
 
 class Page {
@@ -12,41 +15,48 @@ public:
    * Constructors & destructor
    **********************************************/
 
+  // TODO: Maybe this constructor can take a `move`-ed chunk of data
   Page();
+
   // No copy
   Page(CRef<Page>) = delete;
   // No copy assign
-  Page& operator=(CRef<Page>) = delete;
+  MRef<Page> operator=(CRef<Page>) = delete;
 
-  // TODO: The line below should get replaced soon.
-  // We should not have to make Page polymorphic we decouple
-  // page layout from page data.
-  // Page should hold a buffer
-  // PageLayout should RW into the Page buffer.
   virtual ~Page() {} // Make Page polymorphic
 
-  static OptRef<Page> make_opt(MutRef<Page> page);
+  static OptRef<Page> make_opt(MRef<Page> page);
 
   /**********************************************
    * Instance methods
    **********************************************/
 
-  char* data();
-  MRef<char[]> as_char_array();
-  lsn_t lsn();
-  void set_lsn(lsn_t lsn);
-  void reset_memory();
-
   MRef<Buffer> buffer() {
     return buffer_;
   }
 
-  page_id_t id() const {
-    return id_;
+  void copy_n_bytes(size_t source_offset,
+                    size_t dest_offset,
+                    CRef<Buffer> buffer,
+                    size_t n_bytes)
+  {
+    buffer_.copy_n_bytes(source_offset,
+                         dest_offset,
+                         buffer,
+                         n_bytes);
+    // TODO
   }
 
-  void set_id(page_id_t id) {
-    id_ = id;
+  PageId page_id() const {
+    return page_id_;
+  }
+
+  void set_id(PageId id) {
+    page_id_ = id;
+  }
+
+  size_t size() const {
+    return buffer_.size();
   }
 
   // Increase the pin count.
@@ -82,9 +92,9 @@ private:
   static constexpr size_t OFFSET_PAGE_START = 0;
   static constexpr size_t OFFSET_LSN = 4;
 
-  page_id_t id_ = INVALID_PAGE_ID;
-  Buffer buffer_;
-  int pin_count_ = 0;
-  bool is_dirty_ = false;
+  PageId  page_id_;
+  Buffer  buffer_;
+  int     pin_count_ = 0;
+  bool    is_dirty_ = false;
   RWLatch rwlatch_;
 };

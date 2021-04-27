@@ -71,7 +71,6 @@ public:
     return data_;
   }
 
-private:
   Value(TypeId type_id, DataStoreT data)
     : ValueBase(type_id, data) {}
 };

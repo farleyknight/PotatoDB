@@ -4,17 +4,15 @@
 
 #include "common/types.hpp"
 
-// TODO: Let's add:
-// * seek method
-// * operator[] for access to the buffer
-// The seek method sets an offset
-// The operator[] reads data, starting at the offset.
-
 class Buffer {
 public:
   using byte_t = uint8_t;
-  using Data = std::vector<byte_t>;
+  using Data = vector<byte_t>;
   using string_size_t = byte_t;
+
+  Buffer() {
+    data_.resize(0);
+  }
 
   Buffer(size_t size) {
     data_.resize(size);
@@ -28,14 +26,43 @@ public:
   // No copy assign
   MRef<Buffer> operator=(CRef<Buffer>) = delete;
 
-  uint8_t* data() {
+  MRef<Data> as_bytes() {
+    return data_;
+  }
+
+  CRef<Data> as_bytes() const {
+    return data_;
+  }
+
+  byte_t* ptr() {
     return data_.data();
   }
 
-  const uint8_t* data() const {
+  const byte_t* ptr() const {
     return data_.data();
   }
 
+  void copy_from(CRef<Buffer> other) {
+    data_ = other.data_;
+  }
+
+  size_t size() const {
+    return data_.size();
+  }
+
+  void resize(size_t new_size) {
+    data_.resize(new_size);
+  }
+
+  Data::iterator begin() {
+    return data_.begin();
+  }
+
+  Data::iterator end() {
+    return data_.end();
+  }
+
+private:
   Data data_;
 };
 

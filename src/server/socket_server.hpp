@@ -9,9 +9,9 @@ using SocketFunc = std::function<void(WPtr<ClientSocket>)>;
 
 class ClientSocket;
 
-class Server {
+class SocketServer {
 public:
-  ~Server();
+  ~SocketServer();
 
   void set_backlog(int backlog);
   void set_port(int port);
@@ -30,6 +30,7 @@ public:
   void on_read(Move<F> func) {
     read_func_ = func;
   }
+
 private:
   void reuse_main_socket() const;
   void bind_main_socket_to_port();

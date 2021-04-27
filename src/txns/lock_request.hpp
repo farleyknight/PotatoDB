@@ -40,7 +40,7 @@ public:
     lock_mode = mode;
   }
 
-  bool operator==(Ref<LockRequest> other) {
+  bool operator==(CRef<LockRequest> other) {
     return (
       txn_id == other.txn_id &&
       granted == other.granted &&
@@ -48,7 +48,7 @@ public:
     );
   }
 
-  bool operator!=(Ref<LockRequest> other) {
+  bool operator!=(CRef<LockRequest> other) {
     return (
       txn_id != other.txn_id ||
       granted != other.granted ||

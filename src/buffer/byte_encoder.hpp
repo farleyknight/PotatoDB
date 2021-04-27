@@ -1,5 +1,13 @@
 #pragma once
 
+
+/*
+ * TODO TODO
+ * Delete this class! We're going with CastEncoder
+ * The CastEncoder methods can probably be placed
+ * directly in the buffer class itself.
+ */
+
 #include "common/types.hpp"
 #include "buffer/buffer_rw.hpp"
 
@@ -90,7 +98,7 @@ private:
     }
   }
 
-  MutString read_string(CRef<Buffer> buff) {
+  MutString read_string(Ref<Buffer> buff) {
     string_size_t size = buff.data_[0];
 
     MutString new_string(size, 0);

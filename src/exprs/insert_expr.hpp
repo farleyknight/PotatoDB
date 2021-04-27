@@ -23,7 +23,7 @@ public:
     tuples_ = tuples;
   }
 
-  CRef<MutString> table_name() const {
+  MutString table_name() const {
     return table_.to_string();
   }
 

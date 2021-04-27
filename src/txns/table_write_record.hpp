@@ -5,7 +5,7 @@
 #include "tuple/tuple.hpp"
 #include "tuple/rid.hpp"
 
-class TableHeap;
+#include "table/table_heap_ref.hpp"
 
 enum class WType {
   INSERT = 0,
@@ -23,14 +23,14 @@ public:
   TableWriteRecord(RID rid,
                    WType wtype,
                    Tuple tuple,
-                   Ref<TableHeap> table)
-    : rid_(rid),
-      wtype_(wtype),
-      tuple_(tuple),
-      table_(table) {}
+                   CRef<TableHeapRef> table_heap_ref)
+    : rid_            (rid),
+      wtype_          (wtype),
+      tuple_          (tuple),
+      table_heap_ref_ (table_heap_ref) {}
 
-  static List<TableWriteRecord> make_list() {
-    return std::list<TableWriteRecord>();
+  static MutList<TableWriteRecord> make_list() {
+    return MutList<TableWriteRecord>();
   }
 
   /**********************************************
@@ -53,16 +53,16 @@ public:
     return wtype_;
   }
 
-  MutRef<RID> rid() {
+  MRef<RID> rid() {
     return rid_;
   }
 
-  Ref<Tuple> tuple() {
+  CRef<Tuple> tuple() {
     return tuple_;
   }
 
-  Ref<TableHeap> table() {
-    return table_;
+  CRef<TableHeapRef> table() {
+    return table_heap_ref_;
   }
 
 private:
@@ -71,5 +71,5 @@ private:
   /** The tuple is only used for the update operation. */
   Tuple tuple_;
   /** The table heap specifies which table this write record is for. */
-  CRef<TableHeap> table_;
+  CRef<TableHeapRef> table_heap_ref_;
 };

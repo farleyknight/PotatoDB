@@ -125,7 +125,7 @@ bool LockMgr::lock_exclusive(MRef<Txn> txn, CRef<RID> rid) {
 
   LockRequest request {txn.id(), LockMode::EXCLUSIVE};
   if (lock_table_.count(rid) == 0) {
-    MutRef<LockRequestQueue> queue = lock_table_[rid];
+    MRef<LockRequestQueue> queue = lock_table_[rid];
 
     queue.oldest_id = txn.id();
     queue.upgrading = true;
@@ -248,7 +248,7 @@ bool LockMgr::unlock(MRef<Txn> txn, CRef<RID> rid) {
   assert(lock_table_.count(rid) > 0);
 
   // ind the matching txn
-  MutRef<LockRequestQueue> queue = lock_table_[rid];
+  MRef<LockRequestQueue> queue = lock_table_[rid];
   for (auto it = queue.begin(); it != queue.end(); ++it) {
     if (it->txn_id == txn.id()) {
       return remove_request(it, queue, txn, rid);

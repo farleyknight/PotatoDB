@@ -1,5 +1,5 @@
 struct MemcpyEncoder {
-  void write_string(MutRef<Buffer> buff, String s) {
+  void write_string(MRef<Buffer> buff, String s) {
     // TODO!
   }
 

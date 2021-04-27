@@ -1,5 +1,9 @@
 #pragma once
 
+#include <list>
+
+#include "common/config.hpp"
+
 class LockRequestQueue {
 public:
   // First element of the queue
@@ -12,11 +16,11 @@ public:
     return requests.back();
   }
 
-  std::list<LockRequest>::iterator begin() {
+  MutList<LockRequest>::iterator begin() {
     return requests.begin();
   }
 
-  std::list<LockRequest>::iterator end() {
+  MutList<LockRequest>::iterator end() {
     return requests.end();
   }
 
@@ -25,8 +29,8 @@ public:
     requests.push_back(request);
   }
 
-  std::list<LockRequest> requests;
-  std::condition_variable cond;  // for notifying blocked txns on this rid
+  MutList<LockRequest> requests;
+  CondVar cond;  // for notifying blocked txns on this rid
 
   // NOTE: This `upgrading` flag is something that bugged me for several
   // hours one day.

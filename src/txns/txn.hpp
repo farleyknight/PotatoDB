@@ -13,8 +13,9 @@
 
 #include "page/page.hpp"
 
-#include "txns/txn_abort_reason.hpp"
+#include "txns/txn_abort_exception.hpp"
 #include "txns/table_write_record.hpp"
+#include "txns/txn_state.hpp"
 
 enum class IsolationLevel {
   READ_UNCOMMITTED = 0,
@@ -31,19 +32,18 @@ public:
   explicit Txn(txn_id_t id,
                IsolationLevel level =
                IsolationLevel::REPEATABLE_READ)
-    : level_     (level),
-      id_        (id),
+    : id_        (id),
+      level_     (level),
       thread_id_ (std::this_thread::get_id()) {}
 
-  Txn(Ref<Txn>) = delete; // No copy
-  MutRef<Txn> operator=(Ref<Txn>) = delete; // No copy assign
+  Txn(CRef<Txn>) = delete; // No copy
+  MRef<Txn> operator=(CRef<Txn>) = delete; // No copy assign
   // Smart pointers manage their own memory.
   ~Txn() = default;
 
   /**********************************************
   * Instance methods
   **********************************************/
-
 
   // wait-die: When an older txn tries to lock a DB element that has
   // been locked by a younger txn, it waits.
@@ -53,30 +53,32 @@ public:
     return other_txn_id < id_;
   }
 
-
-  MutRef<MutList<TableWriteRecord>> write_set() {
+  MRef<MutList<TableWriteRecord>> write_set() {
     return table_write_set_;
   }
 
-  void append_table_write_record(Ref<TableWriteRecord> write_record) {
+  void append_table_write_record(CRef<TableWriteRecord> write_record) {
     table_write_set_.push_back(write_record);
   }
 
-  void add_deleted_page(page_id_t page_id) {
+  void add_deleted_page(PageId page_id) {
     deleted_page_set_.insert(page_id);
   }
-  MutRef<MutSet<RID>> shared_lock_set() {
+
+  MRef<MutSet<RID>> shared_lock_set() {
     return shared_lock_set_;
   }
-  MutRef<MutSet<RID>> exclusive_lock_set() {
+
+  MRef<MutSet<RID>> exclusive_lock_set() {
     return exclusive_lock_set_;
   }
-  bool is_shared_locked(Ref<RID> rid) const {
+
+  bool is_shared_locked(CRef<RID> rid) const {
     return shared_lock_set_.find(rid) != shared_lock_set_.end();
   }
 
   /** @return true if rid is exclusively locked by this txn */
-  bool is_exclusive_locked(Ref<RID> rid) const {
+  bool is_exclusive_locked(CRef<RID> rid) const {
     return exclusive_lock_set_.find(rid) != exclusive_lock_set_.end();
   }
 
@@ -140,7 +142,7 @@ private:
   // accessed. I removed them for now but they should be replaced when
   // we do the work for concurrent indexes.
   MutDeque<RefWrap<Page>> page_set_;
-  MutSet<page_id_t> deleted_page_set_;
+  MutSet<PageId> deleted_page_set_;
 
   MutSet<RID> shared_lock_set_;
   MutSet<RID> exclusive_lock_set_;
