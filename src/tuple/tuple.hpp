@@ -65,10 +65,10 @@ public:
 
   const PageId page_id() const { return rid_->page_id(); }
 
-  void copy_n_byte(size_t source_offset,
-                   size_t dest_offset,
-                   MRef<Buffer> source_buffer,
-                   size_t n_bytes)
+  void copy_n_bytes(size_t source_offset,
+                    size_t dest_offset,
+                    CRef<Buffer> source_buffer,
+                    size_t n_bytes)
   {
     assert(buffer_.size() >= n);
     memcpy(buffer_.ptr() + dest_offset,

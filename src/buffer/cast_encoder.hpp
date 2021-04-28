@@ -3,6 +3,9 @@
 #include "common/types.hpp"
 // #include "buffer/buffer_rw.hpp"
 
+// TODO: This whole class is deprecated
+// Delete ASAP
+
 class CastEncoder {
 public:
   friend class BufferRW<CastEncoder>;

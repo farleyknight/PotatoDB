@@ -47,7 +47,8 @@ using std::string;
 //
 // No need to know more details than that. They are used
 // mostly in the server code.
-using file_desc_t = int;
+using file_desc_t   = int;
+using byte_t        = std::uint8_t;
 
 // NOTE: I prefer camel-cased names for types
 using String        = const string;

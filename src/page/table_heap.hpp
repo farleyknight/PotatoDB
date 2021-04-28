@@ -5,55 +5,54 @@
 #include "tuple/tuple.hpp"
 
 class LockMgr;
-class TableIterator; // TODO: Rename TableIterator to TableIter
+class TableIterator;
 class Txn;
 
 class TableHeap {
 public:
-  /**********************************************
-   * Constructors & destructor
-   **********************************************/
+  TableHeap(BuffMgr& buff_mgr,
+            LockMgr& lock_mgr,
+            LogMgr& log_mgr,
+            PageId& first_page_id);
 
-  TableHeap(MRef<BuffMgr> buff_mgr,
-            MRef<LockMgr> lock_mgr,
-            MRef<LogMgr> log_mgr,
-            page_id_t first_page_id);
-
-  TableHeap(MRef<BuffMgr> buff_mgr,
-            MRef<LockMgr> lock_mgr,
-            MRef<LogMgr> log_mgr,
-            MRef<Txn> txn);
+  TableHeap(BuffMgr& buff_mgr,
+            LockMgr& lock_mgr,
+            LogMgr& log_mgr,
+            Txn& txn);
 
   ~TableHeap() = default;
+
+  // No copy
+  TableHeap(CRef<TableHeap>) = delete;
+  // No copy assign
+  TableHeap& operator=(CRef<TableHeap>) = delete;
 
   const page_id_t first_page_id() const {
     return first_page_id_;
   }
 
-  bool insert_tuple(Ref<Tuple> tuple,
-                    MRef<RID> rid,
-                    MRef<Txn> txn);
-  bool mark_delete(Ref<RID> rid,
-                   MRef<Txn> txn);
-  bool update_tuple(Ref<Tuple> tuple,
-                    Ref<RID> rid,
-                    MRef<Txn> txn);
-  bool apply_delete(MRef<RID> rid,
-                    MRef<Txn> txn);
-  void rollback_delete(Ref<RID> rid,
-                       MRef<Txn> txn);
+  bool insert_tuple(CRef<Tuple> tuple,
+                    RID& rid,
+                    Txn& txn);
+  bool mark_delete(CRef<RID> rid,
+                   Txn& txn);
+  bool update_tuple(Tuple& tuple,
+                    CRef<RID> rid,
+                    Txn& txn);
+  bool apply_delete(RID& rid,
+                    Txn& txn);
+  void rollback_delete(CRef<RID> rid, Txn& txn);
 
-  Option<Tuple> find_tuple(Ref<RID> rid,
-                           MRef<Txn> txn) const;
+  Option<Tuple> find_tuple(CRef<RID> rid, Txn& txn) const;
 
-  TableIterator begin(MRef<Txn> txn);
-  TableIterator end(MRef<Txn> txn);
+  TableIterator begin(Txn& txn);
+  TableIterator end(Txn& txn);
 
-  MRef<BuffMgr> buff_mgr() { return buff_mgr_; }
+  BuffMgr& buff_mgr() { return buff_mgr_; }
 
 private:
-  page_id_t first_page_id_;
-  MRef<LockMgr> lock_mgr_;
-  MRef<LogMgr> log_mgr_;
-  MRef<BuffMgr> buff_mgr_;
+  PageId& first_page_id_;
+  LockMgr& lock_mgr_;
+  LogMgr& log_mgr_;
+  BuffMgr& buff_mgr_;
 };

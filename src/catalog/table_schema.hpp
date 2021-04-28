@@ -6,7 +6,7 @@
 #include <utility>
 
 #include "common/config.hpp"
-#include "common/exception_type.hpp"
+#include "common/exceptions.hpp"
 
 #include "catalog/table_column.hpp"
 #include "catalog/base_schema.hpp"
@@ -24,9 +24,9 @@ public:
               String table_name,
               table_oid_t table_oid);
   // No copy
-  TableSchema(Ref<TableSchema>) = delete;
+  TableSchema(CRef<TableSchema>) = delete;
   // No copy assign
-  MRef<TableSchema> operator=(Ref<TableSchema>) = delete;
+  TableSchema& operator=(CRef<TableSchema>) = delete;
   // Default destructor
   ~TableSchema() = default;
 

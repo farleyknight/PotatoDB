@@ -62,7 +62,7 @@ public:
             lsn_t prev_lsn,
             LogRecordType log_record_type,
             CRef<RID> rid,
-            Move<Tuple> tuple)
+            Tuple tuple)
     : txn_id_          (txn_id),
       prev_lsn_        (prev_lsn),
       log_record_type_ (log_record_type)

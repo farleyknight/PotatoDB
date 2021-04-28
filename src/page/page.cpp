@@ -6,16 +6,15 @@ Page::Page() {
   reset_memory();
 }
 
-OptRef<Page>
-Page::make_opt(MRef<Page> page) {
+OptRef<Page> Page::make_opt(Page& page) {
   return std::optional<RefWrap<Page>>(page);
 }
 
-MutRawPtr<char> Page::data() {
-  return reinterpret_cast<MutRawPtr<char>>(buffer_.data());
+char* Page::data() {
+  return reinterpret_cast<char*>(buffer_.data());
 }
 
-MRef<char[]> Page::as_char_array() {
+char[]& Page::as_char_array() {
   return reinterpret_cast<char(&)[]>(*buffer_.data());
 }
 

@@ -29,13 +29,14 @@ public:
               column_oid_t column_oid,
               TypeId type_id)
     : name_         (name),
+      type_id_      (type_id),
       table_oid_    (table_oid),
       column_oid_   (column_oid),
-      type_id_      (type_id),
       inlined_      (true),
-      fixed_length_ (Type::size(type_id))
+      fixed_length_ (Type::size_of(type_id))
   {
-    assert(type_id != TypeId::VARCHAR); // "Wrong constructor for VARCHAR type.";
+    // "Wrong constructor for VARCHAR type.";
+    assert(type_id != TypeId::VARCHAR);
   }
 
   explicit TableColumn(String name,
@@ -44,62 +45,33 @@ public:
                        TypeId type_id,
                        uint32_t length)
     : name_            (name),
+      type_id_         (type_id),
       table_oid_       (table_oid),
       column_oid_      (column_oid),
-      type_id_         (type_id),
       inlined_         (false),
-      fixed_length_    (Type::size(type_id)),
+      fixed_length_    (Type::size_of(type_id)),
       variable_length_ (length)
   {
-    assert(type_id == TypeId::VARCHAR); // "Wrong constructor for VARCHAR type.";
+    // "Wrong constructor for VARCHAR type.";
+    assert(type_id == TypeId::VARCHAR);
   }
 
   // Allow copy
-  TableColumn(Ref<TableColumn>) = default;
+  TableColumn(CRef<TableColumn>) = default;
   // Allow copy assign
-  MRef<TableColumn> operator=(Ref<TableColumn>) = default;
+  TableColumn& operator=(CRef<TableColumn>) = default;
   // Default destructor
   ~TableColumn() = default;
 
-  /**********************************************
-   * Instance methods
-   **********************************************/
-
-  const bool is_inlined() const {
-    return inlined_;
-  }
-
-  const bool primary_key() const {
-    return primary_key_;
-  }
-
-  const bool is_nullable() const {
-    return nullable_;
-  }
-
-  const TypeId type_id() const {
-    return type_id_;
-  }
-
-  const table_oid_t table_oid() const {
-    return table_oid_;
-  }
-
-  const column_oid_t oid() const {
-    return column_oid_;
-  }
-
-  const int32_t fixed_length() const {
-    return fixed_length_;
-  }
-
-  const int32_t variable_length() const {
-    return variable_length_;
-  }
-
-  Ref<String> name() const {
-    return name_;
-  }
+  bool is_inlined()         const { return inlined_; }
+  bool primary_key()        const { return primary_key_; }
+  bool is_nullable()        const { return nullable_; }
+  TypeId type_id()          const { return type_id_; }
+  table_oid_t table_oid()   const { return table_oid_; }
+  column_oid_t oid()        const { return column_oid_; }
+  int32_t fixed_length()    const { return fixed_length_; }
+  int32_t variable_length() const { return variable_length_; }
+  CRef<String> name()       const { return name_; }
 
   /**********************************************
    * Debug methods

@@ -48,8 +48,8 @@ public:
           MRef<DiskMgr> disk_mgr,
           MRef<LogMgr> log_mgr);
 
-  BuffMgr(Ref<BuffMgr>) = delete; // No copy
-  BuffMgr& operator=(Ref<BuffMgr>) = delete; // No copy assign
+  BuffMgr(CRef<BuffMgr>) = delete; // No copy
+  BuffMgr& operator=(CRef<BuffMgr>) = delete; // No copy assign
   ~BuffMgr() = default; // Default delete
 
   /**********************************************
@@ -57,39 +57,28 @@ public:
    **********************************************/
 
   static Ptr<BuffMgr> make(size_t pool_size,
-                           MRef<DiskMgr> disk_mgr,
-                           MRef<LogMgr> log_mgr);
+                           DiskMgr& disk_mgr,
+                           LogMgr& log_mgr);
 
   /**********************************************
    * Instance methods
    **********************************************/
 
-  bool flush(page_id_t page_id);
+  bool flush(PageId page_id);
 
-  OptRef<Page> fetch_page(page_id_t page_id);
+  OptRef<Page> fetch_page(PageId page_id);
   OptRef<Page> create_page();
 
-  // NOTE: This is why we should decouple page read-write methods from
-  // page data.
-  OptRef<TablePage> fetch_table_page(page_id_t page_id);
-  OptRef<TablePage> create_table_page();
+  bool unpin(PageId page_id, bool is_dirty);
 
-  OptRef<BPlusTreePage> fetch_btree_page(page_id_t page_id);
-  OptRef<BPlusTreePage> create_btree_page();
-
-  OptRef<HTHeaderPage> fetch_ht_header_page(page_id_t page_id);
-  OptRef<HTHeaderPage> create_ht_header_page();
-
-  bool unpin(page_id_t page_id, bool is_dirty);
-
-  bool delete_page(page_id_t page_id);
+  bool delete_page(PageId page_id);
   void flush_all();
 
-  Ref<Vec<Page>> pages()         { return pages_; }
-  MRef<Page> page_at(size_t i) { return pages_[i]; }
+  CRef<Vec<Page>> pages()        { return pages_; }
+  Page& page_at(size_t i)        { return pages_[i]; }
   size_t pool_size()             { return pool_size_; }
 
-  void flush_page(page_id_t page_id);
+  void flush_page(PageId page_id);
   void flush_page(MRef<Page> page);
 
 private:
@@ -98,16 +87,17 @@ private:
   // And there should be a way to do destucturing bind
   // via something called std::tie?
   // https://en.cppreference.com/w/cpp/utility/tuple/make_tuple
-  OptRef<Page> find_or_make_page(MutRawPtr<frame_id_t> frame_id);
-  bool contains_page(page_id_t page_id);
-  MRef<Page> page_by_id(page_id_t page_id);
+  OptRef<Page> find_or_make_page(frame_id_t* frame_id);
+  bool contains_page(PageId page_id);
+  Page& page_by_id(PageId page_id);
   void pin_page(MRef<Page> page, frame_id_t frame_id);
 
   size_t pool_size_;
   MutVec<Page> pages_;
-  MutMap<page_id_t, frame_id_t> page_table_;
+  MutMap<PageId, frame_id_t> page_table_;
   MutList<frame_id_t> free_list_;
-  MRef<DiskMgr> disk_mgr_;
-  Ref<LogMgr> log_mgr_;
   MutPtr<Replacer> replacer_;
+
+  DiskMgr& disk_mgr_;
+  CRef<LogMgr> log_mgr_;
 };

@@ -7,14 +7,12 @@
 
 #include "buffer/buffer.hpp"
 
+#include "page/page_id.hpp"
+
 #include "txns/rw_latch.hpp"
 
 class Page {
 public:
-  /**********************************************
-   * Constructors & destructor
-   **********************************************/
-
   // TODO: Maybe this constructor can take a `move`-ed chunk of data
   Page();
 
@@ -35,16 +33,19 @@ public:
     return buffer_;
   }
 
+  CRef<Buffer> buffer() const {
+    return buffer_;
+  }
+
   void copy_n_bytes(size_t source_offset,
                     size_t dest_offset,
-                    CRef<Buffer> buffer,
+                    CRef<Buffer> source,
                     size_t n_bytes)
   {
     buffer_.copy_n_bytes(source_offset,
                          dest_offset,
-                         buffer,
+                         source,
                          n_bytes);
-    // TODO
   }
 
   PageId page_id() const {
@@ -63,8 +64,7 @@ public:
   void pin() {
     ++pin_count_;
   }
-
-  // Decrease the pin count.
+// Decrease the pin count.
   void unpin() {
     --pin_count_;
   }
@@ -80,6 +80,17 @@ public:
   bool is_dirty() const {
     return is_dirty_;
   }
+
+  uint32_t read_uint32(size_t offset) const {
+    return buffer_.read_uint32(offset);
+  }
+
+  void write_uint32(size_t offset, uint32_t data) {
+    buffer_.write_uint32(offset, data);
+  }
+
+  PageId read_page_id(size_t offset) const;
+  void write_page_id(size_t offset, PageId page_id);
 
   void wlatch();
   void wunlatch();

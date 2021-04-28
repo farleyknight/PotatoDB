@@ -39,29 +39,30 @@ public:
 
   // After creating a new leaf page from buffer pool, must call initialize
   // method to set default values
-  void init(page_id_t page_id, page_id_t parent_id = INVALID_PAGE_ID, int max_size = PAGE_SIZE);
+  void init(PageId page_id,
+            PageId parent_id = PageId::INVALID(),
+            int max_size = PAGE_SIZE);
   // helper methods
-  page_id_t next_page_id() const;
+  PageId next_page_id() const;
   void set_next_page_id(page_id_t next_page_id);
   KeyT key_at(int index) const;
-  int key_index(Ref<KeyT> key, Ref<KeyComp> comparator) const;
-  Ref<MappingT> item(int index);
+  int key_index(CRef<KeyT> key, CRef<KeyComp> comparator) const;
+  CRef<MappingT> item(int index);
 
   // insert and delete methods
-  int insert(Ref<KeyT> key, Ref<ValueT> value, Ref<KeyComp> comparator);
-  bool lookup(Ref<KeyT> key, MutRawPtr<ValueT> value, Ref<KeyComp> comparator) const;
-  int remove_and_delete_record(Ref<KeyT> key, Ref<KeyComp> comparator);
+  int insert(CRef<KeyT> key, CRef<ValueT> value, CRef<KeyComp> comparator);
+  ValueT lookup(CRef<KeyT> key, CRef<KeyComp> comparator) const;
+  int remove_and_delete_record(CRef<KeyT> key, CRef<KeyComp> comparator);
 
   // Split and Merge utility methods
-  void move_half_to(MRef<BPlusTreeLeafPage> recipient);
-  void move_all_to(MRef<BPlusTreeLeafPage> recipient);
-  void move_first_to_end_of(MRef<BPlusTreeLeafPage> recipient);
-  void move_last_to_front_of(MRef<BPlusTreeLeafPage> recipient);
+  void move_half_to(BPlusTreeLeafPage& recipient);
+  void move_all_to(BPlusTreeLeafPage& recipient);
+  void move_first_to_end_of(BPlusTreeLeafPage& recipient);
+  void move_last_to_front_of(BPlusTreeLeafPage& recipient);
 
- private:
-  void copy_n_from(Ref<Vec<MappingT>> items, int size);
-  void copy_last_from(Ref<MappingT> item);
-  void copy_first_from(Ref<MappingT> item);
-  page_id_t next_page_id_;
-  MappingT array[0];
+private:
+  void copy_n_from(CRef<Vec<MappingT>> items, int size);
+  void copy_last_from(CRef<MappingT> item);
+  void copy_first_from(CRef<MappingT> item);
+  PageId next_page_id_;
 };

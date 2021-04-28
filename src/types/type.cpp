@@ -27,31 +27,25 @@ CRef<Ptr<Type>> Type::instance(TypeId type_id) {
   return types_.at(type_id);
 }
 
-
 Value Type::min() const {
   throw NotImplementedException("min not implemented!");
 }
-
 
 Value Type::max() const {
   throw NotImplementedException("max not implemented!");
 }
 
-
 void Type::serialize_to(UNUSED MRef<Buffer> buff, UNUSED Value val) const {
   throw NotImplementedException("serialize_to not implemented!");
 }
-
 
 Value Type::deserialize_from(UNUSED CRef<Buffer> buff) const {
   throw NotImplementedException("deserialize_from not implemented!");
 }
 
-
 MutString Type::to_string(UNUSED const Value val) const {
   throw NotImplementedException("to_string not implemented!");
 }
-
 
 MutString Type::as_string(const TypeId type_id) {
   switch (type_id) {
@@ -67,3 +61,51 @@ MutString Type::as_string(const TypeId type_id) {
   default:                return "INVALID";
   }
 }
+
+virtual Value add(UNUSED CRef<Value> left,
+                  UNUSED CRef<Value> right) const {
+  throw NotImplementedException("add not implemented!");
+}
+
+virtual Value subtract(UNUSED CRef<Value> left,
+                       UNUSED CRef<Value> right) const {
+  throw NotImplementedException("subtract not implemented!");
+}
+
+virtual Value multiply(UNUSED CRef<Value> left,
+                       UNUSED CRef<Value> right) const {
+  throw NotImplementedException("multiply not implemented!");
+}
+
+virtual Value divide(UNUSED CRef<Value> left,
+                     UNUSED CRef<Value> right) const {
+  throw NotImplementedException("divide not implemented!");
+}
+
+virtual Value modulo(UNUSED CRef<Value> left,
+                     UNUSED CRef<Value> right) const {
+  throw NotImplementedException("modulo not implemented!");
+}
+
+virtual Value min(UNUSED CRef<Value> left,
+                  UNUSED CRef<Value> right) const {
+  throw NotImplementedException("min not implemented!");
+}
+
+virtual Value max(UNUSED CRef<Value> left,
+                  UNUSED CRef<Value> right) const {
+  throw NotImplementedException("max not implemented!");
+}
+
+virtual Value sqrt(UNUSED CRef<Value> val) const {
+  throw NotImplementedException("max not implemented!");
+}
+
+static Value max_value(UNUSED TypeId type_id) { 
+  throw NotImplementedException("max not implemented!");
+}
+
+static Value min_value(UNUSED TypeId type_id) {
+  throw NotImplementedException("max not implemented!");
+}
+

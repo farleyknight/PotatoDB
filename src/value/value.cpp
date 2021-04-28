@@ -6,8 +6,8 @@ void Value::serialize_to(MRef<Buffer> buff) {
   value_type()->serialize_to(buff, *this);
 }
 
-void Value::deserialize_from(CRef<Buffer> buff) {
-  data_ = value_type()->deserialize_from(buff).data_;
+Value Value::deserialize_from(CRef<Buffer> buff, TypeId type_id) {
+  return Type::instance(type_id)->deserialize_from(buff);
 }
 
 bool Value::eq(CRef<Value> other) const {

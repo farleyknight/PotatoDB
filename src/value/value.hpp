@@ -13,7 +13,10 @@ public:
   using StoreT     = typename ValueBase<>::StoreClass;
 
   void serialize_to(MRef<Buffer> buff);
-  void deserialize_from(CRef<Buffer> buff);
+  static Value deserialize_from(CRef<Buffer> buff,
+                                size_t offset,
+                                TypeId type_id);
+
   bool eq(CRef<Value> other) const;
   CRef<Ptr<Type>> value_type() const;
 
@@ -27,45 +30,56 @@ public:
   MutString to_string() const;
 
   // TODO: Can we refactor this template line?
-  template <class T, std::enable_if_t<std::is_same<T, bool>::value, bool> = false>
+  template <class T,
+            std::enable_if_t<std::is_same<T, bool>::value, bool> = false>
   static Value make(T data) {
     return Value(TypeId::BOOLEAN, DataStoreT(data));
   }
 
-  template <class T, std::enable_if_t<std::is_same<T, int8_t>::value, bool> = false>
+  template <class T,
+            std::enable_if_t<std::is_same<T, int8_t>::value, bool> = false>
   static Value make(T data) {
     return Value(TypeId::TINYINT, DataStoreT(data));
   }
 
-  template <class T, std::enable_if_t<std::is_same<T, int16_t>::value, bool> = false>
+  template <class T,
+            std::enable_if_t<std::is_same<T, int16_t>::value, bool> = false>
   static Value make(T data) {
     return Value(TypeId::SMALLINT, DataStoreT(data));
   }
 
-  template <class T, std::enable_if_t<std::is_same<T, int32_t>::value, bool> = false>
+  template <class T,
+            std::enable_if_t<std::is_same<T, int32_t>::value, bool> = false>
   static Value make(T data) {
     return Value(TypeId::INTEGER, DataStoreT(data));
   }
 
-  template <class T, std::enable_if_t<std::is_same<T, int64_t>::value, bool> = false>
+  template <class T,
+            std::enable_if_t<std::is_same<T, int64_t>::value, bool> = false>
   static Value make(T data) {
     return Value(TypeId::BIGINT, DataStoreT(data));
   }
 
-  template <class T, std::enable_if_t<std::is_same<T, double>::value, bool> = false>
+  template <class T,
+            std::enable_if_t<std::is_same<T, double>::value, bool> = false>
   static Value make(T data) {
     return Value(TypeId::DECIMAL, DataStoreT(data));
   }
 
-  template <class T, std::enable_if_t<std::is_same<T, uint64_t>::value, bool> = false>
+  template <class T,
+            std::enable_if_t<std::is_same<T, uint64_t>::value, bool> = false>
   static Value make(T data) {
     return Value(TypeId::TIMESTAMP, DataStoreT(data));
   }
 
-  template <class T, std::enable_if_t<std::is_same<T, std::string>::value, bool> = false>
+  template <class T,
+            std::enable_if_t<std::is_same<T, std::string>::value, bool> = false>
   static Value make(T data) {
     return Value(TypeId::VARCHAR, DataStoreT(data));
   }
+
+  bool lt(CRef<Value> other) const;
+  bool gt(CRef<Value> other) const;
 
   DataStoreT data() {
     return data_;
