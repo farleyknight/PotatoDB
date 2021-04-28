@@ -27,7 +27,7 @@ public:
       if (lhs_value.lt(rhs_value)) {
         return -1;
       }
-      
+
       if (lhs_value.gt(rhs_value)) {
         return 1;
       }
