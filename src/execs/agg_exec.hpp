@@ -1,22 +1,17 @@
 #pragma once
 
 #include "plans/agg_plan.hpp"
-#include "tuple/value_factory.hpp"
 
 #include "execs/agg_ht.hpp"
 #include "execs/base_exec.hpp"
 
-/**
- * AggExec executes an aggregation operation
- * (e.g. COUNT, SUM, MIN, MAX) on the tuples of a child executor.
- */
 class AggExec : public BaseExec {
 public:
   /**********************************************
    * Constructor and destructor
    **********************************************/
 
-  AggExec(MRef<ExecCtx> exec_ctx,
+  AggExec(ExecCtx& exec_ctx,
           AggPlan plan,
           BaseExec child)
     : BaseExec    (exec_ctx),
@@ -25,7 +20,7 @@ public:
       table_      (plan),
       table_iter_ (table_.begin()) {}
 
-  Ref<BaseExec> child() const {
+  CRef<BaseExec> child() const {
     return child_;
   }
 
@@ -37,8 +32,8 @@ public:
   bool at_the_end() const;
   bool match_found();
 
-  AggKey make_key(Ref<Tuple> tuple);
-  AggValue make_val(Ref<Tuple> tuple);
+  AggKey make_key(CRef<Tuple> tuple);
+  AggValue make_val(CRef<Tuple> tuple);
 
 private:
   AggPlan plan_;

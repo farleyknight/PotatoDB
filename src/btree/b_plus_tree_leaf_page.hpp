@@ -35,13 +35,13 @@ public:
   using MappingT = std::pair<KeyT, ValueT>;
 
   static constexpr int PAGE_HEADER_SIZE = 28;
-  static constexpr int PAGE_SIZE = (PAGE_SIZE - PAGE_HEADER_SIZE) / sizeof(MappingT);
+  static constexpr int LEAF_PAGE_SIZE = (PAGE_SIZE - PAGE_HEADER_SIZE) / sizeof(MappingT);
 
   // After creating a new leaf page from buffer pool, must call initialize
   // method to set default values
   void init(PageId page_id,
             PageId parent_id = PageId::INVALID(),
-            int max_size = PAGE_SIZE);
+            int max_size = LEAF_PAGE_SIZE);
   // helper methods
   PageId next_page_id() const;
   void set_next_page_id(page_id_t next_page_id);

@@ -19,7 +19,7 @@ Catalog::Catalog()
  * TODO: Doc me!
  *************************************/
 
-void Catalog::register_table(MRef<Txn> txn,
+void Catalog::register_table(UNUSED Txn& txn,
                              String table_name,
                              SchemaRef schema_ref)
 {
@@ -38,7 +38,7 @@ void Catalog::register_table(MRef<Txn> txn,
  * TODO: Doc me!
  *************************************/
 
-void Catalog::register_index(MRef<Txn> txn,
+void Catalog::register_index(UNUSED Txn& txn,
                              String index_name,
                              String table_name,
                              SchemaRef schema_ref)

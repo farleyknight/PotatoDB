@@ -60,9 +60,11 @@ public:
     if (is_inlined) {
       offset = schema.offset_for(index);
     } else {
-      auto index_offset = data_.ptr(schema.offset_for(index));
+      auto schema_offset = schema.offset_for(index);
+      auto index_offset =
+        *reinterpret_cast<const int32_t *>(data_.cptr(schema_offset));
       offset =
-        *reinterpret_cast<int32_t *>(data_.ptr(index_offset));
+        *reinterpret_cast<const int32_t *>(data_.cptr(index_offset));
     }
     return Value::deserialize_from(data_, offset, column_type);
   }

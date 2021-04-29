@@ -23,10 +23,12 @@ class Catalog;
 //      caching structures throughout the database.
 class SchemaMgr {
 public:
-  SchemaMgr(Ref<Catalog> catalog)
+  SchemaMgr(CRef<Catalog> catalog)
     : catalog_ (catalog) {}
 
-  bool register_schema(Move<TableSchema> table_schema, table_oid_t table_oid) {
+  bool register_schema(Move<TableSchema> table_schema,
+                       table_oid_t table_oid)
+  {
     auto query_schema = QuerySchema::copy(table_schema);
     // NOTE: invariant #1
     table_schemas_.emplace(table_oid, move(table_schema));
@@ -37,26 +39,26 @@ public:
     return true;
   }
 
-  Ref<QuerySchema> query_schema_for(schema_oid_t schema_oid) const {
+  CRef<QuerySchema> query_schema_for(schema_oid_t schema_oid) const {
     return query_schemas_.at(schema_oid);
   }
 
-  Ref<QuerySchema> as_query_schema(SchemaRef schema_ref) const {
+  CRef<QuerySchema> as_query_schema(SchemaRef schema_ref) const {
     assert(schema_ref.is_table_schema());
     // NOTE: invariant #2
     return query_schemas_.at(schema_ref.oid());
   }
 
-  Ref<QuerySchema> query_schema_for(SchemaRef schema_ref) const {
+  CRef<QuerySchema> query_schema_for(SchemaRef schema_ref) const {
     return query_schemas_.at(schema_ref.oid());
   }
 
-  Ref<TableSchema> table_schema_for(schema_oid_t schema_oid) const {
+  CRef<TableSchema> table_schema_for(schema_oid_t schema_oid) const {
     return table_schemas_.at(schema_oid);
   }
 
 private:
-  Ref<Catalog> catalog_;
+  UNUSED CRef<Catalog> catalog_;
   MutMap<schema_oid_t, Move<QuerySchema>> query_schemas_;
   MutMap<schema_oid_t, Move<TableSchema>> table_schemas_;
 };

@@ -2,7 +2,7 @@
 
 #include <type_traits>
 
-#include "common/types.hpp"
+#include "common/config.hpp"
 #include "catalog/base_column.hpp"
 
 template<class ColT>
@@ -31,7 +31,7 @@ public:
   CRef<Vec<size_t>> unlined_columns() const;
   CRef<Vec<ColT>> all() const;
 
-  virtual String to_string() const = 0;
+  virtual string to_string() const = 0;
 
 protected:
   // Are all tuples inlined when stored on the page?

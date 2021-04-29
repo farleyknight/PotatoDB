@@ -22,15 +22,10 @@ public:
   }
 
   Tuple next() override {
-    auto &heap = exec_ctx_.table_mgr().find_table_heap(plan_.table_oid());
+    auto &heap = exec_ctx_.table_mgr().table_heap_for(plan_.table_oid());
     auto tuple = child_.next();
-    auto dummy_rid = RID();
 
-    auto inserted = heap.insert_tuple(tuple, dummy_rid, txn());
-    if (!inserted) {
-      // TODO: Insert txn has failed!
-      // Return empty tuple!
-    }
+    heap.insert_tuple(tuple, txn());
 
     return tuple;
   }

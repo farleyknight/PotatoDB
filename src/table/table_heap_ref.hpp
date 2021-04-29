@@ -9,5 +9,5 @@ public:
   {}
 
 private:
-  file_id_t file_id_;
+  UNUSED file_id_t file_id_;
 };

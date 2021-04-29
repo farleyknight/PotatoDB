@@ -20,7 +20,7 @@ public:
   Tuple(RID rid) : rid_(rid) {}
   // Provide values w/ schema
 
-  Tuple(Vec<Value> values, CRef<QuerySchema> schema);
+  Tuple(vector<Value> values, CRef<QuerySchema> schema);
 
   // Copy constructor
   Tuple(CRef<Tuple> other);
@@ -72,7 +72,7 @@ public:
   {
     assert(buffer_.size() >= n);
     memcpy(buffer_.ptr() + dest_offset,
-           source_buffer.ptr() + source_offset,
+           source_buffer.cptr() + source_offset,
            n_bytes);
   }
 
@@ -84,7 +84,7 @@ public:
 
   static Tuple random_from(CRef<QuerySchema> schema);
 
-  MRef<Buffer> buffer() {
+  Buffer& buffer() {
     return buffer_;
   }
 

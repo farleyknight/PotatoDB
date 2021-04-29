@@ -39,3 +39,13 @@ private:
   file_id_t file_id_   = -1;
   block_id_t block_id_ = -1;
 };
+
+
+namespace std {
+  template <>
+  struct hash<PageId> {
+    size_t operator()(CRef<PageId> page_id) const {
+      return hash<int64_t>()(page_id.as_uint32());
+    }
+  };
+}

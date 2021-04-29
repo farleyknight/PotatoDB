@@ -56,8 +56,8 @@ public:
   KeyT key_at(slot_offset_t bucket_ind) const;
   ValueT value_at(slot_offset_t bucket_ind) const;
   bool insert(slot_offset_t bucket_ind,
-              Ref<KeyT> key,
-              Ref<ValueT> value);
+              CRef<KeyT> key,
+              CRef<ValueT> value);
 
   void remove(slot_offset_t bucket_ind);
   bool is_occupied(slot_offset_t bucket_ind) const;
@@ -68,5 +68,5 @@ public:
 
   // 0 if tombstone/brand new (never occupied), 1 otherwise.
   std::atomic_char readable_[(BLOCK_ARRAY_SIZE - 1) / 8 + 1];
-  MappingT array_[0];
+  // MappingT array_[0];
 };

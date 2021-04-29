@@ -1,14 +1,14 @@
 // Provide database file name.
 // Open a connection to the file handle.
 
-#include "storage/disk_mgr.hpp"
-#include "common/exception_type.hpp"
+#include "disk/disk_mgr.hpp"
+#include "common/exceptions.hpp"
 
 /**********************************************
  *
  **********************************************/
 
-DiskMgr::DiskMgr(String db_name)
+DiskMgr::DiskMgr(string db_name)
   : next_page_id_ (0),
     db_name_      (db_name),
     flush_log_f_  (nullptr)
@@ -53,22 +53,15 @@ DiskMgr::DiskMgr(String db_name)
   db_file_.close();
   db_file_.open(db_name_, std::ios::binary | std::ios::in | std::ios::out);
   if (!db_file_.is_open()) {
-    throw Exception(ExceptionType::BAD_FILE, "Can't open db file " + db_name);
+    throw Exception(ExceptionType::BAD_FILE, "Can't open db file "
+                    + db_name);
   }
 }
 
-/**********************************************
- * Write to buffer
- **********************************************/
-
-void DiskMgr::write_buffer(page_id_t page_id, MutRawPtr<char> buffer) {
-  // First compute the offset
-  int offset = page_id * PAGE_SIZE; // Defined in config above as 4KB
-  // Move file pointer to the offset.
+void DiskMgr::write_buffer(PageId page_id, CRef<Buffer> buffer) {
+  int offset = page_id.block_id() * PAGE_SIZE;
   db_file_.seekp(offset);
-  // Write the page data, given the PAGE_SIZE
-  db_file_.write(buffer, PAGE_SIZE);
-  // Flush to disk!
+  db_file_.write(buffer.char_ptr(), PAGE_SIZE);
   db_file_.flush();
 }
 
@@ -76,56 +69,55 @@ void DiskMgr::write_buffer(page_id_t page_id, MutRawPtr<char> buffer) {
  * Write to page
  **********************************************/
 
-void DiskMgr::write_page(page_id_t page_id, MRef<Page> page) {
-  write_buffer(page_id, page.data());
+void DiskMgr::write_page(PageId page_id, CRef<Page> page) {
+  write_buffer(page_id, page.buffer());
 }
 
 /**********************************************
  * Read from buffer
  **********************************************/
 
-void DiskMgr::read_buffer(page_id_t page_id, MutRawPtr<char> buffer) {
+void DiskMgr::read_buffer(PageId page_id, Buffer& buffer) {
   // First compute the offset
-  int offset = page_id * PAGE_SIZE; // Defined in config above as 4KB
+  int offset = page_id.block_id() * PAGE_SIZE;
   // Move file pointer to the offset.
   db_file_.seekp(offset);
   // Read the data into disk
-  // TODO: Find a way to get rid of this ugly C-ism
-  db_file_.read(buffer, PAGE_SIZE);
+  db_file_.read(buffer.char_ptr(), PAGE_SIZE);
 }
 
 /**********************************************
  * Read from page
  **********************************************/
 
-void DiskMgr::read_page(page_id_t page_id, MRef<Page> page) {
-  read_buffer(page_id, page.data());
+void DiskMgr::read_page(PageId page_id, Page& page) {
+  read_buffer(page_id, page.buffer());
 }
 
 /**********************************************
  *
  **********************************************/
 
-bool DiskMgr::read_log(MutRawPtr<char> log_data,
-                       int size,
-                       int offset)
+bool DiskMgr::read_log(Buffer& log_data,
+                       size_t size,
+                       size_t offset)
 {
   if (offset >= std::filesystem::file_size(log_name_)) {
     return false;
   }
 
   log_io_.seekp(offset);
-  log_io_.read(log_data, size);
+  log_io_.read(log_data.char_ptr(), size);
 
   if (log_io_.bad()) {
     return false;
   }
 
   // if log file ends before reading "size"
-  int read_count = log_io_.gcount();
+  size_t read_count = log_io_.gcount();
   if (read_count < size) {
     log_io_.clear();
-    memset(log_data + read_count, 0, size - read_count);
+    std::memset(log_data.ptr(read_count), 0, size - read_count);
   }
 
   return true;
@@ -135,7 +127,7 @@ bool DiskMgr::read_log(MutRawPtr<char> log_data,
  *
  **********************************************/
 
-void DiskMgr::write_log(RawPtr<char> log_data, int size) {
+void DiskMgr::write_log(CRef<Buffer> log_data, size_t size) {
   if (size == 0) { // no effect on num_flushes_ if log buffer is empty
     return;
   }
@@ -150,7 +142,7 @@ void DiskMgr::write_log(RawPtr<char> log_data, int size) {
 
   num_flushes_ += 1;
   // sequence write
-  log_io_.write(log_data, size);
+  log_io_.write(log_data.char_ptr(), size);
 
   // check for I/O error
   if (log_io_.bad()) {

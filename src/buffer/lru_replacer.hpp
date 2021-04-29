@@ -13,9 +13,9 @@ public:
   **********************************************/
 
   explicit LRUReplacer(size_t num_pages);
-  LRUReplacer(Ref<LRUReplacer>) = delete;
+  LRUReplacer(CRef<LRUReplacer>) = delete;
   // No copy
-  MRef<LRUReplacer> operator=(Ref<LRUReplacer>) = delete;
+  LRUReplacer& operator=(CRef<LRUReplacer>) = delete;
   // No copy assign
   ~LRUReplacer() = default; // Default delete
 
@@ -29,6 +29,6 @@ public:
   size_t size() override;
 
 private:
-  int num_pages_ = 0;
+  UNUSED int num_pages_ = 0;
   // TODO(student): implement me!
 };

@@ -37,6 +37,10 @@ public:
     return buffer_;
   }
 
+  void reset_memory() {
+    buffer_.reset_memory();
+  }
+
   void copy_n_bytes(size_t source_offset,
                     size_t dest_offset,
                     CRef<Buffer> source,

@@ -40,39 +40,39 @@ public:
     (PAGE_SIZE - LEAF_PAGE_HEADER_SIZE) / sizeof(MappingT);
 
   BPlusTree(String name,
-            Ref<BuffMgr> buff_mgr,
-            Ref<KeyComp> comparator,
-            int leaf_size     = LeafPage::PAGE_SIZE,
-            int internal_size = InternalPage::PAGE_SIZE);
+            CRef<BuffMgr> buff_mgr,
+            CRef<KeyComp> comparator,
+            int leaf_size     = LeafPage::LEAF_PAGE_SIZE,
+            int internal_size = InternalPage::INTERNAL_PAGE_SIZE);
 
   // Returns true if this B+ tree has no keys and values.
   bool is_empty() const;
 
   // Insert a key-value pair into this B+ tree.
-  bool insert(Ref<KeyT> key,
-              Ref<ValueT> value,
+  bool insert(CRef<KeyT> key,
+              CRef<ValueT> value,
               OptRef<Txn> txn = std::nullopt);
 
   // Remove a key and its value from this B+ tree.
-  void remove(Ref<KeyT> key,
+  void remove(CRef<KeyT> key,
               OptRef<Txn> txn = std::nullopt);
 
   // return the value associated with a given key
-  Vec<ValueT> find_values(Ref<KeyT> key,
+  Vec<ValueT> find_values(CRef<KeyT> key,
                           OptRef<Txn> txn = std::nullopt);
 
   // index iterator
   IndexIterator begin();
-  IndexIterator begin(Ref<KeyT> key);
+  IndexIterator begin(CRef<KeyT> key);
   IndexIterator end();
 
-  void print(MRef<BuffMgr> bpm) {
+  void print(UNUSED BuffMgr& bpm) {
     // TODO: Fix this
     // to_string(reinterpret_cast<BPlusTreePage *>(bpm.fetch_page(root_page_id_)->data()), bpm);
   }
 
-  void draw(Ref<BuffMgr> bpm,
-            Ref<String> outf) {
+  void draw(UNUSED CRef<BuffMgr> bpm,
+            CRef<String> outf) {
     std::ofstream out(outf);
     out << "digraph G {" << std::endl;
     // TODO: Fix this
@@ -82,25 +82,25 @@ public:
   }
 
   // read data from file and insert one by one
-  void insert_from_file(Ref<String> file_name, OptRef<Txn> txn);
+  void insert_from_file(CRef<String> file_name, OptRef<Txn> txn);
 
   // read data from file and remove one by one
-  void remove_from_file(Ref<String> file_name, OptRef<Txn> txn);
+  void remove_from_file(CRef<String> file_name, OptRef<Txn> txn);
   // expose for test purpose
-  Ref<Page> find_leaf_page(Ref<KeyT> key, bool leftMost = false);
+  CRef<Page> find_leaf_page(CRef<KeyT> key, bool leftMost = false);
 
  private:
-  void start_new_tree(Ref<KeyT> key,
-                      Ref<ValueT> value);
+  void start_new_tree(CRef<KeyT> key,
+                      CRef<ValueT> value);
 
-  bool insert_into_leaf(Ref<KeyT> key,
-                        Ref<ValueT> value,
+  bool insert_into_leaf(CRef<KeyT> key,
+                        CRef<ValueT> value,
                         Txn *txn = nullptr);
 
-  void insert_into_parent(MRef<BPlusTreePage> old_node,
-                          Ref<KeyT> key,
+  void insert_into_parent(BPlusTreePage& old_node,
+                          CRef<KeyT> key,
                           // NOTE: This might actually be an out-parameter?
-                          MRef<BPlusTreePage> new_node,
+                          BPlusTreePage& new_node,
                           Txn *txn = nullptr);
 
   // TODO: Figure out the appropriate return signature for this. I am almost certain this
@@ -129,13 +129,13 @@ public:
   void UpdateRootpage_id_t(int insert_record = 0);
 
   /* Debug Routines for FREE!! */
-  void to_graph(BPlusTreePage *page, Ref<BuffMgr> bpm, std::ofstream &out) const;
-  void to_string(BPlusTreePage *page, Ref<BuffMgr> bpm) const;
+  void to_graph(BPlusTreePage *page, CRef<BuffMgr> bpm, std::ofstream &out) const;
+  void to_string(BPlusTreePage *page, CRef<BuffMgr> bpm) const;
 
   // member variable
   String index_name_;
-  page_id_t root_page_id_;
-  Ref<BuffMgr> buff_mgr_;
+  PageId root_page_id_;
+  CRef<BuffMgr> buff_mgr_;
   KeyComp comp_;
   int leaf_size_;
   int internal_size_;

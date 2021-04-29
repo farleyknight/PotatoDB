@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/config.hpp"
 #include "exprs/expr_type.hpp"
 
 class BaseExpr {

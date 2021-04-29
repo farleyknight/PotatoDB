@@ -10,7 +10,8 @@
 
 #include "catalog/table_column.hpp"
 #include "catalog/base_schema.hpp"
-#include "exprs/column_expr.hpp"
+
+#include "query/query_column.hpp"
 
 class TableSchema : public BaseSchema<TableColumn> {
 public:
@@ -20,8 +21,8 @@ public:
    * the DDL portion of SQL.
    *******************************************************/
 
-  TableSchema(Vec<TableColumn> columns,
-              String table_name,
+  TableSchema(vector<TableColumn> columns,
+              string table_name,
               table_oid_t table_oid);
   // No copy
   TableSchema(CRef<TableSchema>) = delete;
@@ -30,9 +31,9 @@ public:
   // Default destructor
   ~TableSchema() = default;
 
-  String to_string() const;
+  string to_string() const;
 
-  ColumnExpr operator[](String col_name) const;
+  QueryColumn operator[](String col_name) const;
 
   table_oid_t table_oid() const {
     return table_oid_;

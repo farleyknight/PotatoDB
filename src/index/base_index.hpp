@@ -18,15 +18,17 @@ public:
     return make_unique<BaseIndex>();
   }
 
-  virtual void insert_entry(Ref<Tuple> key, Ref<RID> rid) {
+  virtual void insert_entry(UNUSED CRef<Tuple> key,
+                            UNUSED CRef<RID> rid) {
     throw Exception("insert_entry is not implemented on BaseIndex");
   }
 
-  virtual void delete_entry(Ref<Tuple> key, Ref<RID> rid) {
+  virtual void delete_entry(UNUSED CRef<Tuple> key,
+                            UNUSED CRef<RID> rid) {
     throw Exception("delete_entry is not implemented on BaseIndex");
   }
 
-  virtual Vec<RID> scan_key(Ref<Tuple> key) const {
+  virtual Vec<RID> scan_key(UNUSED CRef<Tuple> key) const {
     throw Exception("scan_key is not implemented on BaseIndex");
   }
 };

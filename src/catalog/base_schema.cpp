@@ -1,4 +1,4 @@
-
+#include "common/config.hpp"
 #include "catalog/base_schema.hpp"
 
 template<class ColT>
@@ -23,12 +23,12 @@ BaseSchema<ColT>::BaseSchema(Vec<ColT> cols) {
 }
 
 template<class ColT>
-bool BaseSchema<ColT>::has_column(Ref<String> name) const {
+bool BaseSchema<ColT>::has_column(CRef<String> name) const {
   return column_oids_.find(name) > 0;
 }
 
 template<class ColT>
-column_oid_t BaseSchema<ColT>::column_oid_for(Ref<String> name) const {
+column_oid_t BaseSchema<ColT>::column_oid_for(CRef<String> name) const {
   return column_oids_[name];
 }
 
@@ -38,7 +38,7 @@ size_t BaseSchema<ColT>::offset_for(column_oid_t oid) const {
 }
 
 template<class ColT>
-size_t BaseSchema<ColT>::offset_for(Ref<String> name) const {
+size_t BaseSchema<ColT>::offset_for(CRef<String> name) const {
   return offset_for(column_oid_for(name));
 }
 
@@ -53,21 +53,21 @@ size_t BaseSchema<ColT>::tuple_length() const {
 }
 
 template<class ColT>
-Ref<Vec<size_t>> BaseSchema<ColT>::unlined_columns() const {
+CRef<Vec<size_t>> BaseSchema<ColT>::unlined_columns() const {
   return unlined_columns_;
 }
 
 template<class ColT>
-Ref<ColT> BaseSchema<ColT>::by_name(Ref<String> name) const {
+CRef<ColT> BaseSchema<ColT>::by_name(CRef<String> name) const {
   return columns_.at(column_oid_for(name));
 }
 
 template<class ColT>
-Ref<ColT> BaseSchema<ColT>::by_column_oid(const column_oid_t oid) const {
+CRef<ColT> BaseSchema<ColT>::by_column_oid(const column_oid_t oid) const {
   return columns_.at(oid);
 }
 
 template<class ColT>
-Ref<Vec<ColT>> BaseSchema<ColT>::all() const {
+CRef<Vec<ColT>> BaseSchema<ColT>::all() const {
   return columns_;
 }

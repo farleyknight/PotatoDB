@@ -12,16 +12,16 @@ public:
    * Constructors & destructor
    **********************************************/
 
-  AggHT(Ref<AggPlan> plan) {
-    for (const auto &expr : plan.aggs()) {
-      exprs_.emplace_back(expr);
+  AggHT(CRef<AggPlan> plan) {
+    for (const auto &node : plan.aggs()) {
+      nodes_.emplace_back(node);
     }
 
     for (const auto &type : plan.agg_types()) {
       types_.emplace_back(type);
     }
 
-    assert(exprs_.size() == types_.size());
+    assert(nodes_.size() == types_.size());
   }
 
   /**********************************************
@@ -53,8 +53,8 @@ public:
     return {values};
   }
 
-  void combine(MRef<AggValue> result, MRef<AggValue> input) {
-    for (size_t i = 0; i < exprs_.size(); ++i) {
+  void combine(AggValue& result, AggValue& input) {
+    for (size_t i = 0; i < nodes_.size(); ++i) {
       switch (types_[i]) {
         case AggType::COUNT:
           // Count increases by one.
@@ -76,7 +76,7 @@ public:
     }
   }
 
-  void insert_combine(Ref<AggKey> key, MRef<AggValue> val) {
+  void insert_combine(CRef<AggKey> key, AggValue& val) {
     if (table_.count(key) == 0) {
       table_.insert({key, generate()});
     }
@@ -100,17 +100,21 @@ public:
      * Instance methods
      **********************************************/
 
-    Ref<AggKey> key() { return iter_->first; }
+    CRef<AggKey> key() { return iter_->first; }
 
-    Ref<AggValue> val() { return iter_->second; }
+    CRef<AggValue> val() { return iter_->second; }
 
     Iterator &operator++() {
       ++iter_;
       return *this;
     }
 
-    bool operator==(Ref<Iterator> other) const { return iter_ == other.iter_; }
-    bool operator!=(Ref<Iterator> other) const { return iter_ != other.iter_; }
+    bool operator==(CRef<Iterator> other) const {
+      return iter_ == other.iter_;
+    }
+    bool operator!=(CRef<Iterator> other) const {
+      return iter_ != other.iter_;
+    }
 
   private:
     Map<AggKey, AggValue>::const_iterator iter_;
@@ -125,6 +129,6 @@ public:
 
 private:
   MutMap<AggKey, AggValue> table_ {};
-  MutVec<BaseExpr> exprs_;
+  MutVec<BaseQuery> nodes_;
   MutVec<AggType> types_;
 };

@@ -9,7 +9,6 @@ void AggExec::init() {
   table_.generate();
 
   Tuple tuple;
-  RID rid;
   while (child_.has_next()){
     auto tuple = child_.next();
     auto key = make_key(tuple);
@@ -43,11 +42,12 @@ bool AggExec::match_found() {
   auto value = table_iter_.val();
 
   auto &schema = find_schema(child_.schema_ref());
-  auto &pred = plan_.having();
+
+  auto pred = plan_.having();
   auto result =
     pred.eval_agg(schema,
                   key.group_bys_,
-                  value.aggs_).get_as<bool>();
+                  value.aggs_).as<bool>();
   return result;
 }
 
@@ -59,11 +59,10 @@ Tuple AggExec::next() {
   // create tuple according to output schema
   auto key = table_iter_.key();
   auto value = table_iter_.val();
-
   auto &schema = find_schema(child_.schema_ref());
 
   MutVec<Value> tuple_values;
-  for (auto const &col: schema.all()) {
+  for (QueryColumn const &col : schema.all()) {
     auto val = col.eval_agg(schema,
                             key.group_bys_,
                             value.aggs_);
@@ -77,12 +76,12 @@ Tuple AggExec::next() {
  * TODO: Document me
  **********************************************/
 
-AggKey AggExec::make_key(Ref<Tuple> tuple) {
+AggKey AggExec::make_key(CRef<Tuple> tuple) {
   auto &schema = find_schema(child_.schema_ref());
 
-  MutVec<Value> keys(plan_.group_bys().size());
-  for (auto const &expr : plan_.group_bys()) {
-    keys.emplace_back(expr.eval(tuple, schema));
+  MutVec<Value> keys;
+  for (auto const &node : plan_.group_bys()) {
+    keys.emplace_back(node.eval(tuple, schema));
   }
   return AggKey(keys);
 }
@@ -91,12 +90,12 @@ AggKey AggExec::make_key(Ref<Tuple> tuple) {
  * TODO: Document me
  **********************************************/
 
-AggValue AggExec::make_val(Ref<Tuple> tuple) {
+AggValue AggExec::make_val(CRef<Tuple> tuple) {
   auto &schema = find_schema(child_.schema_ref());
 
-  MutVec<Value> values(plan_.aggs().size());
-  for (auto const &expr : plan_.aggs()) {
-    values.emplace_back(expr.eval(tuple, schema));
+  MutVec<Value> values;
+  for (auto const &node : plan_.aggs()) {
+    values.emplace_back(node.eval(tuple, schema));
   }
   return AggValue(values);
 }

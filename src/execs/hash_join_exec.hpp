@@ -28,8 +28,8 @@ private:
   bool match_found(Ref<Tuple> left, Ref<Tuple> right);
   Value make_value_at(int k, Ref<Tuple> left, Ref<Tuple> right);
 
-  Ref<Schema> left_schema();
-  Ref<Schema> right_schema();
+  CRef<Schema> left_schema();
+  CRef<Schema> right_schema();
 
   MutVec<Tuple> output_tuples_;
 

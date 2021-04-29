@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "catalog/schema_manager.hpp"
+#include "catalog/schema_mgr.hpp"
 #include "catalog/table_schema.hpp"
 #include "catalog/table_meta.hpp"
 #include "catalog/index_meta.hpp"
@@ -24,30 +24,30 @@ public:
   Catalog();
 
   // No copy
-  Catalog(Ref<Catalog>) = delete;
+  Catalog(CRef<Catalog>) = delete;
   // No copy assign
-  MRef<Catalog> operator=(Ref<Catalog>) = delete;
+  Catalog& operator=(CRef<Catalog>) = delete;
   // Default delete
   ~Catalog() = default;
 
-  void register_table(MRef<Txn> txn,
+  void register_table(Txn& txn,
                       String table_name,
                       SchemaRef schema_ref);
 
-  table_oid_t table_oid_for(Ref<String> table_name) const {
+  table_oid_t table_oid_for(CRef<String> table_name) const {
     return table_oids_.at(table_name);
   }
 
-  SchemaRef table_schema_ref_for(Ref<String> table_name) const {
+  SchemaRef table_schema_ref_for(CRef<String> table_name) const {
     return table_schema_refs_.at(table_oid_for(table_name));
   }
 
-  void register_index(MRef<Txn> txn,
+  void register_index(Txn& txn,
                       String table_name,
                       String index_name,
                       SchemaRef schema_ref);
 
-  Ref<QuerySchema> find_query_schema(SchemaRef schema_ref) const {
+  CRef<QuerySchema> find_query_schema(SchemaRef schema_ref) const {
     if (schema_ref.is_query_schema()) {
       return schema_mgr_.query_schema_for(schema_ref);
     } else if (schema_ref.is_table_schema()) {

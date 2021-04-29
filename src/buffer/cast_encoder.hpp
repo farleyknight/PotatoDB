@@ -11,37 +11,38 @@ public:
   friend class BufferRW<CastEncoder>;
 
 private:
+  using string_size_t = Buffer::string_size_t;
+
   CastEncoder() = default;
 
   template<typename IntT>
-  void write_int(MRef<Buffer> buff, IntT n) const {
+  void write_int(Buffer& buff, IntT n) const {
     *reinterpret_cast<IntT*>(buff.ptr()) = n;
   }
 
   template<typename IntT>
   IntT read_int(CRef<Buffer> buff) const {
-    return *reinterpret_cast<const IntT*>(buff.ptr());
+    return *reinterpret_cast<const IntT*>(buff.cptr());
   }
 
-  void write_float(MRef<Buffer> buff, float f) const {
+  void write_float(Buffer& buff, float f) const {
     *reinterpret_cast<float*>(buff.ptr()) = f;
   }
 
   float read_float(CRef<Buffer> buff) const {
-    return *reinterpret_cast<const float*>(buff.ptr());
+    return *reinterpret_cast<const float*>(buff.cptr());
   }
 
-  void write_double(MRef<Buffer> buff, double d) const {
+  void write_double(Buffer& buff, double d) const {
     *reinterpret_cast<double*>(buff.ptr()) = d;
   }
 
   double read_double(CRef<Buffer> buff) const {
-    return *reinterpret_cast<const double*>(buff.ptr());
+    return *reinterpret_cast<const double*>(buff.cptr());
   }
 
-  using string_size_t = Buffer::string_size_t;
 
-  void write_string(MRef<Buffer> buff, String s) const {
+  void write_string(Buffer& buff, String s) const {
     string_size_t size = s.size();
 
     auto c_string = reinterpret_cast<const unsigned char*>(s.c_str());
@@ -51,12 +52,12 @@ private:
                 c_string, size);
   }
 
-  MutString read_string(CRef<Buffer> buff) const {
+  string read_string(CRef<Buffer> buff) const {
     string_size_t size = buff.as_bytes()[0];
-    MutString new_string(size, 0);
+    string new_string(size, 0);
 
     std::memcpy(new_string.data(),
-                buff.ptr() + sizeof(string_size_t),
+                buff.cptr() + sizeof(string_size_t),
                 size);
 
     return new_string;

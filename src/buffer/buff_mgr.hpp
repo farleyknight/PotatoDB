@@ -45,20 +45,12 @@ public:
    **********************************************/
 
   BuffMgr(size_t pool_size,
-          MRef<DiskMgr> disk_mgr,
-          MRef<LogMgr> log_mgr);
+          DiskMgr& disk_mgr,
+          LogMgr& log_mgr);
 
   BuffMgr(CRef<BuffMgr>) = delete; // No copy
   BuffMgr& operator=(CRef<BuffMgr>) = delete; // No copy assign
   ~BuffMgr() = default; // Default delete
-
-  /**********************************************
-   * Heap allocation
-   **********************************************/
-
-  static Ptr<BuffMgr> make(size_t pool_size,
-                           DiskMgr& disk_mgr,
-                           LogMgr& log_mgr);
 
   /**********************************************
    * Instance methods
@@ -78,8 +70,8 @@ public:
   Page& page_at(size_t i)        { return pages_[i]; }
   size_t pool_size()             { return pool_size_; }
 
-  void flush_page(PageId page_id);
-  void flush_page(MRef<Page> page);
+  bool flush_page(PageId page_id);
+  bool flush_page(MRef<Page> page);
 
 private:
   // TODO: We can get rid of this out parameter if

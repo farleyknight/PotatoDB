@@ -2,8 +2,8 @@
 #include "btree/b_plus_tree.hpp"
 
 BPlusTree::BPlusTree(String index_name,
-                     Ref<BuffMgr> buff_mgr,
-                     Ref<KeyComp> comp,
+                     CRef<BuffMgr> buff_mgr,
+                     CRef<KeyComp> comp,
                      int leaf_size,
                      int internal_size)
   : index_name_    (index_name),
@@ -22,7 +22,7 @@ BPlusTree::begin() {
 }
 
 IndexIterator
-BPlusTree::begin(Ref<BPlusTree::KeyT> key) {
+BPlusTree::begin(UNUSED CRef<BPlusTree::KeyT> key) {
   // TODO!
   return IndexIterator();
 }
@@ -34,22 +34,23 @@ BPlusTree::end() {
 }
 
 // TODO: Maybe make this const?
-Vec<BPlusTree::ValueT> BPlusTree::find_values(Ref<BPlusTree::KeyT> key,
-                                              OptRef<Txn> txn)
+Vec<BPlusTree::ValueT>
+BPlusTree::find_values(UNUSED CRef<BPlusTree::KeyT> key,
+                       UNUSED OptRef<Txn> txn)
 {
   return Vec<BPlusTree::ValueT>();
 }
 
-bool BPlusTree::insert(Ref<BPlusTree::KeyT> key,
-                       Ref<BPlusTree::ValueT> value,
-                       OptRef<Txn> txn)
+bool BPlusTree::insert(UNUSED CRef<BPlusTree::KeyT> key,
+                       UNUSED CRef<BPlusTree::ValueT> value,
+                       UNUSED OptRef<Txn> txn)
 {
   // TODO!
   return false;
 }
 
-void BPlusTree::remove(Ref<KeyT> key,
-                       OptRef<Txn> txn)
+void BPlusTree::remove(UNUSED CRef<KeyT> key,
+                       UNUSED OptRef<Txn> txn)
 {
   // TODO!
 }

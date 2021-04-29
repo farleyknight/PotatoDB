@@ -2,6 +2,9 @@
  * Type defs
  **********************************************/
 
+#include <cstdint>
+#include <cstddef>
+
 // The page IDs, frame IDs, and txn IDs are signed 32-bit integers.
 using frame_id_t    = std::int32_t; // NOTE: I think frame_id_t has a few
                                     // places that are out-parameters

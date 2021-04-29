@@ -21,33 +21,54 @@
 template <typename KeyT, typename ValueT, typename KeyComparator>
 class BPlusTreeInternalPage : public BPlusTreePage {
 public:
-  using MappingT = std::pair<KeyT, ValueT>;
+  using MappingT = pair<KeyT, ValueT>;
   static constexpr int PAGE_HEADER_SIZE = 24;
-  static constexpr int PAGE_SIZE = ((PAGE_SIZE - PAGE_HEADER_SIZE) / (sizeof(MappingT)));
+  static constexpr int INTERNAL_PAGE_SIZE = ((PAGE_SIZE - PAGE_HEADER_SIZE) / (sizeof(MappingT)));
 
   // must call initialize method after "create" a new node
-  void init(page_id_t page_id, page_id_t parent_id = INVALID_PAGE_ID, int max_size = PAGE_SIZE);
+  void init(PageId page_id,
+            PageId parent_id = PageId::INVALID(),
+            int max_size = INTERNAL_PAGE_SIZE);
 
   KeyT key_at(int index) const;
-  void set_key_at(int index, Ref<KeyT> key);
-  int value_index(Ref<ValueT> value) const;
+  void set_key_at(int index, CRef<KeyT> key);
+  int value_index(CRef<ValueT> value) const;
   ValueT value_at(int index) const;
 
-  ValueT lookup(Ref<KeyT> key, Ref<KeyComparator> comparator) const;
-  void populate_new_root(Ref<ValueT> old_value, Ref<KeyT> new_key, Ref<ValueT> new_value);
-  int insert_node_after(Ref<ValueT> old_value, Ref<KeyT> new_key, Ref<ValueT> new_value);
+  ValueT lookup(CRef<KeyT> key,
+                CRef<KeyComparator> comparator) const;
+
+  void populate_new_root(CRef<ValueT> old_value,
+                         CRef<KeyT> new_key,
+                         CRef<ValueT> new_value);
+
+  int insert_node_after(CRef<ValueT> old_value,
+                        CRef<KeyT> new_key,
+                        CRef<ValueT> new_value);
   void remove(int index);
   ValueT remove_and_return_only_child();
 
   // Split and Merge utility methods
-  void move_all_to(MRef<BPlusTreeInternalPage> recipient, Ref<KeyT> middle_key, Ref<BuffMgr> buff_mgr);
-  void Move_half_to(MRef<BPlusTreeInternalPage> recipient, Ref<BuffMgr> buff_mgr);
-  void move_first_to_end_of(MRef<BPlusTreeInternalPage> recipient, Ref<KeyT> middle_key, Ref<BuffMgr> buff_mgr);
-  void move_last_to_front_of(MRef<BPlusTreeInternalPage> recipient, Ref<KeyT> middle_key, Ref<BuffMgr> buff_mgr);
+  void move_all_to(BPlusTreeInternalPage& recipient,
+                   CRef<KeyT> middle_key,
+                   CRef<BuffMgr> buff_mgr);
+
+  void move_half_to(BPlusTreeInternalPage& recipient,
+                    CRef<BuffMgr> buff_mgr);
+
+  void move_first_to_end_of(BPlusTreeInternalPage& recipient,
+                            CRef<KeyT> middle_key,
+                            CRef<BuffMgr> buff_mgr);
+
+  void move_last_to_front_of(BPlusTreeInternalPage& recipient,
+                             CRef<KeyT> middle_key,
+                             CRef<BuffMgr> buff_mgr);
 
 private:
-  void copy_n_from(Ref<Vec<MappingT>> items, int size, Ref<BuffMgr> buff_mgr);
-  void Copy_last_from(Ref<MappingT> pair, Ref<BuffMgr> buff_mgr);
-  void copy_first_from(Ref<MappingT> pair, Ref<BuffMgr> buff_mgr);
-  MappingT array[0];
+  void copy_n_from(CRef<Vec<MappingT>> items,
+                   int size,
+                   CRef<BuffMgr> buff_mgr);
+
+  void copy_last_from(CRef<MappingT> pair, CRef<BuffMgr> buff_mgr);
+  void copy_first_from(CRef<MappingT> pair, CRef<BuffMgr> buff_mgr);
 };

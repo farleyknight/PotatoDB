@@ -27,13 +27,12 @@ public:
   // No copy assign
   TableHeap& operator=(CRef<TableHeap>) = delete;
 
-  const page_id_t first_page_id() const {
+  const PageId first_page_id() const {
     return first_page_id_;
   }
 
-  bool insert_tuple(CRef<Tuple> tuple,
-                    RID& rid,
-                    Txn& txn);
+  RID insert_tuple(CRef<Tuple> tuple,
+                   Txn& txn);
   bool mark_delete(CRef<RID> rid,
                    Txn& txn);
   bool update_tuple(Tuple& tuple,
@@ -51,7 +50,7 @@ public:
   BuffMgr& buff_mgr() { return buff_mgr_; }
 
 private:
-  PageId& first_page_id_;
+  PageId first_page_id_;
   LockMgr& lock_mgr_;
   LogMgr& log_mgr_;
   BuffMgr& buff_mgr_;

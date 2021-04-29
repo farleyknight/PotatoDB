@@ -16,18 +16,18 @@ public:
    *         to Blocks which are physical offsets
    *         but using using multiples of page size.
    *********************************************************/
-  DiskMgr(String db_name);
+  DiskMgr(string db_name);
 
   // No copy
   DiskMgr(CRef<DiskMgr>) = delete;
   // No copy assign
   MRef<DiskMgr> operator=(CRef<DiskMgr>) = delete;
 
-  void write_buffer(PageId page_id, MRef<Buffer> buffer);
-  void read_buffer(PageId page_id, MRef<Buffer> buffer);
+  void write_buffer(PageId page_id, CRef<Buffer> buffer);
+  void read_buffer(PageId page_id, Buffer& buffer);
 
-  void write_page(PageId page_id, MRef<Page> page);
-  void read_page(PageId page_id, MRef<Page> page);
+  void write_page(PageId page_id, CRef<Page> page);
+  void read_page(PageId page_id, Page& page);
 
   PageId allocate_page() {
     /*
@@ -50,8 +50,8 @@ public:
     // TODO! Implement in "DROP TABLE" or "DROP INDEX" context.
   }
 
-  bool read_log(CRef<Buffer> log_data, int size, int offset);
-  void write_log(MRef<Buffer> log_data, int size);
+  void write_log(CRef<Buffer> log_data, size_t size);
+  bool read_log(Buffer& log_data, size_t size, size_t offset);
 
   // Close all file handles.
   void shutdown() {
@@ -63,11 +63,11 @@ private:
   std::fstream db_file_;
   std::fstream log_io_;
 
-  MutString db_name_, log_name_;
+  string db_name_, log_name_;
 
   // stream to write db file
   int num_flushes_;
-  int num_writes_;
+  UNUSED int num_writes_;
   bool flush_log_;
   std::future<void> *flush_log_f_{nullptr};
 };

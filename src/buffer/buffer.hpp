@@ -34,15 +34,23 @@ public:
     return data_.data();
   }
 
-  const byte_t* ptr() const {
+  char* char_ptr() {
+    return reinterpret_cast<char*>(data_.data());
+  }
+
+  const byte_t* cptr() const {
     return data_.data();
+  }
+
+  const char* char_ptr() const {
+    return reinterpret_cast<const char*>(data_.data());
   }
 
   byte_t* ptr(size_t offset) {
     return data_.data() + offset;
   }
 
-  const byte_t* ptr(size_t offset) const {
+  const byte_t* cptr(size_t offset) const {
     return data_.data() + offset;
   }
 
@@ -52,13 +60,17 @@ public:
                     size_t n_bytes)
   {
     // TODO: Add assert to prevent out-of-bounds memory operations
-    std::memcpy(ptr() + dest_offset,
-                source.ptr() + source_offset,
+    std::memcpy(ptr(dest_offset),
+                source.cptr(source_offset),
                 n_bytes);
   }
 
   void copy_from(CRef<Buffer> other) {
     data_ = other.data_;
+  }
+
+  void reset_memory() {
+    std::fill(data_.begin(), data_.end(), 0);
   }
 
   size_t size() const {
@@ -82,7 +94,7 @@ public:
   }
 
   int64_t read_int64(size_t offset) const {
-    return *reinterpret_cast<const int64_t*>(ptr(offset));
+    return *reinterpret_cast<const int64_t*>(cptr(offset));
   }
 
   void write_int32(size_t offset, int32_t n) {
@@ -90,7 +102,7 @@ public:
   }
 
   int32_t read_int32(size_t offset) const {
-    return *reinterpret_cast<const int32_t*>(ptr(offset));
+    return *reinterpret_cast<const int32_t*>(cptr(offset));
   }
 
   void write_uint32(size_t offset, int32_t n) {
@@ -98,7 +110,7 @@ public:
   }
 
   uint32_t read_uint32(size_t offset) const {
-    return *reinterpret_cast<const uint32_t*>(ptr(offset));
+    return *reinterpret_cast<const uint32_t*>(cptr(offset));
   }
 
   void write_float(size_t offset, float f) {
@@ -106,7 +118,7 @@ public:
   }
 
   float read_float(size_t offset) const {
-    return *reinterpret_cast<const float*>(ptr(offset));
+    return *reinterpret_cast<const float*>(cptr(offset));
   }
 
   void write_double(size_t offset, double d) {
@@ -114,7 +126,7 @@ public:
   }
 
   double read_double(size_t offset) const {
-    return *reinterpret_cast<const double*>(ptr(offset));
+    return *reinterpret_cast<const double*>(cptr(offset));
   }
 
   void write_string(size_t offset, String value) {

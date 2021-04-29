@@ -8,21 +8,28 @@ public:
     : BaseExpr (ExprType::TABLE)
   {}
 
-  TableExpr(MutString name)
+  TableExpr(string name)
     : BaseExpr (ExprType::TABLE),
       name_    (name)
   {}
 
-  void set_name(MutString name) {
+  TableExpr(table_oid_t table_oid, string name)
+    : BaseExpr   (ExprType::TABLE),
+      name_      (name),
+      table_oid_ (table_oid)
+  {}
+
+  void set_name(string name) {
     name_ = name;
   }
 
-  virtual MutString to_string() const override {
+  virtual string to_string() const override {
     return name_;
   }
 
 protected:
-  MutString name_;
+  string name_;
+  table_oid_t table_oid_;
 };
 
 

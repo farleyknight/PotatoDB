@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/config.hpp"
 #include "btree/b_plus_tree_leaf_page.hpp"
 #include "index/generic_key.hpp"
 #include "index/generic_comp.hpp"
@@ -8,7 +9,7 @@ class IndexIterator {
 public:
   using KeyT     = GenericKey;
   using ValueT   = RID;
-  using MappingT = std::pair<KeyT, ValueT>;
+  using MappingT = pair<KeyT, ValueT>;
   using KeyComp  = GenericComp;
 
   // You may define your own constructor based on your
@@ -23,7 +24,7 @@ public:
    */
 
   // IndexIterator() = default;
-  IndexIterator() : pair_ (MappingT(key_, value_)) {}
+  IndexIterator() {}
   ~IndexIterator() = default;
 
   bool is_end() {
@@ -36,11 +37,11 @@ public:
 
   IndexIterator& operator++();
 
-  bool operator==(CRef<IndexIterator> itr) const {
+  bool operator==(UNUSED CRef<IndexIterator> itr) const {
     throw std::runtime_error("unimplemented");
   }
 
-  bool operator!=(CRef<IndexIterator> itr) const {
+  bool operator!=(UNUSED CRef<IndexIterator> itr) const {
     throw std::runtime_error("unimplemented");
   }
 

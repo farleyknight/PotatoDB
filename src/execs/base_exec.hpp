@@ -9,7 +9,7 @@
  */
 class BaseExec {
 public:
-  explicit BaseExec(MRef<ExecCtx> exec_ctx)
+  explicit BaseExec(ExecCtx& exec_ctx)
     : exec_ctx_(exec_ctx) {}
   virtual ~BaseExec() = default;
 
@@ -33,22 +33,22 @@ public:
     throw NotImplementedException("next() not implemented");
   }
 
-  Ref<ExecCtx> exec_ctx() {
+  CRef<ExecCtx> exec_ctx() {
     return exec_ctx_;
   }
 
-  MRef<Txn> txn() {
+  Txn& txn() {
     return exec_ctx_.txn();
   }
 
-  Ref<Catalog> catalog() const {
+  CRef<Catalog> catalog() const {
     return exec_ctx_.catalog();
   }
 
-  Ref<QuerySchema> find_schema(SchemaRef schema_ref) const {
+  CRef<QuerySchema> find_schema(SchemaRef schema_ref) const {
     return catalog().find_query_schema(schema_ref);
   }
 
 protected:
-  MRef<ExecCtx> exec_ctx_;
+  ExecCtx& exec_ctx_;
 };

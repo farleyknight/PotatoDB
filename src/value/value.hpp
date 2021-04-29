@@ -17,7 +17,6 @@ public:
                                 size_t offset,
                                 TypeId type_id);
 
-  bool eq(CRef<Value> other) const;
   CRef<Ptr<Type>> value_type() const;
 
   template<typename target_t>
@@ -78,8 +77,17 @@ public:
     return Value(TypeId::VARCHAR, DataStoreT(data));
   }
 
+  bool eq(CRef<Value> other) const;
+  bool ne(CRef<Value> other) const;
   bool lt(CRef<Value> other) const;
   bool gt(CRef<Value> other) const;
+
+  bool lte(CRef<Value> other) const;
+  bool gte(CRef<Value> other) const;
+
+  Value add(CRef<Value> other) const;
+  Value min(CRef<Value> other) const;
+  Value max(CRef<Value> other) const;
 
   DataStoreT data() {
     return data_;
