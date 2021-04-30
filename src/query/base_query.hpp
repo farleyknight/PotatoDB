@@ -21,15 +21,15 @@ public:
   ~BaseQuery() = default;
 
   Value eval_join(UNUSED CRef<Tuple> lt, UNUSED CRef<QuerySchema> ls,
-                  UNUSED CRef<Tuple> rt, UNUSED CRef<QuerySchema> rs)
-    const
+                  UNUSED CRef<Tuple> rt, UNUSED CRef<QuerySchema> rs) const
   {
     throw NotImplementedException("eval_join not implemented");
   }
 
   Value eval_agg(UNUSED CRef<QuerySchema> schema,
                  UNUSED CRef<Vec<Value>> group_bys,
-                 UNUSED CRef<Vec<Value>> aggregates) const {
+                 UNUSED CRef<Vec<Value>> aggregates) const
+  {
     throw NotImplementedException("eval_agg not implemented");
   }
 

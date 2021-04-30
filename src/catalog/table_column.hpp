@@ -22,7 +22,8 @@ public:
    * Constructors & destructor
    **********************************************/
 
-  TableColumn() : fixed_length_(INVALID_LENGTH) {}
+  TableColumn()
+    : fixed_length_(INVALID_LENGTH) {}
 
   TableColumn(String name,
               table_oid_t table_oid,

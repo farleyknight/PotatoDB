@@ -3,7 +3,6 @@
 #include <optional>
 
 #include "common/config.hpp"
-#include "exprs/const_expr.hpp"
 #include "plans/base_plan.hpp"
 
 class SeqScanPlan : public BasePlan {
@@ -12,15 +11,15 @@ public:
    * Constructors & destructor
    **********************************************/
 
-  SeqScanPlan(MovePtr<Schema> output,
+  SeqScanPlan(SchemaRef schema_ref,
               table_oid_t table_oid)
-    : BasePlan   (move(output)),
+    : BasePlan   (schema_ref),
       table_oid_ (table_oid) {}
 
-  SeqScanPlan(MovePtr<Schema> output,
-              MovePtr<BaseExpr> pred,
+  SeqScanPlan(SchemaRef schema_ref,
+              MovePtr<BaseQuery> pred,
               table_oid_t table_oid)
-    : BasePlan   (move(output)),
+    : BasePlan   (schema_ref),
       pred_      (move(pred)),
       table_oid_ (table_oid) {}
 
@@ -32,15 +31,15 @@ public:
     return pred_ != nullptr;
   }
 
-  Ref<BaseExpr> pred() {
+  CRef<BaseQuery> pred() {
     assert(pred_);
     return *pred_;
   }
 
-  PlanType type()         const override { return PlanType::SEQ_SCAN; }
-  table_oid_t table_oid() const          { return table_oid_; }
+  PlanType type()         const { return PlanType::TABLE_SCAN; }
+  table_oid_t table_oid() const { return table_oid_; }
 
 private:
-  Option<BaseExpr> pred_;
+  Ptr<BaseQuery> pred_;
   table_oid_t table_oid_;
 };

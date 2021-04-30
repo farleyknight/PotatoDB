@@ -9,7 +9,7 @@
 #include "plans/update_plan.hpp"
 #include "plans/delete_plan.hpp"
 #include "plans/limit_plan.hpp"
-#include "plans/raw_values_plan.hpp"
+#include "plans/raw_tuples_plan.hpp"
 #include "plans/sort_plan.hpp"
 #include "plans/nested_loop_join_plan.hpp"
 
@@ -21,7 +21,7 @@
 #include "execs/limit_exec.hpp"
 #include "execs/sort_exec.hpp"
 #include "execs/nested_loop_join_exec.hpp"
-#include "execs/raw_values_exec.hpp"
+#include "execs/raw_tuples_exec.hpp"
 #include "execs/seq_scan_exec.hpp"
 #include "execs/update_exec.hpp"
 #include "execs/exec_ctx.hpp"
@@ -38,15 +38,16 @@ public:
    * Class methods
    **********************************************/
 
-  static Ptr<BaseExec> create(MRef<ExecCtx> exec_ctx, MovePtr<BasePlan> plan) {
+  static Ptr<BaseExec> create(ExecCtx& exec_ctx,
+                              MovePtr<BasePlan> plan) {
     switch (plan->type()) {
-    case PlanType::SEQ_SCAN: {
+    case PlanType::TABLE_SCAN: {
       auto scan_plan = cast<SeqScanPlan>(plan);
       return SeqScanExec::make(exec_ctx,
                                move(scan_plan));
     }
 
-    case PlanType::VALUES: {
+    case PlanType::RAW_TUPLES: {
       auto values_plan = cast<RawValuesPlan>(plan);
       return RawValuesExec::make(exec_ctx,
                                  move(values_plan));

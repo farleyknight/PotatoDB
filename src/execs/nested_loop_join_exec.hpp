@@ -2,6 +2,7 @@
 
 #include "query/base_query.hpp"
 #include "query/query_column.hpp"
+#include "query/query_join.hpp"
 #include "plans/nested_loop_join_plan.hpp"
 
 class NestedLoopJoinExec : public BaseExec {
@@ -82,9 +83,8 @@ class NestedLoopJoinExec : public BaseExec {
     auto &schema =
       exec_ctx_.catalog().find_query_schema(plan_->schema_ref());
 
-    for (CRef<TableColumn> col : schema.columns()) {
-      CRef<QueryJoin> join =
-        dynamic_cast<CRef<QueryJoin>>(col.node());
+    for (auto col : schema.all()) {
+      CRef<QueryJoin> join = col.join();
 
       JoinSide side = join.side();
 
@@ -92,7 +92,7 @@ class NestedLoopJoinExec : public BaseExec {
         auto &left_schema =
           exec_ctx_.catalog().find_query_schema(plan_->left_schema_ref());
 
-        values.push_back(left.value_by_name(left_schema(),
+        values.push_back(left.value_by_name(left_schema,
                                             col.name()));
       } else if (side == JoinSide::RIGHT) {
         auto &right_schema =
@@ -105,7 +105,7 @@ class NestedLoopJoinExec : public BaseExec {
       }
     }
 
-    return Tuple(move(values), plan_->schema());
+    return Tuple(move(values), schema);
   }
 
 private:

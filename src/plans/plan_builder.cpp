@@ -57,7 +57,7 @@ void PB::apply_join(QueryTable right_table) {
  * TODO: Document me
  **********************************************/
 
-MutRef<PB> PB::on(ColumnExpr left, String op, ColumnExpr right) {
+PB& PB::on(ColumnExpr left, String op, ColumnExpr right) {
   auto left_col = JoinExpr::make_left(left);
   auto right_col = JoinExpr::make_right(right);
 
@@ -74,7 +74,7 @@ MutRef<PB> PB::on(ColumnExpr left, String op, ColumnExpr right) {
  * TODO: Document me
  **********************************************/
 
-MutRef<PB> PB::insert_into(String name) {
+PB& PB::insert_into(String name) {
   insert_table_name_ = name;
   insert_table_oid_ = catalog_.table_oid_for(name);
   plan_type_ = PlanType::INSERT;
@@ -85,7 +85,7 @@ MutRef<PB> PB::insert_into(String name) {
  * values - Provide raw values for an INSERT
  **********************************************/
 
-MutRef<PB> PB::values(Move<RawValueSet> values) {
+PB& PB::values(Move<RawValueSet> values) {
   values_ = move(values);
   return *this;
 }
@@ -94,7 +94,7 @@ MutRef<PB> PB::values(Move<RawValueSet> values) {
  * TODO: Document me
  **********************************************/
 
-MutRef<PB> PB::delete_from(String name) {
+PB& PB::delete_from(String name) {
   plan_type_ = PlanType::DELETE;
   from_table_name_ = name;
   from_table_oid_  = catalog_.table_oid_for(name);
@@ -105,20 +105,19 @@ MutRef<PB> PB::delete_from(String name) {
  * TODO: Document me
  **********************************************/
 
-MutRef<PB> PB::where(Move<String> name, String op, int val) {
+PB& PB::where(Move<String> name, String op, int val) {
   auto const_val = Value::make<int>(val);
   return where(move(name), op, move(const_val));
 }
 
-MutRef<PB> PB::where(Move<String> column_name, String op, Move<Value> val) {
+PB& PB::where(String column_name, String op, Value value) {
   auto column_expr = ColumnExpr::make(from_table_schema(),
-                                      move(column_name));
-  auto const_expr  = ConstExpr::make(move(val));
+                                      column_name);
+  auto const_expr  = ConstExpr::make(value);
   auto clause      = CompExpr::make(move(column_expr),
                                     to_comp_type(op),
                                     move(const_expr));
 
-  // where_clause_.reset(clause.release());
   where_clause_ = move(clause);
 
   return *this;

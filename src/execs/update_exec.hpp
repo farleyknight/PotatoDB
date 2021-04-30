@@ -9,27 +9,25 @@ public:
    * Constructors & destructor
    **********************************************/
 
-  UpdateExec(MRef<ExecCtx> exec_ctx,
+  UpdateExec(ExecCtx& exec_ctx,
+             table_oid_t table_oid,
              MovePtr<UpdatePlan> plan,
              MovePtr<BaseExec> child);
 
-  static Ptr<BaseExec> make(MRef<ExecCtx> exec_ctx,
+  static Ptr<BaseExec> make(ExecCtx& exec_ctx,
+                            table_oid_t table_oid,
                             MovePtr<UpdatePlan> plan,
                             MovePtr<BaseExec> child);
 
-  /**********************************************
-   * Instance methods
-   **********************************************/
 
-  Ref<Schema> schema() override;
   void init() override;
   bool has_next() override;
   Tuple next() override;
 
 private:
-  Tuple updated_tuple(Ref<Tuple> old_tuple);
+  Tuple updated_tuple(CRef<Tuple> old_tuple);
 
   Ptr<UpdatePlan> plan_;
-  Ref<TableMeta> meta_;
+  table_oid_t table_oid_;
   Ptr<BaseExec> child_;
 };

@@ -2,6 +2,7 @@
 
 #include "catalog/table_column.hpp"
 #include "query/base_query.hpp"
+#include "query/query_join.hpp"
 
 class TableSchema;
 class QuerySchema;
@@ -20,6 +21,10 @@ public:
   // Default destructor
   ~QueryColumn() = default;
 
+  void set_join(QueryJoin join) {
+    join_ = join;
+  }
+
   Value eval(CRef<Tuple> tuple, CRef<TableSchema> schema) const;
 
   Value eval_join(CRef<Tuple> lt,
@@ -32,8 +37,13 @@ public:
                  CRef<Vec<Value>> aggs) const;
   string name() const;
 
+  QueryJoin join() {
+    return join_;
+  }
+
 private:
   column_oid_t column_oid_;
   table_oid_t table_oid_;
   string column_name_;
+  QueryJoin join_;
 };

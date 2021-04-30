@@ -23,6 +23,10 @@ public:
                      table_oid, table_oid);
   }
 
+  static SchemaRef INVALID() {
+    return SchemaRef(SchemaType::QUERY, -1, -1);
+  }
+
   bool is_query_schema() const {
     return schema_type_ == SchemaType::QUERY;
   }

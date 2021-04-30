@@ -13,7 +13,7 @@ public:
   // No copy
   BaseSchema(CRef<BaseSchema>) = delete;
   // No copy assign
-  MRef<BaseSchema> operator=(CRef<BaseSchema>) = delete;
+  BaseSchema& operator=(CRef<BaseSchema>) = delete;
   // Default destructor
   ~BaseSchema() = default;
 

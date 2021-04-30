@@ -1,6 +1,7 @@
 #pragma once
 
-#include "exprs/base_expr.hpp"
+#include "catalog/schema_ref.hpp"
+#include "query/base_query.hpp"
 
 enum class JoinSide {
   INVALID = 0,
@@ -8,74 +9,73 @@ enum class JoinSide {
   RIGHT   = 2
 };
 
-class QueryJoin : public BaseJoin {
+class QueryJoin : public BaseQuery {
 public:
-  QueryJoin(JoinSide     side,
-            CRef<Schema> schema,
-            Move<String> name)
-    : BaseQuery      (schema.column_by_name(name).type_id()),
-      join_side_     (side),
-      source_schema_ (schema),
-      column_name_   (move(name)) {}
+  QueryJoin()
+    : BaseQuery    (TypeId::INVALID),
+      join_side_   (JoinSide::INVALID),
+      schema_ref_  (SchemaRef::INVALID()),
+      column_name_ ("")
+  {}
 
-  QueryJoin(CRef<QueryJoin> ) = delete; // No copy
-  QueryJoin& operator=(CRef<QueryJoin>) = delete; // No copy assign
+  QueryJoin(TypeId type_id,
+            JoinSide side,
+            CRef<SchemaRef> schema_ref,
+            String name)
+    : BaseQuery     (type_id),
+      join_side_    (side),
+      schema_ref_   (schema_ref),
+      column_name_  (move(name)) {}
+
+  QueryJoin(CRef<QueryJoin>) = default; // Allow copy
+  QueryJoin& operator=(CRef<QueryJoin>) = default; // Allow copy assign
   ~QueryJoin() = default; // Default delete
 
-  static Ptr<BaseQuery> make_left(CRef<Schema> schema,
-                                  Move<String> name) {
-    return make(JoinSide::LEFT, schema, move(name));
-  }
-
-  static Ptr<BaseQuery> make_right(CRef<Schema> schema,
-                                   Move<String> name) {
-    return make(JoinSide::RIGHT, schema, move(name));
-  }
-
-  Value eval(CRef<Tuple> tuple, CRef<Schema> schema) const override {
-    return tuple.value(schema, column_index());
-  }
-
-  Value eval_join(CRef<Tuple>  lt,
-                  CRef<Schema> ls,
-                  CRef<Tuple>  rt,
-                  CRef<Schema> rs) const override
+  static QueryJoin make_left(TypeId type_id,
+                             SchemaRef schema,
+                             String name)
   {
-    switch (join_side_) {
-    case JoinSide::LEFT:
-      return lt.value(ls, column_index());
-    case JoinSide::RIGHT:
-      return rt.value(rs, column_index());
-    case JoinSide::INVALID:
-      throw Exception("Cannot eval join with INVALID_SIDE!");
-    }
+    return QueryJoin(type_id, JoinSide::LEFT, schema, name);
   }
+
+  static QueryJoin make_right(TypeId type_id,
+                              SchemaRef schema,
+                              String name)
+  {
+    return QueryJoin(type_id, JoinSide::RIGHT, schema, name);
+  }
+
+  Value eval(CRef<Tuple> tuple, CRef<QuerySchema> schema) const;
+  Value eval_join(CRef<Tuple>  lt,
+                  CRef<QuerySchema> ls,
+                  CRef<Tuple>  rt,
+                  CRef<QuerySchema> rs) const;
 
   Value eval_agg(UNUSED CRef<Vec<Value>> group_bys,
-                 UNUSED CRef<Vec<Value>> aggs) const override
+                 UNUSED CRef<Vec<Value>> aggs) const
   {
     throw NotImplementedException("eval_aggregate not implemented");
   }
 
-  string to_string() const override {
+  string to_string() const {
     std::ostringstream os;
 
-    os << "Type id is :: " << Type::as_string(return_type()) << std::endl;
+    os << "Type id is :: " << Type::as_string(type_id()) << std::endl;
     os << "Join side is :: " << (int)join_side_ << std::endl;
     os << "Column name is :: " << column_name_ << std::endl;
-    os << "Column index is :: " << column_index() << std::endl;
     os << "\n";
 
     return os.str();
   }
+  size_t column_index(CRef<QuerySchema> schema) const;
 
-  uint32_t column_index() const {
-    return source_schema_.by_name(column_name_);
+  JoinSide side() const  {
+    return join_side_;
   }
 
 private:
   JoinSide join_side_ = JoinSide::INVALID;
-  CRef<Schema> source_schema_;
+  SchemaRef schema_ref_;
   string column_name_;
 };
 
