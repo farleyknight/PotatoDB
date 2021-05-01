@@ -37,12 +37,12 @@ private:
 
 class UpdatePlan : public BasePlan {
 public:
-  UpdatePlan(BasePlan child,
-             table_oid_t table_oid,
+  UpdatePlan(SchemaRef schema_ref,
+             MovePtr<BasePlan> child,
              Move<MutMap<uint32_t, UpdateInfo>> update_attrs)
-    : BasePlan      (SchemaRef::from_table_oid(table_oid)),
-      table_oid_    (table_oid),
-      child_        (child),
+    : BasePlan      (schema_ref),
+      table_oid_    (schema_ref.table_oid()),
+      child_        (move(child)),
       // NOTE: The update attrs vector could be huge!
       // TODO: Write performance tests where this parameter is huge
       update_attrs_ (update_attrs) {}
@@ -51,8 +51,9 @@ public:
    * Instance methods
    **********************************************/
 
-  PlanType type()                const { return PlanType::UPDATE; }
-  table_oid_t table_oid()        const { return table_oid_; }
+  PlanType type()         const { return PlanType::UPDATE; }
+  table_oid_t table_oid() const { return table_oid_; }
+  MovePtr<BasePlan> child()     { return move(child_); }
 
   CRef<Map<uint32_t, UpdateInfo>> update_attrs() const {
     return update_attrs_;
@@ -60,6 +61,6 @@ public:
 
 private:
   table_oid_t table_oid_;
-  BasePlan child_;
+  MutPtr<BasePlan> child_;
   Map<uint32_t, UpdateInfo> update_attrs_;
 };

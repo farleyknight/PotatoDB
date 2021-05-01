@@ -4,13 +4,13 @@
 
 class HashJoinPlan : public BasePlan {
 public:
-  HashJoinPlan(MovePtr<Schema> schema,
-               Ref<BaseExpr> pred,
-               MoveVec<BaseExpr> left_hash_keys,
-               MoveVec<BaseExpr> right_hash_keys)
-    : BasePlan         (move(schema)),
-      pred_            (pred),
-      // TODO: Instead of providing a Vec<BaseExpr> maybe provice a key schema?
+  HashJoinPlan(SchemaRef schema,
+               MovePtr<BaseQuery> pred,
+               MoveVec<BaseQuery> left_hash_keys,
+               MoveVec<BaseQuery> right_hash_keys)
+    : BasePlan         (schema),
+      pred_            (move(pred)),
+      // TODO: Instead of providing a Vec<BaseQuery> maybe provice a key schema?
       // A key schema might need to reference the parent schema?
       left_hash_keys_  (move(left_hash_keys)),
       right_hash_keys_ (move(right_hash_keys))
@@ -18,14 +18,17 @@ public:
     assert(left_hash_keys_.size() == right_hash_keys_.size());
   }
 
-  PlanType type() const override { return PlanType::HASH_JOIN; }
-  Ref<BaseExpr> pred()           { return pred_; }
+  PlanType type() const  { return PlanType::HASH_JOIN; }
+  CRef<BaseQuery> pred() {
+    assert(pred_);
+    return *pred_;
+  }
 
   // NOTE: These arrays are used to create the key schemas.
-  Ref<Vec<BaseExpr>> left_keys()  { return left_hash_keys_; }
-  Ref<Vec<BaseExpr>> right_keys() { return right_hash_keys_; }
+  CRef<Vec<BaseQuery>> left_keys()  { return left_hash_keys_; }
+  CRef<Vec<BaseQuery>> right_keys() { return right_hash_keys_; }
 
 private:
-  Ref<BaseExpr> pred_;
-  Vec<BaseExpr> left_hash_keys_, right_hash_keys_;
+  Ptr<BaseQuery> pred_;
+  Vec<BaseQuery> left_hash_keys_, right_hash_keys_;
 };

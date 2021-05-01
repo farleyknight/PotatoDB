@@ -1,40 +1,29 @@
 #pragma once
 
 #include "execs/exec_ctx.hpp"
+#include "execs/exec_engine.hpp"
 
 #include "parser/sql_parser.hpp"
-#include "server/resources.hpp"
 
-#include "tuples/result_set.hpp"
+#include "tuple/result_set.hpp"
+
+class PotatoDB;
 
 class Session {
 public:
-  Session(CRef<Resources> resources,
-          const int bp_size = 1000)
-    : buffer_pool_size_ (bp_size)
-  {}
-
+  Session(PotatoDB* db);
   ~Session();
 
-  ResultSet execute(String query) {
-    try {
-      // TODO: Rename as_exprs to as_stmts
-      auto exprs = SQLParser::as_exprs(query);
-      // TODO: Allow for multiple statements
-      auto plan = build_plan(exprs[0]);
-      auto &txn = txn_mgr().begin();
-      auto exec_ctx = ExecCtx::make(txn, resources_);
-
-      auto result_set = exec_eng().execute(move(plan),
-                                           txn,
-                                           *exec_ctx);
-      txn_mgr().commit(txn);
-      return result_set;
-    } catch (std::runtime_exception& e) {
-      return ResultSet();
-    }
-  }
+  ResultSet execute(String query);
 
 private:
-  CRef<Resources> resources_;
+  PotatoDB* db_; // Use as a reference
+
+  DiskMgr disk_mgr_;
+  BuffMgr buff_mgr_;
+  LogMgr log_mgr_;
+  LockMgr lock_mgr_;
+  TxnMgr txn_mgr_;
+  Catalog catalog_;
+  ExecEngine exec_eng_;
 };

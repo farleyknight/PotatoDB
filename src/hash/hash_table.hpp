@@ -2,7 +2,7 @@
 
 #include "common/config.hpp"
 #include "txns/txn.hpp"
-#include "storage/hash_table_block_page.hpp"
+#include "page/hash_table_block_page.hpp"
 #include "index/generic_key.hpp"
 
 template<class KeyT, class ValueT>
@@ -12,11 +12,10 @@ public:
 
   virtual ~HashTable() = default;
 
-  virtual bool insert(Ref<KeyT> key,
-                      Ref<ValueT> value) = 0;
+  virtual bool insert(CRef<KeyT> key,
+                      CRef<ValueT> value) = 0;
 
-  virtual bool remove(Ref<KeyT> key,
-                      Ref<ValueT> value) = 0;
+  virtual bool remove(CRef<KeyT> key) = 0;
 
-  virtual MutVec<ValueT> find_values(Ref<KeyT> key) const = 0;
+  virtual MutVec<ValueT> find_values(CRef<KeyT> key) const = 0;
 };

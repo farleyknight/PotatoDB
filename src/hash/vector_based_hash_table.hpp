@@ -15,17 +15,17 @@ public:
     table_.resize(capacity);
   }
 
-  bool insert(Ref<K> key, Ref<V> value) {
+  bool insert(CRef<K> key, CRef<V> value) {
     auto index = slot_index(key);
     table_[index].push_back(KVPair(key, value));
     return true;
   }
 
-  MutVec<V> find_values(Ref<K> key) const {
+  vector<V> find_values(CRef<K> key) const {
     auto index = slot_index(key);
     auto pairs = table_[index];
 
-    MutVec<V> values;
+    vector<V> values;
     for (auto const& pair : pairs) {
       if (pair.first == key) {
         values.push_back(pair.second);
@@ -34,7 +34,7 @@ public:
     return values;
   }
 
-  bool remove(Ref<K> key, Ref<V> value) {
+  bool remove(CRef<K> key) {
     auto index = slot_index(key);
     auto pairs = table_[index];
     auto removed = false;
@@ -49,15 +49,15 @@ public:
   }
 
 private:
-  slot_offset_t slot_index(Ref<Value> key) {
+  slot_offset_t slot_index(CRef<Value> key) {
     // NOTE: hash_fn_ is most likely something from `HashUtils::`
     return HashUtil::hash_value(key) % capacity_;
   }
 
-  slot_offset_t slot_index(Ref<hash_t> key) const {
+  slot_offset_t slot_index(CRef<hash_t> key) const {
     return key % capacity_;
   }
 
   size_t capacity_;
-  MutVec<MutList<KVPair>> table_;
+  vector<MutList<KVPair>> table_;
 };

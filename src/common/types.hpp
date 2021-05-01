@@ -43,6 +43,7 @@ using std::pair;
 
 using std::string;
 
+using std::unique_ptr;
 
 // NOTE: File descriptors are integers and are pointers to
 // file objects elsewhere in the system.
@@ -88,11 +89,11 @@ using MutMap    = std::unordered_map<K, V>;
 
 // NOTE: Ptr automatically means unique_ptr
 template<class T>
-using Ptr       = const std::unique_ptr<T>;
+using Ptr       = const unique_ptr<T>;
 template<class T>
-using MutPtr    = std::unique_ptr<T>;
+using MutPtr    = unique_ptr<T>;
 template<class T>
-using MovePtr   = std::unique_ptr<T> &&;
+using MovePtr   = unique_ptr<T> &&;
 
 
 // NOTE: SPtr means shared_ptr
@@ -111,6 +112,8 @@ template<typename T>
 using Vec      = const vector<T>;
 template<typename T>
 using MutVec   = vector<T>;
+template<typename T>
+using MoveVec  = vector<T> &&;
 
 using std::list;
 template<class T>

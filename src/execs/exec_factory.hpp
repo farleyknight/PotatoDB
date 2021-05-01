@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include "common/config.hpp"
+
 // TODO: Find a way to bundle up all of these files?
 #include "plans/base_plan.hpp"
 #include "plans/agg_plan.hpp"
@@ -29,82 +31,82 @@
 class ExecFactory {
 public:
 
-  template <class DerivedPlan>
-  static Ptr<DerivedPlan> cast(MRef<MutPtr<BasePlan>> plan) {
-    return unique_ptr<DerivedPlan>(static_cast<DerivedPlan*>(plan.release()));
+  template <class T>
+  static MutPtr<T> cast(MutPtr<BasePlan>& plan) {
+    return unique_ptr<T>(static_cast<T*>(plan.release()));
   }
 
   /**********************************************
    * Class methods
    **********************************************/
 
-  static Ptr<BaseExec> create(ExecCtx& exec_ctx,
-                              MovePtr<BasePlan> plan) {
+  static MutPtr<BaseExec> create(ExecCtx& exec_ctx,
+                                 MovePtr<BasePlan> plan) {
     switch (plan->type()) {
     case PlanType::TABLE_SCAN: {
       auto scan_plan = cast<SeqScanPlan>(plan);
-      return SeqScanExec::make(exec_ctx,
-                               move(scan_plan));
+      return make_unique<SeqScanExec>(exec_ctx,
+                                      move(scan_plan));
     }
 
     case PlanType::RAW_TUPLES: {
-      auto values_plan = cast<RawValuesPlan>(plan);
-      return RawValuesExec::make(exec_ctx,
-                                 move(values_plan));
+      auto tuples_plan = cast<RawTuplesPlan>(plan);
+      return make_unique<RawTuplesExec>(exec_ctx,
+                                        move(tuples_plan));
     }
 
     case PlanType::INSERT: {
       auto insert_plan = cast<InsertPlan>(plan);
       auto child_exec = ExecFactory::create(exec_ctx,
-                                            move(insert_plan->child_plan()));
-      return InsertExec::make(exec_ctx,
-                              move(insert_plan),
-                              move(child_exec));
+                                            move(insert_plan->child()));
+      return make_unique<InsertExec>(exec_ctx,
+                                     move(insert_plan),
+                                     move(child_exec));
     }
 
     case PlanType::UPDATE: {
       auto update_plan = cast<UpdatePlan>(plan);
       auto child_exec = ExecFactory::create(exec_ctx,
-                                            move(update_plan->child_plan()));
-      return UpdateExec::make(exec_ctx,
-                              move(update_plan),
-                              move(child_exec));
+                                            move(update_plan->child()));
+      return make_unique<UpdateExec>(exec_ctx,
+                                     move(update_plan),
+                                     move(child_exec));
     }
 
     case PlanType::DELETE: {
       auto delete_plan = cast<DeletePlan>(plan);
       auto child_exec = ExecFactory::create(exec_ctx,
-                                            move(delete_plan->child_plan()));
-      return DeleteExec::make(exec_ctx,
-                              move(delete_plan),
-                              move(child_exec));
+                                            move(delete_plan->child()));
+      return make_unique<DeleteExec>(exec_ctx,
+                                     move(delete_plan),
+                                     move(child_exec));
     }
 
     case PlanType::LIMIT: {
       auto limit_plan = cast<LimitPlan>(plan);
       auto child_exec = ExecFactory::create(exec_ctx,
-                                            move(limit_plan->child_plan()));
-      return LimitExec::make(exec_ctx,
-                             move(limit_plan),
-                             move(child_exec));
+                                            move(limit_plan->child()));
+      return make_unique<LimitExec>(exec_ctx,
+                                    move(limit_plan),
+                                    move(child_exec));
     }
 
     case PlanType::SORT: {
       auto sort_plan = cast<SortPlan>(plan);
       auto child_exec = ExecFactory::create(exec_ctx,
-                                            move(sort_plan->child_plan()));
-      return SortExec::make(exec_ctx,
-                            move(sort_plan),
-                            move(child_exec));
+                                            move(sort_plan->child()));
+      return make_unique<SortExec>(exec_ctx,
+                                   move(sort_plan),
+                                   move(child_exec));
     }
 
     case PlanType::AGG: {
       auto agg_plan = cast<AggPlan>(plan);
       auto child_exec = ExecFactory::create(exec_ctx,
-                                            move(agg_plan->child_plan()));
-      return AggExec::make(exec_ctx,
-                           move(agg_plan),
-                           move(child_exec));
+                                            move(agg_plan->child()));
+      return make_unique<AggExec>(exec_ctx,
+                                  move(agg_plan),
+                                  move(child_exec));
     }
 
     case PlanType::LOOP_JOIN: {
@@ -116,10 +118,10 @@ public:
       auto right = ExecFactory::create(exec_ctx,
                                        move(nlj_plan->right_plan()));
 
-      return NestedLoopJoinExec::make(exec_ctx,
-                                      move(nlj_plan),
-                                      move(left),
-                                      move(right));
+      return make_unique<NestedLoopJoinExec>(exec_ctx,
+                                             move(nlj_plan),
+                                             move(left),
+                                             move(right));
     }
 
     default:

@@ -6,24 +6,25 @@ public:
    * Constructors & destructor
    **********************************************/
 
-  InsertExec(MRef<ExecCtx> exec_ctx,
-             InsertPlan plan,
-             BaseExec child)
+  InsertExec(ExecCtx& exec_ctx,
+             MovePtr<InsertPlan> plan,
+             MovePtr<BaseExec> child)
     : BaseExec (exec_ctx),
-      plan_    (plan),
-      child_   (child) {}
+      plan_    (move(plan)),
+      child_   (move(child))
+  {}
 
   void init() override {
-    child_.init();
+    child_->init();
   }
 
   bool has_next() override {
-    return child_.has_next();
+    return child_->has_next();
   }
 
   Tuple next() override {
-    auto &heap = exec_ctx_.table_mgr().table_heap_for(plan_.table_oid());
-    auto tuple = child_.next();
+    auto &heap = exec_ctx_.table_mgr().table_heap_for(plan_->table_oid());
+    auto tuple = child_->next();
 
     heap.insert_tuple(tuple, txn());
 
@@ -31,6 +32,6 @@ public:
   }
 
 private:
-  InsertPlan plan_;
-  BaseExec child_;
+  Ptr<InsertPlan> plan_;
+  Ptr<BaseExec> child_;
 };

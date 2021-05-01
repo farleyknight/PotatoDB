@@ -14,16 +14,16 @@
 class DeleteExec : public BaseExec {
 public:
 
-  DeleteExec(MRef<ExecCtx> exec_ctx,
-             DeletePlan plan,
-             BaseExec child)
+  DeleteExec(ExecCtx& exec_ctx,
+             MovePtr<DeletePlan> plan,
+             MovePtr<BaseExec> child)
     : BaseExec (exec_ctx),
       plan_    (move(plan)),
-      child_   (child) {}
+      child_   (move(child)) {}
 
   void init() override {
     // TODO
-    child_.init();
+    child_->init();
   }
 
   bool has_next() override {
@@ -37,6 +37,6 @@ public:
   }
 
 private:
-  DeletePlan plan_;
-  BaseExec child_;
+  MutPtr<DeletePlan> plan_;
+  MutPtr<BaseExec> child_;
 };

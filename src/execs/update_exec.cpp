@@ -6,19 +6,9 @@ UpdateExec::UpdateExec(MRef<ExecCtx> exec_ctx,
                        MovePtr<BaseExec> child)
   : BaseExec (exec_ctx),
     plan_    (move(plan)),
-    child_   (move(child)),
-    meta_    (exec_ctx_.find_table(plan_->table_oid())) {}
+    child_   (move(child))
+{}
 
-
-Ptr<BaseExec>
-UpdateExec::make(MRef<ExecCtx> exec_ctx,
-                 MovePtr<UpdatePlan> plan,
-                 MovePtr<BaseExec> child)
-{
-  return make_unique<UpdateExec>(exec_ctx,
-                                 move(plan),
-                                 move(child));
-}
 
 Ref<Schema> UpdateExec::schema() {
   return plan_->schema();

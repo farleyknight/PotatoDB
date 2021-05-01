@@ -13,35 +13,20 @@ namespace fs = std::filesystem;
 
 class PotatoDB {
 public:
-  PotatoDB()
-    : resources_ (db_file_name())
-  {}
+  PotatoDB() {
+    setup_db_directory();
+  }
 
   void shutdown(UNUSED int signal) {
     socket_server_.shutdown();
   }
 
   CRef<Session> make_session() {
-    sessions_.emplace_back(resources_);
+    sessions_.emplace_back(this);
     return sessions_.back();
   }
 
-private:
-
-  MutString db_file_name() {
-    fs::current_path(home_path());
-    fs::create_directory(".potatodb");
-    fs::current_path(home_path() / ".potatodb");
-
-    if (!fs::exists(db_file_name())) {
-      std::ofstream db_file(db_file_name());
-      // TODO: Puts some header info here, like the version number
-      db_file << "0.1.0";
-      db_file.close();
-    }
-  }
-
-  fs::path db_file_name() {
+  fs::path main_file_name() {
     return home_path() / ".potatodb" / "database.db";
   }
 
@@ -55,6 +40,20 @@ private:
 
   fs::path home_path() {
     return std::getenv("HOME");
+  }
+
+private:
+
+  MutString setup_db_directory() {
+    fs::current_path(home_path());
+    fs::create_directory(".potatodb");
+    fs::current_path(home_path() / ".potatodb");
+
+    if (!fs::exists(db_file_name())) {
+      std::ofstream db_file(db_file_name());
+      db_file << "";
+      db_file.close();
+    }
   }
 
   void startup() {

@@ -11,7 +11,7 @@
 
 class HashJoinExec : public BaseExec {
 public:
-  HashJoinExec(MRef<ExecCtx> exec_ctx,
+  HashJoinExec(ExecCtx& exec_ctx,
                MovePtr<HashJoinPlan> plan,
                MovePtr<BaseExec> left,
                MovePtr<BaseExec> right);
@@ -21,17 +21,20 @@ public:
   Tuple next() override;
 
 private:
-  hash_t compute_hash(Ref<Tuple> tuple,
-                      Ref<Schema> schema,
-                      Vec<BaseExpr> exprs);
+  hash_t compute_hash(CRef<Tuple> tuple,
+                      CRef<QuerySchema> schema,
+                      Vec<BaseQuery> nodes);
 
-  bool match_found(Ref<Tuple> left, Ref<Tuple> right);
-  Value make_value_at(int k, Ref<Tuple> left, Ref<Tuple> right);
+  bool match_found(CRef<Tuple> left, CRef<Tuple> right);
+  Value make_value_at(size_t offset,
+                      CRef<Tuple> left,
+                      CRef<Tuple> right);
 
-  CRef<Schema> left_schema();
-  CRef<Schema> right_schema();
+  CRef<QuerySchema> left_schema();
+  CRef<QuerySchema> right_schema();
+  CRef<QuerySchema> schema();
 
-  MutVec<Tuple> output_tuples_;
+  vector<Tuple> output_tuples_;
 
   Ptr<HashJoinPlan> plan_;
   Ptr<BaseExec> left_, right_;

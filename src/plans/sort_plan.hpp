@@ -15,19 +15,19 @@ public:
    **********************************************/
 
   SortPlan(SchemaRef schema_ref,
-           BasePlan child,
-           MutVec<SortDirection> directions)
+           MutPtr<BasePlan> child,
+           vector<SortDirection> directions)
     : BasePlan    (schema_ref),
-      child_      (child),
+      child_      (move(child)),
       directions_ (directions)
   {
     // assert(schema->column_count() == directions_.size());
   }
 
-
-  PlanType type()                const { return PlanType::SORT; }
+  PlanType type()     const { return PlanType::SORT; }
+  MovePtr<BasePlan> child() { return move(child_); }
 
 private:
-  BasePlan child_;
+  MutPtr<BasePlan> child_;
   MutVec<SortDirection> directions_;
 };

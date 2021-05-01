@@ -5,21 +5,13 @@
 class LimitExec : public BaseExec {
  public:
 
-  LimitExec(MRef<ExecCtx> exec_ctx,
+  LimitExec(ExecCtx& exec_ctx,
             MovePtr<LimitPlan> plan,
             MovePtr<BaseExec> child)
     : BaseExec (exec_ctx),
-      plan_    (std::move(plan)),
-      child_   (std::move(child)) {}
-
-  static Ptr<BaseExec> make(MRef<ExecCtx> exec_ctx,
-                            MovePtr<LimitPlan> plan,
-                            MovePtr<BaseExec> child)
-  {
-    return make_unique<LimitExec>(exec_ctx,
-                                  move(plan),
-                                  move(child));
-  }
+      plan_    (move(plan)),
+      child_   (move(child))
+  {}
 
   void init() override {
     child_->init();
@@ -36,7 +28,6 @@ class LimitExec : public BaseExec {
   }
 
 private:
-  /** The limit plan node to be executed. */
   Ptr<LimitPlan> plan_;
   Ptr<BaseExec> child_;
 };

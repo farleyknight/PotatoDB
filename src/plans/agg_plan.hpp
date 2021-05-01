@@ -18,28 +18,28 @@ public:
    * GroupByExpr and HavingExpr are both optional
    **********************************************/
 
-  AggPlan(SchemaRef schema_ref,
-          BasePlan child,
-          QueryAgg  aggs);
+  AggPlan(SchemaRef         schema_ref,
+          MovePtr<BasePlan> child,
+          QueryAgg          aggs);
 
   /**********************************************
    * HavingExpr is optional
    **********************************************/
 
-  AggPlan(SchemaRef    schema,
-          BasePlan     child,
-          QueryAgg     aggs,
-          QueryGroupBy group_bys);
+  AggPlan(SchemaRef         schema,
+          MovePtr<BasePlan> child,
+          QueryAgg          aggs,
+          QueryGroupBy      group_bys);
 
   /**********************************************
    * All child exprs required
    **********************************************/
 
-  AggPlan(SchemaRef    schema,
-          BasePlan     child,
-          QueryAgg     aggs,
-          QueryGroupBy group_bys,
-          QueryHaving  having);
+  AggPlan(SchemaRef         schema,
+          MovePtr<BasePlan> child,
+          QueryAgg          aggs,
+          QueryGroupBy      group_bys,
+          QueryHaving       having);
 
   /**********************************************
    * Instance methods
@@ -49,8 +49,8 @@ public:
 
   PlanType type()  const { return PlanType::AGG; }
 
-  CRef<BasePlan> child() const {
-    return child_;
+  MovePtr<BasePlan> child() {
+    return move(child_);
   }
 
   bool has_having() {
@@ -82,11 +82,11 @@ public:
   }
 
 private:
-  BasePlan child_;
+  unique_ptr<BasePlan> child_;
 
-  MutVec<QueryAgg> aggs_;
-  MutVec<AggType> agg_types_;
+  vector<QueryAgg> aggs_;
+  vector<AggType> agg_types_;
+  vector<QueryGroupBy> group_bys_;
 
-  MutVec<QueryGroupBy> group_bys_;
   Option<QueryHaving> having_;
 };

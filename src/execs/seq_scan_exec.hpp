@@ -38,7 +38,7 @@ public:
   Tuple next() override;
 
 private:
-  bool match_found(Ref<Tuple> tuple);
+  bool match_found(CRef<Tuple> tuple);
   bool at_the_end();
 
   Ptr<SeqScanPlan> plan_;

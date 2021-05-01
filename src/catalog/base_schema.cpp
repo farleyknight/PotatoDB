@@ -63,8 +63,13 @@ CRef<ColT> BaseSchema<ColT>::by_name(CRef<String> name) const {
 }
 
 template<class ColT>
-CRef<ColT> BaseSchema<ColT>::by_column_oid(const column_oid_t oid) const {
+CRef<ColT> BaseSchema<ColT>::by_column_oid(column_oid_t oid) const {
   return columns_.at(oid);
+}
+
+template<class ColT>
+CRef<ColT> BaseSchema<ColT>::by_offset(size_t offset) const {
+  return columns_.at(offset);
 }
 
 template<class ColT>

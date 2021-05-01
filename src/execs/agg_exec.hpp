@@ -12,16 +12,16 @@ public:
    **********************************************/
 
   AggExec(ExecCtx& exec_ctx,
-          AggPlan plan,
-          BaseExec child)
+          MovePtr<AggPlan> plan,
+          MovePtr<BaseExec> child)
     : BaseExec    (exec_ctx),
-      plan_       (plan),
-      child_      (child),
-      table_      (plan),
+      plan_       (move(plan)),
+      child_      (move(child)),
+      table_      (*plan),
       table_iter_ (table_.begin()) {}
 
-  CRef<BaseExec> child() const {
-    return child_;
+  CRef<BaseExec> child() {
+    return *child_;
   }
 
   void init() override;
@@ -36,8 +36,8 @@ public:
   AggValue make_val(CRef<Tuple> tuple);
 
 private:
-  AggPlan plan_;
-  BaseExec child_;
+  MutPtr<AggPlan> plan_;
+  MutPtr<BaseExec> child_;
   AggHT table_;
   AggHT::Iterator table_iter_;
 };

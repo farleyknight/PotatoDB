@@ -20,7 +20,8 @@ public:
   static SchemaRef from_table_oid(table_oid_t table_oid) {
     return SchemaRef(SchemaType::TABLE,
                      // NOTE: See invariant #2 of SchemaMgr
-                     table_oid, table_oid);
+                     table_oid,
+                     table_oid);
   }
 
   static SchemaRef INVALID() {
@@ -39,8 +40,12 @@ public:
     return schema_oid_;
   }
 
+  table_oid_t table_oid() {
+    return table_oid_;
+  }
+
 private:
   SchemaType schema_type_;
   schema_oid_t schema_oid_;
-  UNUSED table_oid_t table_oid_ = INVALID_TABLE_OID;
+  table_oid_t table_oid_ = INVALID_TABLE_OID;
 };

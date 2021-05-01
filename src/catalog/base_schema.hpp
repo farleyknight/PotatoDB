@@ -25,7 +25,8 @@ public:
   size_t offset_for(column_oid_t oid) const;
   size_t offset_for(CRef<String> name) const;
 
-  CRef<ColT> by_column_oid(const column_oid_t oid) const;
+  CRef<ColT> by_offset(size_t oid) const;
+  CRef<ColT> by_column_oid(column_oid_t oid) const;
   CRef<ColT> by_name(CRef<String> name) const;
 
   CRef<Vec<size_t>> unlined_columns() const;
