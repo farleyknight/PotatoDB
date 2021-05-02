@@ -11,19 +11,11 @@ class PotatoDB;
 
 class Session {
 public:
-  Session(PotatoDB* db);
-  ~Session();
+  Session(PotatoDB* db) : db_ (db) {}
+  ~Session() = default;
 
-  ResultSet execute(String query);
+  ResultSet execute(string query);
 
 private:
   PotatoDB* db_; // Use as a reference
-
-  DiskMgr disk_mgr_;
-  BuffMgr buff_mgr_;
-  LogMgr log_mgr_;
-  LockMgr lock_mgr_;
-  TxnMgr txn_mgr_;
-  Catalog catalog_;
-  ExecEngine exec_eng_;
 };

@@ -6,7 +6,9 @@ void Value::serialize_to(MRef<Buffer> buff) {
   value_type()->serialize_to(buff, *this);
 }
 
-Value Value::deserialize_from(CRef<Buffer> buff, TypeId type_id) {
+Value Value::deserialize_from(CRef<Buffer> buff,
+                              UNUSED size_t offset,
+                              TypeId type_id) {
   return Type::instance(type_id)->deserialize_from(buff);
 }
 

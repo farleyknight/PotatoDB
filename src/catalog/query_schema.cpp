@@ -14,17 +14,9 @@
  * from or connected to QuerySchemas
  ************************************************/
 
-QuerySchema::QuerySchema(vector<QueryColumn> cols,
-                         vector<string> names)
-  : BaseSchema (cols),
-    names_     (names) {}
-
-/**********************************************
- * TODO: Document me
- **********************************************/
-
-UNUSED static QuerySchema
-merge(CRef<QuerySchema> left, CRef<QuerySchema> right) {
+UNUSED QuerySchema QuerySchema::merge(CRef<QuerySchema> left,
+                                      CRef<QuerySchema> right)
+{
   vector<QueryColumn> cols;
   cols.insert(cols.end(), left.all().begin(), left.all().end());
   cols.insert(cols.end(), right.all().begin(), right.all().end());
@@ -39,9 +31,6 @@ merge(CRef<QuerySchema> left, CRef<QuerySchema> right) {
   return QuerySchema(cols, names);
 }
 
-/**********************************************
- * TODO: Document me
- **********************************************/
 
 QuerySchema QuerySchema::slice(CRef<TableSchema> from,
                                CRef<vector<string>> names)
@@ -58,10 +47,6 @@ QuerySchema QuerySchema::slice(CRef<TableSchema> from,
   return QuerySchema(cols, names);
 }
 
-/**********************************************
- * TODO: Document me
- **********************************************/
-
 QuerySchema QuerySchema::slice(CRef<QuerySchema> from,
                                CRef<vector<string>> names)
 {
@@ -71,10 +56,6 @@ QuerySchema QuerySchema::slice(CRef<QuerySchema> from,
   }
   return QuerySchema(cols, names);
 }
-
-/**********************************************
- * TODO: Document me
- **********************************************/
 
 QuerySchema QuerySchema::copy(CRef<TableSchema> original) {
   vector<QueryColumn> cols;
@@ -89,10 +70,6 @@ QuerySchema QuerySchema::copy(CRef<TableSchema> original) {
   }
   return QuerySchema(cols, names);
 }
-
-/**********************************************
- * TODO: Document me
- **********************************************/
 
 string QuerySchema::to_string() const {
   std::ostringstream os;

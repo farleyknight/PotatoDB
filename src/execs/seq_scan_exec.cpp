@@ -36,7 +36,7 @@ Tuple SeqScanExec::next() {
   return tuple;
 }
 
-CRef<TableHeap> SeqScanExec::table_heap() {
+TableHeap& SeqScanExec::table_heap() {
   return exec_ctx_.table_mgr().table_heap_for(plan_->table_oid());
 }
 

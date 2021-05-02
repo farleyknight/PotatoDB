@@ -17,10 +17,11 @@ public:
     data_.resize(size);
   }
 
-  // No copy
-  Buffer(CRef<Buffer>) = delete;
-  // No copy assign
-  Buffer& operator=(CRef<Buffer>) = delete;
+  // NOTE: Buffers are allowed to be copied, but Pages are not.
+  // Allow copy
+  Buffer(CRef<Buffer>) = default;
+  // Allow copy assign
+  Buffer& operator=(CRef<Buffer>) = default;
 
   Data& as_bytes() {
     return data_;
@@ -89,6 +90,16 @@ public:
     return data_.end();
   }
 
+  template<typename numeric_t>
+  void write_numeric(size_t offset, numeric_t n) {
+    *reinterpret_cast<numeric_t*>(ptr(offset)) = n;
+  }
+
+  template<typename numeric_t>
+  numeric_t read_numeric(size_t offset) const {
+    return *reinterpret_cast<const numeric_t*>(cptr(offset));
+  }
+
   void write_int64(size_t offset, int64_t n) {
     *reinterpret_cast<int64_t*>(ptr(offset)) = n;
   }
@@ -111,6 +122,14 @@ public:
 
   uint32_t read_uint32(size_t offset) const {
     return *reinterpret_cast<const uint32_t*>(cptr(offset));
+  }
+
+  void write_int8(size_t offset, int8_t n) {
+    *reinterpret_cast<int8_t*>(ptr(offset)) = n;
+  }
+
+  int64_t read_int8(size_t offset) const {
+    return *reinterpret_cast<const int8_t*>(cptr(offset));
   }
 
   void write_float(size_t offset, float f) {
@@ -149,6 +168,6 @@ public:
 
     return new_string;
   }
-private:
+  
   Data data_;
 };

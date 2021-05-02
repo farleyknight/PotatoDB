@@ -1,12 +1,12 @@
 #include "txns/txn.hpp"
 #include "txns/txn_mgr.hpp"
 
-MRef<Txn> TxnMgr::begin() {
+Txn& TxnMgr::begin() {
   return begin(IsolationLevel::REPEATABLE_READ);
 }
 
-MRef<Txn> TxnMgr::begin(IsolationLevel level =
-                        IsolationLevel::REPEATABLE_READ)
+Txn& TxnMgr::begin(IsolationLevel level =
+                   IsolationLevel::REPEATABLE_READ)
 {
   global_txn_latch_.rlock();
 
@@ -22,16 +22,17 @@ MRef<Txn> TxnMgr::begin(IsolationLevel level =
   return table_.at(txn_id);
 }
 
-void TxnMgr::commit(MRef<Txn> txn) {
+void TxnMgr::commit(Txn& txn) {
   // Perform all deletes before we commit.
   auto write_set = txn.write_set();
   while (!write_set.empty()) {
     auto &item = write_set.back();
-    auto table = item.table();
+
     if (item.is_delete()) {
+      auto &table_heap = table_mgr_.table_heap_for(item.table_oid());
       // Note that this also releases the lock when
       // holding the page latch.
-      table.apply_delete(item.rid(), txn);
+      table_heap.apply_delete(item.rid(), txn);
     }
     write_set.pop_back();
   }
@@ -46,32 +47,31 @@ void TxnMgr::commit(MRef<Txn> txn) {
   global_txn_latch_.runlock();
 }
 
-
-void TxnMgr::abort(MRef<Txn> txn) {
+void TxnMgr::abort(Txn& txn) {
   txn.abort();
   // rollback before releasing lock
   auto write_set = txn.write_set();
 
   while (!write_set.empty()) {
     auto &item = write_set.back();
-    auto table = item.table();
+    auto &table_heap = table_mgr_.table_heap_for(item.table_oid());
 
     switch (item.wtype()) {
     case WType::DELETE:
-      table.rollback_delete(item.rid(), txn);
+      table_heap.rollback_delete(item.rid(), txn);
       break;
     case WType::INSERT:
-      table.apply_delete(item.rid(), txn);
+      table_heap.apply_delete(item.rid(), txn);
       break;
     case WType::UPDATE:
-      table.update_tuple(item.tuple(), item.rid(), txn);
+      table_heap.update_tuple(item.tuple(), item.rid(), txn);
       break;
     }
     write_set.pop_back();
   }
   write_set.clear();
 
-  MSet<RID> lock_set;
+  MutSet<RID> lock_set;
   for (auto item : txn.shared_lock_set()) {
     lock_set.emplace(item);
   }
@@ -83,8 +83,8 @@ void TxnMgr::abort(MRef<Txn> txn) {
   }
 }
 
-void TxnMgr::release_locks(MRef<Txn> txn) const {
-  MSet<RID> lock_set;
+void TxnMgr::release_locks(Txn& txn) const {
+  MutSet<RID> lock_set;
   for (auto item : txn.exclusive_lock_set()) {
     lock_set.emplace(item);
   }

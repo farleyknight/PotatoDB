@@ -1,3 +1,5 @@
+#pragma once
+
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -5,12 +7,14 @@
 
 #include "common/types.hpp"
 
-using SocketFunc = std::function<void(WPtr<ClientSocket>)>;
-
+class PotatoDB;
 class ClientSocket;
+
+using SocketFunc = std::function<void(WPtr<ClientSocket>)>;
 
 class SocketServer {
 public:
+  SocketServer(PotatoDB& instance);
   ~SocketServer();
 
   void set_backlog(int backlog);
@@ -42,6 +46,8 @@ private:
   void stale_socket_cleanup();
   void finish_tasks();
 
+  shared_ptr<ClientSocket> make_client_socket(file_desc_t client_fd);
+
   int         backlog_     =  5;
   int         port_        = -1;
   file_desc_t main_socket_ = -1;
@@ -51,14 +57,15 @@ private:
   file_desc_t curr_high_fd_, new_high_fd_;
 
   SocketFunc accept_func_, read_func_;
-  MutVec<MutSPtr<ClientSocket>> sockets_;
+  vector<shared_ptr<ClientSocket>> sockets_;
 
-  MutVec<Task> tasks_;
+  vector<Task> tasks_;
 
   // NOTE: Stale file descriptors are connections that can be dropped
   // Since another thread may be already accessing this vector, we
   // have a mutex, to ensure only one thread is accessing the vector
   // at a time.
-  MutVec<file_desc_t> stale_fds_;
+  vector<file_desc_t> stale_fds_;
   Mutex stale_fd_mutex_;
+  PotatoDB& instance_;
 };

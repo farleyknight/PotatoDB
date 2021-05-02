@@ -12,7 +12,7 @@ public:
   using DataStoreT = typename ValueBase<>::DataStoreT;
   using StoreT     = typename ValueBase<>::StoreClass;
 
-  void serialize_to(MRef<Buffer> buff);
+  void serialize_to(Buffer& buff);
   static Value deserialize_from(CRef<Buffer> buff,
                                 size_t offset,
                                 TypeId type_id);
@@ -96,6 +96,5 @@ public:
   Value(TypeId type_id, DataStoreT data)
     : ValueBase(type_id, data) {}
 };
-
 
 template char* Value::as<char*>() const;

@@ -10,12 +10,14 @@ class Txn;
 
 class TableHeap {
 public:
-  TableHeap(BuffMgr& buff_mgr,
+  TableHeap(table_oid_t table_oid,
+            BuffMgr& buff_mgr,
             LockMgr& lock_mgr,
             LogMgr& log_mgr,
             PageId first_page_id);
 
-  TableHeap(BuffMgr& buff_mgr,
+  TableHeap(table_oid_t table_oid,
+            BuffMgr& buff_mgr,
             LockMgr& lock_mgr,
             LogMgr& log_mgr,
             Txn& txn);
@@ -31,7 +33,7 @@ public:
     return first_page_id_;
   }
 
-  bool insert_tuple(CRef<Tuple> tuple,
+  bool insert_tuple(Tuple& tuple,
                     Txn& txn);
   bool mark_delete(CRef<RID> rid,
                    Txn& txn);
@@ -42,14 +44,15 @@ public:
                     Txn& txn);
   void rollback_delete(CRef<RID> rid, Txn& txn);
 
-  Option<Tuple> find_tuple(CRef<RID> rid, Txn& txn) const;
+  Tuple find_tuple(CRef<RID> rid, Txn& txn) const;
 
-  TableIterator begin(Txn& txn) const;
-  TableIterator end(Txn& txn) const;
+  TableIterator begin(Txn& txn);
+  TableIterator end(Txn& txn);
 
   BuffMgr& buff_mgr() { return buff_mgr_; }
 
 private:
+  table_oid_t table_oid_;
   PageId first_page_id_;
   LockMgr& lock_mgr_;
   LogMgr& log_mgr_;

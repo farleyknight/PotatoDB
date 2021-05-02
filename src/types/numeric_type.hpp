@@ -37,12 +37,14 @@ public:
     }
   }
 
-  void serialize_to(MRef<Buffer> buff, Value val) const override {
-    Type::rw().write_int<numeric_t>(buff, val.as<numeric_t>());
+  void serialize_to(Buffer& buff, Value val) const override {
+    size_t offset = 0;
+    buff.write_numeric<numeric_t>(offset, val.as<numeric_t>());
   }
 
   Value deserialize_from(CRef<Buffer> buff) const override {
-    return Value::make(Type::rw().read_int<numeric_t>(buff));
+    size_t offset = 0;
+    return Value::make(buff.read_numeric<numeric_t>(offset));
   }
 
   Value min() const override {

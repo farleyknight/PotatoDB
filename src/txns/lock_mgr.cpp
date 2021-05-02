@@ -1,7 +1,7 @@
 #include "txns/lock_mgr.hpp"
 
-LockMgr::LockMgr(TwoPLMode two_pl_mode = TwoPLMode::STRICT,
-                 DeadlockMode deadlock_mode = DeadlockMode::PREVENTION)
+LockMgr::LockMgr(TwoPLMode two_pl_mode,
+                 DeadlockMode deadlock_mode)
   : two_pl_mode_   (two_pl_mode),
     deadlock_mode_ (deadlock_mode)
 {
@@ -29,7 +29,7 @@ LockMgr::LockMgr(TwoPLMode two_pl_mode = TwoPLMode::STRICT,
   }
 }
 
-~LockMgr::LockMgr() {
+LockMgr::~LockMgr() {
   if (deadlock_detection()) {
     enable_cycle_detection_ = false;
     cycle_detection_thread_->join();
@@ -166,7 +166,7 @@ bool LockMgr::lock_exclusive(MRef<Txn> txn, CRef<RID> rid) {
 }
 
 
-bool LockMgr:lock_upgrade(MRef<Txn> txn, CRef<RID> rid) {
+bool LockMgr::lock_upgrade(Txn& txn, CRef<RID> rid) {
   std::unique_lock<Mutex> guard(latch_);
 
   if (!can_obtain_lock(txn)) {
@@ -184,9 +184,9 @@ bool LockMgr:lock_upgrade(MRef<Txn> txn, CRef<RID> rid) {
   //
   // Everything else is identical to granting an exclusive lock.
 
-  MRef<LockRequestQueue> queue = lock_table_[rid];
-  auto original                  = queue.begin();
-  auto first_exclusive           = queue.end();
+  LockRequestQueue&    queue = lock_table_[rid];
+  auto original              = queue.begin();
+  auto first_exclusive       = queue.end();
 
   for (auto it = queue.begin(); it != queue.end(); ++it) {
     // Part (1) - Look for original
@@ -217,7 +217,7 @@ bool LockMgr:lock_upgrade(MRef<Txn> txn, CRef<RID> rid) {
   // Part (4) - Copy old request to new one
   // NOTE: original here is an iterator, so we deref to get the
   // current object of the iterator.
-  MRef<LockRequest> request = *original;
+  LockRequest& request = *original;
   request.granted = true;
   request.set_mode(LockMode::EXCLUSIVE);
 
@@ -239,7 +239,7 @@ bool LockMgr:lock_upgrade(MRef<Txn> txn, CRef<RID> rid) {
   return grant_upgrade_request(request, txn, rid);
 }
 
-bool LockMgr::unlock(MRef<Txn> txn, CRef<RID> rid) {
+bool LockMgr::unlock(Txn& txn, CRef<RID> rid) {
   std::unique_lock<std::mutex> guard(latch_);
   if (!can_unlock(txn)) {
     return false;
@@ -248,7 +248,7 @@ bool LockMgr::unlock(MRef<Txn> txn, CRef<RID> rid) {
   assert(lock_table_.count(rid) > 0);
 
   // ind the matching txn
-  MRef<LockRequestQueue> queue = lock_table_[rid];
+  LockRequestQueue& queue = lock_table_[rid];
   for (auto it = queue.begin(); it != queue.end(); ++it) {
     if (it->txn_id == txn.id()) {
       return remove_request(it, queue, txn, rid);
@@ -263,9 +263,9 @@ bool LockMgr::unlock(MRef<Txn> txn, CRef<RID> rid) {
 }
 
 
-bool LockMgr::grant_read_request(MRef<LockRequest> request,
-                                 MRef<LockRequestQueue> queue,
-                                 MRef<Txn> txn,
+bool LockMgr::grant_read_request(LockRequest& request,
+                                 LockRequestQueue& queue,
+                                 Txn& txn,
                                  CRef<RID> rid)
 {
   request.granted = true;
@@ -277,8 +277,8 @@ bool LockMgr::grant_read_request(MRef<LockRequest> request,
 }
 
 
-bool LockMgr::grant_write_request(MRef<LockRequest> request,
-                                  MRef<Txn> txn,
+bool LockMgr::grant_write_request(LockRequest& request,
+                                  Txn& txn,
                                   CRef<RID> rid)
 {
   request.granted = true;
@@ -289,8 +289,8 @@ bool LockMgr::grant_write_request(MRef<LockRequest> request,
 }
 
 
-bool LockMgr::grant_upgrade_request(MRef<LockRequest> request,
-                                    MRef<Txn> txn,
+bool LockMgr::grant_upgrade_request(LockRequest& request,
+                                    Txn& txn,
                                     CRef<RID> rid)
 {
   request.granted = true;
@@ -313,9 +313,9 @@ void LockMgr::run_cycle_detection() {
 }
 
 bool LockMgr::remove_request(MutList<LockRequest>::iterator it,
-                             MRef<LockRequestQueue> queue,
-                             MRef<Txn> txn,
-                             Ref<RID> rid) const
+                             LockRequestQueue& queue,
+                             Txn& txn,
+                             CRef<RID> rid) const
 {
   if (it->is_exclusive()) {
     txn.exclusive_lock_set().erase(rid);
@@ -334,7 +334,7 @@ bool LockMgr::remove_request(MutList<LockRequest>::iterator it,
 // A txn can obtain a lock if it is not finished and it is not
 // shrinking. Basically it can only attempt if it is growing. But we
 // should keep track of finished vs shrinking as separate abort reasons.
-bool LockMgr::can_obtain_lock(MRef<Txn> txn) {
+bool LockMgr::can_obtain_lock(Txn& txn) {
   if (txn.is_finished()) {
     txn.abort_with_reason(AbortReason::LOCK_AFTER_FINISHED);
     return false;
@@ -347,7 +347,7 @@ bool LockMgr::can_obtain_lock(MRef<Txn> txn) {
   return true;
 }
 
-bool LockMgr::can_unlock(MRef<Txn> txn) {
+bool LockMgr::can_unlock(Txn& txn) {
   // if strict 2pl, when unlock txn must be in committed or abort state
   if (strict_2pl()) {
     // A txn is finished if it is committed or aborted

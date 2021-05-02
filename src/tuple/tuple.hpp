@@ -23,14 +23,14 @@ public:
   Tuple(vector<Value> values, CRef<QuerySchema> schema);
 
   // Copy constructor
-  Tuple(CRef<Tuple> other);
-
+  Tuple(CRef<Tuple> other) = default;
   // Destructor
-  ~Tuple();
+  ~Tuple() = default;
 
-  /**********************************************
-   * Instance methods
-   **********************************************/
+
+  bool is_valid() const {
+    return rid_.has_value();
+  }
 
   CRef<Buffer> data_for(CRef<QuerySchema> schema,
                         const uint32_t column_index) const;
@@ -58,7 +58,6 @@ public:
   size_t size()                 const { return buffer_.size(); }
 
   void reset(size_t new_size) {
-    // NOTE: reserve does not actually do a resize!
     buffer_.resize(new_size);
     std::fill(buffer_.begin(), buffer_.end(), 0);
   }
@@ -71,6 +70,7 @@ public:
                     size_t n_bytes)
   {
     assert(buffer_.size() >= n);
+    // TODO: Handle this inside the Buffer
     memcpy(buffer_.ptr() + dest_offset,
            source_buffer.cptr() + source_offset,
            n_bytes);

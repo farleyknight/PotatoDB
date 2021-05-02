@@ -7,36 +7,33 @@
 
 #include "common/config.hpp"
 
-#include "txns/lock_mgr.hpp"
-#include "txns/txn.hpp"
+#include "buffer/table_mgr.hpp"
 
 #include "page/table_heap.hpp"
 
+#include "txns/lock_mgr.hpp"
+#include "txns/txn.hpp"
+
 class TxnMgr {
 public:
-  /**********************************************
-  * Constructors & destructor
-  **********************************************/
-
-  explicit TxnMgr(MRef<LockMgr> lock_mgr,
-                  MRef<LogMgr> log_mgr)
-    : lock_mgr_ (lock_mgr),
-      log_mgr_  (log_mgr) {}
+  explicit TxnMgr(LockMgr& lock_mgr,
+                  LogMgr& log_mgr,
+                  TableMgr& table_mgr)
+    : lock_mgr_  (lock_mgr),
+      log_mgr_   (log_mgr),
+      table_mgr_ (table_mgr)
+  {}
 
   // No copy
   TxnMgr(CRef<TxnMgr>) = delete;
   // No copy assign
-  MRef<TxnMgr> operator=(CRef<TxnMgr>) = delete;
+  TxnMgr& operator=(CRef<TxnMgr>) = delete;
   ~TxnMgr() = default; // Default delete
 
-  /**********************************************
-  * Instance methods
-  **********************************************/
-
-  MRef<Txn> begin();
-  MRef<Txn> begin(IsolationLevel level);
-  void commit(MRef<Txn> txn);
-  void abort(MRef<Txn> txn);
+  Txn& begin();
+  Txn& begin(IsolationLevel level);
+  void commit(Txn& txn);
+  void abort(Txn& txn);
 
   CRef<Txn> find(txn_id_t txn_id) {
     assert(table_.find(txn_id) != table_.end());
@@ -52,15 +49,15 @@ public:
   }
 
 private:
-  void release_locks(MRef<Txn> txn) const;
+  void release_locks(Txn& txn) const;
 
   // Atomic, to ensure that no two Txns end up with the same ID
   Atomic<txn_id_t> curr_txn_id_ = 0;
-  MRef<LockMgr> lock_mgr_;
-  MRef<LogMgr> log_mgr_;
+  LockMgr& lock_mgr_;
+  UNUSED LogMgr& log_mgr_;
+  TableMgr& table_mgr_;
 
   MutMap<txn_id_t, Txn> table_;
-  /** The global txn latch is used for checkpointing. */
   RWLatch global_txn_latch_;
 };
 

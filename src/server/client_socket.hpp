@@ -11,33 +11,33 @@
 
 #include "common/types.hpp"
 
-class Session;
-class SocketServer;
+#include "server/socket_server.hpp"
+#include "server/session.hpp"
 
 class ClientSocket {
 public:
   ClientSocket(file_desc_t file_desc,
-               MRef<SocketServer> server,
-               MRef<Session> session);
+               SocketServer* server,
+               Session session);
   ~ClientSocket() = default;
 
   int file_desc() const;
   void shutdown();
   void write(CRef<string> data) const;
   string read() const;
-  MutString process_request(MutString message) const;
+  string process_request(string message) const;
 
   // No copy
   ClientSocket(CRef<ClientSocket>) = delete;
   // No copy assign
-  MRef<ClientSocket> operator=(CRef<ClientSocket>) = delete;
+  ClientSocket& operator=(CRef<ClientSocket>) = delete;
 
-  MRef<Session> session() {
+  Session& session() {
     return session_;
   }
 
 private:
   file_desc_t file_desc_ = -1;
-  MRef<SocketServer> server_;
-  MRef<Session> session_;
+  SocketServer* server_;
+  Session session_;
 };

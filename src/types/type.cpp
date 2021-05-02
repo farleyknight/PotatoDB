@@ -62,50 +62,50 @@ MutString Type::as_string(const TypeId type_id) {
   }
 }
 
-virtual Value add(UNUSED CRef<Value> left,
-                  UNUSED CRef<Value> right) const {
+Value Type::add(UNUSED CRef<Value> left,
+                UNUSED CRef<Value> right) const {
   throw NotImplementedException("add not implemented!");
 }
 
-virtual Value subtract(UNUSED CRef<Value> left,
-                       UNUSED CRef<Value> right) const {
+Value Type::subtract(UNUSED CRef<Value> left,
+                     UNUSED CRef<Value> right) const {
   throw NotImplementedException("subtract not implemented!");
 }
 
-virtual Value multiply(UNUSED CRef<Value> left,
-                       UNUSED CRef<Value> right) const {
+Value Type::multiply(UNUSED CRef<Value> left,
+                     UNUSED CRef<Value> right) const {
   throw NotImplementedException("multiply not implemented!");
 }
 
-virtual Value divide(UNUSED CRef<Value> left,
-                     UNUSED CRef<Value> right) const {
+Value Type::divide(UNUSED CRef<Value> left,
+                   UNUSED CRef<Value> right) const {
   throw NotImplementedException("divide not implemented!");
 }
 
-virtual Value modulo(UNUSED CRef<Value> left,
-                     UNUSED CRef<Value> right) const {
+Value Type::modulo(UNUSED CRef<Value> left,
+                   UNUSED CRef<Value> right) const {
   throw NotImplementedException("modulo not implemented!");
 }
 
-virtual Value min(UNUSED CRef<Value> left,
-                  UNUSED CRef<Value> right) const {
+Value Type::min(UNUSED CRef<Value> left,
+                UNUSED CRef<Value> right) const {
   throw NotImplementedException("min not implemented!");
 }
 
-virtual Value max(UNUSED CRef<Value> left,
-                  UNUSED CRef<Value> right) const {
+Value Type::max(UNUSED CRef<Value> left,
+                UNUSED CRef<Value> right) const {
   throw NotImplementedException("max not implemented!");
 }
 
-virtual Value sqrt(UNUSED CRef<Value> val) const {
+Value Type::sqrt(UNUSED CRef<Value> val) const {
   throw NotImplementedException("max not implemented!");
 }
 
-static Value max_value(UNUSED TypeId type_id) { 
+Value Type::max_value(UNUSED TypeId type_id) {
   throw NotImplementedException("max not implemented!");
 }
 
-static Value min_value(UNUSED TypeId type_id) {
+Value Type::min_value(UNUSED TypeId type_id) {
   throw NotImplementedException("max not implemented!");
 }
 

@@ -49,6 +49,12 @@ public:
   size_t size() {
     return results_.size();
   }
+
+  string to_string() {
+    // TODO: Send this back to the client in a structured way
+    return "";
+  }
+
 private:
   SchemaRef schema_;
   vector<Tuple> results_;

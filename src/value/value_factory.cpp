@@ -1,7 +1,7 @@
 
-#include "tuple/value_factory.hpp"
+#include "value/value_factory.hpp"
 
-Value ValueFactory::from_column(BaseColumn column); {
+Value ValueFactory::from_column(BaseColumn column) {
   switch (column.type_id()) {
   case TypeId::BOOLEAN:
     return random_boolean();
@@ -23,7 +23,8 @@ Value ValueFactory::from_column(BaseColumn column); {
 
 String ValueFactory::random_string(uint32_t length) {
   auto seed = std::chrono::system_clock::now().time_since_epoch().count();
-  std::mt19937 generator(seed);  // mt19937 is a standard mersenne_twister_engine
+  // mt19937 is a standard mersenne_twister_engine
+  std::mt19937 generator(seed);
 
   static const char alphanum[] =
     "0123456789"

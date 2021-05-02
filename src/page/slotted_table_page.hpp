@@ -5,6 +5,9 @@
 
 class SlottedTablePage : public TablePage {
 public:
+  SlottedTablePage(Page* page)
+    : TablePage (page)
+  {}
 
   // TODO: Rename to `allocate`
   void init(PageId page_id,
@@ -32,11 +35,11 @@ public:
     set_prev_page_id(prev_page_id);
     set_next_page_id(PageId::INVALID());
 
-    set_free_space_pointer(page.size());
+    set_free_space_pointer(page_->size());
     set_tuple_count(0);
   }
 
-  bool insert_tuple(CRef<Tuple> tuple, RID& rid) {
+  bool insert_tuple(Tuple& tuple) {
     // If there is not enough space, then return false.
     if (free_space_remaining() < tuple.size() + TUPLE_SLOT_SIZE) {
       return false;
@@ -46,7 +49,7 @@ public:
     uint32_t i;
     for (i = 0; i < tuple_count(); i++) {
       // If the slot is empty, i.e. its tuple has size 0,
-      if (tuple_size_at(page, i) == 0) {
+      if (tuple_size_at(i) == 0) {
         // Then we break out of the loop at index i.
         break;
       }
@@ -62,20 +65,21 @@ public:
     // Otherwise we claim available free space..
     set_free_space_pointer(free_space_pointer() - tuple.size());
 
-    page.copy_n_bytes(0, // Source offset
-                      // Destination offset
-                      free_space_pointer(page),
-                      tuple.buffer(), // Source buffer
-                      tuple.size()); // N bytes
+    page_->copy_n_bytes(0, // Source offset
+                        // Destination offset
+                        free_space_pointer(),
+                        tuple.buffer(), // Source buffer
+                        tuple.size()); // N bytes
 
     // Set the tuple.
-    set_tuple_offset_at_slot(i, free_space_pointer(page));
+    set_tuple_offset_at_slot(i, free_space_pointer());
     set_tuple_size_at(i, tuple.size());
 
-    rid.set(table_page_id(), i);
     if (i == tuple_count()) {
       set_tuple_count(tuple_count() + 1);
     }
+
+    tuple.set_rid(RID(table_page_id(), i));
 
     return true;
   }
@@ -127,8 +131,7 @@ public:
     return true;
   }
 
-  void rollback_delete(Page& page,
-                       CRef<RID> rid,
+  void rollback_delete(CRef<RID> rid,
                        Txn& txn,
                        LogMgr& log_mgr)
   {
@@ -189,8 +192,8 @@ public:
   {
     uint32_t slot_id = rid.slot_id();
 
-    uint32_t tuple_offset = tuple_offset_at_slot(page, slot_id);
-    uint32_t tuple_size = tuple_size_at(page, slot_id);
+    uint32_t tuple_offset = tuple_offset_at_slot(slot_id);
+    uint32_t tuple_size = tuple_size_at(slot_id);
     // Check if this is a delete operation, i.e. commit a delete.
     if (is_deleted(tuple_size)) {
       tuple_size = unset_deleted_flag(tuple_size);
@@ -201,7 +204,7 @@ public:
     Tuple delete_tuple;
     delete_tuple.copy_n_bytes(tuple_offset, // Source offset
                               0, // Destination
-                              page.buffer(), // Source buffer
+                              page_->buffer(), // Source buffer
                               tuple_size); // N bytes
 
     delete_tuple.set_rid(rid);
@@ -223,10 +226,10 @@ public:
 
     uint32_t pointer = free_space_pointer();
 
-    page_.copy_n_bytes(pointer, // Source offset
-                       pointer + tuple_size, // Destination offset
-                       page.buffer(),
-                       tuple_offset - pointer); // N bytes
+    page_->copy_n_bytes(pointer, // Source offset
+                        pointer + tuple_size, // Destination offset
+                        page_->buffer(),
+                        tuple_offset - pointer); // N bytes
 
     // memmove(
     //   data() + pointer + tuple_size,
@@ -241,37 +244,38 @@ public:
     // Update all tuple offsets.
     for (uint32_t i = 0; i < tuple_count(); ++i) {
       uint32_t tuple_offset_i = tuple_offset_at_slot(i);
-      if (tuple_size_at(page, i) != 0 && tuple_offset_i < tuple_offset) {
+      if (tuple_size_at(i) != 0 && tuple_offset_i < tuple_offset) {
         set_tuple_offset_at_slot(i, tuple_offset_i + tuple_size);
       }
     }
   }
 
-  bool find_tuple(CRef<RID> rid, Tuple& tuple) {
+  Tuple find_tuple(CRef<RID> rid) {
     // Get the current slot number.
     uint32_t slot_id = rid.slot_id();
     // If somehow we have more slots than tuples, abort the txn.
     if (slot_id >= tuple_count()) {
-      return false;
+      return Tuple();
     }
     // Otherwise get the current tuple size too.
     uint32_t tuple_size = tuple_size_at(slot_id);
     // If the tuple is deleted, abort the txn.
     if (is_deleted(tuple_size)) {
-      return false;
+      return Tuple();
     }
 
     // At this point, we have at least a shared lock on the RID.
     // Copy the tuple data into our result.
     uint32_t tuple_offset = tuple_offset_at_slot(slot_id);
+    Tuple tuple;
     tuple.reset(tuple_size);
     tuple.copy_n_bytes(tuple_offset, // Source offset
                        0, // Destination offset
-                       page.buffer(), // Source buffer
+                       page_->buffer(), // Source buffer
                        tuple_size); // N bytes
 
     tuple.set_rid(rid);
-    return true;
+    return tuple;
   }
 
   Option<RID> first_tuple_rid() {
@@ -298,13 +302,13 @@ public:
   }
 
   uint32_t tuple_count() {
-    return page_.read_uint32(OFFSET_TUPLE_COUNT);
+    return page_->read_uint32(OFFSET_TUPLE_COUNT);
     // return *reinterpret_cast<uint32_t *>(data() + OFFSET_TUPLE_COUNT);
   }
 
   /** Set the number of tuples in this page. */
   void set_tuple_count(uint32_t tuple_count) {
-    page_.write_uint32(OFFSET_TUPLE_COUNT, tuple_count);
+    page_->write_uint32(OFFSET_TUPLE_COUNT, tuple_count);
     // memcpy(data() + OFFSET_TUPLE_COUNT, &tuple_count, sizeof(uint32_t));
   }
 
@@ -316,21 +320,21 @@ private:
                     uint32_t slot_id,
                     uint32_t tuple_size)
   {
-    uint32_t tuple_offset = tuple_offset_at_slot(page, slot_id);
+    uint32_t tuple_offset = tuple_offset_at_slot(slot_id);
     old_tuple.copy_n_bytes(tuple_offset,
                            0,
-                           page_.buffer(),
+                           page_->buffer(),
                            tuple_size);
 
     old_tuple.set_rid(rid);
 
     uint32_t pointer = free_space_pointer();
 
-    page.copy_n_bytes(pointer, // Source offset
-                      // Destination offset
-                      pointer + tuple_size - new_tuple.size(),
-                      page.buffer(), // Source buffer
-                      tuple_offset - pointer); // N bytes
+    page_->copy_n_bytes(pointer, // Source offset
+                        // Destination offset
+                        pointer + tuple_size - new_tuple.size(),
+                        page_->buffer(), // Source buffer
+                        tuple_offset - pointer); // N bytes
 
     // memmove(
     //   data() + pointer + tuple_size - new_tuple.size(),
@@ -340,11 +344,11 @@ private:
 
     set_free_space_pointer(pointer + tuple_size - new_tuple.size());
 
-    page_.copy_n_bytes(0, // Source offset
-                       // Dest offset
-                       tuple_offset + tuple_size - new_tuple.size(),
-                       new_tuple.buffer(), // Source buffer
-                       new_tuple.size()); // N Bytes
+    page_->copy_n_bytes(0, // Source offset
+                        // Dest offset
+                        tuple_offset + tuple_size - new_tuple.size(),
+                        new_tuple.buffer(), // Source buffer
+                        new_tuple.size()); // N Bytes
 
     set_tuple_size_at(slot_id, new_tuple.size());
 
@@ -360,37 +364,37 @@ private:
   }
 
   uint32_t free_space_pointer() {
-    return page_.read_uint32(OFFSET_FREE_SPACE);
+    return page_->read_uint32(OFFSET_FREE_SPACE);
   }
 
   void set_free_space_pointer(uint32_t free_space_pointer) {
-    page_.write_uint32(OFFSET_FREE_SPACE, free_space_pointer);
+    page_->write_uint32(OFFSET_FREE_SPACE, free_space_pointer);
   }
 
   uint32_t free_space_remaining() {
     return free_space_pointer() -
-      SIZE_TABLE_PAGE_HEADER - TUPLE_SLOT_SIZE * tuple_count(page);
+      SIZE_TABLE_PAGE_HEADER - TUPLE_SLOT_SIZE * tuple_count();
   }
 
   uint32_t tuple_offset_at_slot(uint32_t slot_id) {
     auto offset = OFFSET_TUPLE_OFFSET + TUPLE_SLOT_SIZE * slot_id;
-    return page_.read_uint32(offset);
+    return page_->read_uint32(offset);
   }
 
   void set_tuple_offset_at_slot(uint32_t slot_id,
                                 uint32_t tuple_offset) {
     auto buffer_offset = OFFSET_TUPLE_OFFSET + TUPLE_SLOT_SIZE * slot_id;
-    page_.write_uint32(buffer_offset, tuple_offset);
+    page_->write_uint32(buffer_offset, tuple_offset);
   }
 
   uint32_t tuple_size_at(uint32_t slot_id) {
     auto buffer_offset = OFFSET_TUPLE_SIZE + TUPLE_SLOT_SIZE * slot_id;
-    return page_.read_uint32(buffer_offset);
+    return page_->read_uint32(buffer_offset);
   }
 
   void set_tuple_size_at(uint32_t slot_id, uint32_t size) {
     auto buffer_offset = OFFSET_TUPLE_SIZE + TUPLE_SLOT_SIZE * slot_id;
-    page_.write_uint32(buffer_offset, size);
+    page_->write_uint32(buffer_offset, size);
   }
 
   static bool is_deleted(uint32_t tuple_size) {

@@ -7,7 +7,9 @@ class TableSchema;
 
 class QuerySchema : public BaseSchema<QueryColumn> {
 public:
-  QuerySchema(vector<QueryColumn> cols, vector<string> names);
+  QuerySchema(vector<QueryColumn> cols, vector<string> names)
+    : BaseSchema (cols, names)
+  {}
 
   // No copy
   QuerySchema(CRef<QuerySchema>) = delete;

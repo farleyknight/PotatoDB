@@ -34,32 +34,36 @@ class LockMgr;
 
 class TablePage : public PageLayout {
 public:
+  TablePage(Page* page)
+    : PageLayout (page)
+  {}
+
   void set_page_id(PageId page_id) {
-    page_.write_page_id(0, page_id);
+    page_->write_page_id(0, page_id);
   }
 
   PageId table_page_id() {
-    return page_.read_page_id(0);
+    return page_->read_page_id(0);
   }
 
   PageId prev_page_id() {
-    return page_.read_page_id(OFFSET_PREV_PAGE_ID);
+    return page_->read_page_id(OFFSET_PREV_PAGE_ID);
   }
 
   PageId next_page_id() {
-    return page_.read_page_id(OFFSET_NEXT_PAGE_ID);
+    return page_->read_page_id(OFFSET_NEXT_PAGE_ID);
   }
 
   void set_table_page_id(PageId table_page_id) {
-    page_.write_page_id(0, table_page_id);
+    page_->write_page_id(0, table_page_id);
   }
 
   void set_prev_page_id(PageId prev_page_id) {
-    page_.write_page_id(OFFSET_PREV_PAGE_ID, prev_page_id);
+    page_->write_page_id(OFFSET_PREV_PAGE_ID, prev_page_id);
   }
 
   void set_next_page_id(PageId next_page_id) {
-    page_.write_page_id(OFFSET_NEXT_PAGE_ID, next_page_id);
+    page_->write_page_id(OFFSET_NEXT_PAGE_ID, next_page_id);
   }
 
 protected:

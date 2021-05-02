@@ -2,7 +2,9 @@
 #include "catalog/base_schema.hpp"
 
 template<class ColT>
-BaseSchema<ColT>::BaseSchema(Vec<ColT> cols) {
+BaseSchema<ColT>::BaseSchema(vector<ColT> cols, vector<string> names) {
+  assert(cols.size() == names.size());
+
   size_t offset = 0;
   for (size_t oid = 0; oid < cols.size(); ++oid) {
     auto &col = cols[oid];
@@ -15,7 +17,7 @@ BaseSchema<ColT>::BaseSchema(Vec<ColT> cols) {
     offsets_.push_back(offset);
     offset += col.fixed_length();
 
-    column_oids_[col.name()] = oid;
+    column_oids_[names[oid]] = oid;
     columns_.push_back(col);
   }
 

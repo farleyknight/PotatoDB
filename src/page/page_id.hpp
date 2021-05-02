@@ -35,6 +35,10 @@ public:
     return file_id_ == other.file_id_ && block_id_ == other.block_id_;
   }
 
+  bool operator!=(CRef<PageId> other) const {
+    return file_id_ != other.file_id_ || block_id_ != other.block_id_;
+  }
+
 private:
   file_id_t file_id_   = -1;
   block_id_t block_id_ = -1;

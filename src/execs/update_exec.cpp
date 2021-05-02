@@ -28,9 +28,9 @@ Tuple UpdateExec::next() {
 
   auto new_tuple = updated_tuple(tuple);
 
-  bool updated = table_heap().update_tuple(new_tuple,
-                                           rid,
-                                           exec_ctx_.txn());
+  table_heap().update_tuple(new_tuple,
+                            rid,
+                            exec_ctx_.txn());
 
   return new_tuple;
 }

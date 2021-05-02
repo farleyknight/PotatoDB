@@ -60,9 +60,9 @@ private:
 
   std::mutex latch_;
 
-  std::thread *flush_thread_;
+  UNUSED std::thread *flush_thread_;
 
   std::condition_variable cv_;
 
-  CRef<DiskMgr> disk_mgr_;
+  UNUSED CRef<DiskMgr> disk_mgr_;
 };

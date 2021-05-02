@@ -13,7 +13,7 @@ public:
 
   TableIterator(TableHeap& table_heap,
                 CRef<RID> rid,
-                Txn txn);
+                Txn& txn);
   // Copy constructor
   TableIterator(CRef<TableIterator> other);
 
@@ -32,6 +32,6 @@ public:
 private:
   TableHeap& table_heap_;
   RID rid_;
-  MutOption<Tuple> tuple_;
+  Tuple tuple_;
   Txn& txn_;
 };

@@ -4,15 +4,36 @@
 
 class PageLayout {
 public:
-  PageLayout(Page& page)
+  PageLayout(Page* page)
     : page_ (page)
-  {}
+  {
+    assert(page != nullptr);
+  }
 
   // TODO: Finish recovery module
   lsn_t lsn();
   void set_lsn(lsn_t lsn);
   void reset_memory();
 
+  void rlatch() {
+    page_->rlatch();
+  }
+  void runlatch() {
+    page_->runlatch();
+  }
+
+  void wlatch() {
+    page_->wlatch();
+  }
+
+  void wunlatch() {
+    page_->wunlatch();
+  }
+
+  PageId page_id() {
+    return page_->page_id();
+  }
+
 protected:
-  Page& page_;
+  Page* page_;
 };

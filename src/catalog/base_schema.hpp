@@ -8,7 +8,7 @@
 template<class ColT>
 class BaseSchema {
 public:
-  BaseSchema(Vec<ColT> columns);
+  BaseSchema(vector<ColT> columns, vector<string> names);
 
   // No copy
   BaseSchema(CRef<BaseSchema>) = delete;
@@ -39,12 +39,12 @@ protected:
   // If some of them are not inlined, the page layout will differ.
   bool all_tuples_inlined_ = true;
 
-  MutVec<ColT> columns_;
+  vector<ColT> columns_;
   // keeps track of unlined columns, using logical position(start with 0)
-  MutVec<column_oid_t> unlined_columns_;
+  vector<column_oid_t> unlined_columns_;
 
-  MutMap<MutString, column_oid_t> column_oids_;
-  MutVec<size_t> offsets_;
+  MutMap<string, column_oid_t> column_oids_;
+  vector<size_t> offsets_;
 
   // size of fixed length columns
   // NOTE: This *must* be uint32_t to keep consistent with page

@@ -41,9 +41,11 @@ using std::numeric_limits;
 
 using std::pair;
 
+using std::shared_ptr;
 using std::string;
 
 using std::unique_ptr;
+
 
 // NOTE: File descriptors are integers and are pointers to
 // file objects elsewhere in the system.

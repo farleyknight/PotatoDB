@@ -53,7 +53,7 @@ public:
     return other_txn_id < id_;
   }
 
-  MRef<MutList<TableWriteRecord>> write_set() {
+  MutList<TableWriteRecord>& write_set() {
     return table_write_set_;
   }
 
@@ -65,11 +65,11 @@ public:
     deleted_page_set_.insert(page_id);
   }
 
-  MRef<MutSet<RID>> shared_lock_set() {
+  MutSet<RID>& shared_lock_set() {
     return shared_lock_set_;
   }
 
-  MRef<MutSet<RID>> exclusive_lock_set() {
+  MutSet<RID>& exclusive_lock_set() {
     return exclusive_lock_set_;
   }
 

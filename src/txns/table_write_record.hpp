@@ -15,27 +15,19 @@ enum class WType {
 
 class TableWriteRecord {
 public:
-  /**********************************************
-  * Constructors & destructor
-  **********************************************/
-
   // NOTE: We are intentionally copying the RID, WType, and Tuple here,
   TableWriteRecord(RID rid,
                    WType wtype,
                    Tuple tuple,
-                   CRef<TableHeapRef> table_heap_ref)
-    : rid_            (rid),
-      wtype_          (wtype),
-      tuple_          (tuple),
-      table_heap_ref_ (table_heap_ref) {}
+                   table_oid_t table_oid)
+    : rid_       (rid),
+      wtype_     (wtype),
+      tuple_     (tuple),
+      table_oid_ (table_oid) {}
 
   static MutList<TableWriteRecord> make_list() {
     return MutList<TableWriteRecord>();
   }
-
-  /**********************************************
-  * Instance methods
-  **********************************************/
 
   bool is_delete() {
     return wtype_ == WType::DELETE;
@@ -53,23 +45,25 @@ public:
     return wtype_;
   }
 
-  MRef<RID> rid() {
+  RID& rid() {
     return rid_;
   }
 
-  CRef<Tuple> tuple() {
+  Tuple& tuple() {
     return tuple_;
   }
 
-  CRef<TableHeapRef> table() {
-    return table_heap_ref_;
+  CRef<Tuple> tuple() const {
+    return tuple_;
+  }
+
+  table_oid_t table_oid() {
+    return table_oid_;
   }
 
 private:
   RID rid_;
   WType wtype_;
-  /** The tuple is only used for the update operation. */
   Tuple tuple_;
-  /** The table heap specifies which table this write record is for. */
-  CRef<TableHeapRef> table_heap_ref_;
+  table_oid_t table_oid_;
 };

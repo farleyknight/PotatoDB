@@ -5,8 +5,8 @@
 #include "server/session.hpp"
 
 ClientSocket::ClientSocket(file_desc_t file_desc,
-                           MRef<SocketServer> server,
-                           MRef<Session> session)
+                           SocketServer* server,
+                           Session session)
   : file_desc_ (file_desc),
     server_    (server),
     session_   (session)
@@ -17,7 +17,7 @@ int ClientSocket::file_desc() const {
 }
 
 void ClientSocket::shutdown() {
-  server_.remove_socket(file_desc_);
+  server_->remove_socket(file_desc_);
 }
 
 void ClientSocket::write(CRef<String> data) const {
@@ -34,7 +34,7 @@ void ClientSocket::write(CRef<String> data) const {
 const size_t buffer_size = 256;
 
 MutString ClientSocket::read() const {
-  MutString message;
+  string message;
 
   char buffer[buffer_size] = {0};
   ssize_t bytes = recv(file_desc_, buffer, sizeof(buffer), MSG_DONTWAIT);

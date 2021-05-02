@@ -12,32 +12,33 @@
 #include "tuple/rid.hpp"
 #include "tuple/tuple.hpp"
 
-TableHeap::TableHeap(BuffMgr& buff_mgr,
+TableHeap::TableHeap(table_oid_t table_oid,
+                     BuffMgr& buff_mgr,
                      LockMgr& lock_mgr,
                      LogMgr& log_mgr,
                      PageId first_page_id)
-  : buff_mgr_      (buff_mgr),
+  : table_oid_     (table_oid),
+    first_page_id_ (first_page_id),
     lock_mgr_      (lock_mgr),
     log_mgr_       (log_mgr),
-    first_page_id_ (first_page_id) {}
+    buff_mgr_      (buff_mgr)
+{}
 
-TableHeap::TableHeap(BuffMgr& buff_mgr,
+TableHeap::TableHeap(table_oid_t table_oid,
+                     BuffMgr& buff_mgr,
                      LockMgr& lock_mgr,
                      LogMgr& log_mgr,
                      Txn& txn)
-  : buff_mgr_ (buff_mgr),
-    lock_mgr_ (lock_mgr),
-    log_mgr_  (log_mgr)
+  : table_oid_ (table_oid),
+    lock_mgr_  (lock_mgr),
+    log_mgr_   (log_mgr),
+    buff_mgr_  (buff_mgr)
 {
-  Page* maybe_first_page = buff_mgr.create_page();
-  assert(maybe_first_page);
+  SlottedTablePage first_page(buff_mgr.create_page());
 
-  auto &first_page = SlottedTablePage(*maybe_first_page);
   first_page_id_ = first_page.page_id();
-
   first_page.wlatch();
   first_page.init(first_page_id_,
-                  PAGE_SIZE,
                   PageId::INVALID(),
                   txn,
                   log_mgr_);
@@ -46,7 +47,7 @@ TableHeap::TableHeap(BuffMgr& buff_mgr,
   buff_mgr_.unpin(first_page_id_, true);
 }
 
-bool TableHeap::insert_tuple(CRef<Tuple> tuple,
+bool TableHeap::insert_tuple(Tuple& tuple,
                              Txn& txn)
 {
   // Tuple Header is 32 bytes I think?
@@ -61,21 +62,19 @@ bool TableHeap::insert_tuple(CRef<Tuple> tuple,
     return false;
   }
 
-  auto curr_page = SlottedTablePage(*maybe_page);
+  auto curr_page = SlottedTablePage(maybe_page);
 
   // Insert into the first page with enough space.
   // If no such page exists, create a new page and insert into that.
   while (!curr_page.insert_tuple(tuple)) {
-    auto next_page_id = curr_page.get().next_page_id();
+    auto next_page_id = curr_page.next_page_id();
 
     // If the next page is a valid page,
-    if (next_page_id != INVALID_PAGE_ID) {
+    if (next_page_id != PageId::INVALID()) {
       // Unlatch and unpin the current page.
-      buff_mgr_.unpin(curr_page.get().table_page_id(), false);
+      buff_mgr_.unpin(curr_page.table_page_id(), false);
       // And repeat the process with the next page.
-      maybe_page = buff_mgr_.fetch_page(next_page_id);
-      assert(maybe_page);
-      curr_page = SlottedTablePage(*maybe_page);
+      curr_page = SlottedTablePage(buff_mgr_.fetch_page(next_page_id));
     } else {
       // Otherwise we have run out of valid pages.
       // We need to create a new page.
@@ -83,31 +82,30 @@ bool TableHeap::insert_tuple(CRef<Tuple> tuple,
       // If we could not create a new page,
       if (maybe_new_page == nullptr) {
         // Then life sucks and we abort the txn.
-        buff_mgr_.unpin(curr_page.get().table_page_id(), false);
+        buff_mgr_.unpin(curr_page.table_page_id(), false);
         txn.abort_with_reason(AbortReason::PAGE_NOT_AVAILABLE);
         return false;
       }
 
-      auto new_page = SlottedTablePage(*maybe_new_page);
+      auto new_page = SlottedTablePage(maybe_new_page);
 
       // Otherwise we were able to create a new page. We initialize it now.
-      curr_page.set_next_page_id(new_page.id());
-      new_page.init(new_page.id(),
-                    PAGE_SIZE,
-                    curr_page.get().table_page_id(),
+      curr_page.set_next_page_id(new_page.page_id());
+      new_page.init(new_page.page_id(),
+                    curr_page.table_page_id(),
                     txn,
                     log_mgr_);
-      buff_mgr_.unpin(curr_page.get().table_page_id(), true);
-      curr_page = new_page
+      buff_mgr_.unpin(curr_page.table_page_id(), true);
+      curr_page = new_page;
     }
   }
 
-  buff_mgr_.unpin(curr_page.get().table_page_id(), true);
+  buff_mgr_.unpin(curr_page.table_page_id(), true);
 
   txn.write_set().emplace_back(tuple.rid(),
                                WType::INSERT,
-                               Tuple {},
-                               *this);
+                               Tuple(),
+                               table_oid_);
   return true;
 }
 
@@ -115,16 +113,15 @@ bool TableHeap::mark_delete(CRef<RID> rid, Txn& txn) {
   // TODO(student): remove empty page
 
   // Find the page which contains the tuple.
-  auto maybe_page = buff_mgr_.fetch_table_page(rid.page_id());
+  auto maybe_page = buff_mgr_.fetch_page(rid.page_id());
   // If the page could not be found, then abort the txn.
-  if (maybe_page == std::nullopt) {
+  if (maybe_page == nullptr) {
     // NOTE: I've added this, not BusTub original
     txn.abort_with_reason(AbortReason::PAGE_NOT_AVAILABLE);
     return false;
   }
 
-  // Otherwise, mark the tuple as deleted.
-  auto &page = maybe_page.value().get();
+  auto page = SlottedTablePage(maybe_page);
 
   page.wlatch();
   page.mark_delete(rid, txn, lock_mgr_, log_mgr_);
@@ -132,11 +129,14 @@ bool TableHeap::mark_delete(CRef<RID> rid, Txn& txn) {
 
   buff_mgr_.unpin(page.table_page_id(), true);
 
-  txn.write_set().emplace_back(rid, WType::DELETE, Tuple(), *this);
+  txn.write_set().emplace_back(rid,
+                               WType::DELETE,
+                               Tuple(),
+                               table_oid_);
   return true;
 }
 
-bool TableHeap::update_tuple(CRef<Tuple> new_tuple,
+bool TableHeap::update_tuple(Tuple& new_tuple,
                              CRef<RID> rid,
                              Txn& txn) {
 
@@ -148,7 +148,7 @@ bool TableHeap::update_tuple(CRef<Tuple> new_tuple,
     return false;
   }
 
-  auto &page = TablePage(*maybe_page);
+  auto page = SlottedTablePage(maybe_page);
   // Update the tuple; but first save the old value for rollbacks.
   Tuple old_tuple;
   old_tuple.reset(new_tuple.size());
@@ -159,21 +159,24 @@ bool TableHeap::update_tuple(CRef<Tuple> new_tuple,
   buff_mgr_.unpin(page.table_page_id(), is_updated);
 
   if (is_updated && txn.state() != TxnState::ABORTED) {
-    txn.write_set().emplace_back(rid, WType::UPDATE, old_tuple, *this);
+    txn.write_set().emplace_back(rid,
+                                 WType::UPDATE,
+                                 old_tuple,
+                                 table_oid_);
   }
 
   return is_updated;
 }
 
-bool TableHeap::apply_delete(MRef<RID> rid, MRef<Txn> txn) {
+bool TableHeap::apply_delete(RID& rid, Txn& txn) {
   // Find the page which contains the tuple.
-  auto maybe_page = buff_mgr_.fetch_table_page(rid.page_id());
-  if (!maybe_page.has_value()) {
+  auto maybe_page = buff_mgr_.fetch_page(rid.page_id());
+  if (maybe_page == nullptr) {
     txn.abort_with_reason(AbortReason::PAGE_NOT_AVAILABLE);
     return false;
   }
 
-  auto &page = maybe_page.value().get();
+  auto page = SlottedTablePage(maybe_page);
 
   // Delete the tuple from the page.
   page.wlatch();
@@ -184,53 +187,49 @@ bool TableHeap::apply_delete(MRef<RID> rid, MRef<Txn> txn) {
   return true;
 }
 
-void TableHeap::rollback_delete(Ref<RID> rid, MRef<Txn> txn) {
-  auto maybe_page = buff_mgr_.fetch_table_page(rid.page_id());
-  assert(maybe_page.has_value());
+void TableHeap::rollback_delete(CRef<RID> rid, Txn& txn) {
+  auto maybe_page = buff_mgr_.fetch_page(rid.page_id());
+  assert(maybe_page);
 
-  auto &page = maybe_page.value().get();
+  auto page = SlottedTablePage(maybe_page);
 
   page.wlatch();
   page.rollback_delete(rid, txn, log_mgr_);
   page.wunlatch();
 
-  buff_mgr_.unpin(page.id(), true);
+  buff_mgr_.unpin(page.page_id(), true);
 }
 
-Option<Tuple>
-TableHeap::find_tuple(Ref<RID> rid, MRef<Txn> txn) const {
+Tuple TableHeap::find_tuple(CRef<RID> rid, Txn& txn) const {
   // Find the page which contains the tuple.
 
-  auto maybe_page =
-    buff_mgr_.fetch_table_page(rid.page_id());
+  auto maybe_page = buff_mgr_.fetch_page(rid.page_id());
 
   // If the page could not be found, then abort the txn.
-  if (!maybe_page.has_value()) {
+  if (maybe_page == nullptr) {
     txn.abort_with_reason(AbortReason::PAGE_NOT_AVAILABLE);
-    return std::nullopt;
+    return Tuple();
   }
 
-  auto &page = maybe_page.value().get();
+  SlottedTablePage page(maybe_page);
 
   page.rlatch();
-
-  Tuple tuple;
-  page.find_tuple(rid, tuple);
+  Tuple tuple = page.find_tuple(rid);
   page.runlatch();
-
   buff_mgr_.unpin(rid.page_id(), false);
+
   return tuple;
 }
 
-TableIterator TableHeap::begin(MRef<Txn> txn) {
+TableIterator TableHeap::begin(Txn& txn) {
   auto page_id = first_page_id_;
   RID rid;
 
-  while (page_id != INVALID_PAGE_ID) {
-    auto maybe_page = buff_mgr_.fetch_table_page(page_id);
-    assert(maybe_page.has_value());
+  while (page_id != PageId::INVALID()) {
+    auto maybe_page = buff_mgr_.fetch_page(page_id);
+    assert(maybe_page);
 
-    auto &page = maybe_page.value().get();
+    SlottedTablePage page(maybe_page);
 
     auto maybe_rid = page.first_tuple_rid();
 
@@ -246,6 +245,6 @@ TableIterator TableHeap::begin(MRef<Txn> txn) {
   return TableIterator(*this, rid, txn);
 }
 
-TableIterator TableHeap::end(MRef<Txn> txn) const {
+TableIterator TableHeap::end(Txn& txn) {
   return TableIterator(*this, RID(), txn);
 }

@@ -25,8 +25,8 @@ public:
   * Constructors & destructor
   **********************************************/
 
-  explicit LockMgr(TwoPLMode two_pl_mode,
-                   DeadlockMode deadlock_mode);
+  explicit LockMgr(TwoPLMode two_pl_mode = TwoPLMode::STRICT,
+                   DeadlockMode deadlock_mode = DeadlockMode::PREVENTION);
   ~LockMgr();
 
   // No copy

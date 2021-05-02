@@ -20,7 +20,7 @@ private:
   bool match_found(CRef<Tuple> tuple);
   bool at_the_end();
   CRef<QuerySchema> schema();
-  CRef<TableHeap> table_heap();
+  TableHeap& table_heap();
 
   Ptr<SeqScanPlan> plan_;
 

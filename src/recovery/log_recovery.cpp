@@ -6,7 +6,8 @@
  * @return: true means deserialize succeed, otherwise can't deserialize cause
  * incomplete log record
  */
-bool LogRecovery::deserialize_log_record(const char *data, LogRecord *log_record) {
+bool LogRecovery::deserialize_log_record(UNUSED const char *data,
+                                         UNUSED LogRecord *log_record) {
   return false;
 }
 

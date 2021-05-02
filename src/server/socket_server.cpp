@@ -17,9 +17,10 @@
 
 #include "server/client_socket.hpp"
 #include "server/socket_server.hpp"
+#include "server/potatodb.hpp"
 
-SocketServer::SocketServer(CRef<Resources> resources)
-  : resources_ (resources)
+SocketServer::SocketServer(PotatoDB& instance)
+  : instance_ (instance)
 {}
 
 SocketServer::~SocketServer() {
@@ -88,8 +89,8 @@ void SocketServer::accept_new_connection() {
   sockaddr_in client_addr;
   auto client_addr_length = sizeof(client_addr);
 
-  auto &addr = reinterpret_cast<sockaddr*>(&client_addr);
-  auto &len  = reinterpret_cast<socklen_t*>(&client_addr_length);
+  auto addr = reinterpret_cast<sockaddr*>(&client_addr);
+  auto len  = reinterpret_cast<socklen_t*>(&client_addr_length);
 
   file_desc_t client_fd = accept(main_socket_, addr, len);
 
@@ -111,12 +112,13 @@ void SocketServer::accept_new_connection() {
   sockets_.push_back(client_socket);
 }
 
-MutSPtr<ClientSocket> SocketServer::make_client_socket() {
+shared_ptr<ClientSocket>
+SocketServer::make_client_socket(file_desc_t client_fd) {
   return make_shared<ClientSocket>(client_fd,
-                                   *this,
-                                   instance.make_session());
+                                   this,
+                                   instance_.make_session());
 }
- 
+
 void SocketServer::read_from_connection(file_desc_t fd) {
   char buffer[2] = {0,0};
 
@@ -136,16 +138,16 @@ void SocketServer::read_from_connection(file_desc_t fd) {
   }
 }
 
-void Server::prep_main_socket_set() {
+void SocketServer::prep_main_socket_set() {
   FD_ZERO(&main_socket_set_);
   FD_SET(main_socket_, &main_socket_set_);
   curr_high_fd_ = main_socket_;
 }
 
 const int one_second = 1;
-const int one_minute = 60;
+UNUSED const int one_minute = 60;
 
-bool Server::update_socket_set() {
+bool SocketServer::update_socket_set() {
   struct timeval timeout = {one_second, 0};  // Sleep for one minute
 
   int fd_count = select(curr_high_fd_ + 1,

@@ -10,9 +10,10 @@
  **********************************************/
 
 TableSchema::TableSchema(vector<TableColumn> columns,
+                         vector<string> names,
                          string table_name,
                          table_oid_t table_oid)
-  : BaseSchema  (columns),
+  : BaseSchema  (columns, names),
     table_oid_  (table_oid),
     table_name_ (table_name)
 {}

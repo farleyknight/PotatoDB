@@ -4,8 +4,6 @@
 
 #include "common/config.hpp"
 
-#include "server/resources.hpp"
-
 #include "server/session.hpp"
 #include "server/socket_server.hpp"
 
@@ -13,12 +11,10 @@ namespace fs = std::filesystem;
 
 class PotatoDB {
 public:
-  PotatoDB() {
-    setup_db_directory();
-  }
+  PotatoDB();
 
   void shutdown(UNUSED int signal) {
-    socket_server_.shutdown();
+    server_.shutdown();
   }
 
   CRef<Session> make_session() {
@@ -43,14 +39,13 @@ public:
   }
 
 private:
-
-  MutString setup_db_directory() {
+  void setup_db_directory() {
     fs::current_path(home_path());
     fs::create_directory(".potatodb");
     fs::current_path(home_path() / ".potatodb");
 
-    if (!fs::exists(db_file_name())) {
-      std::ofstream db_file(db_file_name());
+    if (!fs::exists(main_file_name())) {
+      std::ofstream db_file(main_file_name());
       db_file << "";
       db_file.close();
     }
@@ -59,16 +54,16 @@ private:
   void startup() {
     // TODO: Add logging for this line
     std::cout << "Start PotatoDB Server (0.1.0)" << std::endl;
-    socket_server_.set_port(port);
-    socket_server_.on_read([&](WPtr<ClientSocket> socket_ptr) {
+    server_.set_port(port_);
+    server_.on_read([&](WPtr<ClientSocket> socket_ptr) {
       if (auto client = socket_ptr.lock()) {
         auto query = client->read();
         std::cout << "Client Socket got query " << query << std::endl;
 
         try {
-          auto result = client->session()->execute(query);
-          client->write(result);
-        } catch (std::runtime_exception &e) {
+          auto result = client->session().execute(query);
+          client->write(result.to_string());
+        } catch (std::exception &e) {
           // TODO: Send better error message
           client->write("Got an error! :(");
         }
@@ -80,11 +75,19 @@ private:
 
     // TODO: Allow port customization
     // TODO: Add logging for this line
-    std::cout << "Server listening on port 7878.." << std::endl;
-    socket_server.accept_connections();
+    std::cout << "Server listening on port " << port_ << std::endl;
+    server_.accept_connections();
   }
 
+  int port_ = 7878;
+  vector<Session> sessions_;
+
   SocketServer server_;
-  Resource resources_;
-  MutVec<Session> sessions_;
+  DiskMgr disk_mgr_;
+  BuffMgr buff_mgr_;
+  LogMgr log_mgr_;
+  LockMgr lock_mgr_;
+  TxnMgr txn_mgr_;
+  Catalog catalog_;
+  ExecEngine exec_eng_;
 };
