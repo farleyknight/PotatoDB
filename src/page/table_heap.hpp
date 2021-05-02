@@ -13,7 +13,7 @@ public:
   TableHeap(BuffMgr& buff_mgr,
             LockMgr& lock_mgr,
             LogMgr& log_mgr,
-            PageId& first_page_id);
+            PageId first_page_id);
 
   TableHeap(BuffMgr& buff_mgr,
             LockMgr& lock_mgr,
@@ -31,8 +31,8 @@ public:
     return first_page_id_;
   }
 
-  RID insert_tuple(CRef<Tuple> tuple,
-                   Txn& txn);
+  bool insert_tuple(CRef<Tuple> tuple,
+                    Txn& txn);
   bool mark_delete(CRef<RID> rid,
                    Txn& txn);
   bool update_tuple(Tuple& tuple,
@@ -44,8 +44,8 @@ public:
 
   Option<Tuple> find_tuple(CRef<RID> rid, Txn& txn) const;
 
-  TableIterator begin(Txn& txn);
-  TableIterator end(Txn& txn);
+  TableIterator begin(Txn& txn) const;
+  TableIterator end(Txn& txn) const;
 
   BuffMgr& buff_mgr() { return buff_mgr_; }
 

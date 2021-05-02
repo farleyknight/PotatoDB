@@ -1,34 +1,40 @@
 
 #include "common/config.hpp"
-#include "storage/page.hpp"
+#include "page/page.hpp"
 
 Page::Page() {
   reset_memory();
 }
 
-OptRef<Page> Page::make_opt(Page& page) {
-  return std::optional<RefWrap<Page>>(page);
-}
-
-char* Page::data() {
-  return reinterpret_cast<char*>(buffer_.data());
-}
-
-char[]& Page::as_char_array() {
-  return reinterpret_cast<char(&)[]>(*buffer_.data());
-}
-
 lsn_t Page::lsn() {
-  return *reinterpret_cast<lsn_t *>(data() + OFFSET_LSN);
+  return buffer_.read_int32(OFFSET_LSN);
+  // return *reinterpret_cast<lsn_t *>(data() + OFFSET_LSN);
 }
 
 void Page::set_lsn(lsn_t lsn) {
-  memcpy(data() + OFFSET_LSN, &lsn, sizeof(lsn_t));
+  buffer_.write_int32(OFFSET_LSN, lsn);
+  // memcpy(data() + OFFSET_LSN, &lsn, sizeof(lsn_t));
+}
+
+uint32_t Page::read_uint32(size_t offset) const {
+  return buffer_.read_uint32(offset);
+}
+
+void Page::write_uint32(size_t offset, uint32_t data) {
+  buffer_.write_uint32(offset, data);
+}
+
+PageId Page::read_page_id(size_t offset) const {
+  return PageId::from(buffer_.read_uint32(offset));
+}
+
+void Page::write_page_id(size_t offset, PageId page_id) {
+  buffer_.write_uint32(offset, page_id.as_uint32());
 }
 
 void Page::reset_memory() {
   // Zero-out the entire buffer
-  buffer_.fill({});
+  buffer_.reset_memory();
   // Freshly zeroed-out page should not be dirty and have no pins
   is_dirty_ = false;
   pin_count_ = 0;

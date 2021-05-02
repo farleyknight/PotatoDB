@@ -58,8 +58,8 @@ public:
 
   bool flush(PageId page_id);
 
-  OptRef<Page> fetch_page(PageId page_id);
-  OptRef<Page> create_page();
+  Page* fetch_page(PageId page_id);
+  Page* create_page();
 
   bool unpin(PageId page_id, bool is_dirty);
 
@@ -74,15 +74,11 @@ public:
   bool flush_page(MRef<Page> page);
 
 private:
-  // TODO: We can get rid of this out parameter if
-  // we return a pair.
-  // And there should be a way to do destucturing bind
-  // via something called std::tie?
-  // https://en.cppreference.com/w/cpp/utility/tuple/make_tuple
-  OptRef<Page> find_or_make_page(frame_id_t* frame_id);
+  std::tuple<Page*, frame_id_t> pick_or_evict_page();
+
   bool contains_page(PageId page_id);
   Page& page_by_id(PageId page_id);
-  void pin_page(MRef<Page> page, frame_id_t frame_id);
+  void pin_page(Page& page, frame_id_t frame_id);
 
   size_t pool_size_;
   MutVec<Page> pages_;

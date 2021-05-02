@@ -19,7 +19,9 @@ public:
 
 private:
   Tuple updated_tuple(CRef<Tuple> old_tuple);
+  TableHeap& table_heap();
 
+  CRef<QuerySchema> schema();
   Ptr<UpdatePlan> plan_;
   Ptr<BaseExec> child_;
 };

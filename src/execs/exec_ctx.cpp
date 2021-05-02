@@ -5,12 +5,12 @@ ExecCtx::ExecCtx(Txn& txn,
                  CRef<BuffMgr>  buff_mgr,
                  CRef<LockMgr>  lock_mgr,
                  CRef<TxnMgr>   txn_mgr,
-                 CRef<TableMgr> table_mgr,
+                 TableMgr&      table_mgr,
                  Catalog&       catalog)
   : txn_       (txn),
+    table_mgr_ (table_mgr),
+    catalog_   (catalog),
     buff_mgr_  (buff_mgr),
     txn_mgr_   (txn_mgr),
-    lock_mgr_  (lock_mgr),
-    table_mgr_ (table_mgr),
-    catalog_   (catalog)
+    lock_mgr_  (lock_mgr)
 {}

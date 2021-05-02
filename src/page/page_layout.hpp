@@ -4,15 +4,15 @@
 
 class PageLayout {
 public:
+  PageLayout(Page& page)
+    : page_ (page)
+  {}
 
   // TODO: Finish recovery module
-  lsn_t lsn(CRef<Page> page);
-  void set_lsn(MRef<Page> page, lsn_t lsn);
-  void reset_memory(MRef<Page> page);
+  lsn_t lsn();
+  void set_lsn(lsn_t lsn);
+  void reset_memory();
 
-  PageId read_page_id(CRef<Page> page, size_t offset);
-  void write_page_id(MRef<Page> page, size_t offset, PageId page_id);
-
-private:
-
+protected:
+  Page& page_;
 };

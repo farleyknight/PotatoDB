@@ -13,11 +13,11 @@ public:
   // TODO: Should fetch the page from the buffer pool
   // Should store a reference to the page in a Vec
   // Should return a reference to the TableHeap
-  TableHeap& table_heap_for(table_oid_t table_oid) const;
+  TableHeap& table_heap_for(table_oid_t table_oid);
 
-  RID insert_tuple(CRef<Tuple> tuple,
-                   table_oid_t table_oid,
-                   Txn& txn)
+  bool insert_tuple(CRef<Tuple> tuple,
+                    table_oid_t table_oid,
+                    Txn& txn)
   {
     return table_heap_for(table_oid).insert_tuple(tuple, txn);
   }

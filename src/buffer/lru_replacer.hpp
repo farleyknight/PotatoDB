@@ -23,7 +23,8 @@ public:
   * Instance methods
   **********************************************/
 
-  bool evict(frame_id_t *frame_id) override;
+  std::tuple<bool, frame_id_t> evict() override;
+  
   void pin(frame_id_t frame_id) override;
   void unpin(frame_id_t frame_id) override;
   size_t size() override;

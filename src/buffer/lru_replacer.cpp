@@ -6,9 +6,8 @@
 LRUReplacer::LRUReplacer(size_t num_pages)
   : num_pages_ (num_pages) {}
 
-bool LRUReplacer::evict(UNUSED frame_id_t *frame_id) {
-  // TODO:
-  return false;
+std::tuple<bool, frame_id_t> evict() {
+  return std::make_tuple(false, -1);
 }
 
 /*

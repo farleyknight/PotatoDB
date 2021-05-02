@@ -12,9 +12,9 @@
  **********************************************/
 
 template<class K, class V>
-LinearProbeHT<K, V>::LinearProbeHT(Ref<String> name,
-                                   MRef<BuffMgr> buff_mgr,
-                                   Ref<CompT> comp,
+LinearProbeHT<K, V>::LinearProbeHT(CRef<String> name,
+                                   BuffMgr& buff_mgr,
+                                   CRef<CompT> comp,
                                    size_t num_buckets,
                                    HashFunc<K> hash_fn)
   : name_        (name),
@@ -23,7 +23,7 @@ LinearProbeHT<K, V>::LinearProbeHT(Ref<String> name,
     num_buckets_ (num_buckets),
     hash_fn_     (move(hash_fn))
 {
-  auto &header_page = fetch_header_page();
+  auto header_page = fetch_header_page();
   header_page.set_size(num_buckets);
   append_buckets(header_page, num_buckets);
 }
@@ -33,7 +33,7 @@ LinearProbeHT<K, V>::LinearProbeHT(Ref<String> name,
  **********************************************/
 
 template<class K, class V>
-MutVec<V> LinearProbeHT<K, V>::find_values(Ref<K> key) const {
+vector<V> LinearProbeHT<K, V>::find_values(CRef<K> key) const {
   MutVec<V> result;
 
   table_latch_.rlock();
@@ -50,7 +50,9 @@ MutVec<V> LinearProbeHT<K, V>::find_values(Ref<K> key) const {
     auto maybe_page = buff_mgr_.fetch_page(block_index);
     assert(maybe_page.has_value());
     auto &page = maybe_page.value().get();
-    auto block = reinterpret_cast<MutRawPtr<HTBlockPage<K, V>>>(page.data());
+    auto block = HTBlockPage(page);
+
+    // auto block = reinterpret_cast<HTBlockPage<K, V>*>(page.data());
 
     // expected offset of key-value pair in this block
     auto data_offset_in_block = index % block_array_size();
@@ -73,8 +75,8 @@ MutVec<V> LinearProbeHT<K, V>::find_values(Ref<K> key) const {
 }
 
 template<class K, class V>
-bool LinearProbeHT<K, V>::insert(Ref<K> key,
-                                 Ref<V> value)
+bool LinearProbeHT<K, V>::insert(CRef<K> key,
+                                 CRef<V> value)
 {
   table_latch_.rlock();
   auto result = find_value(key);
@@ -82,7 +84,7 @@ bool LinearProbeHT<K, V>::insert(Ref<K> key,
     return false;
   }
 
-  auto &header_page = fetch_header_page();
+  auto header_page = fetch_header_page();
   auto expected_index = slot_index(key);
   auto meet_starting_point = false;
 
@@ -101,7 +103,10 @@ bool LinearProbeHT<K, V>::insert(Ref<K> key,
     auto maybe_page = buff_mgr_.fetch_page(header_page.block_page_id(block_index));
     assert(maybe_page.has_value());
     auto &page = maybe_page.value().get();
-    auto block = reinterpret_cast<MutRawPtr<HTBlockPage<K, V>>>(page.data());
+    // auto block = reinterpret_cast<MutRawPtr<HTBlockPage<K, V>>>(page.data());
+
+    auto block = HTBlockPage(page);
+
 
     // inserting (and flushing the page if the insert operator is successfuly)
     page.wlatch();
@@ -121,9 +126,9 @@ bool LinearProbeHT<K, V>::insert(Ref<K> key,
 }
 
 template<class K, class V>
-bool LinearProbeHT<K, V>::remove(Ref<K> key, Ref<V> value) {
+bool LinearProbeHT<K, V>::remove(CRef<K> key, CRef<V> value) {
   table_latch_.rlock();
-  auto &header_page = fetch_header_page();
+  auto header_page = fetch_header_page();
   auto expected_index = slot_index(key);
   auto meet_starting_point = false;
   for (auto index = expected_index;; index = (index + 1) % header_page.size()) {
@@ -136,6 +141,7 @@ bool LinearProbeHT<K, V>::remove(Ref<K> key, Ref<V> value) {
     auto maybe_page = buff_mgr_.fetch_page(header_page.block_page_id(block_index));
     assert(maybe_page.has_value());
     auto &page = maybe_page.value().get();
+    auto block = HTBlockPage<K,V>(page);
     // TODO: Eventually remove this casting bullshit!
     // But for now, Page and it's data are so tied together that
     // a better version is not possible. Perhaps fixing this
@@ -143,7 +149,8 @@ bool LinearProbeHT<K, V>::remove(Ref<K> key, Ref<V> value) {
     // pages and how they are formatted.
     // One of the things that SimpleDB got right!
     // => PageFormatter classes
-    auto block = reinterpret_cast<MutRawPtr<HTBlockPage<K, V>>>(page.data());
+    // auto block = reinterpret_cast<MutRawPtr<HTBlockPage<K, V>>>(page.data());
+
     // expected offset of key-value pair in this block
     auto data_offset_in_block = index % block_array_size();
 
@@ -180,17 +187,21 @@ void LinearProbeHT<K, V>::resize(size_t initial_size)
   // only grow up in size
   if (header_page.size() < expected_size) {
     auto old_size = header_page.size();
-    header_page_.set_size(expected_size);
+    header_page.set_size(expected_size);
     append_buckets(header_page, expected_size - old_size);
     // re-organize all key-value pairs
-    MutVec<MutRawPtr<HTBlockPage<K, V>>> all_old_blocks;
-    MutVec<page_id_t> all_block_page_ids;
+    vector<HTBlockPage<K, V>*> all_old_blocks;
+    vector<page_id_t> all_block_page_ids;
 
-    for (size_t index = 0; index < header_page_.num_blocks(); ++index) {
+    // NOTE: Why are we grabbing the blocks 0 up to N?
+    // Are we always certain that these blocks will have our HT pages?
+    // Something seems smelly.. This looks like a bug waiting to happen!
+    for (size_t index = 0; index < header_page.num_blocks(); ++index) {
       auto maybe_page = buff_mgr_.fetch_page(index);
       assert(maybe_page.has_value());
       auto &page = maybe_page.value().get();
-      auto block = reinterpret_cast<MutRawPtr<HTBlockPage<K, V>>>(page.data());
+      auto block = HTBlockPage<K, V>(page);
+
       all_old_blocks.push_back(block);
       all_block_page_ids.push_back(header_page.block_page_id(index));
     }
@@ -209,8 +220,7 @@ void LinearProbeHT<K, V>::resize(size_t initial_size)
 }
 
 template<class K, class V>
-size_t LinearProbeHT<K, V>::size()
-{
+size_t LinearProbeHT<K, V>::size() {
   table_latch_.rlock();
   auto size = fetch_header_page().size();
   table_latch_.runlock();
@@ -225,18 +235,21 @@ template<class K, class V>
 void LinearProbeHT<K, V>::load_header_page() {
   if (header_page_.has_value()) { return; }
 
-  header_page_ = buff_mgr_.fetch_ht_header_page(header_page_id_);
+  header_page_ = buff_mgr_.fetch_page(header_page_id_);
   if (!header_page_.has_value()) {
     throw new Exception("Can't initialize header page");
   }
 }
 
 template<class K, class V>
-void LinearProbeHT<K, V>::append_buckets(MRef<HTHeaderPage> header_page,
+void LinearProbeHT<K, V>::append_buckets(HTHeaderPage& header_page,
                                          size_t num_buckets)
 {
-  size_t total_current_buckets = header_page.num_blocks() * block_array_size();
-  for (; total_current_buckets < num_buckets; total_current_buckets += block_array_size()) {
+  size_t total_current_buckets
+    = header_page.num_blocks() * block_array_size();
+  for (; total_current_buckets < num_buckets;
+       total_current_buckets += block_array_size()) {
+
     auto maybe_page = buff_mgr_.create_page();
     assert(maybe_page.has_value());
     auto &page = maybe_page.value().get();
@@ -248,7 +261,7 @@ void LinearProbeHT<K, V>::append_buckets(MRef<HTHeaderPage> header_page,
 }
 
 template<class K, class V>
-slot_offset_t LinearProbeHT<K, V>::slot_index(Ref<K> key) {
+slot_offset_t LinearProbeHT<K, V>::slot_index(CRef<K> key) {
   return hash_fn_.hash(key) % fetch_header_page().size();
 }
 

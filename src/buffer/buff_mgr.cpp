@@ -1,12 +1,10 @@
 
+#include <tuple>
+
 #include "common/config.hpp"
 #include "buffer/buff_mgr.hpp"
 #include "page/hash_table_header_page.hpp"
 #include "page/hash_table_block_page.hpp"
-
-/**********************************************
- * Constructor
- **********************************************/
 
 BuffMgr::BuffMgr(size_t pool_size,
                  DiskMgr& disk_mgr,
@@ -18,7 +16,7 @@ BuffMgr::BuffMgr(size_t pool_size,
 {
   // TODO: Use a configuration file to allow `LRUReplacer`
   // to be used instead.
-  replacer_ = ClockReplacer::make(pool_size);
+  replacer_ = make_unique<ClockReplacer>(pool_size);
 
   for (size_t i = 0; i < pool_size; ++i) {
     // TODO: Figure out if we need `static_cast` here?
@@ -26,9 +24,25 @@ BuffMgr::BuffMgr(size_t pool_size,
   }
 }
 
-/**********************************************
- *
- **********************************************/
+std::tuple<Page*, frame_id_t> BuffMgr::pick_or_evict_page() {
+  if (!free_list_.empty()) {
+    frame_id_t frame_id = free_list_.front();
+    free_list_.pop_front();
+    return std::make_tuple(&pages_[frame_id], frame_id);
+  } else {
+    bool evicted;
+    frame_id_t frame_id = -1;
+    std::tie(evicted, frame_id) = replacer_->evict();
+    if (!evicted) {
+      return std::make_tuple(nullptr, frame_id);
+    }
+    Page& page = pages_[frame_id];
+    flush_page(page);
+    page_table_.erase(page.page_id());
+
+    return std::make_tuple(&pages_[frame_id], frame_id);
+  }
+}
 
 bool BuffMgr::flush_page(PageId page_id) {
   if (!contains_page(page_id)) {
@@ -45,46 +59,42 @@ bool BuffMgr::flush_page(PageId page_id) {
   return true;
 }
 
-
-/**********************************************
- * TODO: Document me!
- **********************************************/
-
-OptRef<Page> BuffMgr::fetch_page(PageId page_id) {
+Page* BuffMgr::fetch_page(PageId page_id) {
   frame_id_t frame_id;
 
   if (contains_page(page_id)) {
     frame_id = page_table_[page_id];
     Page& page = pages_[frame_id];
     pin_page(page, frame_id);
-    return Page::make_opt(page);
+
+    return &pages_[frame_id];
   }
 
-  OptRef<Page> maybe_page = find_or_make_page(&frame_id);
-  if (!maybe_page.has_value()) {
-    return std::nullopt;
+  Page *maybe_page;
+  std::tie(maybe_page, frame_id) = pick_or_evict_page();
+  if (maybe_page == nullptr) {
+    return nullptr;
   }
-  Page& page = maybe_page.value();
+  Page& page = *maybe_page;
 
   disk_mgr_.read_page(page_id, page);
   page_table_[page_id] = frame_id;
   page.set_id(page_id);
   pin_page(page, frame_id);
 
-  return page;
+  return maybe_page;
 }
 
-/**********************************************
- * TODO document me
- **********************************************/
-
-OptRef<Page> BuffMgr::create_page() {
-  frame_id_t frame_id = 0;
-  OptRef<Page> maybe_page = find_or_make_page(&frame_id);
-  if (!maybe_page.has_value()) {
-    return std::nullopt;
+// NOTE: At some point this method should take a `file_id_t`
+// and allocate an extra block on the page via the `disk_mgr`.
+Page* BuffMgr::create_page() {
+  frame_id_t frame_id;
+  Page *maybe_page = nullptr;
+  std::tie(maybe_page, frame_id) = pick_or_evict_page();
+  if (maybe_page == nullptr) {
+    return nullptr;
   }
-  Page& page = maybe_page.value();
+  Page& page = *maybe_page;
 
   PageId page_id = disk_mgr_.allocate_page();
   page_table_[page_id] = frame_id;
@@ -93,12 +103,8 @@ OptRef<Page> BuffMgr::create_page() {
   page.set_dirty(true);
   pin_page(page, frame_id);
 
-  return page;
+  return maybe_page;
 }
-
-/**********************************************
- * TODO: document me
- **********************************************/
 
 bool BuffMgr::unpin(PageId page_id, bool is_dirty) {
   if (!contains_page(page_id)) {
@@ -121,10 +127,6 @@ bool BuffMgr::unpin(PageId page_id, bool is_dirty) {
   return true;
 }
 
-/**********************************************
- * TODO: document me
- **********************************************/
-
 bool BuffMgr::delete_page(PageId page_id) {
   if (!contains_page(page_id)) {
     return true;
@@ -145,10 +147,6 @@ bool BuffMgr::delete_page(PageId page_id) {
   return true;
 }
 
-/**********************************************
- * TODO document me
- **********************************************/
-
 void BuffMgr::flush_all() {
   for (auto it : page_table_) {
     flush(it.first);
@@ -158,58 +156,19 @@ void BuffMgr::flush_all() {
   replacer_->reset();
 }
 
-/**********************************************
- * TODO document me
- **********************************************/
-
-// TODO: Let's get rid of this raw pointer!
-// It's also an out-parameter!
-// Let's find a better way to do this..
-// I think this method is used elsewhere in this class..
-OptRef<Page> BuffMgr::find_or_make_page(frame_id_t* frame_id) {
-  if (!free_list_.empty()) {
-    *frame_id = free_list_.front();
-    free_list_.pop_front();
-    return Page::make_opt(pages_[*frame_id]);
-  } else {
-    if (!replacer_->evict(frame_id)) {
-      return std::nullopt;
-    }
-    Page& page = pages_[*frame_id];
-    flush_page(page);
-    page_table_.erase(page.page_id());
-    return Page::make_opt(page);
-  }
-}
-
-/**********************************************
- * TODO document me
- **********************************************/
-
 bool BuffMgr::contains_page(PageId page_id) {
   return page_table_.count(page_id) > 0;
 }
 
-/**********************************************
- * TODO document me
- **********************************************/
-
-MRef<Page> BuffMgr::page_by_id(PageId page_id) {
+Page& BuffMgr::page_by_id(PageId page_id) {
   return pages_[page_table_[page_id]];
 }
-
-/**********************************************
- * TODO document me
- **********************************************/
 
 void BuffMgr::pin_page(Page& page, frame_id_t frame_id) {
   page.pin();
   replacer_->pin(frame_id);
 }
 
-/**********************************************
- * TODO document me
- **********************************************/
 
 bool BuffMgr::flush_page(Page& page) {
   if (page.is_dirty()) {

@@ -1,6 +1,6 @@
 #include <cstdint>
 
-#include "murmur3.hpp"
+#include <MurmurHash3.h>
 
 template <typename KeyT>
 class HashFunc {

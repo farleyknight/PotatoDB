@@ -19,17 +19,15 @@ public:
   // No copy
   Page(CRef<Page>) = delete;
   // No copy assign
-  MRef<Page> operator=(CRef<Page>) = delete;
+  Page& operator=(CRef<Page>) = delete;
 
   virtual ~Page() {} // Make Page polymorphic
-
-  static OptRef<Page> make_opt(MRef<Page> page);
 
   /**********************************************
    * Instance methods
    **********************************************/
 
-  MRef<Buffer> buffer() {
+  Buffer& buffer() {
     return buffer_;
   }
 
@@ -37,9 +35,7 @@ public:
     return buffer_;
   }
 
-  void reset_memory() {
-    buffer_.reset_memory();
-  }
+  void reset_memory();
 
   void copy_n_bytes(size_t source_offset,
                     size_t dest_offset,
@@ -60,6 +56,9 @@ public:
     page_id_ = id;
   }
 
+  lsn_t lsn();
+  void set_lsn(lsn_t lsn);
+
   size_t size() const {
     return buffer_.size();
   }
@@ -68,7 +67,7 @@ public:
   void pin() {
     ++pin_count_;
   }
-// Decrease the pin count.
+  // Decrease the pin count.
   void unpin() {
     --pin_count_;
   }
@@ -77,20 +76,15 @@ public:
     return pin_count_;
   }
 
+  uint32_t read_uint32(size_t offset) const;
+  void write_uint32(size_t offset, uint32_t data);
+
   void set_dirty(bool dirty) {
     is_dirty_ = dirty;
   }
 
   bool is_dirty() const {
     return is_dirty_;
-  }
-
-  uint32_t read_uint32(size_t offset) const {
-    return buffer_.read_uint32(offset);
-  }
-
-  void write_uint32(size_t offset, uint32_t data) {
-    buffer_.write_uint32(offset, data);
   }
 
   PageId read_page_id(size_t offset) const;
@@ -101,6 +95,7 @@ public:
 
   void rlatch();
   void runlatch();
+
 
 private:
   static constexpr size_t SIZE_PAGE_HEADER = 8;
