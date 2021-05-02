@@ -15,8 +15,8 @@ public:
   TableHeap& table_heap_for(table_oid_t table_oid);
 
 private:
-  CRef<DiskMgr> disk_mgr_;
-  CRef<BuffMgr> buff_mgr_;
+  UNUSED CRef<DiskMgr> disk_mgr_;
+  UNUSED CRef<BuffMgr> buff_mgr_;
 
   MutMap<table_oid_t, page_id_t> page_ids_;
   MutMap<table_oid_t, MutPtr<TableHeap>> table_heaps_;

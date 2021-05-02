@@ -8,9 +8,10 @@ public:
   using StoreClass = StoreT;
   using DataStoreT = typename StoreT::store_t;
 
-  TypeId type_id() {
+  TypeId type_id() const {
     return type_id_;
   }
+
 protected:
   ValueBase(TypeId type_id, DataStoreT data)
     : type_id_ (type_id),

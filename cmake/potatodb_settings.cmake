@@ -44,4 +44,6 @@ file(GLOB_RECURSE MAIN_SOURCES   "src/*.cpp")
 file(GLOB_RECURSE TEST_SOURCES   "tests/*.cpp")
 file(GLOB_RECURSE PERF_SOURCES   "perf/*cpp")
 file(GLOB_RECURSE SERVER_SOURCES "server/*.cpp")
-file(GLOB_RECURSE PARSER_SOURCES "parser/PotatoSQL*.cpp")
+#file(GLOB_RECURSE PARSER_SOURCES "parser/PotatoSQL*.cpp")
+
+set(PARSER_SOURCES "parser/PotatoSQLLexer.cpp;parser/PotatoSQLParser.cpp")

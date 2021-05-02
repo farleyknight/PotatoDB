@@ -92,13 +92,13 @@ create_table_stmt
    ( database_name '.' )? table_name
    ( '(' column_def ( ',' column_def )*?
             ( ',' table_constraint )* ')' ( K_WITHOUT IDENTIFIER )?
-   | K_AS select_stmt 
+   | K_AS select_stmt
    )
  ;
 
 create_trigger_stmt
  : K_CREATE ( K_TEMP | K_TEMPORARY )? K_TRIGGER ( K_IF K_NOT K_EXISTS )?
-   ( database_name '.' )? trigger_name ( K_BEFORE  | K_AFTER | K_INSTEAD K_OF )? 
+   ( database_name '.' )? trigger_name ( K_BEFORE  | K_AFTER | K_INSTEAD K_OF )?
    ( K_DELETE | K_INSERT | K_UPDATE ( K_OF column_name ( ',' column_name )* )? ) K_ON ( database_name '.' )? table_name
    ( K_FOR K_EACH K_ROW )? ( K_WHEN expr )?
    K_BEGIN ( ( update_stmt | insert_stmt | delete_stmt | select_stmt ) ';' )+ K_END

@@ -1,40 +1,39 @@
 
 #include "common/hash_util.hpp"
-#include "tuple/value.hpp"
+#include "value/value.hpp"
 
-hash_t HashUtil::hash_value(Ref<Value> val) {
+hash_t HashUtil::hash_value(CRef<Value> val) {
   switch (val.type_id()) {
   case TypeId::TINYINT: {
-    auto raw = static_cast<int64_t>(val.get_as<int8_t>());
-    return hash<int64_t>(&raw);
+    auto raw = static_cast<int8_t>(val.as<int8_t>());
+    return hash<int8_t>(&raw);
   }
   case TypeId::SMALLINT: {
-    auto raw = static_cast<int64_t>(val.get_as<int16_t>());
-    return hash<int64_t>(&raw);
+    auto raw = static_cast<int16_t>(val.as<int16_t>());
+    return hash<int16_t>(&raw);
   }
   case TypeId::INTEGER: {
-    auto raw = static_cast<int64_t>(val.get_as<int32_t>());
-    return hash<int64_t>(&raw);
+    auto raw = static_cast<int32_t>(val.as<int32_t>());
+    return hash<int32_t>(&raw);
   }
   case TypeId::BIGINT: {
-    auto raw = static_cast<int64_t>(val.get_as<int64_t>());
+    auto raw = static_cast<int64_t>(val.as<int64_t>());
     return hash<int64_t>(&raw);
   }
   case TypeId::BOOLEAN: {
-    auto raw = val.get_as<bool>();
+    auto raw = val.as<bool>();
     return hash<bool>(&raw);
   }
   case TypeId::DECIMAL: {
-    auto raw = val.get_as<double>();
+    auto raw = val.as<double>();
     return hash<double>(&raw);
   }
   case TypeId::VARCHAR: {
-    auto raw = val.varlen();
-    auto len = val.length();
-    return hash_bytes(raw, len);
+    auto raw = val.as<string>();
+    return hash_bytes(raw.c_str(), raw.size());
   }
   case TypeId::TIMESTAMP: {
-    auto raw = val.get_as<uint64_t>();
+    auto raw = val.as<uint64_t>();
     return hash<uint64_t>(&raw);
   }
 
