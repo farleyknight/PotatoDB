@@ -14,17 +14,12 @@ public:
   BaseIndex() = default;
   virtual ~BaseIndex() = default;
 
-  static Ptr<BaseIndex> make() {
-    return make_unique<BaseIndex>();
-  }
-
   virtual void insert_entry(UNUSED CRef<Tuple> key,
                             UNUSED CRef<RID> rid) {
     throw Exception("insert_entry is not implemented on BaseIndex");
   }
 
-  virtual void delete_entry(UNUSED CRef<Tuple> key,
-                            UNUSED CRef<RID> rid) {
+  virtual void delete_entry(UNUSED CRef<Tuple> key) {
     throw Exception("delete_entry is not implemented on BaseIndex");
   }
 

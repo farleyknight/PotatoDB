@@ -22,11 +22,12 @@ public:
                          size_t num_buckets,
                          HashFunc<K> hash_fn);
 
-  bool insert(CRef<K> key,
-              CRef<V> value) override;
-  bool remove(CRef<K> key,
-              CRef<V> value) override;
-  MutVec<V> find_values(CRef<K> key) const override;
+  virtual bool insert(CRef<K> key,
+                      CRef<V> value) override;
+
+  virtual bool remove(CRef<K> key) override;
+
+  vector<V> find_values(CRef<K> key) const override;
 
   void resize(size_t initial_size);
   size_t size();

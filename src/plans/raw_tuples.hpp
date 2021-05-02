@@ -1,10 +1,11 @@
 #pragma once
 
+#include "page/page_id.hpp"
 #include "value/value.hpp"
 
 class RawTuples {
 public:
-  using Data = MutVec<MutVec<Value>>;
+  using Data = vector<vector<Value>>;
 
   // Default constructor
   RawTuples() = default;
@@ -51,6 +52,10 @@ public:
 
   Iterator begin() const { return Iterator(data_.begin()); }
   Iterator end()   const { return Iterator(data_.end());   }
+
+  bool empty() {
+    return data_.size() == 0;
+  }
 
 private:
   PageId page_id_;

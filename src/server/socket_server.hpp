@@ -14,7 +14,7 @@ using SocketFunc = std::function<void(WPtr<ClientSocket>)>;
 
 class SocketServer {
 public:
-  SocketServer(PotatoDB& instance);
+  SocketServer(PotatoDB* instance);
   ~SocketServer();
 
   void set_backlog(int backlog);
@@ -67,5 +67,5 @@ private:
   // at a time.
   vector<file_desc_t> stale_fds_;
   Mutex stale_fd_mutex_;
-  PotatoDB& instance_;
+  PotatoDB* instance_;
 };

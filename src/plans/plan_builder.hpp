@@ -4,57 +4,44 @@
 
 #include "catalog/catalog.hpp"
 
-#include "exprs/comp_expr.hpp"
-#include "exprs/column_expr.hpp"
-#include "exprs/const_expr.hpp"
+#include "query/query_comp.hpp"
+#include "query/query_column.hpp"
+#include "query/query_const.hpp"
+#include "query/query_table.hpp"
 
 #include "plans/base_plan.hpp"
-#include "plans/raw_values_plan.hpp"
+#include "plans/raw_tuples_plan.hpp"
 
 class PlanBuilder {
 public:
-  using Self = MutRef<PlanBuilder>;
-
-  /**********************************************
-   * PB : Constructors & destructor
-   * - DSL for building queries
-   **********************************************/
-
-  PB(MutRef<Catalog> catalog)
+  PlanBuilder(Catalog& catalog)
     : catalog_(catalog) {}
 
   // No copy
-  PlanBuilder(Ref<PlanBuilder>) = delete;
+  PlanBuilder(CRef<PlanBuilder>) = delete;
   // No copy assign
-  Self operator=(Ref<PlanBuilder>) = delete;
-  ~PB() = default;
+  PlanBuilder operator=(CRef<PlanBuilder>) = delete;
+  ~PlanBuilder() = default;
 
-  static Ptr<PlanBuilder> make(MutRef<Catalog> catalog) {
-    return make_unique<PB>(catalog);
-  }
 
-  /**********************************************
-   * DSL Methods
-   **********************************************/
+  PlanBuilder& insert_into(String name);
+  PlanBuilder& tuples(Move<RawTuples> tuples);
 
-  Self insert_into(String name);
-  Self values(Move<RawValueSet> values);
+  PlanBuilder& select(vector<string> names);
+  PlanBuilder& from(string name);
+  PlanBuilder& join(string name);
+  PlanBuilder& on(string left_name,
+                  string op,
+                  string right_name);
 
-  Self select(Vec<String> names);
-  Self from(String name);
-  Self join(String name);
-  Self on(String left_name,
-          String op,
-          String right_name);
+  PlanBuilder& delete_from(string name);
 
-  Self delete_from(String name);
-
-  Self where(Move<String> name,
-             String op,
-             int val);
-  Self where(Move<String> name,
-             String operation,
-             Move<Value> val);
+  PlanBuilder& where(string name,
+                     string op,
+                     int val);
+  PlanBuilder& where(string name,
+                     string operation,
+                     Value val);
 
   MutPtr<BasePlan> to_plan();
 
@@ -63,46 +50,53 @@ private:
    * Private Instance Methods
    **********************************************/
 
-  MutPtr<BasePlan> build_values();
+  MutPtr<BasePlan> build_tuples();
   MutPtr<BasePlan> build_insert(MovePtr<BasePlan> scan_plan);
   MutPtr<BasePlan> build_delete(MovePtr<BasePlan> scan_plan);
   // TODO: Need to add build_update in here.
   MutPtr<BasePlan> build_scan();
   MutPtr<BasePlan> build_loop_join();
-  MutPtr<BasePlan> build_loop_join();
   MutPtr<BasePlan> build_left_scan();
   MutPtr<BasePlan> build_right_scan();
 
-  void apply_join(QueryTable right_table);
+  PlanBuilder& loop_join(string right_table);
+  PlanBuilder& hash_join(string right_table);
 
-  Ref<Schema> insert_table_schema();
+  PlanBuilder& on(QueryColumn left,
+                  string op,
+                  QueryColumn right);
 
-  Ref<Schema> from_table_schema();
+  void apply_join(string right_table_name);
 
-  Ref<Schema> right_table_schema();
-  Ref<Schema> left_table_schema();
+  SchemaRef insert_table_schema_ref();
+  CRef<QuerySchema> insert_table_schema();
 
-  CompType to_comp_type(String op);
+  SchemaRef from_table_schema_ref();
+  CRef<QuerySchema> from_table_schema();
+  CRef<QuerySchema> right_table_schema();
+  CRef<QuerySchema> left_table_schema();
 
-  MutVec<ColumnExpr> select_column_names_;
-  MutVec<ColumnExpr> insert_column_names_;
+  CompType to_comp_type(string op);
 
-  MutString from_table_name_;
-  MutString insert_table_name_;
+  vector<string> select_column_names_;
+  vector<string> insert_column_names_;
+
+  string from_table_name_;
+  string insert_table_name_;
 
   table_oid_t from_table_oid_   = INVALID_TABLE_OID;
   table_oid_t insert_table_oid_ = INVALID_TABLE_OID;
 
-  MutString left_table_name_;
-  MutString right_table_name_;
+  string left_table_name_;
+  string right_table_name_;
 
   table_oid_t left_table_oid_  = INVALID_TABLE_OID;
   table_oid_t right_table_oid_ = INVALID_TABLE_OID;
 
   MutOption<PlanType> plan_type_;
-  MutPtr<CompExpr> where_clause_;
-  MutPtr<CompExpr> join_clause_;
+  MutPtr<QueryComp> where_clause_;
+  MutPtr<QueryComp> join_clause_;
 
-  MutRef<Catalog> catalog_;
-  RawValueSet values_;
+  Catalog& catalog_;
+  RawTuples tuples_;
 };

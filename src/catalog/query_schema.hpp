@@ -2,6 +2,7 @@
 
 #include "catalog/base_schema.hpp"
 #include "query/query_column.hpp"
+#include "query/query_join.hpp"
 
 class TableSchema;
 
@@ -11,10 +12,10 @@ public:
     : BaseSchema (cols, names)
   {}
 
-  // No copy
-  QuerySchema(CRef<QuerySchema>) = delete;
-  // Nocopy-assign
-  MRef<QuerySchema> operator=(CRef<QuerySchema>) = delete;
+  // Allow copy
+  QuerySchema(CRef<QuerySchema>) = default;
+  // Allow copy-assign
+  QuerySchema& operator=(CRef<QuerySchema>) = default;
   // Default destructor
   ~QuerySchema() = default;
 
@@ -42,6 +43,12 @@ public:
   CRef<vector<string>> names() const {
     return names_;
   }
+
+  CRef<vector<QueryJoin>> joins() const {
+    return joins_;
+  }
+
 private:
   vector<string> names_;
+  vector<QueryJoin> joins_; // TODO: Need to populate this
 };

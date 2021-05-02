@@ -4,7 +4,10 @@
 
 class QueryGroupBy : public BaseQuery {
 public:
-  QueryGroupBy(BaseQuery node);
+  QueryGroupBy(string column_name);
+
+  QueryGroupBy(TypeId type_id,
+               string column_name);
 
   // Allow copy
   QueryGroupBy(CRef<QueryGroupBy>) = default;
@@ -35,5 +38,6 @@ public:
                  CRef<Vec<Value>>) const;
 
 private:
-  BaseExpr node_;
+  BaseQuery node_;
+  string column_name_;
 };

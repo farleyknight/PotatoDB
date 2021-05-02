@@ -20,30 +20,26 @@ public:
 
   AggPlan(SchemaRef         schema_ref,
           MovePtr<BasePlan> child,
-          QueryAgg          aggs);
+          MoveVec<QueryAgg> aggs);
 
   /**********************************************
    * HavingExpr is optional
    **********************************************/
 
-  AggPlan(SchemaRef         schema,
-          MovePtr<BasePlan> child,
-          QueryAgg          aggs,
-          QueryGroupBy      group_bys);
+  AggPlan(SchemaRef             schema,
+          MovePtr<BasePlan>     child,
+          MoveVec<QueryAgg>     aggs,
+          MoveVec<QueryGroupBy> group_bys);
 
   /**********************************************
    * All child exprs required
    **********************************************/
 
-  AggPlan(SchemaRef         schema,
-          MovePtr<BasePlan> child,
-          QueryAgg          aggs,
-          QueryGroupBy      group_bys,
-          QueryHaving       having);
-
-  /**********************************************
-   * Instance methods
-   **********************************************/
+  AggPlan(SchemaRef             schema,
+          MovePtr<BasePlan>     child,
+          MoveVec<QueryAgg>     aggs,
+          MoveVec<QueryGroupBy> group_bys,
+          MovePtr<QueryHaving>  having);
 
   void build_agg_types();
 
@@ -54,11 +50,11 @@ public:
   }
 
   bool has_having() {
-    return having_.has_value();
+    return having_ != nullptr;
   }
 
   CRef<QueryHaving> having() {
-    return having_.value();
+    return *having_;
   }
 
   CRef<BaseQuery> group_by_at(uint32_t idx) const {
@@ -88,5 +84,5 @@ private:
   vector<AggType> agg_types_;
   vector<QueryGroupBy> group_bys_;
 
-  Option<QueryHaving> having_;
+  Ptr<QueryHaving> having_;
 };

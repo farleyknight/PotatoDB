@@ -8,16 +8,6 @@
 
 #include "txns/lock_mgr.hpp"
 
-/*************************************
- * TODO: Doc me!
- *************************************/
-
-Catalog::Catalog()
-  : schema_mgr_ (*this) {}
-
-/*************************************
- * TODO: Doc me!
- *************************************/
 
 void Catalog::register_table(UNUSED Txn& txn,
                              String table_name,
@@ -33,10 +23,6 @@ void Catalog::register_table(UNUSED Txn& txn,
                       MutMap<MutString, index_oid_t>());
 }
 
-
-/*************************************
- * TODO: Doc me!
- *************************************/
 
 void Catalog::register_index(UNUSED Txn& txn,
                              String index_name,

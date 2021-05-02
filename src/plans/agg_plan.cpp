@@ -3,7 +3,7 @@
 
 AggPlan::AggPlan(SchemaRef         schema,
                  MovePtr<BasePlan> child,
-                 MoveVec<AggExpr>  aggs)
+                 MoveVec<QueryAgg> aggs)
   : BasePlan (schema),
     child_   (move(child)),
     aggs_    (move(aggs))
@@ -11,10 +11,10 @@ AggPlan::AggPlan(SchemaRef         schema,
   build_agg_types();
 }
 
-AggPlan::AggPlan(SchemaRef            schema,
-                 MovePtr<BasePlan>    child,
-                 MoveVec<AggExpr>     aggs,
-                 MoveVec<GroupByExpr> group_bys)
+AggPlan::AggPlan(SchemaRef             schema,
+                 MovePtr<BasePlan>     child,
+                 MoveVec<QueryAgg>     aggs,
+                 MoveVec<QueryGroupBy> group_bys)
   : BasePlan   (schema),
     child_     (move(child)),
     aggs_      (move(aggs)),
@@ -23,11 +23,11 @@ AggPlan::AggPlan(SchemaRef            schema,
   build_agg_types();
 }
 
-AggPlan::AggPlan(SchemaRef            schema,
-                 MovePtr<BasePlan>    child,
-                 MoveVec<AggExpr>     aggs,
-                 MoveVec<GroupByExpr> group_bys,
-                 MovePtr<HavingExpr>  having)
+AggPlan::AggPlan(SchemaRef             schema,
+                 MovePtr<BasePlan>     child,
+                 MoveVec<QueryAgg>     aggs,
+                 MoveVec<QueryGroupBy> group_bys,
+                 MovePtr<QueryHaving>  having)
   : BasePlan   (schema),
     child_     (move(child)),
     aggs_      (move(aggs)),

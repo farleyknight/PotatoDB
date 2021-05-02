@@ -21,7 +21,7 @@ public:
   /**********************************************
   * Constructors & destructor
   **********************************************/
-  Catalog();
+  Catalog() {}
 
   // No copy
   Catalog(CRef<Catalog>) = delete;
@@ -46,6 +46,10 @@ public:
                       String table_name,
                       String index_name,
                       SchemaRef schema_ref);
+
+  CRef<QuerySchema> find_query_schema(table_oid_t table_oid) const {
+    return schema_mgr_.query_schema_for(table_oid);
+  }
 
   CRef<QuerySchema> find_query_schema(SchemaRef schema_ref) const {
     if (schema_ref.is_query_schema()) {

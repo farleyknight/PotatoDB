@@ -10,10 +10,10 @@ class BaseSchema {
 public:
   BaseSchema(vector<ColT> columns, vector<string> names);
 
-  // No copy
-  BaseSchema(CRef<BaseSchema>) = delete;
-  // No copy assign
-  BaseSchema& operator=(CRef<BaseSchema>) = delete;
+  // Allow copy
+  BaseSchema(CRef<BaseSchema>) = default;
+  // Allow copy assign
+  BaseSchema& operator=(CRef<BaseSchema>) = default;
   // Default destructor
   ~BaseSchema() = default;
 

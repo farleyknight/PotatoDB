@@ -5,7 +5,8 @@
 
 class QueryHaving : public BaseQuery {
 public:
-  QueryHaving(BaseQuery having_clause);
+  QueryHaving(TypeId type_id,
+              BaseQuery having_clause);
 
   Value eval_agg(CRef<QuerySchema> schema,
                  CRef<Vec<Value>> group_bys,

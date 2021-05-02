@@ -1,32 +1,33 @@
-#include "catalog/schema.hpp"
+#include "catalog/query_schema.hpp"
 
-#include "exprs/agg_expr.hpp"
-#include "exprs/group_by_expr.hpp"
+#include "query/query_agg.hpp"
+#include "query/query_group_by.hpp"
 
-AggExpr::AggExpr(BaseExpr expr, AggType agg_type)
-  : BaseExpr  (expr.type_id()),
+QueryAgg::QueryAgg(BaseQuery node, AggType agg_type)
+  : BaseQuery (node.type_id()),
     agg_type_ (agg_type) {}
 
-Value AggExpr::eval_agg(Ref<QuerySchema> schema,
-                        Ref<Vec<Value>> group_bys,
-                        Ref<Vec<Value>> aggregates) const
+Value QueryAgg::eval_agg(CRef<QuerySchema> schema,
+                         UNUSED CRef<Vec<Value>> group_bys,
+                         CRef<Vec<Value>> aggregates) const
 {
-  auto index = schema.by_name(expr_.name());
+  auto index = schema.column_oid_for(node_.name());
   return aggregates[index];
 }
 
-Value AggExpr::eval(Ref<Tuple> tuple, Ref<Schema> schema) const {
+Value QueryAgg::eval(UNUSED CRef<Tuple> tuple,
+                     UNUSED CRef<QuerySchema> schema) const {
   throw NotImplementedException("eval not implemented");
 }
 
-Value AggExpr::eval_join(Ref<Tuple> lt,
-                         Ref<Schema> ls,
-                         Ref<Tuple> rt,
-                         Ref<Schema> rs) const
+Value QueryAgg::eval_join(UNUSED CRef<Tuple> lt,
+                          UNUSED CRef<QuerySchema> ls,
+                          UNUSED CRef<Tuple> rt,
+                          UNUSED CRef<QuerySchema> rs) const
 {
   throw NotImplementedException("eval_join not implemented");
 }
 
-String AggExpr::to_string() const {
-  throw NotImplementedException("to_string not implemented for AggExpr");
+String QueryAgg::to_string() const {
+  throw NotImplementedException("to_string not implemented for QueryAgg");
 }

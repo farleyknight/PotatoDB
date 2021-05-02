@@ -2,7 +2,6 @@
 
 #include "catalog/table_column.hpp"
 #include "query/base_query.hpp"
-#include "query/query_join.hpp"
 
 class TableSchema;
 class QuerySchema;
@@ -10,8 +9,8 @@ class QuerySchema;
 class QueryColumn : public BaseQuery {
 public:
   QueryColumn(TypeId type_id,
-              table_oid_t table_oid,
-              column_oid_t column_oid,
+              // table_oid_t table_oid,
+              // column_oid_t column_oid,
               string column_name);
 
   // Allow copy
@@ -20,10 +19,6 @@ public:
   QueryColumn& operator=(CRef<QueryColumn>) = default;
   // Default destructor
   ~QueryColumn() = default;
-
-  void set_join(QueryJoin join) {
-    join_ = join;
-  }
 
   Value eval(CRef<Tuple> tuple, CRef<TableSchema> schema) const;
 
@@ -37,13 +32,8 @@ public:
                  CRef<Vec<Value>> aggs) const;
   string name() const;
 
-  QueryJoin join() {
-    return join_;
-  }
-
 private:
   column_oid_t column_oid_;
-  table_oid_t table_oid_;
+  // table_oid_t table_oid_;
   string column_name_;
-  QueryJoin join_;
 };

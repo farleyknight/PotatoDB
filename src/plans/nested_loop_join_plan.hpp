@@ -18,18 +18,18 @@ public:
   NestedLoopJoinPlan(SchemaRef schema_ref,
                      MovePtr<BasePlan> left_child,
                      MovePtr<BasePlan> right_child,
-                     Option<QueryComp> pred)
+                     MovePtr<QueryComp> pred)
     : BasePlan     (schema_ref),
       left_child_  (move(left_child)),
       right_child_ (move(right_child)),
-      pred_        (pred) {}
+      pred_        (move(pred)) {}
 
   bool has_pred() {
-    return pred_.has_value();
+    return pred_ != nullptr;
   }
 
   CRef<QueryComp> pred() {
-    return pred_.value();
+    return *pred_;
   }
 
   PlanType type()              const { return PlanType::LOOP_JOIN; }
@@ -43,5 +43,5 @@ public:
 private:
   MutPtr<BasePlan> left_child_;
   MutPtr<BasePlan> right_child_;
-  Option<QueryComp> pred_;
+  MutPtr<QueryComp> pred_;
 };

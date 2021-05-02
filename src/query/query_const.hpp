@@ -8,9 +8,9 @@ public:
    * Constructors & destructor
    **********************************************/
 
-  explicit QueryConst(Move<Value> value)
+  explicit QueryConst(Value value)
     : BaseQuery (value.type_id()),
-      value_    (std::move(value)) {}
+      value_    (value) {}
 
   explicit QueryConst(int8_t integer)
     : BaseQuery (TypeId::SMALLINT),

@@ -83,9 +83,7 @@ class NestedLoopJoinExec : public BaseExec {
     auto &schema =
       exec_ctx_.catalog().find_query_schema(plan_->schema_ref());
 
-    for (auto col : schema.all()) {
-      CRef<QueryJoin> join = col.join();
-
+    for (auto join : schema.joins()) {
       JoinSide side = join.side();
 
       if (side == JoinSide::LEFT) {
@@ -93,13 +91,13 @@ class NestedLoopJoinExec : public BaseExec {
           exec_ctx_.catalog().find_query_schema(plan_->left_schema_ref());
 
         values.push_back(left.value_by_name(left_schema,
-                                            col.name()));
+                                            join.name()));
       } else if (side == JoinSide::RIGHT) {
         auto &right_schema =
           exec_ctx_.catalog().find_query_schema(plan_->right_schema_ref());
 
         values.push_back(right.value_by_name(right_schema,
-                                             col.name()));
+                                             join.name()));
       } else if (side == JoinSide::INVALID) {
         throw Exception("Cannot combine tuples with INVALID_SIDE!");
       }

@@ -24,11 +24,11 @@ QueryColumn TableSchema::operator[](String col_name) const {
   }
 
   auto column = by_name(col_name);
-  auto column_oid = column_oid_for(col_name);
+  // auto column_oid = column_oid_for(col_name);
 
   return QueryColumn(column.type_id(),
-                     table_oid_,
-                     column_oid,
+                     // table_oid_,
+                     // column_oid,
                      col_name);
 }
 

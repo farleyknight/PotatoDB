@@ -1,33 +1,22 @@
 
-#include "exprs/group_by_expr.hpp"
-#include "catalog/schema.hpp"
+#include "query/query_group_by.hpp"
+#include "catalog/query_schema.hpp"
 
-GroupByExpr::GroupByExpr(TypeId type_id,
-                         Ref<Schema> source_schema,
-                         Ref<String> column_name)
-  : BaseExpr       (type_id),
-    source_schema_ (source_schema),
-    column_name_   (column_name) {}
+QueryGroupBy::QueryGroupBy(TypeId type_id,
+                           string column_name)
+  : BaseQuery    (type_id),
+    column_name_ (column_name) {}
 
-GroupByExpr::GroupByExpr(Ref<Schema> source_schema,
-                         Ref<String> column_name)
-  : BaseExpr       (TypeId::INTEGER),
-    source_schema_ (source_schema),
-    column_name_   (column_name) {}
+QueryGroupBy::QueryGroupBy(string column_name)
+  : BaseQuery    (TypeId::INTEGER),
+    column_name_ (column_name) {}
 
 
-Ptr<GroupByExpr> GroupByExpr::make(Ref<Schema> source_schema,
-                                   Ref<String> column_name)
+Value QueryGroupBy::eval_agg(CRef<QuerySchema> schema,
+                             CRef<Vec<Value>> group_bys,
+                             UNUSED CRef<Vec<Value>> aggrs)
+  const
 {
-  return make_unique<GroupByExpr>(TypeId::INTEGER,
-                                  source_schema,
-                                  column_name);
-}
-
-
-Value GroupByExpr::eval_agg(Ref<Vec<Value>> group_bys,
-                            Ref<Vec<Value>> aggrs) const
-{
-  auto index = source_schema_.by_name(column_name_);
+  auto index = schema.column_oid_for(column_name_);
   return group_bys[index];
 }

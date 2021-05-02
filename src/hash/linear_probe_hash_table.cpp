@@ -126,7 +126,7 @@ bool LinearProbeHT<K, V>::insert(CRef<K> key,
 }
 
 template<class K, class V>
-bool LinearProbeHT<K, V>::remove(CRef<K> key, CRef<V> value) {
+bool LinearProbeHT<K, V>::remove(CRef<K> key) {
   table_latch_.rlock();
   auto header_page = fetch_header_page();
   auto expected_index = slot_index(key);
@@ -138,34 +138,25 @@ bool LinearProbeHT<K, V>::remove(CRef<K> key, CRef<V> value) {
     }
     // initialize block_page and block (casting)
     auto block_index = index / block_array_size();
-    auto maybe_page = buff_mgr_.fetch_page(header_page.block_page_id(block_index));
-    assert(maybe_page.has_value());
-    auto &page = maybe_page.value().get();
-    auto block = HTBlockPage<K,V>(page);
-    // TODO: Eventually remove this casting bullshit!
-    // But for now, Page and it's data are so tied together that
-    // a better version is not possible. Perhaps fixing this
-    // in the code is a good enough case for a refactor on
-    // pages and how they are formatted.
-    // One of the things that SimpleDB got right!
-    // => PageFormatter classes
-    // auto block = reinterpret_cast<MutRawPtr<HTBlockPage<K, V>>>(page.data());
+    auto page_id = header_page.block_page_id(block_index);
+    auto maybe_page = buff_mgr_.fetch_page(page_id);
+    assert(maybe_page);
+    auto page = HTBlockPage<K,V>(maybe_page);
 
     // expected offset of key-value pair in this block
     auto data_offset_in_block = index % block_array_size();
 
     // conditions
     page.wlatch();
-    if (!block->is_occupied(data_offset_in_block)) {
+    if (!page.is_occupied(data_offset_in_block)) {
       page.wunlatch();
       break;
     }
 
-    if (block->is_readable(data_offset_in_block) &&
-        comp_(key, block->key_at(data_offset_in_block)) == 0 &&
-        value == block->value_at(data_offset_in_block)) {
+    if (page.is_readable(data_offset_in_block) &&
+        comp_(key, page.key_at(data_offset_in_block)) == 0) {
       // removing and unlock
-      block->remove(data_offset_in_block);
+      page.remove(data_offset_in_block);
       page.wunlatch();
       table_latch_.runlock();
       return true;

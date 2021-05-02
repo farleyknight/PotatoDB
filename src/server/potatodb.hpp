@@ -38,6 +38,12 @@ public:
     return std::getenv("HOME");
   }
 
+  int pool_size() {
+    return 100;
+  }
+
+  ResultSet execute(string query);
+
 private:
   void setup_db_directory() {
     fs::current_path(home_path());
@@ -51,33 +57,7 @@ private:
     }
   }
 
-  void startup() {
-    // TODO: Add logging for this line
-    std::cout << "Start PotatoDB Server (0.1.0)" << std::endl;
-    server_.set_port(port_);
-    server_.on_read([&](WPtr<ClientSocket> socket_ptr) {
-      if (auto client = socket_ptr.lock()) {
-        auto query = client->read();
-        std::cout << "Client Socket got query " << query << std::endl;
-
-        try {
-          auto result = client->session().execute(query);
-          client->write(result.to_string());
-        } catch (std::exception &e) {
-          // TODO: Send better error message
-          client->write("Got an error! :(");
-        }
-      } else {
-        // TODO: Logger
-        std::cout << "Could not get lock!" << std::endl;
-      }
-    });
-
-    // TODO: Allow port customization
-    // TODO: Add logging for this line
-    std::cout << "Server listening on port " << port_ << std::endl;
-    server_.accept_connections();
-  }
+  void startup();
 
   int port_ = 7878;
   vector<Session> sessions_;
@@ -88,6 +68,7 @@ private:
   LogMgr log_mgr_;
   LockMgr lock_mgr_;
   TxnMgr txn_mgr_;
+  TableMgr table_mgr_;
   Catalog catalog_;
   ExecEngine exec_eng_;
 };

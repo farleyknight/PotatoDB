@@ -38,11 +38,11 @@ QuerySchema QuerySchema::slice(CRef<TableSchema> from,
   vector<QueryColumn> cols;
   for (auto const& name : names) {
     auto col = from.by_name(name);
-    auto expr = QueryColumn(col.type_id(),
-                            col.table_oid(),
-                            col.oid(),
-                            col.name());
-    cols.push_back(expr);
+    auto query_col = QueryColumn(col.type_id(),
+                                 // col.table_oid(),
+                                 // col.oid(),
+                                 col.name());
+    cols.push_back(query_col);
   }
   return QuerySchema(cols, names);
 }
@@ -62,8 +62,8 @@ QuerySchema QuerySchema::copy(CRef<TableSchema> original) {
   vector<string> names(original.column_count());
   for (auto const& col : original.all()) {
     auto query_col = QueryColumn(col.type_id(),
-                                 col.table_oid(),
-                                 col.oid(),
+                                 // col.table_oid(),
+                                 // col.oid(),
                                  col.name());
     cols.push_back(query_col);
     names.push_back(col.name());

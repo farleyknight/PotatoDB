@@ -19,12 +19,12 @@ void LinearProbeHTIndex::insert_entry(CRef<Tuple> key, CRef<RID> rid) {
   container_.insert(index_key, rid);
 }
 
-void LinearProbeHTIndex::delete_entry(CRef<Tuple> key, CRef<RID> rid) {
+void LinearProbeHTIndex::delete_entry(CRef<Tuple> key) {
   // construct delete index key
   GenericKey index_key;
   index_key.set_from_key(key);
 
-  container_.remove(index_key, rid);
+  container_.remove(index_key);
 }
 
 Vec<RID> LinearProbeHTIndex::scan_key(CRef<Tuple> key) const {
