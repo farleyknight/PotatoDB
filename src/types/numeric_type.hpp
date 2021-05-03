@@ -6,6 +6,8 @@
 
 template<typename numeric_t>
 class NumericType : public Type {
+private:
+  using Type::serialize_to;
 public:
   size_t size() const override {
     return sizeof(numeric_t);
@@ -37,13 +39,11 @@ public:
     }
   }
 
-  void serialize_to(Buffer& buff, Value val) const override {
-    size_t offset = 0;
+  virtual void serialize_to(size_t offset, Buffer& buff, Value val) const {
     buff.write_numeric<numeric_t>(offset, val.as<numeric_t>());
   }
 
-  Value deserialize_from(CRef<Buffer> buff) const override {
-    size_t offset = 0;
+  Value deserialize_from(size_t offset, CRef<Buffer> buff) const override {
     return Value::make(buff.read_numeric<numeric_t>(offset));
   }
 

@@ -149,7 +149,7 @@ bool BuffMgr::delete_page(PageId page_id) {
 
 void BuffMgr::flush_all() {
   for (auto it : page_table_) {
-    flush(it.first);
+    flush_page(it.first);
   }
   free_list_.clear();
   page_table_.clear();
@@ -168,7 +168,6 @@ void BuffMgr::pin_page(Page& page, frame_id_t frame_id) {
   page.pin();
   replacer_->pin(frame_id);
 }
-
 
 bool BuffMgr::flush_page(Page& page) {
   if (page.is_dirty()) {

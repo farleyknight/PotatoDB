@@ -8,10 +8,14 @@ class QuerySchema;
 
 class QueryColumn : public BaseQuery {
 public:
+
+  // TODO: We should be able to create a QueryColumn via a TableColumn
+  // Can we inherit both from BaseQuery and BaseColumn?
   QueryColumn(TypeId type_id,
-              // table_oid_t table_oid,
-              // column_oid_t column_oid,
-              string column_name);
+              string name)
+    : BaseQuery (type_id),
+      name_     (name)
+  {}
 
   // Allow copy
   QueryColumn(CRef<QueryColumn>) = default;
@@ -20,20 +24,40 @@ public:
   // Default destructor
   ~QueryColumn() = default;
 
-  Value eval(CRef<Tuple> tuple, CRef<TableSchema> schema) const;
+  Value eval(UNUSED CRef<Tuple> tuple,
+             UNUSED CRef<QuerySchema> schema) const {
+    throw NotImplementedException("eval_agg not implemented!");
+  }
 
-  Value eval_join(CRef<Tuple> lt,
-                  CRef<QuerySchema> ls,
-                  CRef<Tuple> rt,
-                  CRef<QuerySchema> rs) const;
+  Value eval_join(UNUSED CRef<Tuple> lt,
+                  UNUSED CRef<QuerySchema> ls,
+                  UNUSED CRef<Tuple> rt,
+                  UNUSED CRef<QuerySchema> rs) const {
+    throw NotImplementedException("eval_agg not implemented!");
+  }
 
-  Value eval_agg(CRef<QuerySchema> schema,
-                 CRef<Vec<Value>> group_bys,
-                 CRef<Vec<Value>> aggs) const;
-  string name() const;
+  Value eval_agg(UNUSED CRef<QuerySchema> schema,
+                 UNUSED CRef<Vec<Value>> group_bys,
+                 UNUSED CRef<Vec<Value>> aggs) const {
+    throw NotImplementedException("eval_agg not implemented!");
+  }
+
+  string name() const {
+    return name_;
+  }
+
+  bool is_inlined() const {
+    return false; // TODO!
+  }
+
+  bool fixed_length() {
+    return 0; // TODO!
+  }
+
+  size_t variable_length() const {
+    return 0; // TODO!
+  }
 
 private:
-  column_oid_t column_oid_;
-  // table_oid_t table_oid_;
-  string column_name_;
+  string name_;
 };

@@ -10,9 +10,6 @@ public:
     assert(page != nullptr);
   }
 
-  // TODO: Finish recovery module
-  lsn_t lsn();
-  void set_lsn(lsn_t lsn);
   void reset_memory();
 
   void rlatch() {

@@ -7,8 +7,8 @@ QueryAgg::QueryAgg(BaseQuery node, AggType agg_type)
   : BaseQuery (node.type_id()),
     agg_type_ (agg_type) {}
 
-Value QueryAgg::eval_agg(CRef<QuerySchema> schema,
-                         UNUSED CRef<Vec<Value>> group_bys,
+Value QueryAgg::eval_agg(const QuerySchema& schema,
+                         UNUSED const Vec<Value>& group_bys,
                          CRef<Vec<Value>> aggregates) const
 {
   auto index = schema.column_oid_for(node_.name());

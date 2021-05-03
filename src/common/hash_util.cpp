@@ -1,4 +1,5 @@
 
+#include "common/exceptions.hpp"
 #include "common/hash_util.hpp"
 #include "value/value.hpp"
 

@@ -4,12 +4,15 @@
 #include "types/type.hpp"
 
 class InvalidType : public Type {
+private:
+  using Type::deserialize_from;
+
 public:
   TypeId type_id() const override {
     return TypeId::INVALID;
   }
 
-  Value deserialize_from(UNUSED CRef<Buffer> buff) const override {
+  Value deserialize_from(UNUSED const Buffer& buff) const {
     throw Exception("No deserialize_from for InvalidType");
   }
 

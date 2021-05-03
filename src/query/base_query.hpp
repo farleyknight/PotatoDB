@@ -3,6 +3,8 @@
 #include <vector>
 #include <functional>
 
+#include "common/exceptions.hpp"
+
 #include "value/value.hpp"
 
 class Tuple;

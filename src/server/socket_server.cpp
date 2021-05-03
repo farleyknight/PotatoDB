@@ -19,7 +19,7 @@
 #include "server/socket_server.hpp"
 #include "server/potatodb.hpp"
 
-SocketServer::SocketServer(PotatoDB& instance)
+SocketServer::SocketServer(PotatoDB* instance)
   : instance_ (instance)
 {}
 
@@ -116,7 +116,7 @@ shared_ptr<ClientSocket>
 SocketServer::make_client_socket(file_desc_t client_fd) {
   return make_shared<ClientSocket>(client_fd,
                                    this,
-                                   instance_.make_session());
+                                   instance_->make_session());
 }
 
 void SocketServer::read_from_connection(file_desc_t fd) {

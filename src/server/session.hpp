@@ -14,7 +14,7 @@ public:
   Session(PotatoDB* db) : db_ (db) {}
   ~Session() = default;
 
-  ResultSet execute(string query);
+  MutPtr<ResultSet> execute(string query);
 
 private:
   PotatoDB* db_; // Use as a reference

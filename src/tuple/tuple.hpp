@@ -10,9 +10,6 @@
 
 class Tuple {
 public:
-  /**********************************************
-   * Constructors & destructor
-   **********************************************/
   Tuple() = default;
 
   // Constructor for table heap tuple
@@ -20,32 +17,29 @@ public:
   Tuple(RID rid) : rid_(rid) {}
   // Provide values w/ schema
 
-  Tuple(vector<Value> values, CRef<QuerySchema> schema);
+  Tuple(vector<Value> values, const QuerySchema& schema);
 
-  // Copy constructor
-  Tuple(CRef<Tuple> other) = default;
   // Destructor
   ~Tuple() = default;
-
 
   bool is_valid() const {
     return rid_.has_value();
   }
 
-  CRef<Buffer> data_for(CRef<QuerySchema> schema,
-                        const uint32_t column_index) const;
+  size_t buffer_offset_for(const QuerySchema& schema,
+                           const uint32_t column_index) const;
 
-  void copy_from(CRef<Tuple> tuple) {
+  void copy_from(const Tuple& tuple) {
     buffer_.copy_from(tuple.buffer_);
   }
 
-  Value value(CRef<QuerySchema> schema,
-              const uint32_t column_index) const;
+  Value value(const QuerySchema& schema,
+              uint32_t column_index) const;
 
-  Value value_by_name(CRef<QuerySchema> schema,
-                      CRef<String> name) const;
+  Value value_by_name(const QuerySchema& schema,
+                      string name) const;
 
-  bool is_null(CRef<QuerySchema> schema,
+  bool is_null(const QuerySchema& schema,
                uint32_t column_index) const;
 
   Tuple key_from_tuple(CRef<QuerySchema> schema,

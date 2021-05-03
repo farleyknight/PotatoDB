@@ -33,3 +33,5 @@ template<class KeyT, class ValueT>
 bool HTBlockPage<KeyT, ValueT>::is_readable(UNUSED slot_offset_t bucket_ind) const {
   return false;
 }
+
+template class HTBlockPage<GenericKey, RID>;

@@ -25,22 +25,22 @@ BaseSchema<ColT>::BaseSchema(vector<ColT> cols, vector<string> names) {
 }
 
 template<class ColT>
-bool BaseSchema<ColT>::has_column(CRef<String> name) const {
-  return column_oids_.find(name) > 0;
+bool BaseSchema<ColT>::has_column(const string& name) const {
+  return column_oids_.count(name) > 0;
 }
 
 template<class ColT>
-column_oid_t BaseSchema<ColT>::column_oid_for(CRef<String> name) const {
-  return column_oids_[name];
+column_oid_t BaseSchema<ColT>::column_oid_for(const string& name) const {
+  return column_oids_.at(name);
 }
 
 template<class ColT>
 size_t BaseSchema<ColT>::offset_for(column_oid_t oid) const {
-  return offsets_[oid];
+  return offsets_.at(oid);
 }
 
 template<class ColT>
-size_t BaseSchema<ColT>::offset_for(CRef<String> name) const {
+size_t BaseSchema<ColT>::offset_for(const string& name) const {
   return offset_for(column_oid_for(name));
 }
 
@@ -55,26 +55,29 @@ size_t BaseSchema<ColT>::tuple_length() const {
 }
 
 template<class ColT>
-CRef<Vec<size_t>> BaseSchema<ColT>::unlined_columns() const {
+CRef<Vec<column_oid_t>> BaseSchema<ColT>::unlined_columns() const {
   return unlined_columns_;
 }
 
 template<class ColT>
-CRef<ColT> BaseSchema<ColT>::by_name(CRef<String> name) const {
+const ColT& BaseSchema<ColT>::by_name(string name) const {
   return columns_.at(column_oid_for(name));
 }
 
 template<class ColT>
-CRef<ColT> BaseSchema<ColT>::by_column_oid(column_oid_t oid) const {
+const ColT& BaseSchema<ColT>::by_column_oid(column_oid_t oid) const {
   return columns_.at(oid);
 }
 
 template<class ColT>
-CRef<ColT> BaseSchema<ColT>::by_offset(size_t offset) const {
+const ColT& BaseSchema<ColT>::by_offset(size_t offset) const {
   return columns_.at(offset);
 }
 
 template<class ColT>
-CRef<Vec<ColT>> BaseSchema<ColT>::all() const {
+const Vec<ColT>& BaseSchema<ColT>::all() const {
   return columns_;
 }
+
+template class BaseSchema<QueryColumn>;
+template class BaseSchema<TableColumn>;

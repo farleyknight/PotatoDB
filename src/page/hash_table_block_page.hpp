@@ -23,35 +23,15 @@
 template<class KeyT, class ValueT>
 class HTBlockPage {
 public:
-  /**********************************************
-   * Useful types
-   **********************************************/
   using CompT    = Comp<KeyT>;
   using MappingT = std::pair<KeyT, ValueT>;
 
   static const int BLOCK_ARRAY_SIZE =
     (4 * PAGE_SIZE / (4 * sizeof(MappingT) + 1));
 
-  /**********************************************
-   * Constructor & destructor
-   **********************************************/
-
-  // NOTE: We never actually use the constructor because
-  // it is always implemented via `reinterpret_cast`.
-  // What that means is, in practice we are overlaying
-  // the memory layout of the instance variables onto
-  // chunk of memory that is attached to a Page object.
-  //
-  // Suffice to say, this is hideous to me, from a memory
-  // safety perspective. But, because I do not know how
-  // else to do it, we'll use Pavlo's approach for now
-  // and in the future we can find a better way to store
-  // this.
-  HTBlockPage() = delete;
-
-  /**********************************************
-   * Instance methods
-   **********************************************/
+  HTBlockPage(Page* page)
+    : page_ (page)
+  {}
 
   KeyT key_at(slot_offset_t bucket_ind) const;
   ValueT value_at(slot_offset_t bucket_ind) const;
@@ -63,10 +43,31 @@ public:
   bool is_occupied(slot_offset_t bucket_ind) const;
   bool is_readable(slot_offset_t bucket_ind) const;
 
- private:
-  std::atomic_char occupied_[(BLOCK_ARRAY_SIZE - 1) / 8 + 1];
 
-  // 0 if tombstone/brand new (never occupied), 1 otherwise.
-  std::atomic_char readable_[(BLOCK_ARRAY_SIZE - 1) / 8 + 1];
-  // MappingT array_[0];
+  void wlatch() {
+    page_->wlatch();
+  }
+
+  void wunlatch() {
+    page_->wunlatch();
+  }
+
+  void rlatch() {
+    page_->rlatch();
+  }
+
+  void runlatch() {
+    page_->runlatch();
+  }
+
+  size_t size() {
+    return page_->size();
+  }
+
+  PageId page_id() {
+    return page_->page_id();
+  }
+
+private:
+  Page* page_;
 };

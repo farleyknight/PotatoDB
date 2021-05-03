@@ -4,6 +4,8 @@
 #include <stdexcept>
 #include <string>
 
+#include "common/types.hpp"
+
 enum class ExceptionType {
   /** Invalid exception type.*/
   INVALID = 0,
@@ -29,20 +31,20 @@ enum class ExceptionType {
 
 class Exception : public std::runtime_error {
 public:
-  explicit Exception(CRef<String> message)
+  explicit Exception(string message)
   : std::runtime_error(message), type_(ExceptionType::INVALID) {
     String exception_message = "Message :: " + message + "\n";
     std::cerr << exception_message;
   }
 
-  Exception(ExceptionType exception_type, CRef<String> message)
+  Exception(ExceptionType exception_type, string message)
   : std::runtime_error(message), type_(exception_type) {
     String exception_message =
     "\nException Type :: " + to_string(type_) + "\nMessage :: " + message + "\n";
     std::cerr << exception_message;
   }
 
-  String to_string(ExceptionType type) {
+  string to_string(ExceptionType type) {
     switch (type) {
     case ExceptionType::INVALID:
       return "Invalid";

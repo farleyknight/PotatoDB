@@ -38,6 +38,15 @@ public:
     : PageLayout (page)
   {}
 
+  // TODO: Finish recovery module
+  lsn_t lsn() {
+    return page_->read_lsn();
+  }
+
+  void set_lsn(lsn_t lsn) {
+    page_->write_lsn(lsn);
+  }
+
   void set_page_id(PageId page_id) {
     page_->write_page_id(0, page_id);
   }

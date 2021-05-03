@@ -71,7 +71,7 @@ public:
   size_t pool_size()             { return pool_size_; }
 
   bool flush_page(PageId page_id);
-  bool flush_page(MRef<Page> page);
+  bool flush_page(Page& page);
 
 private:
   std::tuple<Page*, frame_id_t> pick_or_evict_page();

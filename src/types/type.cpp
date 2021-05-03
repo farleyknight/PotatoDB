@@ -27,27 +27,7 @@ CRef<Ptr<Type>> Type::instance(TypeId type_id) {
   return types_.at(type_id);
 }
 
-Value Type::min() const {
-  throw NotImplementedException("min not implemented!");
-}
-
-Value Type::max() const {
-  throw NotImplementedException("max not implemented!");
-}
-
-void Type::serialize_to(UNUSED MRef<Buffer> buff, UNUSED Value val) const {
-  throw NotImplementedException("serialize_to not implemented!");
-}
-
-Value Type::deserialize_from(UNUSED CRef<Buffer> buff) const {
-  throw NotImplementedException("deserialize_from not implemented!");
-}
-
-MutString Type::to_string(UNUSED const Value val) const {
-  throw NotImplementedException("to_string not implemented!");
-}
-
-MutString Type::as_string(const TypeId type_id) {
+string Type::as_string(const TypeId type_id) {
   switch (type_id) {
   case TypeId::INVALID:   return "INVALID";
   case TypeId::BOOLEAN:   return "BOOLEAN";

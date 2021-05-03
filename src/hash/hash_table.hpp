@@ -17,5 +17,5 @@ public:
 
   virtual bool remove(CRef<KeyT> key) = 0;
 
-  virtual MutVec<ValueT> find_values(CRef<KeyT> key) const = 0;
+  virtual vector<ValueT> find_values(CRef<KeyT> key) = 0;
 };

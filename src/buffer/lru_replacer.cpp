@@ -26,5 +26,9 @@ void LRUReplacer::unpin(UNUSED frame_id_t frame_id) {
 }
 
 size_t LRUReplacer::size() {
-  return 0;
+  return 0; // TODO!
+}
+
+void LRUReplacer::reset() {
+  return; // TODO!
 }

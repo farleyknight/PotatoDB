@@ -12,8 +12,6 @@ void handle_exit(int signal) {
   potatodb.shutdown(signal);
 }
 
-const int port = 7878;
-
 int main() {
   signal(SIGINT, handle_exit);
 

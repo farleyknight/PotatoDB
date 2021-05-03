@@ -4,6 +4,8 @@
 
 #include "common/config.hpp"
 #include "catalog/base_column.hpp"
+#include "query/query_column.hpp"
+#include "catalog/table_column.hpp"
 
 template<class ColT>
 class BaseSchema {
@@ -11,26 +13,31 @@ public:
   BaseSchema(vector<ColT> columns, vector<string> names);
 
   // Allow copy
-  BaseSchema(CRef<BaseSchema>) = default;
+  BaseSchema(const BaseSchema&) = default;
   // Allow copy assign
-  BaseSchema& operator=(CRef<BaseSchema>) = default;
+  BaseSchema& operator=(const BaseSchema&) = default;
   // Default destructor
   ~BaseSchema() = default;
 
   size_t column_count() const;
   size_t tuple_length() const;
 
-  bool has_column(CRef<String> name) const;
-  column_oid_t column_oid_for(CRef<String> name) const;
+  bool has_column(const string& name) const;
+  size_t index_for(const string& name) const;
+  column_oid_t column_oid_for(const string& name) const;
   size_t offset_for(column_oid_t oid) const;
-  size_t offset_for(CRef<String> name) const;
+  size_t offset_for(const string& name) const;
 
-  CRef<ColT> by_offset(size_t oid) const;
-  CRef<ColT> by_column_oid(column_oid_t oid) const;
-  CRef<ColT> by_name(CRef<String> name) const;
+  const ColT& by_offset(size_t offset) const;
+  const ColT& by_index(size_t index) const {
+    return by_offset(index);
+  }
 
-  CRef<Vec<size_t>> unlined_columns() const;
-  CRef<Vec<ColT>> all() const;
+  const ColT& by_column_oid(column_oid_t oid) const;
+  const ColT& by_name(string name) const;
+
+  const vector<column_oid_t>& unlined_columns() const;
+  const vector<ColT>& all() const;
 
   virtual string to_string() const = 0;
 
@@ -51,3 +58,4 @@ protected:
   // layout offsets.
   uint32_t tuple_length_;
 };
+

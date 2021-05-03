@@ -1,6 +1,7 @@
 #pragma once
 
 #include "page/page.hpp"
+#include "page/page_layout.hpp"
 
 /**
  *
@@ -12,8 +13,12 @@
  * -------------------------------------------------------------
  */
 
-class HTHeaderPage : public Page {
+class HTHeaderPage : public PageLayout {
 public:
+  HTHeaderPage(Page* page)
+    : PageLayout (page)
+  {}
+
   size_t size() const;
   void set_size(size_t size);
   PageId page_id() const;

@@ -4,6 +4,9 @@
 #include "buffer/buffer.hpp"
 
 class BooleanType : public Type {
+private:
+  using Type::serialize_to;
+
 public:
   TypeId type_id() const override {
     return TypeId::BOOLEAN;
@@ -21,13 +24,15 @@ public:
     return Value::make(true);
   }
 
-  void serialize_to(Buffer& buff, Value val) const override {
-    size_t offset = 0;
+  virtual void serialize_to(size_t offset,
+                            Buffer& buff,
+                            Value val)
+    const
+  {
     buff.write_int8(offset, val.as<bool>());
   }
 
-  Value deserialize_from(CRef<Buffer> buff) const override {
-    size_t offset = 0;
+  Value deserialize_from(size_t offset, const Buffer& buff) const override {
     return Value::make(buff.read_int8(offset));
   }
 

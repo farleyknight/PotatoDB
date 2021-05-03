@@ -1,5 +1,6 @@
 
 #include "server/potatodb.hpp"
+#include "server/client_socket.hpp"
 
 PotatoDB::PotatoDB()
   : server_    (this),
@@ -8,24 +9,25 @@ PotatoDB::PotatoDB()
     log_mgr_   (disk_mgr_),
     txn_mgr_   (lock_mgr_, log_mgr_, table_mgr_),
     // catalog_   (buff_mgr_, lock_mgr_, log_mgr_),
-    catalog_   (),
     table_mgr_ (disk_mgr_, buff_mgr_),
+    catalog_   (),
     exec_eng_  (buff_mgr_, txn_mgr_, catalog_)
 {
   setup_db_directory();
 }
 
-BasePlan build_plan(BaseExpr expr) {
+MutPtr<BasePlan> PotatoDB::build_plan(UNUSED const BaseExpr& expr) {
   auto schema_ref = SchemaRef(SchemaType::QUERY, -1);
-  return SeqScanPlan(schema_ref);
+  return make_unique<SeqScanPlan>(schema_ref);
 }
 
-ResultSet PotatoDB::execute(string query) {
+MutPtr<ResultSet> PotatoDB::execute(string query) {
   try {
     // TODO: Rename as_exprs to as_stmts
     auto exprs = SQLParser::as_exprs(query);
     // TODO: Allow for multiple statements
-    auto plan = build_plan(exprs[0]);
+    assert(exprs.size() > 0);
+    auto plan = build_plan(*exprs[0]);
 
     // Create and run the txn
     auto &txn = txn_mgr_.begin();
@@ -36,9 +38,9 @@ ResultSet PotatoDB::execute(string query) {
                      table_mgr_,
                      catalog_);
 
-    auto result_set = exec_eng().execute(plan,
-                                         txn,
-                                         exec_ctx);
+    auto result_set = exec_eng_.query(move(plan),
+                                      txn,
+                                      exec_ctx);
     txn_mgr_.commit(txn);
     return result_set;
   } catch (std::exception& e) {
@@ -57,7 +59,7 @@ void PotatoDB::startup() {
 
       try {
         auto result = client->session().execute(query);
-        client->write(result.to_string());
+        client->write(result->to_string());
       } catch (std::exception &e) {
         // TODO: Send better error message
         client->write("Got an error! :(");

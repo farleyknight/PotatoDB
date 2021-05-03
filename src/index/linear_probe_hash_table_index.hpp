@@ -16,7 +16,7 @@ public:
 
   void insert_entry(CRef<Tuple> key, CRef<RID> rid) override;
   void delete_entry(CRef<Tuple> key) override;
-  Vec<RID> scan_key(CRef<Tuple> key) const override;
+  virtual Vec<RID> scan_key(CRef<Tuple> key) override;
 
 protected:
   CRef<IndexMeta> meta_;

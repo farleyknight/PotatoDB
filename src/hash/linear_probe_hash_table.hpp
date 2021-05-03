@@ -27,7 +27,7 @@ public:
 
   virtual bool remove(CRef<K> key) override;
 
-  vector<V> find_values(CRef<K> key) const override;
+  virtual vector<V> find_values(CRef<K> key) override;
 
   void resize(size_t initial_size);
   size_t size();
@@ -36,16 +36,13 @@ private:
   void append_buckets(HTHeaderPage& page,
                       size_t num_buckets);
   slot_offset_t slot_index(CRef<K> key);
-  HTHeaderPage& fetch_header_page();
+  HTHeaderPage fetch_header_page();
   size_t block_array_size();
 
-  OptRef<HTHeaderPage> header_page_;
   String name_;
-  page_id_t header_page_id_;
+  PageId header_page_id_;
   CompT comp_;
   int num_buckets_;
-
-  void load_header_page();
 
   // Readers includes inserts and removes, writer is only resize
   RWLatch table_latch_;

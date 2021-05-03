@@ -52,3 +52,4 @@ private:
   vector<string> names_;
   vector<QueryJoin> joins_; // TODO: Need to populate this
 };
+

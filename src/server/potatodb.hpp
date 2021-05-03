@@ -42,7 +42,10 @@ public:
     return 100;
   }
 
-  ResultSet execute(string query);
+  MutPtr<ResultSet> execute(string query);
+
+  MutPtr<BasePlan> build_plan(const BaseExpr& expr);
+  void startup();
 
 private:
   void setup_db_directory() {
@@ -56,8 +59,6 @@ private:
       db_file.close();
     }
   }
-
-  void startup();
 
   int port_ = 7878;
   vector<Session> sessions_;

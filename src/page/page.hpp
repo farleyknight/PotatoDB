@@ -56,9 +56,6 @@ public:
     page_id_ = id;
   }
 
-  lsn_t lsn();
-  void set_lsn(lsn_t lsn);
-
   size_t size() const {
     return buffer_.size();
   }
@@ -75,6 +72,9 @@ public:
   int pin_count() const {
     return pin_count_;
   }
+
+  lsn_t read_lsn() const;
+  void write_lsn(lsn_t lsn);
 
   uint32_t read_uint32(size_t offset) const;
   void write_uint32(size_t offset, uint32_t data);
@@ -96,11 +96,11 @@ public:
   void rlatch();
   void runlatch();
 
-
-private:
   static constexpr size_t SIZE_PAGE_HEADER = 8;
   static constexpr size_t OFFSET_PAGE_START = 0;
   static constexpr size_t OFFSET_LSN = 4;
+
+private:
 
   PageId  page_id_;
   Buffer  buffer_;

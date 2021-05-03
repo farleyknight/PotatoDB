@@ -9,7 +9,7 @@
 
 #include "types/type_id.hpp"
 
-class Value;
+#include "value/value.hpp"
 
 class Type {
 public:
@@ -18,7 +18,6 @@ public:
   virtual TypeId type_id() const {
     throw NotImplementedException("type_id not implemented!");
   }
-
 
   virtual size_t size() const {
     throw NotImplementedException("size not implemented!");
@@ -31,18 +30,21 @@ public:
   virtual Value min() const;
   virtual Value max() const;
 
-  virtual void serialize_to(MRef<Buffer> buff, Value val) const;
-  virtual Value deserialize_from(CRef<Buffer> buff) const;
+  virtual void serialize_to(Buffer& buff, size_t offset, Value val) const;
+  virtual Value deserialize_from(UNUSED size_t offset,
+                                 UNUSED const Buffer& buff) const {
+    throw NotImplementedException("add not implemented!");
+  }
 
-  virtual MutString to_string(const Value val) const;
 
-  static CRef<Ptr<Type>> instance(const TypeId type_id);
-  static MutString as_string(const TypeId type_id);
+  virtual string to_string(const Value& val) const;
+
+  static const Ptr<Type>& instance(const TypeId type_id);
+  static string as_string(const TypeId type_id);
 
   static size_t size_of(TypeId type_id) {
     return Type::instance(type_id)->size();
   }
-
 
   virtual bool eq(UNUSED CRef<Value> left,
                   UNUSED CRef<Value> right) const {

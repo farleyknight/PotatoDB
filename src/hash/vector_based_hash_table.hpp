@@ -15,13 +15,13 @@ public:
     table_.resize(capacity);
   }
 
-  bool insert(CRef<K> key, CRef<V> value) {
+  virtual bool insert(CRef<K> key, CRef<V> value) override {
     auto index = slot_index(key);
     table_[index].push_back(KVPair(key, value));
     return true;
   }
 
-  vector<V> find_values(CRef<K> key) const {
+  virtual vector<V> find_values(CRef<K> key) override {
     auto index = slot_index(key);
     auto pairs = table_[index];
 
@@ -34,7 +34,7 @@ public:
     return values;
   }
 
-  bool remove(CRef<K> key) {
+  virtual bool remove(CRef<K> key) override {
     auto index = slot_index(key);
     auto pairs = table_[index];
     auto removed = false;

@@ -24,10 +24,11 @@ public:
   **********************************************/
 
   std::tuple<bool, frame_id_t> evict() override;
-  
+
   void pin(frame_id_t frame_id) override;
   void unpin(frame_id_t frame_id) override;
   size_t size() override;
+  void reset() override;
 
 private:
   UNUSED int num_pages_ = 0;

@@ -6,12 +6,12 @@ Page::Page() {
   reset_memory();
 }
 
-lsn_t Page::lsn() {
+lsn_t Page::read_lsn() const {
   return buffer_.read_int32(OFFSET_LSN);
   // return *reinterpret_cast<lsn_t *>(data() + OFFSET_LSN);
 }
 
-void Page::set_lsn(lsn_t lsn) {
+void Page::write_lsn(lsn_t lsn) {
   buffer_.write_int32(OFFSET_LSN, lsn);
   // memcpy(data() + OFFSET_LSN, &lsn, sizeof(lsn_t));
 }

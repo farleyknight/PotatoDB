@@ -3,17 +3,21 @@
 #include <string>
 #include <type_traits>
 
+#include "buffer/buffer.hpp"
+
 #include "types/type_id.hpp"
-#include "types/type.hpp"
+
 #include "value/value_base.hpp"
+
+class Type;
 
 class Value : public ValueBase<> {
 public:
   using DataStoreT = typename ValueBase<>::DataStoreT;
   using StoreT     = typename ValueBase<>::StoreClass;
 
-  void serialize_to(Buffer& buff);
-  static Value deserialize_from(CRef<Buffer> buff,
+  void serialize_to(size_t offset, Buffer& buff);
+  static Value deserialize_from(const Buffer& buff,
                                 size_t offset,
                                 TypeId type_id);
 
@@ -25,6 +29,10 @@ public:
   }
 
   size_t size() const;
+  size_t length() const {
+    return size();
+  }
+
   bool is_null() const;
   MutString to_string() const;
 
@@ -86,6 +94,10 @@ public:
   bool gte(CRef<Value> other) const;
 
   Value add(CRef<Value> other) const;
+  Value subtract(CRef<Value> other) const;
+  Value multiply(CRef<Value> other) const;
+  Value divide(CRef<Value> other) const;
+
   Value min(CRef<Value> other) const;
   Value max(CRef<Value> other) const;
 
