@@ -16,12 +16,12 @@ public:
   using DataStoreT = typename ValueBase<>::DataStoreT;
   using StoreT     = typename ValueBase<>::StoreClass;
 
-  void serialize_to(size_t offset, Buffer& buff);
-  static Value deserialize_from(const Buffer& buff,
-                                size_t offset,
+  void serialize_to(size_t offset, Buffer& buff) const;
+  static Value deserialize_from(size_t offset,
+                                const Buffer& buff,
                                 TypeId type_id);
 
-  CRef<Ptr<Type>> value_type() const;
+  const Ptr<Type>& value_type() const;
 
   template<typename target_t>
   target_t as() const {
@@ -34,7 +34,7 @@ public:
   }
 
   bool is_null() const;
-  MutString to_string() const;
+  const string to_string() const;
 
   // TODO: Can we refactor this template line?
   template <class T,
@@ -98,8 +98,8 @@ public:
   Value multiply(CRef<Value> other) const;
   Value divide(CRef<Value> other) const;
 
-  Value min(CRef<Value> other) const;
-  Value max(CRef<Value> other) const;
+  Value min(const Value& other) const;
+  Value max(const Value& other) const;
 
   DataStoreT data() {
     return data_;

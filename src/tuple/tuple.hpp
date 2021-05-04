@@ -27,7 +27,7 @@ public:
   }
 
   size_t buffer_offset_for(const QuerySchema& schema,
-                           const uint32_t column_index) const;
+                           column_oid_t column_index) const;
 
   void copy_from(const Tuple& tuple) {
     buffer_.copy_from(tuple.buffer_);
@@ -53,14 +53,14 @@ public:
 
   void reset(size_t new_size) {
     buffer_.resize(new_size);
-    std::fill(buffer_.begin(), buffer_.end(), 0);
+    fill(buffer_.begin(), buffer_.end(), 0);
   }
 
   const PageId page_id() const { return rid_->page_id(); }
 
   void copy_n_bytes(size_t source_offset,
                     size_t dest_offset,
-                    CRef<Buffer> source_buffer,
+                    const Buffer& source_buffer,
                     size_t n_bytes)
   {
     assert(buffer_.size() >= n);
@@ -70,11 +70,7 @@ public:
            n_bytes);
   }
 
-  /**********************************************
-   * Debug & testing methods
-   **********************************************/
-
-  String to_string(CRef<QuerySchema> schema) const;
+  const string to_string(CRef<QuerySchema> schema) const;
 
   static Tuple random_from(CRef<QuerySchema> schema);
 
@@ -82,11 +78,11 @@ public:
     return buffer_;
   }
 
-  CRef<Buffer> buffer() const {
+  const Buffer& buffer() const {
     return buffer_;
   }
 
 private:
-  MutOption<RID> rid_ = std::nullopt;
+  optional<RID> rid_ = nullopt;
   Buffer buffer_;
 };

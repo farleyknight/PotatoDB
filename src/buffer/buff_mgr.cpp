@@ -1,8 +1,8 @@
-
 #include <tuple>
 
 #include "common/config.hpp"
 #include "buffer/buff_mgr.hpp"
+#include "buffer/lru_replacer.hpp"
 #include "page/hash_table_header_page.hpp"
 #include "page/hash_table_block_page.hpp"
 
@@ -10,13 +10,14 @@ BuffMgr::BuffMgr(size_t pool_size,
                  DiskMgr& disk_mgr,
                  LogMgr& log_mgr)
   : pool_size_ (pool_size),
-    pages_     (MutVec<Page>(pool_size)),
+    pages_     (vector<Page>(pool_size)),
     disk_mgr_  (disk_mgr),
     log_mgr_   (log_mgr)
 {
   // TODO: Use a configuration file to allow `LRUReplacer`
   // to be used instead.
   replacer_ = make_unique<ClockReplacer>(pool_size);
+  // replacer_ = make_unique<LRUReplacer>(pool_size);
 
   for (size_t i = 0; i < pool_size; ++i) {
     // TODO: Figure out if we need `static_cast` here?

@@ -36,8 +36,24 @@ Tuple::Tuple(vector<Value> values, const QuerySchema& schema) {
   }
 }
 
-String Tuple::to_string(const QuerySchema& schema) const {
-  std::stringstream os;
+size_t Tuple::buffer_offset_for(const QuerySchema& schema,
+                                column_oid_t column_oid) const {
+  auto is_inlined = schema.by_index(column_oid).is_inlined();
+  auto offset     = schema.offset_for(column_oid);
+
+  // For inlined data types, data is stored where it is.
+  if (is_inlined) {
+    return offset;
+  }
+  // We read the relative offset from the tuple data.
+  auto new_offset = buffer_.read_int32(offset);
+  // And return the beginning address of the real data for the
+  // VARCHAR type.
+  return new_offset;
+}
+
+const string Tuple::to_string(const QuerySchema& schema) const {
+  stringstream os;
 
   int column_count = schema.column_count();
   bool first = true;
@@ -67,7 +83,7 @@ Value Tuple::value(const QuerySchema& schema,
   const TypeId type_id = schema.by_index(column_index).type_id();
   const auto offset = buffer_offset_for(schema, column_index);
 
-  return Value::deserialize_from(buffer_, offset, type_id);
+  return Value::deserialize_from(offset, buffer_, type_id);
 }
 
 Value Tuple::value_by_name(const QuerySchema& schema,
@@ -83,7 +99,7 @@ bool Tuple::is_null(const QuerySchema& schema,
 
 Tuple Tuple::key_from_tuple(const QuerySchema& schema,
                             const QuerySchema& key_schema,
-                            const Vec<uint32_t>& key_attrs) const
+                            const vector<uint32_t>& key_attrs) const
 {
   vector<Value> values;
   values.reserve(key_attrs.size());

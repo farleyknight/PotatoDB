@@ -2,35 +2,40 @@
 
 #include "buffer/replacer.hpp"
 
-/**
- * LRUReplacer implements the lru replacement policy, which approximates the Least Recently Used policy.
- */
 class LRUReplacer : public Replacer {
 public:
+  LRUReplacer(size_t num_pages)
+    : num_pages_ (num_pages)
+  {}
 
-  /**********************************************
-  * Constructors & destructor
-  **********************************************/
-
-  explicit LRUReplacer(size_t num_pages);
-  LRUReplacer(CRef<LRUReplacer>) = delete;
   // No copy
-  LRUReplacer& operator=(CRef<LRUReplacer>) = delete;
+  LRUReplacer(const LRUReplacer&) = delete;
   // No copy assign
+  LRUReplacer& operator=(const LRUReplacer&) = delete;
   ~LRUReplacer() = default; // Default delete
 
-  /**********************************************
-  * Instance methods
-  **********************************************/
+  std::tuple<bool, frame_id_t> evict() {
+    return std::make_tuple(false, -1);
+  }
 
-  std::tuple<bool, frame_id_t> evict() override;
+  void pin(UNUSED frame_id_t frame_id) {
+    // TODO:
+    return;
+  }
 
-  void pin(frame_id_t frame_id) override;
-  void unpin(frame_id_t frame_id) override;
-  size_t size() override;
-  void reset() override;
+  void unpin(UNUSED frame_id_t frame_id) {
+    // TODO:
+    return;
+  }
+
+  size_t size() {
+    return 0; // TODO!
+  }
+
+  void reset() {
+    return; // TODO!
+  }
 
 private:
   UNUSED int num_pages_ = 0;
-  // TODO(student): implement me!
 };

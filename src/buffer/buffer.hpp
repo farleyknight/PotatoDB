@@ -19,9 +19,9 @@ public:
 
   // NOTE: Buffers are allowed to be copied, but Pages are not.
   // Allow copy
-  Buffer(CRef<Buffer>) = default;
+  Buffer(const Buffer&) = default;
   // Allow copy assign
-  Buffer& operator=(CRef<Buffer>) = default;
+  Buffer& operator=(const Buffer&) = default;
 
   Data& as_bytes() {
     return data_;
@@ -124,6 +124,14 @@ public:
     return *reinterpret_cast<const uint32_t*>(cptr(offset));
   }
 
+  void write_bool(size_t offset, bool b) {
+    *reinterpret_cast<bool*>(ptr(offset)) = b;
+  }
+
+  bool read_bool(size_t offset) const {
+    return *reinterpret_cast<const bool*>(cptr(offset));
+  }
+
   void write_int8(size_t offset, int8_t n) {
     *reinterpret_cast<int8_t*>(ptr(offset)) = n;
   }
@@ -168,6 +176,6 @@ public:
 
     return new_string;
   }
-  
+
   Data data_;
 };

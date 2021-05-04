@@ -45,6 +45,11 @@ size_t BaseSchema<ColT>::offset_for(const string& name) const {
 }
 
 template<class ColT>
+size_t BaseSchema<ColT>::index_for(const string& name) const {
+  return column_oid_for(name);
+}
+
+template<class ColT>
 size_t BaseSchema<ColT>::column_count() const {
   return columns_.size();
 }

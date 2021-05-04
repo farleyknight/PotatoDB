@@ -13,20 +13,24 @@ public:
   ClockReplacer(size_t max_frames);
 
   // No copy
-  ClockReplacer(CRef<ClockReplacer> other) = delete;
+  ClockReplacer(const ClockReplacer& other) = delete;
   // No copy assign
-  ClockReplacer& operator=(CRef<ClockReplacer> other) = delete;
+  ClockReplacer& operator=(const ClockReplacer& other) = delete;
   ~ClockReplacer() = default; // Default delete
 
-  std::tuple<bool, frame_id_t> evict();
+  std::tuple<bool, frame_id_t> evict() override;
 
   void allocate(frame_id_t frame_id);
-  void pin(frame_id_t frame_id);
+  void pin(frame_id_t frame_id) override;
   // unpin the frame, allowing it to be thrown out by `evict`
-  void unpin(frame_id_t frame_id);
+  void unpin(frame_id_t frame_id) override;
 
-  size_t size() {
+  size_t size() override {
     return available_frames_;
+  }
+
+  void reset() override {
+    // TODO
   }
 
 private:

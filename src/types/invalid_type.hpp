@@ -12,6 +12,13 @@ public:
     return TypeId::INVALID;
   }
 
+  // TODO: Rename to `write_to`
+  void serialize_to(UNUSED size_t offset,
+                    UNUSED Buffer& buff,
+                    UNUSED Value val) const override {
+    throw Exception("No serialize_to for InvalidType");
+  }
+
   Value deserialize_from(UNUSED const Buffer& buff) const {
     throw Exception("No deserialize_from for InvalidType");
   }
@@ -24,11 +31,11 @@ public:
     throw Exception("No size for InvalidType");
   }
 
-  Value min() const override {
+  static Value min() {
     throw Exception("No min for InvalidType");
   }
 
-  Value max() const override {
+  static Value max() {
     throw Exception("No max for InvalidType");
   }
 };

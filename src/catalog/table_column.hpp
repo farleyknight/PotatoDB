@@ -78,7 +78,7 @@ public:
    * Debug methods
    **********************************************/
 
-  String to_string() const {
+  const string to_string() const {
     std::ostringstream os;
 
     os << "TableColumn[" << std::endl <<

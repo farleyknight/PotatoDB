@@ -66,7 +66,7 @@ public:
       offset =
         *reinterpret_cast<const int32_t *>(data_.cptr(index_offset));
     }
-    return Value::deserialize_from(data_, offset, column_type);
+    return Value::deserialize_from(offset, data_, column_type);
   }
 
   Buffer data_ {KEY_SIZE};

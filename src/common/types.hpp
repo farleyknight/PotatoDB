@@ -36,6 +36,7 @@ using std::make_unique;
 using std::max;
 using std::move;
 
+using std::nullopt;
 using std::nullptr_t;
 using std::numeric_limits;
 
@@ -43,6 +44,7 @@ using std::pair;
 
 using std::shared_ptr;
 using std::string;
+using std::stringstream;
 
 using std::unique_ptr;
 
