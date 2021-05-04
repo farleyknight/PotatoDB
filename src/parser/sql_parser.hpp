@@ -19,12 +19,12 @@ class ErrorListener : public BaseErrorListener {
                            UNUSED antlr4::Token *offendingSymbol,
                            size_t line,
                            size_t charPositionInLine,
-                           const std::string &msg,
+                           const string &msg,
                            UNUSED std::exception_ptr e)
     override
   {
-    std::string message(msg);
-    std::string full_message = "Line(" + std::to_string(line) + ":" +
+    string message(msg);
+    string full_message = "Line(" + std::to_string(line) + ":" +
       std::to_string(charPositionInLine) + ") Error(" + message + ")";
 
     throw std::invalid_argument(full_message);
@@ -33,7 +33,7 @@ class ErrorListener : public BaseErrorListener {
 
 class SQLParser {
 public:
-  static MutString as_tree(MutString input) {
+  static string as_tree(string input) {
     ANTLRInputStream stream(input);
 
     PotatoSQLLexer lexer(&stream);
@@ -53,7 +53,7 @@ public:
     }
   }
 
-  static Vec<MutString> as_expr_strings(MutString input) {
+  static Vec<string> as_expr_strings(string input) {
     ANTLRInputStream stream(input);
 
     PotatoSQLLexer lexer(&stream);
@@ -73,17 +73,17 @@ public:
       if (visitor.results.size() > 0) {
         return visitor.results;
       } else {
-        MutVec<MutString> result {"No parse result!"};
+        vector<string> result {"No parse result!"};
         return result;
       }
     } catch (std::invalid_argument &e) {
-      MutString error_message(e.what());
-      MutVec<MutString> result {error_message};
+      string error_message(e.what());
+      vector<string> result {error_message};
       return result;
     }
   }
 
-  static MutVec<MutPtr<BaseExpr>> as_exprs(MutString input) {
+  static vector<MutPtr<BaseExpr>> as_exprs(string input) {
     ANTLRInputStream stream(input);
 
     PotatoSQLLexer lexer(&stream);
@@ -103,12 +103,12 @@ public:
       if (visitor.exprs.size() > 0) {
         return move(visitor.exprs);
       } else {
-        MutVec<MutPtr<BaseExpr>> results;
+        vector<MutPtr<BaseExpr>> results;
         return results;
       }
 
     } catch (UNUSED std::invalid_argument &e) {
-      MutVec<MutPtr<BaseExpr>> results;
+      vector<MutPtr<BaseExpr>> results;
       return results;
     }
   }

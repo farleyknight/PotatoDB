@@ -46,6 +46,7 @@ sql_stmt
                                       | savepoint_stmt
                                       | simple_select_stmt
                                       | select_stmt
+                                      | show_tables_stmt
                                       | update_stmt
                                       | update_stmt_limited
                                       | vacuum_stmt )
@@ -57,6 +58,10 @@ alter_table_stmt
    | K_ADD K_COLUMN? column_def
    )
  ;
+
+show_tables_stmt
+    : K_SHOW K_TABLES
+    ;
 
 analyze_stmt
  : K_ANALYZE ( database_name | table_or_index_name | database_name '.' table_or_index_name )?
@@ -814,7 +819,9 @@ K_ROW : R O W;
 K_SAVEPOINT : S A V E P O I N T;
 K_SELECT : S E L E C T;
 K_SET : S E T;
+K_SHOW : S H O W;
 K_TABLE : T A B L E;
+K_TABLES : T A B L E S;
 K_TEMP : T E M P;
 K_TEMPORARY : T E M P O R A R Y;
 K_THEN : T H E N;

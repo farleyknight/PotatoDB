@@ -41,7 +41,7 @@ public:
    **********************************************/
 
   static MutPtr<BaseExec> create(ExecCtx& exec_ctx,
-                                 MovePtr<BasePlan> plan) {
+                                 MutPtr<BasePlan>&& plan) {
     switch (plan->type()) {
     case PlanType::TABLE_SCAN: {
       auto scan_plan = cast<SeqScanPlan>(plan);

@@ -37,6 +37,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitShow_tables_stmt(PotatoSQLParser::Show_tables_stmtContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitAnalyze_stmt(PotatoSQLParser::Analyze_stmtContext *ctx) override {
     return visitChildren(ctx);
   }

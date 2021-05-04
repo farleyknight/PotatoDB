@@ -11,7 +11,7 @@ public:
 
   virtual ~BaseExpr() = default;
 
-  virtual MutString to_string() const {
+  virtual string to_string() const {
     // TODO: Throw not implemented error
     return "BASE EXPR";
   }

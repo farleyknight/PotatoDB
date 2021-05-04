@@ -3,6 +3,7 @@
 #include "PotatoSQLBaseVisitor.h"
 
 #include "common/types.hpp"
+#include "exprs/show_tables_expr.hpp"
 #include "exprs/insert_expr.hpp"
 #include "exprs/select_expr.hpp"
 #include "exprs/create_table_expr.hpp"
@@ -10,22 +11,28 @@
 using antlrcpp::Any;
 using potatosql::PotatoSQLBaseVisitor;
 using potatosql::PotatoSQLParser;
+using PotatoSQLParser;
 
 class EvalParseVisitor : public PotatoSQLBaseVisitor {
-public:
-  MutVec<MutString> results;
-  MutVec<MutPtr<BaseExpr>> exprs;
+private:
+  vector<string> results_;
+  vector<ptr<BaseExpr>> exprs_;
 
-  Any visitSelect_stmt(PotatoSQLParser::Select_stmtContext *ctx)
-    override
-  {
+public:
+  const vector<string> results() {
+    return results_;
+  }
+
+  const vector<ptr<BaseExpr>>& exprs() {
+    return exprs_;
+  }
+
+  Any visitSelect_stmt(Select_stmtContext *ctx) override {
     // TODO?
     return visitChildren(ctx);
   }
 
-  Any visitCreate_table_stmt(PotatoSQLParser::Create_table_stmtContext *ctx)
-    override
-  {
+  Any visitCreate_table_stmt(Create_table_stmtContext *ctx) override {
     CreateTableExpr create_table;
     assert(ctx->table_name());
 
@@ -42,14 +49,17 @@ public:
 
     create_table.set_column_defs(def_list);
 
-    exprs.emplace_back(make_unique<CreateTableExpr>(create_table));
+    exprs_.emplace_back(make_unique<CreateTableExpr>(create_table));
 
     return visitChildren(ctx);
   }
 
-  Any visitInsert_stmt(PotatoSQLParser::Insert_stmtContext *ctx)
-    override
-  {
+  Any visitShow_tables_stmt(Show_tables_stmtContext *ctx) override {
+    ShowTablesExpr show_tables;
+    exprs.emplace_back
+  }
+
+  Any visitInsert_stmt(Insert_stmtContext *ctx) override {
     InsertExpr insert;
     assert(ctx->table_name());
 
@@ -85,9 +95,7 @@ public:
     return visitChildren(ctx);
   }
 
-  Any visitSelect_core(PotatoSQLParser::Select_coreContext *ctx)
-    override
-  {
+  Any visitSelect_core(Select_coreContext *ctx) override {
     const auto &col_list_ctx = ctx->column_list();
 
     ColumnListExpr cols;
@@ -115,9 +123,7 @@ public:
     return visitChildren(ctx);
   }
 
-  Any visitExpr(PotatoSQLParser::ExprContext *ctx)
-    override
-  {
+  Any visitExpr(ExprContext *ctx) override {
     return visitChildren(ctx);
   }
 };

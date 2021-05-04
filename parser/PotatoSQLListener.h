@@ -31,6 +31,9 @@ public:
   virtual void enterAlter_table_stmt(PotatoSQLParser::Alter_table_stmtContext *ctx) = 0;
   virtual void exitAlter_table_stmt(PotatoSQLParser::Alter_table_stmtContext *ctx) = 0;
 
+  virtual void enterShow_tables_stmt(PotatoSQLParser::Show_tables_stmtContext *ctx) = 0;
+  virtual void exitShow_tables_stmt(PotatoSQLParser::Show_tables_stmtContext *ctx) = 0;
+
   virtual void enterAnalyze_stmt(PotatoSQLParser::Analyze_stmtContext *ctx) = 0;
   virtual void exitAnalyze_stmt(PotatoSQLParser::Analyze_stmtContext *ctx) = 0;
 

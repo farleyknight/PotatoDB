@@ -33,6 +33,9 @@ public:
   virtual void enterAlter_table_stmt(PotatoSQLParser::Alter_table_stmtContext * /*ctx*/) override { }
   virtual void exitAlter_table_stmt(PotatoSQLParser::Alter_table_stmtContext * /*ctx*/) override { }
 
+  virtual void enterShow_tables_stmt(PotatoSQLParser::Show_tables_stmtContext * /*ctx*/) override { }
+  virtual void exitShow_tables_stmt(PotatoSQLParser::Show_tables_stmtContext * /*ctx*/) override { }
+
   virtual void enterAnalyze_stmt(PotatoSQLParser::Analyze_stmtContext * /*ctx*/) override { }
   virtual void exitAnalyze_stmt(PotatoSQLParser::Analyze_stmtContext * /*ctx*/) override { }
 

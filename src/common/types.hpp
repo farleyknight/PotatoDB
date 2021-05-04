@@ -59,30 +59,15 @@ using std::unique_ptr;
 using file_desc_t   = int;
 using byte_t        = std::uint8_t;
 
-// NOTE: I prefer camel-cased names for types
-using String        = const string;
-using MutString     = string;
-
 using std::mutex;
 using Mutex         = mutex;
 
 using std::thread;
 using Thread        = thread;
 
-
 /************************************************
  * References and Pointers
  ************************************************/
-
-// By default, all references should be const.
-// This prevents us from accidentially modifying references.
-template<class T>
-using CRef      = T const&;
-
-// To make a non-const reference, we borrow the `mut` keyword
-// from Rust, giving us `MRef`.
-template<class T>
-using MRef      = T&;
 
 template<typename T>
 using Move      = T&&;
@@ -93,13 +78,10 @@ using Map       = const std::unordered_map<K, V>;
 template<class K, class V>
 using MutMap    = std::unordered_map<K, V>;
 
-// NOTE: Ptr automatically means unique_ptr
 template<class T>
-using Ptr       = const unique_ptr<T>;
+using ptr      = unique_ptr<T>;
 template<class T>
-using MutPtr    = unique_ptr<T>;
-template<class T>
-using MovePtr   = unique_ptr<T> &&;
+using MovePtr  = unique_ptr<T> &&;
 
 
 // NOTE: SPtr means shared_ptr
@@ -116,8 +98,6 @@ using WPtr     = std::weak_ptr<T>;
 using std::vector;
 template<typename T>
 using Vec      = const vector<T>;
-template<typename T>
-using MutVec   = vector<T>;
 template<typename T>
 using MoveVec  = vector<T> &&;
 
