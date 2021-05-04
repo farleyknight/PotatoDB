@@ -4,6 +4,9 @@
 #include "buffer/buffer.hpp"
 
 class BooleanType : public Type {
+private:
+  using Type::serialize_to;
+
 public:
   TypeId type_id() const override {
     return TypeId::BOOLEAN;
@@ -13,33 +16,43 @@ public:
     return sizeof(bool);
   }
 
-  Value min() const override {
+  static Value min() {
     return Value::make(false);
   }
 
-  Value max() const override {
+  static Value max() {
     return Value::make(true);
   }
 
-  void serialize_to(MRef<Buffer> buff, Value val) const override {
-    Type::rw().write_int8(buff, val.as<bool>());
+  // TODO: Rename to `write_to`
+  void serialize_to(size_t offset, Buffer& buff, Value val) const override {
+    buff.write_bool(offset, val.as<bool>());
   }
 
-  Value deserialize_from(CRef<Buffer> buff) const override {
-    return Value::make(Type::rw().read_int8(buff));
+  // TODO: Rename to `read_from`
+  Value deserialize_from(size_t offset, const Buffer& buff) const override {
+    return Value::make(buff.read_bool(offset));
   }
 
   bool is_castable_from(UNUSED TypeId type_id) const override {
     return true;
   }
 
-  bool eq(CRef<Value> left, CRef<Value> right) const override {
+  bool eq(const Value& left, const Value& right) const override {
     if (left.is_null() && right.is_null()) {
       return true;
     } else if (left.is_null() || right.is_null()) {
       return false;
     } else {
       return left.as<bool>() == right.as<bool>();
+    }
+  }
+
+  const string to_string(const Value& value) const override {
+    if (value.is_null()) {
+      return "NULL";
+    } else {
+      return value.as<bool>() ? "true" : "false";
     }
   }
 };

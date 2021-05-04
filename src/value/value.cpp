@@ -2,25 +2,27 @@
 #include "value/value.hpp"
 #include "types/type.hpp"
 
-void Value::serialize_to(MRef<Buffer> buff) {
-  value_type()->serialize_to(buff, *this);
+void Value::serialize_to(size_t offset, Buffer& buff) const {
+  value_type()->serialize_to(offset, buff, *this);
 }
 
-void Value::deserialize_from(CRef<Buffer> buff) {
-  data_ = value_type()->deserialize_from(buff).data_;
+Value Value::deserialize_from(size_t offset,
+                              const Buffer& buff,
+                              TypeId type_id) {
+  return Type::instance(type_id)->deserialize_from(offset, buff);
 }
 
-bool Value::eq(CRef<Value> other) const {
+bool Value::eq(const Value& other) const {
   return value_type()->eq(*this, other);
 }
 
-CRef<Ptr<Type>> Value::value_type() const {
+const Ptr<Type>& Value::value_type() const {
   return Type::instance(type_id_);
 }
 
 size_t Value::size() const {
   if (type_id_ == TypeId::VARCHAR) {
-    return as<std::string>().size() + sizeof(int8_t);
+    return as<string>().size() + sizeof(int8_t);
   }
   return value_type()->size();
 }
@@ -29,6 +31,38 @@ bool Value::is_null() const {
   return is_null_;
 }
 
-MutString Value::to_string() const {
+const string Value::to_string() const {
   return value_type()->to_string(*this);
+}
+
+Value Value::add(const Value& other) const {
+  return value_type()->add(*this, other);
+}
+
+Value Value::subtract(const Value& other) const {
+  return value_type()->subtract(*this, other);
+}
+
+Value Value::multiply(const Value& other) const {
+  return value_type()->multiply(*this, other);
+}
+
+Value Value::divide(const Value& other) const {
+  return value_type()->divide(*this, other);
+}
+
+bool Value::lt(const Value& other) const {
+  return value_type()->lt(*this, other);
+}
+
+bool Value::gt(const Value& other) const {
+  return value_type()->gt(*this, other);
+}
+
+Value Value::max(const Value& other) const {
+  return value_type()->max(*this, other);
+}
+
+Value Value::min(const Value& other) const {
+  return value_type()->min(*this, other);
 }

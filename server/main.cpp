@@ -1,33 +1,21 @@
 #include <iostream>
 
 #include "common/types.hpp"
+
 #include "server/client_socket.hpp"
-#include "server/server.hpp"
+#include "server/socket_server.hpp"
+#include "server/potatodb.hpp"
 
-Server server;
+PotatoDB potatodb;
 
-void handle_exit(UNUSED int signal) {
-  server.shutdown();
+void handle_exit(int signal) {
+  potatodb.shutdown(signal);
 }
-
-const int port = 7878;
 
 int main() {
   signal(SIGINT, handle_exit);
 
-  std::cout << "Start PotatoDB Server (0.1.0)" << std::endl;
-  server.set_port(port);
-  server.on_read([&](WPtr<ClientSocket> socket_ptr) {
-    if (auto socket = socket_ptr.lock()) {
-      auto data = socket->read();
-      std::cout << "Socket got data " << data << std::endl;
-      socket->write(data);
-    }
-  });
-
-  // TODO Allow port customization
-  std::cout << "Server listening on port 7878.." << std::endl;
-  server.accept_connections();
+  potatodb.startup();
 
   return 0;
 }

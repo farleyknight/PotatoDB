@@ -1,3 +1,5 @@
+#pragma once
+
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
@@ -9,26 +11,33 @@
 
 #include "common/types.hpp"
 
-class Server;
+#include "server/socket_server.hpp"
+#include "server/session.hpp"
 
 class ClientSocket {
 public:
   ClientSocket(file_desc_t file_desc,
-               MRef<Server> server);
+               SocketServer* server,
+               Session session);
   ~ClientSocket() = default;
 
   int file_desc() const;
-
   void shutdown();
   void write(CRef<string> data) const;
   string read() const;
-  MutString parse_message(MutString message) const;
+  string process_request(string message) const;
 
   // No copy
   ClientSocket(CRef<ClientSocket>) = delete;
   // No copy assign
-  MRef<ClientSocket> operator=(CRef<ClientSocket>) = delete;
+  ClientSocket& operator=(CRef<ClientSocket>) = delete;
+
+  Session& session() {
+    return session_;
+  }
+
 private:
   file_desc_t file_desc_ = -1;
-  MRef<Server> server_;
+  SocketServer* server_;
+  Session session_;
 };

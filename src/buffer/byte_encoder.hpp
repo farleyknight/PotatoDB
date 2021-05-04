@@ -1,5 +1,13 @@
 #pragma once
 
+
+/*
+ * TODO TODO
+ * Delete this class! We're going with CastEncoder
+ * The CastEncoder methods can probably be placed
+ * directly in the buffer class itself.
+ */
+
 #include "common/types.hpp"
 #include "buffer/buffer_rw.hpp"
 
@@ -13,7 +21,7 @@ private:
   ByteEncoder() = default;
 
   template<typename IntT>
-  void write_int(MRef<Buffer> buff, IntT n)  const{
+  void write_int(Buffer& buff, IntT n)  const{
     size_t num_bytes = sizeof(IntT);
     for (size_t i = 0; i < num_bytes; ++i) {
       buff.data_[i] = (n >> (i*bits_in_a_byte));
@@ -38,7 +46,7 @@ private:
     unsigned char bytes[sizeof(float)];
   };
 
-  void write_float(MRef<Buffer> buff, float f) const {
+  void write_float(Buffer& buff, float f) const {
     float_bytes_t data;
     data.val = f;
     for (size_t i = 0; i < sizeof(float); ++i) {
@@ -59,7 +67,7 @@ private:
     unsigned char bytes[sizeof(double)];
   };
 
-  void write_double(MRef<Buffer> buff, double d) const {
+  void write_double(Buffer& buff, double d) const {
     double_bytes_t data;
     data.val = d;
     for (size_t i = 0; i < sizeof(double); ++i) {
@@ -77,7 +85,7 @@ private:
 
   using string_size_t = Buffer::string_size_t;
 
-  void write_string(MRef<Buffer> buff, String s) {
+  void write_string(Buffer& buff, String s) {
     assert(s.size() < std::numeric_limits<string_size_t>::max());
     int8_t string_size = s.size();
 
@@ -90,10 +98,10 @@ private:
     }
   }
 
-  MutString read_string(CRef<Buffer> buff) {
+  string read_string(CRef<Buffer> buff) {
     string_size_t size = buff.data_[0];
 
-    MutString new_string(size, 0);
+    string new_string(size, 0);
     char *c_string = new_string.data();
 
     for (size_t i = 0; i < size; ++i) {

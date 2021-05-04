@@ -1,20 +1,23 @@
 #include "common/types.hpp"
-#include "server/client_socket.hpp"
-#include "server/server.hpp"
 
-#include "parser/potato_sql.hpp"
+#include "server/client_socket.hpp"
+#include "server/socket_server.hpp"
+#include "server/session.hpp"
 
 ClientSocket::ClientSocket(file_desc_t file_desc,
-                           MRef<Server> server)
+                           SocketServer* server,
+                           Session session)
   : file_desc_ (file_desc),
-    server_    (server) {}
+    server_    (server),
+    session_   (session)
+{}
 
 int ClientSocket::file_desc() const {
   return file_desc_;
 }
 
 void ClientSocket::shutdown() {
-  server_.remove_socket(file_desc_);
+  server_->remove_socket(file_desc_);
 }
 
 void ClientSocket::write(CRef<String> data) const {
@@ -30,12 +33,8 @@ void ClientSocket::write(CRef<String> data) const {
 
 const size_t buffer_size = 256;
 
-MutString ClientSocket::parse_message(MutString message) const {
-  return PotatoSQL::parse(message);
-}
-
 MutString ClientSocket::read() const {
-  MutString message;
+  string message;
 
   char buffer[buffer_size] = {0};
   ssize_t bytes = recv(file_desc_, buffer, sizeof(buffer), MSG_DONTWAIT);
@@ -47,7 +46,5 @@ MutString ClientSocket::read() const {
     bytes = recv(file_desc_, buffer, sizeof(buffer), MSG_DONTWAIT);
   }
 
-  auto response = parse_message(message);
-
-  return response;
+  return message;
 }

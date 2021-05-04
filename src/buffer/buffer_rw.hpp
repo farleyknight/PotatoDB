@@ -79,10 +79,10 @@ public:
   MutString to_hex_string(CRef<Buffer> buff) {
     const int8_t lower_byte_mask = 0x0F;
     const char hex_chars[] = "0123456789ABCDEF";
-    MutString result(buff.data_.size() * 2, 0);
+    MutString result(buff.size() * 2, 0);
     char *char_buff = const_cast<char *>(result.data());
 
-    for (auto const &byte : buff.data_) {
+    for (auto const &byte : buff.as_bytes()) {
       *char_buff = hex_chars[byte >> 4];
       char_buff++;
       *char_buff = hex_chars[byte & lower_byte_mask];
