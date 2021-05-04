@@ -22,22 +22,6 @@ public:
     return sessions_.back();
   }
 
-  fs::path main_file_name() {
-    return home_path() / ".potatodb" / "database.db";
-  }
-
-  fs::path config_file_name() {
-    return home_path() / ".potatodb" / "potatodb.yml";
-  }
-
-  fs::path log_file_name() {
-    return home_path() / ".potatodb" / "database.log";
-  }
-
-  fs::path home_path() {
-    return std::getenv("HOME");
-  }
-
   int pool_size() {
     return 100;
   }
@@ -48,18 +32,6 @@ public:
   void startup();
 
 private:
-  void setup_db_directory() {
-    fs::current_path(home_path());
-    fs::create_directory(".potatodb");
-    fs::current_path(home_path() / ".potatodb");
-
-    if (!fs::exists(main_file_name())) {
-      std::ofstream db_file(main_file_name());
-      db_file << "";
-      db_file.close();
-    }
-  }
-
   int port_ = 7878;
   vector<Session> sessions_;
 

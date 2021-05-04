@@ -4,22 +4,18 @@
 #include "disk/disk_mgr.hpp"
 #include "common/exceptions.hpp"
 
-/**********************************************
- *
- **********************************************/
-
-DiskMgr::DiskMgr(string db_name)
+DiskMgr::DiskMgr()
   : next_page_id_ (0),
-    db_name_      (db_name),
     flush_log_f_  (nullptr)
 {
-  String::size_type n = db_name_.rfind('.');
-  if (n == String::npos) {
-    throw Exception(ExceptionType::BAD_FILE, "Wrong file format");
-  }
+  setup_db_directory();
+  setup_log_file();
+  setup_db_file();
+}
 
-  log_name_ = db_name_.substr(0, n) + ".log";
-  log_io_.open(log_name_,
+void DiskMgr::setup_log_file() {
+  std::cout << "Attempting to open log with name " << log_file_name() << std::endl;
+  log_io_.open(log_file_name(),
                std::ios::binary |
                std::ios::in |
                std::ios::app |
@@ -29,14 +25,14 @@ DiskMgr::DiskMgr(string db_name)
   if (!log_io_.is_open()) {
     log_io_.clear();
     // create a new file
-    log_io_.open(log_name_,
+    log_io_.open(log_file_name(),
                  std::ios::binary |
                  std::ios::trunc |
                  std::ios::app |
                  std::ios::out);
     log_io_.close();
     // reopen with original mode
-    log_io_.open(log_name_,
+    log_io_.open(log_file_name(),
                  std::ios::binary |
                  std::ios::in |
                  std::ios::app |
@@ -45,17 +41,25 @@ DiskMgr::DiskMgr(string db_name)
       throw Exception(ExceptionType::BAD_FILE, "Can't open DB log file");
     }
   }
+}
 
+void DiskMgr::setup_db_file() {
   // Create the file if it doesn't exist
   // https://www.systutorials.com/how-to-create-a-file-if-not-exist-and-open-it-in-read-and-write-modes-in-c/
-  db_file_.open(db_name, std::ios::out | std::ios::app);
+  db_file_.open(main_file_name(), std::ios::out | std::ios::app);
   // Close the file handle, then re-open so we can start using it.
   db_file_.close();
-  db_file_.open(db_name_, std::ios::binary | std::ios::in | std::ios::out);
+  db_file_.open(main_file_name(), std::ios::binary | std::ios::in | std::ios::out);
   if (!db_file_.is_open()) {
     throw Exception(ExceptionType::BAD_FILE, "Can't open db file "
-                    + db_name);
+                    + main_file_name().string());
   }
+}
+
+void DiskMgr::setup_db_directory() {
+  fs::current_path(home_path());
+  fs::create_directory(".potatodb");
+  fs::current_path(home_path() / ".potatodb");
 }
 
 void DiskMgr::write_buffer(PageId page_id, CRef<Buffer> buffer) {
@@ -65,17 +69,10 @@ void DiskMgr::write_buffer(PageId page_id, CRef<Buffer> buffer) {
   db_file_.flush();
 }
 
-/**********************************************
- * Write to page
- **********************************************/
-
-void DiskMgr::write_page(PageId page_id, CRef<Page> page) {
+void DiskMgr::write_page(PageId page_id, const Page& page) {
   write_buffer(page_id, page.buffer());
 }
 
-/**********************************************
- * Read from buffer
- **********************************************/
 
 void DiskMgr::read_buffer(PageId page_id, Buffer& buffer) {
   // First compute the offset
@@ -86,23 +83,13 @@ void DiskMgr::read_buffer(PageId page_id, Buffer& buffer) {
   db_file_.read(buffer.char_ptr(), PAGE_SIZE);
 }
 
-/**********************************************
- * Read from page
- **********************************************/
-
 void DiskMgr::read_page(PageId page_id, Page& page) {
   read_buffer(page_id, page.buffer());
 }
 
-/**********************************************
- *
- **********************************************/
 
-bool DiskMgr::read_log(Buffer& log_data,
-                       size_t size,
-                       size_t offset)
-{
-  if (offset >= std::filesystem::file_size(log_name_)) {
+bool DiskMgr::read_log(Buffer& log_data, size_t size, size_t offset) {
+  if (offset >= std::filesystem::file_size(log_file_name())) {
     return false;
   }
 
@@ -123,11 +110,7 @@ bool DiskMgr::read_log(Buffer& log_data,
   return true;
 }
 
-/**********************************************
- *
- **********************************************/
-
-void DiskMgr::write_log(CRef<Buffer> log_data, size_t size) {
+void DiskMgr::write_log(const Buffer& log_data, size_t size) {
   if (size == 0) { // no effect on num_flushes_ if log buffer is empty
     return;
   }

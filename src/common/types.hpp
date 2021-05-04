@@ -30,6 +30,8 @@
 using std::int32_t;
 using std::uint32_t;
 
+using std::fstream;
+
 using std::make_optional;
 using std::make_shared;
 using std::make_unique;

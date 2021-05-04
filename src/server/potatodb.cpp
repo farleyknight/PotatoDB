@@ -4,7 +4,7 @@
 
 PotatoDB::PotatoDB()
   : server_    (this),
-    disk_mgr_  (main_file_name()),
+    disk_mgr_  (),
     buff_mgr_  (pool_size(), disk_mgr_, log_mgr_),
     log_mgr_   (disk_mgr_),
     txn_mgr_   (lock_mgr_, log_mgr_, table_mgr_),
@@ -12,9 +12,7 @@ PotatoDB::PotatoDB()
     table_mgr_ (disk_mgr_, buff_mgr_),
     catalog_   (),
     exec_eng_  (buff_mgr_, txn_mgr_, catalog_)
-{
-  setup_db_directory();
-}
+{}
 
 MutPtr<BasePlan> PotatoDB::build_plan(UNUSED const BaseExpr& expr) {
   auto schema_ref = SchemaRef(SchemaType::QUERY, -1);

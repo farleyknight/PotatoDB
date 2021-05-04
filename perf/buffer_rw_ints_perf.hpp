@@ -13,8 +13,8 @@ void BM_DirectCastEncoding(benchmark::State& state) {
   IntT val;
 
   while (state.KeepRunning()) {
-    *reinterpret_cast<IntT*>(buff.data()) = n;
-    benchmark::DoNotOptimize(val = *reinterpret_cast<IntT*>(buff.data()));
+    *reinterpret_cast<IntT*>(buff.ptr()) = n;
+    benchmark::DoNotOptimize(val = *reinterpret_cast<IntT*>(buff.ptr()));
     assert(n == val);
   }
 

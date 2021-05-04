@@ -13,7 +13,7 @@ elseif(EXISTS ENV{VCPKG_ROOT})
 endif()
 
 
-set(VCPKG_ROOT "/Users/farleyknight/code/vcpkg/")
+set(VCPKG_ROOT "/Users/fknight/code/vcpkg")
 
 if(DEFINED VCPKG_ROOT)
   message(STATUS "VCPKG_ROOT is set to ${VCPKG_ROOT}")

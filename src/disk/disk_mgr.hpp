@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <fstream>
 #include <future>
 #include <iostream>
@@ -7,6 +8,8 @@
 
 #include "common/config.hpp"
 #include "page/page.hpp"
+
+namespace fs = std::filesystem;
 
 class DiskMgr {
 public:
@@ -16,17 +19,17 @@ public:
    *         to Blocks which are physical offsets
    *         but using using multiples of page size.
    *********************************************************/
-  DiskMgr(string db_name);
+  DiskMgr();
 
   // No copy
-  DiskMgr(CRef<DiskMgr>) = delete;
+  DiskMgr(const DiskMgr&) = delete;
   // No copy assign
-  MRef<DiskMgr> operator=(CRef<DiskMgr>) = delete;
+  DiskMgr& operator=(const DiskMgr&) = delete;
 
-  void write_buffer(PageId page_id, CRef<Buffer> buffer);
+  void write_buffer(PageId page_id, const Buffer& buffer);
   void read_buffer(PageId page_id, Buffer& buffer);
 
-  void write_page(PageId page_id, CRef<Page> page);
+  void write_page(PageId page_id, const Page& page);
   void read_page(PageId page_id, Page& page);
 
   PageId allocate_page() {
@@ -50,7 +53,7 @@ public:
     // TODO! Implement in "DROP TABLE" or "DROP INDEX" context.
   }
 
-  void write_log(CRef<Buffer> log_data, size_t size);
+  void write_log(const Buffer& log_data, size_t size);
   bool read_log(Buffer& log_data, size_t size, size_t offset);
 
   // Close all file handles.
@@ -59,11 +62,28 @@ public:
   }
 
 private:
-  std::atomic<page_id_t> next_page_id_{0};
-  std::fstream db_file_;
-  std::fstream log_io_;
+  void setup_log_file();
+  void setup_db_file();
+  void setup_db_directory();
 
-  string db_name_, log_name_;
+  fs::path main_file_name() {
+    return home_path() / ".potatodb" / "database.db";
+  }
+
+  fs::path config_file_name() {
+    return home_path() / ".potatodb" / "potatodb.yml";
+  }
+
+  fs::path log_file_name() {
+    return home_path() / ".potatodb" / "database.log";
+  }
+
+  fs::path home_path() {
+    return std::getenv("HOME");
+  }
+
+  std::atomic<page_id_t> next_page_id_{0};
+  fstream db_file_, log_io_;
 
   // stream to write db file
   int num_flushes_;
