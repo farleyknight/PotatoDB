@@ -6,27 +6,16 @@
 #include "plans/nested_loop_join_plan.hpp"
 
 class NestedLoopJoinExec : public BaseExec {
- public:
-
+public:
   NestedLoopJoinExec(ExecCtx& exec_ctx,
-                     MovePtr<NestedLoopJoinPlan> plan,
-                     MovePtr<BaseExec> left,
-                     MovePtr<BaseExec> right)
+                     ptr<NestedLoopJoinPlan>&& plan,
+                     ptr<BaseExec>&& left,
+                     ptr<BaseExec>&& right)
     : BaseExec (exec_ctx),
       plan_    (move(plan)),
       left_    (move(left)),
       right_   (move(right)) {}
 
-  static Ptr<BaseExec> make(ExecCtx& exec_ctx,
-                            MovePtr<NestedLoopJoinPlan> plan,
-                            MovePtr<BaseExec> left,
-                            MovePtr<BaseExec> right)
-  {
-    return make_unique<NestedLoopJoinExec>(exec_ctx,
-                                           move(plan),
-                                           move(left),
-                                           move(right));
-  }
 
   void init() override {
     left_->init();
@@ -109,7 +98,7 @@ class NestedLoopJoinExec : public BaseExec {
   }
 
 private:
-  Ptr<NestedLoopJoinPlan> plan_;
-  Ptr<BaseExec> left_;
-  Ptr<BaseExec> right_;
+  ptr<NestedLoopJoinPlan> plan_;
+  ptr<BaseExec> left_;
+  ptr<BaseExec> right_;
 };

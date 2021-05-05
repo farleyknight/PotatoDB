@@ -19,7 +19,7 @@ public:
    **********************************************/
 
   AggPlan(SchemaRef         schema_ref,
-          MovePtr<BasePlan> child,
+          ptr<BasePlan>&& child,
           MoveVec<QueryAgg> aggs);
 
   /**********************************************
@@ -27,7 +27,7 @@ public:
    **********************************************/
 
   AggPlan(SchemaRef             schema,
-          MovePtr<BasePlan>     child,
+          ptr<BasePlan>&&     child,
           MoveVec<QueryAgg>     aggs,
           MoveVec<QueryGroupBy> group_bys);
 
@@ -36,16 +36,16 @@ public:
    **********************************************/
 
   AggPlan(SchemaRef             schema,
-          MovePtr<BasePlan>     child,
+          ptr<BasePlan>&&     child,
           MoveVec<QueryAgg>     aggs,
           MoveVec<QueryGroupBy> group_bys,
-          MovePtr<QueryHaving>  having);
+          ptr<QueryHaving>&&  having);
 
   void build_agg_types();
 
   PlanType type()  const { return PlanType::AGG; }
 
-  MovePtr<BasePlan> child() {
+  ptr<BasePlan>&& child() {
     return move(child_);
   }
 
@@ -78,11 +78,11 @@ public:
   }
 
 private:
-  unique_ptr<BasePlan> child_;
+  ptr<BasePlan> child_;
 
   vector<QueryAgg> aggs_;
   vector<AggType> agg_types_;
   vector<QueryGroupBy> group_bys_;
 
-  Ptr<QueryHaving> having_;
+  ptr<QueryHaving> having_;
 };

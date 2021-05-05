@@ -16,7 +16,7 @@ public:
   using MappingT = std::pair<K, V>;
   using CompT    = Comp<K>;
 
-  explicit LinearProbeHT(const String& name,
+  explicit LinearProbeHT(const string& name,
                          BuffMgr& buff_mgr,
                          const CompT& comp,
                          size_t num_buckets,
@@ -39,7 +39,7 @@ private:
   HTHeaderPage fetch_header_page();
   size_t block_array_size();
 
-  String name_;
+  string name_;
   PageId header_page_id_;
   CompT comp_;
   int num_buckets_;

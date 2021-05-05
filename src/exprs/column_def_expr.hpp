@@ -4,16 +4,16 @@
 
 class ColumnDefExpr : public BaseExpr {
 public:
-  ColumnDefExpr(String name, String type)
+  ColumnDefExpr(string name, string type)
     : BaseExpr (ExprType::COLUMN_DEF),
       name_    (name),
       type_    (type)
   {}
 
-  virtual MutString to_string() const override {
+  virtual string to_string() const override {
     return name_ + " " + type_;
   }
 
 protected:
-  MutString name_, type_;
+  string name_, type_;
 };

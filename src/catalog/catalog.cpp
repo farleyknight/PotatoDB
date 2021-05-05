@@ -4,7 +4,7 @@
 
 #include "catalog/catalog.hpp"
 #include "catalog/table_meta.hpp"
-#include "catalog/index_meta.hpp"
+#include "index/index_meta.hpp"
 
 #include "txns/lock_mgr.hpp"
 

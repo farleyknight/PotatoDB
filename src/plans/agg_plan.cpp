@@ -2,7 +2,7 @@
 #include "plans/agg_plan.hpp"
 
 AggPlan::AggPlan(SchemaRef         schema,
-                 MovePtr<BasePlan> child,
+                 ptr<BasePlan>&& child,
                  MoveVec<QueryAgg> aggs)
   : BasePlan (schema),
     child_   (move(child)),
@@ -12,7 +12,7 @@ AggPlan::AggPlan(SchemaRef         schema,
 }
 
 AggPlan::AggPlan(SchemaRef             schema,
-                 MovePtr<BasePlan>     child,
+                 ptr<BasePlan>&&     child,
                  MoveVec<QueryAgg>     aggs,
                  MoveVec<QueryGroupBy> group_bys)
   : BasePlan   (schema),
@@ -24,10 +24,10 @@ AggPlan::AggPlan(SchemaRef             schema,
 }
 
 AggPlan::AggPlan(SchemaRef             schema,
-                 MovePtr<BasePlan>     child,
+                 ptr<BasePlan>&&     child,
                  MoveVec<QueryAgg>     aggs,
                  MoveVec<QueryGroupBy> group_bys,
-                 MovePtr<QueryHaving>  having)
+                 ptr<QueryHaving>&&  having)
   : BasePlan   (schema),
     child_     (move(child)),
     aggs_      (move(aggs)),

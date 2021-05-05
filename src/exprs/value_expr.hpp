@@ -4,16 +4,16 @@
 
 class ValueExpr : public BaseExpr {
 public:
-  ValueExpr(MutString data)
+  ValueExpr(string data)
     : BaseExpr (ExprType::VALUE),
       data_    (data)
   {}
 
-  virtual MutString to_string() const override {
+  virtual string to_string() const override {
     return data_;
   }
 
 protected:
-  MutString data_;
+  string data_;
 };
 

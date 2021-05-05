@@ -7,8 +7,8 @@ public:
    **********************************************/
 
   InsertExec(ExecCtx& exec_ctx,
-             MovePtr<InsertPlan> plan,
-             MovePtr<BaseExec> child)
+             ptr<InsertPlan>&& plan,
+             ptr<BaseExec>&& child)
     : BaseExec (exec_ctx),
       plan_    (move(plan)),
       child_   (move(child))
@@ -32,6 +32,6 @@ public:
   }
 
 private:
-  Ptr<InsertPlan> plan_;
-  Ptr<BaseExec> child_;
+  ptr<InsertPlan> plan_;
+  ptr<BaseExec> child_;
 };

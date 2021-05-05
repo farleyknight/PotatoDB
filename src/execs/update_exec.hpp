@@ -10,8 +10,8 @@ public:
    **********************************************/
 
   UpdateExec(ExecCtx& exec_ctx,
-             MovePtr<UpdatePlan> plan,
-             MovePtr<BaseExec> child);
+             ptr<UpdatePlan>&& plan,
+             ptr<BaseExec>&& child);
 
   void init() override;
   bool has_next() override;
@@ -22,6 +22,6 @@ private:
   TableHeap& table_heap();
 
   const QuerySchema& schema();
-  Ptr<UpdatePlan> plan_;
-  Ptr<BaseExec> child_;
+  ptr<UpdatePlan> plan_;
+  ptr<BaseExec> child_;
 };

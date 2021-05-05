@@ -12,8 +12,8 @@ public:
    **********************************************/
 
   AggExec(ExecCtx& exec_ctx,
-          MovePtr<AggPlan> plan,
-          MovePtr<BaseExec> child)
+          ptr<AggPlan>&& plan,
+          ptr<BaseExec>&& child)
     : BaseExec    (exec_ctx),
       plan_       (move(plan)),
       child_      (move(child)),
@@ -36,8 +36,8 @@ public:
   AggValue make_val(const Tuple& tuple);
 
 private:
-  MutPtr<AggPlan> plan_;
-  MutPtr<BaseExec> child_;
+  ptr<AggPlan> plan_;
+  ptr<BaseExec> child_;
   AggHT table_;
   AggHT::Iterator table_iter_;
 };

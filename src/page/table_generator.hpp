@@ -49,12 +49,12 @@ public:
 
   String name;
   uint32_t num_rows;
-  MutVec<ColumnInsertMeta> col_meta;
+  vector<ColumnInsertMeta> col_meta;
 };
 
 class TableGenerator {
 public:
-  explicit TableGenerator(MRef<ExecCtx> exec_ctx)
+  explicit TableGenerator(ExecCtx& exec_ctx)
     : exec_ctx_ (exec_ctx) {}
 
   void generate_test_tables() {
@@ -65,7 +65,7 @@ public:
      * you add a new table, set it up here.
      */
 
-    MutVec<TableInsertMeta> insert_meta {
+    vector<TableInsertMeta> insert_meta {
       // The empty table
       TableInsertMeta {
         "empty_table",
@@ -134,7 +134,7 @@ public:
 
     for (auto &table_meta : insert_meta) {
       // Create Schema
-      MutVec<Column> cols {};
+      vector<Column> cols {};
       cols.reserve(table_meta.col_meta.size());
       for (const auto &col_meta : table_meta.col_meta) {
         if (col_meta.type != TypeId::VARCHAR) {
@@ -156,11 +156,11 @@ public:
     }
   }
 
-  void fill_table(Ref<TableMeta> info, MRef<TableInsertMeta> table_meta) {
+  void fill_table(Ref<TableMeta> info, TableInsertMeta& table_meta) {
     uint32_t num_inserted = 0;
     uint32_t batch_size = 128;
     while (num_inserted < table_meta.num_rows) {
-      MutVec<Vec<Value>> values;
+      vector<Vec<Value>> values;
       uint32_t num_values = std::min(batch_size,
                                      table_meta.num_rows - num_inserted);
 
@@ -169,7 +169,7 @@ public:
       }
 
       for (uint32_t i = 0; i < num_values; i++) {
-        MutVec<Value> entry;
+        vector<Value> entry;
         entry.reserve(values.size());
         for (const auto &col : values) {
           entry.emplace_back(col[i]);
@@ -187,10 +187,10 @@ public:
   }
 
   template <typename CppType>
-  Vec<Value> generate_numeric_values(MRef<ColumnInsertMeta> col_meta,
+  Vec<Value> generate_numeric_values(ColumnInsertMeta& col_meta,
                                      uint32_t count)
   {
-    MutVec<Value> values;
+    vector<Value> values;
     if (col_meta.dist == Dist::Serial) {
       for (uint32_t i = 0; i < count; i++) {
         auto count = static_cast<CppType>(col_meta.serial_counter);
@@ -214,7 +214,7 @@ public:
     return values;
   }
 
-  Vec<Value> make_values(MRef<ColumnInsertMeta> col_meta,
+  Vec<Value> make_values(ColumnInsertMeta& col_meta,
                          uint32_t count)
   {
     switch (col_meta.type) {
@@ -239,5 +239,5 @@ public:
   }
 
 private:
-  MRef<ExecCtx> exec_ctx_;
+  ExecCtx& exec_ctx_;
 };

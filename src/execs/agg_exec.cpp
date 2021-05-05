@@ -61,7 +61,7 @@ Tuple AggExec::next() {
   auto value = table_iter_.val();
   auto schema = find_schema(child_->schema_ref());
 
-  MutVec<Value> tuple_values;
+  vector<Value> tuple_values;
   for (QueryColumn const &col : schema.all()) {
     auto val = col.eval_agg(schema,
                             key.group_bys_,
@@ -79,7 +79,7 @@ Tuple AggExec::next() {
 AggKey AggExec::make_key(const Tuple& tuple) {
   auto &schema = find_schema(child_->schema_ref());
 
-  MutVec<Value> keys;
+  vector<Value> keys;
   for (auto const &node : plan_->group_bys()) {
     keys.emplace_back(node.eval(tuple, schema));
   }
@@ -93,7 +93,7 @@ AggKey AggExec::make_key(const Tuple& tuple) {
 AggValue AggExec::make_val(const Tuple& tuple) {
   auto &schema = find_schema(child_->schema_ref());
 
-  MutVec<Value> values;
+  vector<Value> values;
   for (auto const &node : plan_->aggs()) {
     values.emplace_back(node.eval(tuple, schema));
   }

@@ -38,7 +38,7 @@ private:
 class UpdatePlan : public BasePlan {
 public:
   UpdatePlan(SchemaRef schema_ref,
-             MovePtr<BasePlan> child,
+             ptr<BasePlan>&& child,
              Move<MutMap<uint32_t, UpdateInfo>> update_attrs)
     : BasePlan      (schema_ref),
       table_oid_    (schema_ref.table_oid()),
@@ -53,7 +53,7 @@ public:
 
   PlanType type()         const { return PlanType::UPDATE; }
   table_oid_t table_oid() const { return table_oid_; }
-  MovePtr<BasePlan> child()     { return move(child_); }
+  ptr<BasePlan>&& child()     { return move(child_); }
 
   const Map<uint32_t, UpdateInfo>& update_attrs() const {
     return update_attrs_;
@@ -61,6 +61,6 @@ public:
 
 private:
   table_oid_t table_oid_;
-  MutPtr<BasePlan> child_;
+  ptr<BasePlan> child_;
   Map<uint32_t, UpdateInfo> update_attrs_;
 };

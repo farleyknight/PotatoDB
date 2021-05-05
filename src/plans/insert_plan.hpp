@@ -5,7 +5,7 @@
 class InsertPlan : public BasePlan {
 public:
   InsertPlan(SchemaRef schema,
-             MutPtr<BasePlan> child)
+             ptr<BasePlan> child)
     : BasePlan   (schema),
       child_     (move(child)),
       table_oid_ (schema.table_oid()) {}
@@ -13,9 +13,9 @@ public:
   PlanType type()         const { return PlanType::INSERT; }
   table_oid_t table_oid() const { return table_oid_; }
 
-  MovePtr<BasePlan> child()     { return move(child_); }
+  ptr<BasePlan>&& child()     { return move(child_); }
 
 private:
-  MutPtr<BasePlan> child_;
+  ptr<BasePlan> child_;
   table_oid_t table_oid_;
 };

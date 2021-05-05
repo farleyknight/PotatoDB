@@ -9,7 +9,7 @@
 class SeqScanExec : public BaseExec {
 public:
   SeqScanExec(ExecCtx& exec_ctx,
-              MovePtr<SeqScanPlan> plan);
+              ptr<SeqScanPlan>&& plan);
   ~SeqScanExec() = default;
 
   void init() override;
@@ -22,8 +22,8 @@ private:
   const QuerySchema& schema();
   TableHeap& table_heap();
 
-  Ptr<SeqScanPlan> plan_;
+  ptr<SeqScanPlan> plan_;
 
   UNUSED table_oid_t table_oid_;
-  MutPtr<TableIterator> table_iter_;
+  ptr<TableIterator> table_iter_;
 };

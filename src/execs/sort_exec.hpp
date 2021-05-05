@@ -8,16 +8,16 @@ class SortExec : public BaseExec {
    * @param plan the sort plan to be executed
    * @param child the child executor that produces tuple
    */
-  SortExec(MRef<ExecCtx> exec_ctx,
-           MovePtr<SortPlan> plan,
-           MovePtr<BaseExec> child)
+  SortExec(ExecCtx& exec_ctx,
+           ptr<SortPlan>&& plan,
+           ptr<BaseExec>&& child)
     : BaseExec (exec_ctx),
       plan_    (move(plan)),
       child_   (move(child)) {}
 
-  static Ptr<BaseExec> make(MRef<ExecCtx> exec_ctx,
-                            MovePtr<SortPlan> plan,
-                            MovePtr<BaseExec> child)
+  static ptr<BaseExec> make(ExecCtx& exec_ctx,
+                            ptr<SortPlan>&& plan,
+                            ptr<BaseExec>&& child)
   {
     return make_unique<SortExec>(exec_ctx,
                                  move(plan),
@@ -43,6 +43,6 @@ class SortExec : public BaseExec {
 
 private:
   /** The sort plan node to be executed. */
-  Ptr<SortPlan> plan_;
-  Ptr<BaseExec> child_;
+  ptr<SortPlan> plan_;
+  ptr<BaseExec> child_;
 };

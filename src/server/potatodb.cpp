@@ -14,12 +14,12 @@ PotatoDB::PotatoDB()
     exec_eng_  (buff_mgr_, txn_mgr_, catalog_)
 {}
 
-MutPtr<BasePlan> PotatoDB::build_plan(UNUSED const BaseExpr& expr) {
+ptr<BasePlan> PotatoDB::build_plan(UNUSED const BaseExpr& expr) {
   auto schema_ref = SchemaRef(SchemaType::QUERY, -1);
   return make_unique<SeqScanPlan>(schema_ref);
 }
 
-MutPtr<ResultSet> PotatoDB::execute(string query) {
+ptr<ResultSet> PotatoDB::execute(string query) {
   try {
     // TODO: Rename as_exprs to as_stmts
     auto exprs = SQLParser::as_exprs(query);

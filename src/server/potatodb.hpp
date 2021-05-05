@@ -26,9 +26,9 @@ public:
     return 100;
   }
 
-  MutPtr<ResultSet> execute(string query);
+  ptr<ResultSet> execute(string query);
 
-  MutPtr<BasePlan> build_plan(const BaseExpr& expr);
+  ptr<BasePlan> build_plan(const BaseExpr& expr);
   void startup();
 
 private:

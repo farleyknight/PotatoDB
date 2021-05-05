@@ -10,14 +10,14 @@ public:
    **********************************************/
 
   RawTuplesExec(ExecCtx& exec_ctx,
-                MovePtr<RawTuplesPlan> plan)
+                ptr<RawTuplesPlan>&& plan)
     : BaseExec     (exec_ctx),
       plan_        (move(plan)),
       iter_        (plan_->raw_tuples().begin())
   {}
 
-  static Ptr<BaseExec> make(ExecCtx& exec_ctx,
-                            MovePtr<RawTuplesPlan> plan) {
+  static ptr<BaseExec> make(ExecCtx& exec_ctx,
+                            ptr<RawTuplesPlan>&& plan) {
     return make_unique<RawTuplesExec>(exec_ctx, move(plan));
   }
 
@@ -43,6 +43,6 @@ public:
   }
 
 private:
-  Ptr<RawTuplesPlan> plan_;
+  ptr<RawTuplesPlan> plan_;
   RawTuples::Iterator iter_;
 };

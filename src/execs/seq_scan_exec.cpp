@@ -1,7 +1,7 @@
 #include "execs/seq_scan_exec.hpp"
 
 SeqScanExec::SeqScanExec(ExecCtx& exec_ctx,
-                         MovePtr<SeqScanPlan> plan)
+                         ptr<SeqScanPlan>&& plan)
   : BaseExec     (exec_ctx),
     plan_        (move(plan))
 {}

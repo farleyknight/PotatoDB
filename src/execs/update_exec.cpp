@@ -2,8 +2,8 @@
 #include "execs/update_exec.hpp"
 
 UpdateExec::UpdateExec(ExecCtx& exec_ctx,
-                       MovePtr<UpdatePlan> plan,
-                       MovePtr<BaseExec> child)
+                       ptr<UpdatePlan>&& plan,
+                       ptr<BaseExec>&& child)
   : BaseExec (exec_ctx),
     plan_    (move(plan)),
     child_   (move(child))
@@ -42,7 +42,7 @@ TableHeap& UpdateExec::table_heap() {
 Tuple UpdateExec::updated_tuple(const Tuple& old_tuple) {
   auto update_attrs = plan_->update_attrs();
   uint32_t col_count = schema().column_count();
-  MutVec<Value> values;
+  vector<Value> values;
   for (uint32_t index = 0; index < col_count; index++) {
     if (update_attrs.find(index) == update_attrs.end()) {
       values.emplace_back(old_tuple.value(schema(), index));

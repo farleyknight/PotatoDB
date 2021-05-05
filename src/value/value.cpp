@@ -16,7 +16,7 @@ bool Value::eq(const Value& other) const {
   return value_type()->eq(*this, other);
 }
 
-const Ptr<Type>& Value::value_type() const {
+const ptr<Type>& Value::value_type() const {
   return Type::instance(type_id_);
 }
 

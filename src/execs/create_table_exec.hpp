@@ -22,5 +22,5 @@ public:
     throw NotImplementedException("next is not implemented for CreateTableExec!");
   }
 private:
-  Ptr<CreateTablePlan> plan_;
+  ptr<CreateTablePlan> plan_;
 };

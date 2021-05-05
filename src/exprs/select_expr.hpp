@@ -26,7 +26,7 @@ public:
     return column_list_;
   }
 
-  virtual MutString to_string() const override {
+  virtual string to_string() const override {
     return "SELECT " + column_list_.to_string() +
       "FROM " + table_list_.to_string();
   }

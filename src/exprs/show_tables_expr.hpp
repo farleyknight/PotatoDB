@@ -4,7 +4,7 @@
 
 class ShowTablesExpr : public BaseExpr {
 public:
-  ShowTablesExpr() :
-    : BaseExpr (ExprTypes::SHOW_TABLES)
+  ShowTablesExpr() 
+    : BaseExpr (ExprType::SHOW_TABLES)
   {}
 };

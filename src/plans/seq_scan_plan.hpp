@@ -10,7 +10,7 @@ public:
       table_oid_ (schema_ref.table_oid()) {}
 
   SeqScanPlan(SchemaRef schema_ref,
-              MovePtr<BaseQuery> pred)
+              ptr<BaseQuery>&& pred)
     : BasePlan   (schema_ref),
       pred_      (move(pred)),
       table_oid_ (schema_ref.table_oid()) {}
@@ -28,6 +28,6 @@ public:
   table_oid_t table_oid() const { return table_oid_; }
 
 private:
-  Ptr<BaseQuery> pred_;
+  ptr<BaseQuery> pred_;
   table_oid_t table_oid_;
 };

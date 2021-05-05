@@ -228,7 +228,7 @@ void SocketServer::fire_read_event(file_desc_t fd) {
 }
 
 void SocketServer::stale_socket_cleanup() {
-  std::lock_guard<Mutex> lock(stale_fd_mutex_);
+  std::lock_guard<mutex> lock(stale_fd_mutex_);
 
   for (auto fd : stale_fds_) {
     std::cout << "Clearing FD : " << fd << std::endl;
@@ -243,7 +243,7 @@ void SocketServer::remove_socket(file_desc_t fd) {
   // TODO: When we get a logging system working, add
   // the line below:
   // std::cout << "Closing socket FD : " << fd << std::endl;
-  std::lock_guard<Mutex> lock(stale_fd_mutex_);
+  std::lock_guard<mutex> lock(stale_fd_mutex_);
 
   auto match_fd = [&](SPtr<ClientSocket> socket) {
     return socket->file_desc() == fd;

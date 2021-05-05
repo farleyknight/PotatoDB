@@ -15,7 +15,7 @@ public:
    **********************************************/
 
   SortPlan(SchemaRef schema_ref,
-           MutPtr<BasePlan> child,
+           ptr<BasePlan> child,
            vector<SortDirection> directions)
     : BasePlan    (schema_ref),
       child_      (move(child)),
@@ -25,9 +25,9 @@ public:
   }
 
   PlanType type()     const { return PlanType::SORT; }
-  MovePtr<BasePlan> child() { return move(child_); }
+  ptr<BasePlan>&& child() { return move(child_); }
 
 private:
-  MutPtr<BasePlan> child_;
-  MutVec<SortDirection> directions_;
+  ptr<BasePlan> child_;
+  vector<SortDirection> directions_;
 };

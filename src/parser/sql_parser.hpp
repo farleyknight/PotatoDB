@@ -70,8 +70,8 @@ public:
       EvalParseVisitor visitor;
       visitor.visit(tree);
 
-      if (visitor.results.size() > 0) {
-        return visitor.results;
+      if (visitor.results().size() > 0) {
+        return move(visitor.results());
       } else {
         vector<string> result {"No parse result!"};
         return result;
@@ -83,7 +83,7 @@ public:
     }
   }
 
-  static vector<MutPtr<BaseExpr>> as_exprs(string input) {
+  static vector<ptr<BaseExpr>> as_exprs(string input) {
     ANTLRInputStream stream(input);
 
     PotatoSQLLexer lexer(&stream);
@@ -100,15 +100,15 @@ public:
       EvalParseVisitor visitor;
       visitor.visit(tree);
 
-      if (visitor.exprs.size() > 0) {
-        return move(visitor.exprs);
+      if (visitor.exprs().size() > 0) {
+        return move(visitor.exprs());
       } else {
-        vector<MutPtr<BaseExpr>> results;
+        vector<ptr<BaseExpr>> results;
         return results;
       }
 
     } catch (UNUSED std::invalid_argument &e) {
-      vector<MutPtr<BaseExpr>> results;
+      vector<ptr<BaseExpr>> results;
       return results;
     }
   }

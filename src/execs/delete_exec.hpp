@@ -15,8 +15,8 @@ class DeleteExec : public BaseExec {
 public:
 
   DeleteExec(ExecCtx& exec_ctx,
-             MovePtr<DeletePlan> plan,
-             MovePtr<BaseExec> child)
+             ptr<DeletePlan>&& plan,
+             ptr<BaseExec>&& child)
     : BaseExec (exec_ctx),
       plan_    (move(plan)),
       child_   (move(child)) {}
@@ -37,6 +37,6 @@ public:
   }
 
 private:
-  MutPtr<DeletePlan> plan_;
-  MutPtr<BaseExec> child_;
+  ptr<DeletePlan> plan_;
+  ptr<BaseExec> child_;
 };

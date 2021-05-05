@@ -99,7 +99,7 @@ PlanBuilder& PlanBuilder::where(string column_name,
   return *this;
 }
 
-MutPtr<BasePlan> PlanBuilder::to_plan() {
+ptr<BasePlan> PlanBuilder::to_plan() {
   if (plan_type_ == PlanType::TABLE_SCAN) {
     return build_scan();
   } else if (plan_type_ == PlanType::LOOP_JOIN) {
@@ -117,25 +117,25 @@ MutPtr<BasePlan> PlanBuilder::to_plan() {
   }
 }
 
-MutPtr<BasePlan> PlanBuilder::build_tuples() {
+ptr<BasePlan> PlanBuilder::build_tuples() {
   return make_unique<RawTuplesPlan>(insert_table_schema_ref(),
                                     tuples_);
 }
 
-MutPtr<BasePlan> PlanBuilder::build_insert(MovePtr<BasePlan> scan_plan) {
+ptr<BasePlan> PlanBuilder::build_insert(ptr<BasePlan>&& scan_plan) {
   //auto insert_schema = QuerySchema::slice(insert_table_schema(),
   //                                        insert_column_names_);
   return make_unique<InsertPlan>(insert_table_schema_ref(),
                                  move(scan_plan));
 }
 
-MutPtr<BasePlan> PlanBuilder::build_delete(MovePtr<BasePlan> scan_plan) {
+ptr<BasePlan> PlanBuilder::build_delete(ptr<BasePlan>&& scan_plan) {
   // auto delete_schema = QuerySchema::copy(from_table_schema());
   return make_unique<DeletePlan>(from_table_schema_ref(),
                                  move(scan_plan));
 }
 
-MutPtr<BasePlan> PlanBuilder::build_scan() {
+ptr<BasePlan> PlanBuilder::build_scan() {
   //auto scan_schema = QuerySchema::slice(from_table_schema(),
   //                                      select_column_names_);
   if (where_clause_) {
@@ -146,7 +146,7 @@ MutPtr<BasePlan> PlanBuilder::build_scan() {
   }
 }
 
-MutPtr<BasePlan> PlanBuilder::build_loop_join() {
+ptr<BasePlan> PlanBuilder::build_loop_join() {
   auto left_scan = build_left_scan();
   auto right_scan = build_right_scan();
 
@@ -163,7 +163,7 @@ MutPtr<BasePlan> PlanBuilder::build_loop_join() {
 }
 
 
-MutPtr<BasePlan> PlanBuilder::build_left_scan() {
+ptr<BasePlan> PlanBuilder::build_left_scan() {
   vector<string> col_names;
   for (auto name : select_column_names_) {
     if (name.rfind(left_table_name_) == 0) {
@@ -177,7 +177,7 @@ MutPtr<BasePlan> PlanBuilder::build_left_scan() {
   return make_unique<SeqScanPlan>(from_table_schema_ref());
 }
 
-MutPtr<BasePlan> PlanBuilder::build_right_scan() {
+ptr<BasePlan> PlanBuilder::build_right_scan() {
   vector<string> col_names;
   for (auto name : select_column_names_) {
     if (name.rfind(right_table_name_) == 0) {
@@ -190,7 +190,7 @@ MutPtr<BasePlan> PlanBuilder::build_right_scan() {
   return make_unique<SeqScanPlan>(from_table_schema_ref());
 }
 
-CompType PlanBuilder::to_comp_type(String op) {
+CompType PlanBuilder::to_comp_type(string op) {
   if (op == "<") {
     return CompType::LT;
   } else if (op == ">") {

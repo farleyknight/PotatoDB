@@ -24,7 +24,7 @@ public:
   ~PlanBuilder() = default;
 
 
-  PlanBuilder& insert_into(String name);
+  PlanBuilder& insert_into(string name);
   PlanBuilder& tuples(Move<RawTuples> tuples);
 
   PlanBuilder& select(vector<string> names);
@@ -43,21 +43,21 @@ public:
                      string operation,
                      Value val);
 
-  MutPtr<BasePlan> to_plan();
+  ptr<BasePlan> to_plan();
 
 private:
   /**********************************************
    * Private Instance Methods
    **********************************************/
 
-  MutPtr<BasePlan> build_tuples();
-  MutPtr<BasePlan> build_insert(MovePtr<BasePlan> scan_plan);
-  MutPtr<BasePlan> build_delete(MovePtr<BasePlan> scan_plan);
+  ptr<BasePlan> build_tuples();
+  ptr<BasePlan> build_insert(ptr<BasePlan>&& scan_plan);
+  ptr<BasePlan> build_delete(ptr<BasePlan>&& scan_plan);
   // TODO: Need to add build_update in here.
-  MutPtr<BasePlan> build_scan();
-  MutPtr<BasePlan> build_loop_join();
-  MutPtr<BasePlan> build_left_scan();
-  MutPtr<BasePlan> build_right_scan();
+  ptr<BasePlan> build_scan();
+  ptr<BasePlan> build_loop_join();
+  ptr<BasePlan> build_left_scan();
+  ptr<BasePlan> build_right_scan();
 
   PlanBuilder& loop_join(string right_table);
   PlanBuilder& hash_join(string right_table);
@@ -94,8 +94,8 @@ private:
   table_oid_t right_table_oid_ = INVALID_TABLE_OID;
 
   MutOption<PlanType> plan_type_;
-  MutPtr<QueryComp> where_clause_;
-  MutPtr<QueryComp> join_clause_;
+  ptr<QueryComp> where_clause_;
+  ptr<QueryComp> join_clause_;
 
   Catalog& catalog_;
   RawTuples tuples_;

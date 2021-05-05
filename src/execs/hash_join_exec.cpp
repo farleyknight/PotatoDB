@@ -4,9 +4,9 @@
 #include "plans/hash_join_plan.hpp"
 
 HashJoinExec::HashJoinExec(ExecCtx& exec_ctx,
-                           MovePtr<HashJoinPlan> plan,
-                           MovePtr<BaseExec> left,
-                           MovePtr<BaseExec> right)
+                           ptr<HashJoinPlan>&& plan,
+                           ptr<BaseExec>&& left,
+                           ptr<BaseExec>&& right)
   : BaseExec (exec_ctx),
     plan_    (move(plan)),
     left_    (move(left)),
@@ -15,7 +15,7 @@ HashJoinExec::HashJoinExec(ExecCtx& exec_ctx,
 // https://github.com/Mrhaha666/15-445_2019fall/blob/42536d7fa034277bf60f78d5124bc0bdc4d69b82/lab3_backup/src/execution/hash_join_executor.cpp#L28
 
 hash_t HashJoinExec::compute_hash(const Tuple& tuple,
-                                  const Tuple& schema,
+                                  const QuerySchema& schema,
                                   Vec<BaseQuery> nodes)
 {
   hash_t curr_hash = 0;
@@ -62,7 +62,7 @@ void HashJoinExec::init() {
     Vec<Tuple> left_tuples = join_ht_.find_values(hash_value);
     for (auto &left_tuple : left_tuples) {
       if (match_found(left_tuple, right_tuple)) {
-        MutVec<Value> values;
+        vector<Value> values;
         for (size_t col_index = 0; col_index < col_total; ++col_index) {
           values.push_back(make_value_at(col_index,
                                          left_tuple, right_tuple));
@@ -98,14 +98,14 @@ Tuple HashJoinExec::next() {
   return tuple;
 }
 
-const Tuple& HashJoinExec::schema() {
+const QuerySchema& HashJoinExec::schema() {
   return find_schema(plan_->schema_ref());
 }
 
-const Tuple& HashJoinExec::left_schema()  {
+const QuerySchema& HashJoinExec::left_schema()  {
   return find_schema(left_->schema_ref());
 }
 
-const Tuple& HashJoinExec::right_schema() {
+const QuerySchema& HashJoinExec::right_schema() {
   return find_schema(right_->schema_ref());
 }

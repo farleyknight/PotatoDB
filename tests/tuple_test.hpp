@@ -27,12 +27,12 @@ TEST(TupleTest, DISABLED_SerializeAndDeserializeTest) {
 TEST(TupleTest, MemoryAllocationTest) {
   // uint32_t varchar_length = 10;
 
-  // MutVec<Column> columns {
+  // vector<Column> columns {
   //   Column("column_name", TypeId::VARCHAR, varchar_length)
   // };
   // const Schema schema(move(columns));
 
-  // MutVec<Value> values;
+  // vector<Value> values;
   // values.reserve(schema.column_count());
 
   // uint32_t len = 5;
@@ -52,12 +52,12 @@ TEST(TupleTest, MemoryAllocationTest) {
 TEST(TupleTest, ToStringTest) {
   // uint32_t varchar_length = 10;
 
-  // MutVec<Column> columns {
+  // vector<Column> columns {
   //   Column("column_name", TypeId::VARCHAR, varchar_length)
   // };
   // const Schema schema(move(columns));
 
-  // MutVec<Value> values;
+  // vector<Value> values;
   // values.reserve(schema.column_count());
 
   // uint32_t len = 5;

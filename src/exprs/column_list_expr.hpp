@@ -13,11 +13,11 @@ public:
     columns_.push_back(expr);
   }
 
-  const MutVec<ColumnExpr>& columns() const {
+  const vector<ColumnExpr>& columns() const {
     return columns_;
   }
 
-  MutString to_string() const override {
+  string to_string() const override {
     std::stringstream stream;
     stream << "[";
 
@@ -33,5 +33,5 @@ public:
   }
 
 protected:
-  MutVec<ColumnExpr> columns_;
+  vector<ColumnExpr> columns_;
 };

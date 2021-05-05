@@ -9,7 +9,7 @@ public:
   TableBuilder(Ref<Catalog> catalog)
     : catalog_ (catalog) {}
 
-  using Self = MRef<TableBuilder>;
+  using Self = TableBuilder&;
   Self table_name(String table_name);
 
   Self add_column(String name, TypeId type_id);

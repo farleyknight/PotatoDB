@@ -5,7 +5,7 @@
 class HashJoinPlan : public BasePlan {
 public:
   HashJoinPlan(SchemaRef schema,
-               MovePtr<BaseQuery> pred,
+               ptr<BaseQuery>&& pred,
                MoveVec<BaseQuery> left_hash_keys,
                MoveVec<BaseQuery> right_hash_keys)
     : BasePlan         (schema),
@@ -29,6 +29,6 @@ public:
   const Vec<BaseQuery>& right_keys() { return right_hash_keys_; }
 
 private:
-  Ptr<BaseQuery> pred_;
+  ptr<BaseQuery> pred_;
   Vec<BaseQuery> left_hash_keys_, right_hash_keys_;
 };

@@ -12,7 +12,7 @@ public:
    * Constructors & destructor
    **********************************************/
 
-  AggHT(CRef<AggPlan> plan) {
+  AggHT(const AggPlan& plan) {
     for (const auto &node : plan.aggs()) {
       nodes_.emplace_back(node);
     }
@@ -29,7 +29,7 @@ public:
    **********************************************/
 
   AggValue generate() {
-    MutVec<Value> values;
+    vector<Value> values;
     for (const auto &type : types_) {
       switch (type) {
         case AggType::COUNT:
@@ -76,7 +76,7 @@ public:
     }
   }
 
-  void insert_combine(CRef<AggKey> key, AggValue& val) {
+  void insert_combine(const AggKey& key, AggValue& val) {
     if (table_.count(key) == 0) {
       table_.insert({key, generate()});
     }
@@ -100,19 +100,23 @@ public:
      * Instance methods
      **********************************************/
 
-    CRef<AggKey> key() { return iter_->first; }
+    const AggKey& key() {
+      return iter_->first;
+    }
 
-    CRef<AggValue> val() { return iter_->second; }
+    const AggValue& val() {
+      return iter_->second;
+    }
 
     Iterator &operator++() {
       ++iter_;
       return *this;
     }
 
-    bool operator==(CRef<Iterator> other) const {
+    bool operator==(const Iterator& other) const {
       return iter_ == other.iter_;
     }
-    bool operator!=(CRef<Iterator> other) const {
+    bool operator!=(const Iterator& other) const {
       return iter_ != other.iter_;
     }
 
@@ -129,6 +133,6 @@ public:
 
 private:
   MutMap<AggKey, AggValue> table_ {};
-  MutVec<BaseQuery> nodes_;
-  MutVec<AggType> types_;
+  vector<BaseQuery> nodes_;
+  vector<AggType> types_;
 };

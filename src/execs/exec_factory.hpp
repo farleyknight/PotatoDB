@@ -32,7 +32,7 @@ class ExecFactory {
 public:
 
   template <class T>
-  static MutPtr<T> cast(MutPtr<BasePlan>& plan) {
+  static ptr<T> cast(ptr<BasePlan>& plan) {
     return unique_ptr<T>(static_cast<T*>(plan.release()));
   }
 
@@ -40,8 +40,8 @@ public:
    * Class methods
    **********************************************/
 
-  static MutPtr<BaseExec> create(ExecCtx& exec_ctx,
-                                 MutPtr<BasePlan>&& plan) {
+  static ptr<BaseExec> create(ExecCtx& exec_ctx,
+                                 ptr<BasePlan>&& plan) {
     switch (plan->type()) {
     case PlanType::TABLE_SCAN: {
       auto scan_plan = cast<SeqScanPlan>(plan);

@@ -13,7 +13,7 @@ public:
     column_defs_.push_back(column_def);
   }
 
-  virtual MutString to_string() const override {
+  virtual string to_string() const override {
     std::stringstream stream;
     stream << "[";
     for (size_t i = 0; i < column_defs_.size(); ++i) {
@@ -27,5 +27,5 @@ public:
   }
 
 protected:
-  MutVec<ColumnDefExpr> column_defs_;
+  vector<ColumnDefExpr> column_defs_;
 };

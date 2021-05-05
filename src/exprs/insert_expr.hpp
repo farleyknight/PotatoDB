@@ -23,7 +23,7 @@ public:
     tuples_ = tuples;
   }
 
-  MutString table_name() const {
+  string table_name() const {
     return table_.to_string();
   }
 
@@ -35,7 +35,7 @@ public:
     return tuples_;
   }
 
-  virtual MutString to_string() const override {
+  virtual string to_string() const override {
     return "INSERT INTO " + table_.to_string() +
       columns_.to_string() +
       "VALUES " + tuples_.to_string();

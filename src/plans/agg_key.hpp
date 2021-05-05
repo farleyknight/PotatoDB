@@ -7,7 +7,7 @@
 
 class AggKey {
 public:
-  AggKey(MutVec<Value> group_bys)
+  AggKey(vector<Value> group_bys)
     : group_bys_ (group_bys) {}
 
   const Vec<Value>& group_bys() const {
@@ -23,19 +23,19 @@ public:
     return true;
   }
 
-  MutVec<Value> group_bys_;
+  vector<Value> group_bys_;
 };
 
 class AggValue {
 public:
-  AggValue(MutVec<Value> aggs)
+  AggValue(vector<Value> aggs)
     : aggs_ (aggs) {}
 
   const Vec<Value>& aggs() {
     return aggs_;
   }
 
-  MutVec<Value> aggs_;
+  vector<Value> aggs_;
 };
 
 

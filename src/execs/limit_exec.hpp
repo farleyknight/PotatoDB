@@ -6,8 +6,8 @@ class LimitExec : public BaseExec {
  public:
 
   LimitExec(ExecCtx& exec_ctx,
-            MovePtr<LimitPlan> plan,
-            MovePtr<BaseExec> child)
+            ptr<LimitPlan>&& plan,
+            ptr<BaseExec>&& child)
     : BaseExec (exec_ctx),
       plan_    (move(plan)),
       child_   (move(child))
@@ -28,6 +28,6 @@ class LimitExec : public BaseExec {
   }
 
 private:
-  Ptr<LimitPlan> plan_;
-  Ptr<BaseExec> child_;
+  ptr<LimitPlan> plan_;
+  ptr<BaseExec> child_;
 };

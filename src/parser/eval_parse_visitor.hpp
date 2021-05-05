@@ -11,7 +11,14 @@
 using antlrcpp::Any;
 using potatosql::PotatoSQLBaseVisitor;
 using potatosql::PotatoSQLParser;
-using PotatoSQLParser;
+
+// TODO: Rename these! Not a fan of underscores in class names
+using SelectStmtContext      = PotatoSQLParser::Select_stmtContext;
+using CreateTableStmtContext = PotatoSQLParser::Create_table_stmtContext;
+using ShowTablesStmtContext  = PotatoSQLParser::Show_tables_stmtContext;
+using InsertStmtContext      = PotatoSQLParser::Insert_stmtContext;
+using SelectCoreContext      = PotatoSQLParser::Select_coreContext;
+using ExprContext            = PotatoSQLParser::ExprContext;
 
 class EvalParseVisitor : public PotatoSQLBaseVisitor {
 private:
@@ -19,20 +26,20 @@ private:
   vector<ptr<BaseExpr>> exprs_;
 
 public:
-  const vector<string> results() {
-    return results_;
+  vector<string>&& results() {
+    return move(results_);
   }
 
-  const vector<ptr<BaseExpr>>& exprs() {
-    return exprs_;
+  vector<ptr<BaseExpr>>&& exprs() {
+    return move(exprs_);
   }
 
-  Any visitSelect_stmt(Select_stmtContext *ctx) override {
+  Any visitSelect_stmt(SelectStmtContext *ctx) override {
     // TODO?
     return visitChildren(ctx);
   }
 
-  Any visitCreate_table_stmt(Create_table_stmtContext *ctx) override {
+  Any visitCreate_table_stmt(CreateTableStmtContext *ctx) override {
     CreateTableExpr create_table;
     assert(ctx->table_name());
 
@@ -54,12 +61,14 @@ public:
     return visitChildren(ctx);
   }
 
-  Any visitShow_tables_stmt(Show_tables_stmtContext *ctx) override {
+  Any visitShow_tables_stmt(ShowTablesStmtContext *ctx) override {
     ShowTablesExpr show_tables;
-    exprs.emplace_back
+    exprs_.emplace_back(make_unique<ShowTablesExpr>());
+
+    return visitChildren(ctx);
   }
 
-  Any visitInsert_stmt(Insert_stmtContext *ctx) override {
+  Any visitInsert_stmt(InsertStmtContext *ctx) override {
     InsertExpr insert;
     assert(ctx->table_name());
 
@@ -90,12 +99,12 @@ public:
     }
     insert.set_tuples(tuples);
 
-    exprs.emplace_back(make_unique<InsertExpr>(insert));
+    exprs_.emplace_back(make_unique<InsertExpr>(insert));
 
     return visitChildren(ctx);
   }
 
-  Any visitSelect_core(Select_coreContext *ctx) override {
+  Any visitSelect_core(SelectCoreContext *ctx) override {
     const auto &col_list_ctx = ctx->column_list();
 
     ColumnListExpr cols;
@@ -118,7 +127,7 @@ public:
     select.set_columns(cols);
     select.set_tables(tables);
 
-    exprs.emplace_back(make_unique<SelectExpr>(select));
+    exprs_.emplace_back(make_unique<SelectExpr>(select));
 
     return visitChildren(ctx);
   }

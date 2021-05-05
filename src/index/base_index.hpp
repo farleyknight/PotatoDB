@@ -23,7 +23,7 @@ public:
     throw Exception("delete_entry is not implemented on BaseIndex");
   }
 
-  virtual const vector<RID>& scan_key(UNUSED const Tuple& key) {
+  virtual vector<RID> scan_key(UNUSED const Tuple& key) {
     throw Exception("scan_key is not implemented on BaseIndex");
   }
 };

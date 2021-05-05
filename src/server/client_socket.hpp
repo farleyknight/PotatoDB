@@ -25,7 +25,7 @@ public:
   void shutdown();
   void write(const string& data) const;
   string read() const;
-  string process_request(string message) const;
+  // string process_request(const string& message) const;
 
   // No copy
   ClientSocket(const ClientSocket&) = delete;

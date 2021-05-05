@@ -10,7 +10,7 @@ public:
    **********************************************/
 
   LimitPlan(SchemaRef schema,
-            MutPtr<BasePlan> child,
+            ptr<BasePlan> child,
             size_t limit,
             size_t offset)
    : BasePlan (schema),
@@ -26,10 +26,10 @@ public:
   PlanType type()     const { return PlanType::LIMIT; }
   size_t limit()      const { return limit_; }
   size_t offset()     const { return offset_; }
-  MovePtr<BasePlan> child() { return move(child_); }
+  ptr<BasePlan>&& child() { return move(child_); }
 
 private:
-  MutPtr<BasePlan> child_;
+  ptr<BasePlan> child_;
   size_t limit_;
   size_t offset_;
 };

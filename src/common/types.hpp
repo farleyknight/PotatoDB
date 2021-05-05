@@ -81,9 +81,6 @@ using Map       = const std::unordered_map<K, V>;
 template<class K, class V>
 using MutMap    = std::unordered_map<K, V>;
 
-template<class T>
-using MovePtr  = unique_ptr<T> &&;
-
 
 // NOTE: SPtr means shared_ptr
 template<class T>

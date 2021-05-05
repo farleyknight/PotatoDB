@@ -1,9 +1,9 @@
 struct MemcpyEncoder {
-  void write_string(MRef<Buffer> buff, String s) {
+  void write_string(Buffer& buff, String s) {
     // TODO!
   }
 
-  MutString read_string(Ref<Buffer> buff) {
+  string read_string(Ref<Buffer> buff) {
     // TODO
     return "";
   }

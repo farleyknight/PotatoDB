@@ -13,11 +13,11 @@ public:
     tables_.push_back(table);
   }
 
-  const MutVec<TableExpr>& tables() const {
+  const vector<TableExpr>& tables() const {
     return tables_;
   }
 
-  MutString to_string() const override {
+  string to_string() const override {
     std::stringstream stream;
     stream << "[";
     for (size_t i = 0; i < tables_.size(); ++i) {
@@ -31,5 +31,5 @@ public:
   }
 
 protected:
-  MutVec<TableExpr> tables_;
+  vector<TableExpr> tables_;
 };

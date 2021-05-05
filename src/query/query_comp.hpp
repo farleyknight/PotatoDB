@@ -32,33 +32,33 @@ public:
    **********************************************/
 
   Value eval(const Tuple& tuple,
-             const Tuple& schema) const {
-    Value lhs = left_.eval(tuple, schema);
-    Value rhs = right_.eval(tuple, schema);
+             const QuerySchema& schema) const {
+    auto lhs = left_.eval(tuple, schema);
+    auto rhs = right_.eval(tuple, schema);
     return Value::make(compare(lhs, rhs));
   }
 
   Value eval_join(const Tuple& lt,
-                  const Tuple& ls,
+                  const QuerySchema& ls,
                   const Tuple& rt,
-                  const Tuple& rs) const
+                  const QuerySchema& rs) const
   {
-    Value lhs = left_.eval_join(lt, ls, rt, rs);
-    Value rhs = right_.eval_join(lt, ls, rt, rs);
+    auto lhs = left_.eval_join(lt, ls, rt, rs);
+    auto rhs = right_.eval_join(lt, ls, rt, rs);
     return Value::make(compare(lhs, rhs));
   }
 
-  Value eval_agg(const Tuple& schema,
-                 const Tuple& group_bys,
-                 const Tuple& aggregates) const {
-    Value lhs = left_.eval_agg(schema, group_bys, aggregates);
-    Value rhs = right_.eval_agg(schema, group_bys, aggregates);
+  Value eval_agg(const QuerySchema& schema,
+                 const vector<Value>& group_bys,
+                 const vector<Value>& aggregates) const {
+    auto lhs = left_.eval_agg(schema, group_bys, aggregates);
+    auto rhs = right_.eval_agg(schema, group_bys, aggregates);
     return Value::make(compare(lhs, rhs));
   }
 
 private:
-  bool compare(const Tuple& lhs,
-               const Tuple& rhs) const
+  bool compare(const Value& lhs,
+               const Value& rhs) const
   {
     switch (type_) {
     case CompType::EQ:

@@ -12,7 +12,7 @@
  **********************************************/
 
 template<class K, class V>
-LinearProbeHT<K, V>::LinearProbeHT(const String& name,
+LinearProbeHT<K, V>::LinearProbeHT(const string& name,
                                    BuffMgr& buff_mgr,
                                    const CompT& comp,
                                    size_t num_buckets,
@@ -34,7 +34,7 @@ LinearProbeHT<K, V>::LinearProbeHT(const String& name,
 
 template<class K, class V>
 vector<V> LinearProbeHT<K, V>::find_values(const K& key) {
-  MutVec<V> result;
+  vector<V> result;
 
   table_latch_.rlock();
   auto header_page = fetch_header_page();

@@ -5,23 +5,34 @@
 #include "catalog/schema_mgr.hpp"
 #include "catalog/table_schema.hpp"
 #include "catalog/table_meta.hpp"
-#include "catalog/index_meta.hpp"
 
 #include "common/config.hpp"
 
 #include "txns/lock_mgr.hpp"
 
 #include "index/base_index.hpp"
+#include "index/index_meta.hpp"
 
 class SchemaRef;
 class SchemaManager;
 
 class Catalog {
 public:
-  /**********************************************
-  * Constructors & destructor
-  **********************************************/
-  Catalog() {}
+  Catalog() {
+    build_catalog_table();
+  }
+
+  void build_catalog_table() {
+    // TODO: Use some SQL here
+    // 1) Write the necessary SQL
+    // 2) Feed it to the parser
+    // 3) Parser feeds it to the exec eng
+    // 4) Need to add operator for creating a table
+    // 5) DiskMgr should create a TableFile?
+    // 6) TableFile creates TableHeap
+    // 7) TableHeap creates TablePage
+    // 8) TablePage adds tuples to the `system_catalog`
+  }
 
   // No copy
   Catalog(const Catalog&) = delete;

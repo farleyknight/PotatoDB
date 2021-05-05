@@ -13,11 +13,11 @@ public:
     tuples_.push_back(expr);
   }
 
-  const MutVec<TupleExpr>& tuples() const {
+  const vector<TupleExpr>& tuples() const {
     return tuples_;
   }
 
-  MutString to_string() const override {
+  string to_string() const override {
     std::stringstream stream;
     stream << "[";
 
@@ -33,5 +33,5 @@ public:
   }
 
 protected:
-  MutVec<TupleExpr> tuples_;
+  vector<TupleExpr> tuples_;
 };

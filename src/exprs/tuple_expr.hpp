@@ -13,11 +13,11 @@ public:
     values_.push_back(expr);
   }
 
-  const MutVec<ValueExpr>& values() const {
+  const vector<ValueExpr>& values() const {
     return values_;
   }
 
-  MutString to_string() const override {
+  string to_string() const override {
     std::stringstream stream;
     stream << "[";
 
@@ -33,5 +33,5 @@ public:
   }
 
 protected:
-  MutVec<ValueExpr> values_;
+  vector<ValueExpr> values_;
 };

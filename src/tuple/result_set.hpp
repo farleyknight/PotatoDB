@@ -19,7 +19,7 @@ public:
   ResultSet& operator=(const ResultSet&) = delete;
   ~ResultSet() = default;
 
-  static Ptr<ResultSet> empty() {
+  static ptr<ResultSet> empty() {
     return make_unique<ResultSet>();
   }
 
@@ -28,8 +28,9 @@ public:
    **********************************************/
 
   template<typename T>
-  T value(String name, const ResultSet& tuple,
-                       const ResultSet& exec_ctx)
+  T value(const string name,
+          const Tuple& tuple,
+          const ExecCtx& exec_ctx)
   {
     auto &schema
       = exec_ctx.catalog().find_query_schema(schema_);
@@ -37,14 +38,17 @@ public:
   }
 
   template<typename T>
-  T value_at(String name, size_t index, const ResultSet& exec_ctx) {
+  T value_at(const string name,
+             size_t index,
+             const ExecCtx& exec_ctx)
+  {
     assert(results_.size() >= index + 1);
     auto &schema
       = exec_ctx.catalog().find_query_schema(schema_);
     return results_[index].value(schema, schema.offset_for(name)).as<T>();
   }
 
-  const ResultSet& results() {
+  const vector<Tuple>& results() {
     return results_;
   }
 
@@ -54,7 +58,7 @@ public:
 
   string to_string() {
     // TODO: Send this back to the client in a structured way
-    return "";
+    return "<a result set should appear here>";
   }
 
 private:
