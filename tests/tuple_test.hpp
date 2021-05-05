@@ -1,7 +1,7 @@
 
 // TODO: Get tests from MiniSQL
 
-TEST(TupleTest, DISABLED_SerializeAndDeserializeTest) {
+TEST(TupleTest, SerializeAndDeserializeTest) {
   // // Make values
   // auto &schema = Parser::statement();
 

@@ -1,6 +1,7 @@
 
 #include "server/potatodb.hpp"
 #include "server/client_socket.hpp"
+#include "parser/sql_parser.hpp"
 
 PotatoDB potatodb;
 
@@ -15,6 +16,24 @@ PotatoDB::PotatoDB()
     catalog_   (),
     exec_eng_  (buff_mgr_, txn_mgr_, catalog_)
 {}
+
+
+void PotatoDB::build_catalog_table() {
+  // TODO: Use some SQL here
+  // 1) Write the necessary SQL [DONE?]
+  // 2) Feed it to the parser [DONE?]
+  // 3) Parser feeds it to the exec eng [DONE?]
+
+  // potatodb.execute(system_table_sql);
+
+  // 4) Need to add operator for creating a table [TODO]
+
+  // 5) DiskMgr should create a TableFile?
+  // 6) TableFile creates TableHeap
+  // 7) TableHeap creates TablePage
+  // 8) TablePage adds tuples to the `system_catalog`
+}
+
 
 ptr<BasePlan> PotatoDB::build_plan(UNUSED const BaseExpr& expr) {
   auto schema_ref = SchemaRef(SchemaType::QUERY, -1);

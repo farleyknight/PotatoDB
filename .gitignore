@@ -60,3 +60,6 @@ antlr_generated/
 
 # Graphviz
 potatodb.dot*
+build.ninja
+.ninja_deps
+.ninja_log

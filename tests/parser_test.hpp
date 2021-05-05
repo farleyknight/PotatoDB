@@ -84,7 +84,7 @@ TEST(ParserTest, InsertWithColumnsTest) {
 }
 
 
-TEST(ParserTest, DISABLED_CreateTableTest) {
+TEST(ParserTest, CreateTableTest) {
   // TODO: Test using SQLParser::as_exprs()
 
   string statement = "CREATE TABLE foobar (id INTEGER PRIMARY KEY, name VARCHAR(10) NOT NULL)";

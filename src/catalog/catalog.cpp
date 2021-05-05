@@ -1,43 +1,7 @@
-#include "buffer/buff_mgr.hpp"
-
-#include "common/config.hpp"
-
 #include "catalog/catalog.hpp"
-#include "catalog/table_meta.hpp"
 
-#include "index/index_meta.hpp"
-#include "server/potatodb.hpp"
-#include "txns/lock_mgr.hpp"
-
-const string system_table_sql =
-  "CREATE TABLE system_catalog ( " \
-
-  /*
-    "id         INTEGER PRIMARY KEY, " \
-    "type       INTEGER NOT NULL, " \
-    "name       VARCHAR(32) NOT NULL, " \
-    "table_name VARCHAR(32) NOT NULL, " \
-    "sql        VARCHAR(255) NOT NULL " \
-   */
-
-  ");";
-
-
-void Catalog::build_catalog_table() {
-  // TODO: Use some SQL here
-  // 1) Write the necessary SQL [DONE?]
-  // 2) Feed it to the parser [DONE?]
-  // 3) Parser feeds it to the exec eng [DONE?]
-
-  // potatodb.execute(system_table_sql);
-
-  // 4) Need to add operator for creating a table [TODO]
-
-  // 5) DiskMgr should create a TableFile?
-  // 6) TableFile creates TableHeap
-  // 7) TableHeap creates TablePage
-  // 8) TablePage adds tuples to the `system_catalog`
-}
+// #include "catalog/table_meta.hpp"
+// #include "server/potatodb.hpp"
 
 void Catalog::register_table(UNUSED Txn& txn,
                              const string table_name,

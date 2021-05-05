@@ -2,11 +2,11 @@
 
 #include <memory>
 
+#include "common/config.hpp"
+
 #include "catalog/schema_mgr.hpp"
 #include "catalog/table_schema.hpp"
 #include "catalog/table_meta.hpp"
-
-#include "common/config.hpp"
 
 #include "txns/lock_mgr.hpp"
 
@@ -19,10 +19,7 @@ class SchemaManager;
 class Catalog {
 public:
   Catalog() {
-    build_catalog_table();
   }
-
-  void build_catalog_table();
 
   // No copy
   Catalog(const Catalog&) = delete;

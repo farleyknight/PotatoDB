@@ -6,7 +6,7 @@
 
 #include "type_tests_fixture.hpp"
 
-TEST_F(TypeTests, DISABLED_CompareValueTest) {
+TEST_F(TypeTests, CompareValueTest) {
   std::string temp = "32";
   Value val1 = Value::make(temp);
   Value val2 = Value::make(32);

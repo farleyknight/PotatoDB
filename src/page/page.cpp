@@ -1,5 +1,4 @@
 
-#include "common/config.hpp"
 #include "page/page.hpp"
 
 Page::Page() {

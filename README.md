@@ -2,6 +2,29 @@
 
 A personal project to learn database internals and writing performant C++ code.
 
+## Build System
+
+Currently using CMake to generate our build scripts. However, while traditionally CMake has been used alongside the command `make`, I've switched to using `ninja` instead. What does this mean for someone just using the project? Here's the commands you'll run.
+
+To generate the build scripts:
+
+```bash
+$ cmake . -G Ninja
+```
+
+To actually compile:
+
+```bash
+$ ninja
+```
+
+To compile a specific target, say the test suite:
+
+```bash
+$ ninja tests
+```
+
+
 ## Installation
 
 At the moment PotatoDB has no easy-to-use installers. This is because it is still under heavy develompent. Instead, you'll be building it from scratch. 
@@ -9,7 +32,6 @@ At the moment PotatoDB has no easy-to-use installers. This is because it is stil
 First install `vcpkg`. That boils down to cloning it locally from GitHub and running the bootstrap script. Check out the instructions here:
 
 https://docs.microsoft.com/en-us/cpp/build/install-vcpkg?view=msvc-160&tabs=macos#to-copy-and-set-up-vcpkg-on-macos
-
 It basically boils down to these steps:
 
 ```bash
@@ -39,3 +61,6 @@ I have tried my best to use the same best practices in this project as there are
 
 Towards that end, there is a section in my `CMakeLists.txt` dedicated to those dependencies. They are management by hand at the moment.
 
+### Using git module
+
+I can't remember where I read this, but I do recall seeing a piece of advice: In order to get `vcpkg` working with GitHub actions (to show badges), we may have to make it a git submodule. Will research this further at some point...

@@ -82,19 +82,19 @@ if(ANTLR_EXECUTABLE AND Java_JAVA_EXECUTABLE)
 
     if(ANTLR_TARGET_LISTENER)
       list(APPEND ANTLR_${Name}_CXX_OUTPUTS
-        ${ANTLR_${Name}_OUTPUT_DIR}/${ANTLR_INPUT}BaseListener.h
-        ${ANTLR_${Name}_OUTPUT_DIR}/${ANTLR_INPUT}BaseListener.cpp
-        ${ANTLR_${Name}_OUTPUT_DIR}/${ANTLR_INPUT}Listener.h
-        ${ANTLR_${Name}_OUTPUT_DIR}/${ANTLR_INPUT}Listener.cpp)
+        ${ANTLR_${Name}_OUTPUT_DIR}/parser/${ANTLR_INPUT}BaseListener.h
+        ${ANTLR_${Name}_OUTPUT_DIR}/parser/${ANTLR_INPUT}BaseListener.cpp
+        ${ANTLR_${Name}_OUTPUT_DIR}/parser/${ANTLR_INPUT}Listener.h
+        ${ANTLR_${Name}_OUTPUT_DIR}/parser/${ANTLR_INPUT}Listener.cpp)
       list(APPEND ANTLR_TARGET_COMPILE_FLAGS -listener)
     endif()
 
     if(ANTLR_TARGET_VISITOR)
       list(APPEND ANTLR_${Name}_CXX_OUTPUTS
-        ${ANTLR_${Name}_OUTPUT_DIR}/${ANTLR_INPUT}BaseVisitor.h
-        ${ANTLR_${Name}_OUTPUT_DIR}/${ANTLR_INPUT}BaseVisitor.cpp
-        ${ANTLR_${Name}_OUTPUT_DIR}/${ANTLR_INPUT}Visitor.h
-        ${ANTLR_${Name}_OUTPUT_DIR}/${ANTLR_INPUT}Visitor.cpp)
+        ${ANTLR_${Name}_OUTPUT_DIR}/parser/${ANTLR_INPUT}BaseVisitor.h
+        ${ANTLR_${Name}_OUTPUT_DIR}/parser/${ANTLR_INPUT}BaseVisitor.cpp
+        ${ANTLR_${Name}_OUTPUT_DIR}/parser/${ANTLR_INPUT}Visitor.h
+        ${ANTLR_${Name}_OUTPUT_DIR}/parser/${ANTLR_INPUT}Visitor.cpp)
       list(APPEND ANTLR_TARGET_COMPILE_FLAGS -visitor)
     endif()
 
@@ -129,7 +129,7 @@ if(ANTLR_EXECUTABLE AND Java_JAVA_EXECUTABLE)
       DEPENDS ${InputFile}
       ${ANTLR_TARGET_DEPENDS}
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-      COMMENT "Building ${Name} with ANTLR ${ANTLR_VERSION}\n Target compile flags: ${ANTLR_TARGET_COMPILE_FLAGS}")
+      COMMENT "Building ${Name} with ANTLR ${ANTLR_VERSION}\n\tTarget compile flags: ${ANTLR_TARGET_COMPILE_FLAGS}")
   endmacro(ANTLR_TARGET)
 
 endif(ANTLR_EXECUTABLE AND Java_JAVA_EXECUTABLE)
