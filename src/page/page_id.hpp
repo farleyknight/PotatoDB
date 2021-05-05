@@ -31,11 +31,11 @@ public:
     return block_id_;
   }
 
-  bool operator==(CRef<PageId> other) const {
+  bool operator==(const PageId& other) const {
     return file_id_ == other.file_id_ && block_id_ == other.block_id_;
   }
 
-  bool operator!=(CRef<PageId> other) const {
+  bool operator!=(const PageId& other) const {
     return file_id_ != other.file_id_ || block_id_ != other.block_id_;
   }
 
@@ -48,7 +48,7 @@ private:
 namespace std {
   template <>
   struct hash<PageId> {
-    size_t operator()(CRef<PageId> page_id) const {
+    size_t operator()(const PageId& page_id) const {
       return hash<int64_t>()(page_id.as_uint32());
     }
   };

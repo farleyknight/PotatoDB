@@ -3,7 +3,7 @@
 #include "page/slotted_table_page.hpp"
 
 TableIterator::TableIterator(TableHeap& table_heap,
-                             CRef<RID> rid,
+                             const RID& rid,
                              Txn& txn)
   : table_heap_ (table_heap),
     rid_        (rid),
@@ -11,7 +11,7 @@ TableIterator::TableIterator(TableHeap& table_heap,
     txn_        (txn)
 {}
 
-TableIterator::TableIterator(CRef<TableIterator> other)
+TableIterator::TableIterator(const TableIterator& other)
   : table_heap_ (other.table_heap_),
     rid_        (other.rid()),
     tuple_      (table_heap_.find_tuple(rid_, other.txn_)),
@@ -71,7 +71,7 @@ TableIterator TableIterator::operator++(int) {
   return clone;
 }
 
-bool TableIterator::operator==(CRef<TableIterator> it) const {
+bool TableIterator::operator==(const TableIterator& it) const {
   if (!tuple_.is_valid()) {
     return false;
   }
@@ -82,7 +82,7 @@ bool TableIterator::operator==(CRef<TableIterator> it) const {
   return first_rid.get() == second_rid.get();
 }
 
-bool TableIterator::operator!=(CRef<TableIterator> it) const {
+bool TableIterator::operator!=(const TableIterator& it) const {
   return !(*this == it);
 }
 
@@ -90,7 +90,7 @@ bool TableIterator::has_tuple() const {
   return tuple_.is_valid();
 }
 
-CRef<Tuple> TableIterator::tuple() const {
+const Tuple& TableIterator::tuple() const {
   assert(tuple_.is_valid());
   return tuple_;
 }

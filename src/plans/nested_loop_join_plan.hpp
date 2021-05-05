@@ -28,7 +28,7 @@ public:
     return pred_ != nullptr;
   }
 
-  CRef<QueryComp> pred() {
+  const QueryComp& pred() {
     return *pred_;
   }
 

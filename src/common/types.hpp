@@ -34,6 +34,7 @@ using std::fstream;
 
 using std::make_optional;
 using std::make_shared;
+using std::make_tuple;
 using std::make_unique;
 using std::max;
 using std::move;
@@ -48,8 +49,13 @@ using std::shared_ptr;
 using std::string;
 using std::stringstream;
 
+using std::tuple;
+
 using std::unique_ptr;
 
+// ptr is shorter than unique_ptr
+template<class T>
+using ptr      = unique_ptr<T>;
 
 // NOTE: File descriptors are integers and are pointers to
 // file objects elsewhere in the system.
@@ -60,10 +66,7 @@ using file_desc_t   = int;
 using byte_t        = std::uint8_t;
 
 using std::mutex;
-using Mutex         = mutex;
-
 using std::thread;
-using Thread        = thread;
 
 /************************************************
  * References and Pointers
@@ -78,8 +81,6 @@ using Map       = const std::unordered_map<K, V>;
 template<class K, class V>
 using MutMap    = std::unordered_map<K, V>;
 
-template<class T>
-using ptr      = unique_ptr<T>;
 template<class T>
 using MovePtr  = unique_ptr<T> &&;
 

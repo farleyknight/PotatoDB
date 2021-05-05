@@ -18,9 +18,9 @@ public:
     : catalog_(catalog) {}
 
   // No copy
-  PlanBuilder(CRef<PlanBuilder>) = delete;
+  PlanBuilder(const PlanBuilder&) = delete;
   // No copy assign
-  PlanBuilder operator=(CRef<PlanBuilder>) = delete;
+  PlanBuilder operator=(const PlanBuilder&) = delete;
   ~PlanBuilder() = default;
 
 
@@ -69,12 +69,12 @@ private:
   void apply_join(string right_table_name);
 
   SchemaRef insert_table_schema_ref();
-  CRef<QuerySchema> insert_table_schema();
+  const QuerySchema& insert_table_schema();
 
   SchemaRef from_table_schema_ref();
-  CRef<QuerySchema> from_table_schema();
-  CRef<QuerySchema> right_table_schema();
-  CRef<QuerySchema> left_table_schema();
+  const QuerySchema& from_table_schema();
+  const QuerySchema& right_table_schema();
+  const QuerySchema& left_table_schema();
 
   CompType to_comp_type(string op);
 

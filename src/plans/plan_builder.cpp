@@ -207,7 +207,7 @@ SchemaRef PlanBuilder::insert_table_schema_ref() {
   return SchemaRef(SchemaType::TABLE, insert_table_oid_);
 }
 
-CRef<QuerySchema> PlanBuilder::insert_table_schema() {
+const QuerySchema& PlanBuilder::insert_table_schema() {
   return catalog_.find_query_schema(insert_table_oid_);
 }
 
@@ -215,14 +215,14 @@ SchemaRef PlanBuilder::from_table_schema_ref() {
   return SchemaRef(SchemaType::TABLE, from_table_oid_);
 }
 
-CRef<QuerySchema> PlanBuilder::from_table_schema() {
+const QuerySchema& PlanBuilder::from_table_schema() {
   return catalog_.find_query_schema(from_table_oid_);
 }
 
-CRef<QuerySchema> PlanBuilder::right_table_schema() {
+const QuerySchema& PlanBuilder::right_table_schema() {
   return catalog_.find_query_schema(right_table_oid_);
 }
 
-CRef<QuerySchema> PlanBuilder::left_table_schema() {
+const QuerySchema& PlanBuilder::left_table_schema() {
   return catalog_.find_query_schema(left_table_oid_);
 }

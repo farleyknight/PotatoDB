@@ -13,7 +13,7 @@ public:
     columns_.push_back(expr);
   }
 
-  CRef<MutVec<ColumnExpr>> columns() const {
+  const MutVec<ColumnExpr>& columns() const {
     return columns_;
   }
 

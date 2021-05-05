@@ -25,9 +25,9 @@ public:
   ~TableHeap() = default;
 
   // No copy
-  TableHeap(CRef<TableHeap>) = delete;
+  TableHeap(const TableHeap&) = delete;
   // No copy assign
-  TableHeap& operator=(CRef<TableHeap>) = delete;
+  TableHeap& operator=(const TableHeap&) = delete;
 
   const PageId first_page_id() const {
     return first_page_id_;
@@ -35,16 +35,16 @@ public:
 
   bool insert_tuple(Tuple& tuple,
                     Txn& txn);
-  bool mark_delete(CRef<RID> rid,
+  bool mark_delete(const RID& rid,
                    Txn& txn);
   bool update_tuple(Tuple& tuple,
-                    CRef<RID> rid,
+                    const RID& rid,
                     Txn& txn);
   bool apply_delete(RID& rid,
                     Txn& txn);
-  void rollback_delete(CRef<RID> rid, Txn& txn);
+  void rollback_delete(const RID& rid, Txn& txn);
 
-  Tuple find_tuple(CRef<RID> rid, Txn& txn) const;
+  Tuple find_tuple(const RID& rid, Txn& txn) const;
 
   TableIterator begin(Txn& txn);
   TableIterator end(Txn& txn);

@@ -58,7 +58,8 @@ class NestedLoopJoinExec : public BaseExec {
     return Tuple();
   }
 
-  bool join_matches(CRef<Tuple> left, CRef<Tuple> right) {
+  bool join_matches(const Tuple& left,
+                    const Tuple& right) {
     if (!plan_->has_pred()) {
       return true;
     }
@@ -77,7 +78,8 @@ class NestedLoopJoinExec : public BaseExec {
     return match.as<bool>();
   }
 
-  Tuple combine_tuples(CRef<Tuple> left, CRef<Tuple> right) {
+  Tuple combine_tuples(const Tuple& left,
+                       const Tuple& right) {
     vector<Value> values;
 
     auto &schema =

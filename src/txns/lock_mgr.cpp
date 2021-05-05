@@ -37,7 +37,7 @@ LockMgr::~LockMgr() {
   }
 }
 
-bool LockMgr::lock_shared(MRef<Txn> txn, CRef<RID> rid) {
+bool LockMgr::lock_shared(MRef<Txn> txn, const RID& rid) {
   // Latch the LockMgr. Only one RID can be locked at a time.
   std::unique_lock<std::mutex> guard(latch_);
 
@@ -116,7 +116,7 @@ bool LockMgr::lock_shared(MRef<Txn> txn, CRef<RID> rid) {
 }
 
 
-bool LockMgr::lock_exclusive(MRef<Txn> txn, CRef<RID> rid) {
+bool LockMgr::lock_exclusive(MRef<Txn> txn, const RID& rid) {
   std::unique_lock<Mutex> guard(latch_);
 
   if (!can_obtain_lock(txn)) {
@@ -166,7 +166,7 @@ bool LockMgr::lock_exclusive(MRef<Txn> txn, CRef<RID> rid) {
 }
 
 
-bool LockMgr::lock_upgrade(Txn& txn, CRef<RID> rid) {
+bool LockMgr::lock_upgrade(Txn& txn, const RID& rid) {
   std::unique_lock<Mutex> guard(latch_);
 
   if (!can_obtain_lock(txn)) {
@@ -239,7 +239,7 @@ bool LockMgr::lock_upgrade(Txn& txn, CRef<RID> rid) {
   return grant_upgrade_request(request, txn, rid);
 }
 
-bool LockMgr::unlock(Txn& txn, CRef<RID> rid) {
+bool LockMgr::unlock(Txn& txn, const RID& rid) {
   std::unique_lock<std::mutex> guard(latch_);
   if (!can_unlock(txn)) {
     return false;
@@ -266,7 +266,7 @@ bool LockMgr::unlock(Txn& txn, CRef<RID> rid) {
 bool LockMgr::grant_read_request(LockRequest& request,
                                  LockRequestQueue& queue,
                                  Txn& txn,
-                                 CRef<RID> rid)
+                                 const RID& rid)
 {
   request.granted = true;
   // NOTE: We call notify all so other SHARED lock requests
@@ -279,7 +279,7 @@ bool LockMgr::grant_read_request(LockRequest& request,
 
 bool LockMgr::grant_write_request(LockRequest& request,
                                   Txn& txn,
-                                  CRef<RID> rid)
+                                  const RID& rid)
 {
   request.granted = true;
   // NOTE: We DO NOT call notify all because EXCLUSIVE lock requests
@@ -291,7 +291,7 @@ bool LockMgr::grant_write_request(LockRequest& request,
 
 bool LockMgr::grant_upgrade_request(LockRequest& request,
                                     Txn& txn,
-                                    CRef<RID> rid)
+                                    const RID& rid)
 {
   request.granted = true;
   txn.shared_lock_set().erase(rid);
@@ -315,7 +315,7 @@ void LockMgr::run_cycle_detection() {
 bool LockMgr::remove_request(MutList<LockRequest>::iterator it,
                              LockRequestQueue& queue,
                              Txn& txn,
-                             CRef<RID> rid) const
+                             const RID& rid) const
 {
   if (it->is_exclusive()) {
     txn.exclusive_lock_set().erase(rid);

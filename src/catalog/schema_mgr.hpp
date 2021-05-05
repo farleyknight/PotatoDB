@@ -38,21 +38,21 @@ public:
     return true;
   }
 
-  CRef<QuerySchema> query_schema_for(table_oid_t table_oid) const {
+  const QuerySchema& query_schema_for(table_oid_t table_oid) const {
     return query_schemas_.at(table_oid);
   }
 
-  CRef<QuerySchema> as_query_schema(SchemaRef schema_ref) const {
+  const QuerySchema& as_query_schema(SchemaRef schema_ref) const {
     assert(schema_ref.is_table_schema());
     // NOTE: invariant #2
     return query_schemas_.at(schema_ref.table_oid());
   }
 
-  CRef<QuerySchema> query_schema_for(SchemaRef schema_ref) const {
+  const QuerySchema& query_schema_for(SchemaRef schema_ref) const {
     return query_schemas_.at(schema_ref.table_oid());
   }
 
-  CRef<TableSchema> table_schema_for(table_oid_t table_oid) const {
+  const TableSchema& table_schema_for(table_oid_t table_oid) const {
     return table_schemas_.at(table_oid);
   }
 

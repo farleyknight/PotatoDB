@@ -1,14 +1,16 @@
 #include "query/query_join.hpp"
 #include "tuple/tuple.hpp"
 
-Value QueryJoin::eval(CRef<Tuple> tuple, CRef<QuerySchema> schema) const {
+Value QueryJoin::eval(const Tuple& tuple,
+                      const Tuple& schema) const
+{
   return tuple.value(schema, column_index(schema));
 }
 
-Value QueryJoin::eval_join(CRef<Tuple>  lt,
-                           CRef<QuerySchema> ls,
-                           CRef<Tuple>  rt,
-                           CRef<QuerySchema> rs) const
+Value QueryJoin::eval_join(const Tuple&  lt,
+                           const Tuple& ls,
+                           const Tuple&  rt,
+                           const Tuple& rs) const
 {
   switch (join_side_) {
   case JoinSide::LEFT:
@@ -20,7 +22,6 @@ Value QueryJoin::eval_join(CRef<Tuple>  lt,
   }
 }
 
-size_t QueryJoin::column_index(CRef<QuerySchema> schema) const {
+size_t QueryJoin::column_index(const Tuple& schema) const {
   return schema.offset_for(column_name_);
 }
-

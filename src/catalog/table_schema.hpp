@@ -26,9 +26,9 @@ public:
               string table_name,
               table_oid_t table_oid);
   // No copy
-  TableSchema(CRef<TableSchema>) = delete;
+  TableSchema(const TableSchema&) = delete;
   // No copy assign
-  TableSchema& operator=(CRef<TableSchema>) = delete;
+  TableSchema& operator=(const TableSchema&) = delete;
   // Default destructor
   ~TableSchema() = default;
 

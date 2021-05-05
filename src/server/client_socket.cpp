@@ -20,7 +20,7 @@ void ClientSocket::shutdown() {
   server_->remove_socket(file_desc_);
 }
 
-void ClientSocket::write(CRef<String> data) const {
+void ClientSocket::write(const String& data) const {
   auto result = send(file_desc_,
                      reinterpret_cast<const void*>(data.c_str()),
                      data.size(),

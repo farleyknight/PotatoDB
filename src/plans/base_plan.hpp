@@ -28,8 +28,8 @@ public:
     : schema_ref_ (schema_ref)
   {}
 
-  BasePlan(CRef<BasePlan> plan);
-  BasePlan& operator=(CRef<BasePlan> plan);
+  BasePlan(const BasePlan& plan);
+  BasePlan& operator=(const BasePlan& plan);
 
   SchemaRef schema_ref() const { return schema_ref_; }
   PlanType type()        const { return PlanType::INVALID; }

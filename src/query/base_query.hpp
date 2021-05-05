@@ -16,27 +16,27 @@ public:
   BaseQuery(TypeId type_id) : type_id_{type_id} {}
 
   // Allow copy
-  BaseQuery(CRef<BaseQuery>) = default;
+  BaseQuery(const BaseQuery&) = default;
   // Allow copy assign
-  BaseQuery& operator=(CRef<BaseQuery>) = default;
+  BaseQuery& operator=(const BaseQuery&) = default;
   // Default destructor
   ~BaseQuery() = default;
 
-  Value eval_join(UNUSED CRef<Tuple> lt, UNUSED CRef<QuerySchema> ls,
-                  UNUSED CRef<Tuple> rt, UNUSED CRef<QuerySchema> rs) const
+  Value eval_join(UNUSED const Tuple& lt, UNUSED const QuerySchema& ls,
+                  UNUSED const Tuple& rt, UNUSED const QuerySchema& rs) const
   {
     throw NotImplementedException("eval_join not implemented");
   }
 
-  Value eval_agg(UNUSED CRef<QuerySchema> schema,
-                 UNUSED CRef<Vec<Value>> group_bys,
-                 UNUSED CRef<Vec<Value>> aggregates) const
+  Value eval_agg(UNUSED const QuerySchema& schema,
+                 UNUSED const vector<Value>& group_bys,
+                 UNUSED const vector<Value>& aggregates) const
   {
     throw NotImplementedException("eval_agg not implemented");
   }
 
-  Value eval(UNUSED CRef<Tuple> tuple,
-             UNUSED CRef<QuerySchema> schema) const {
+  Value eval(UNUSED const Tuple& tuple,
+             UNUSED const QuerySchema& schema) const {
     throw NotImplementedException("eval not implemented");
   }
 

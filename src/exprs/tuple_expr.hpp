@@ -13,7 +13,7 @@ public:
     values_.push_back(expr);
   }
 
-  CRef<MutVec<ValueExpr>> values() const {
+  const MutVec<ValueExpr>& values() const {
     return values_;
   }
 

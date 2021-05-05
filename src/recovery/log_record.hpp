@@ -61,7 +61,7 @@ public:
   LogRecord(txn_id_t txn_id,
             lsn_t prev_lsn,
             LogRecordType log_record_type,
-            CRef<RID> rid,
+            const RID& rid,
             Tuple tuple)
     : txn_id_          (txn_id),
       prev_lsn_        (prev_lsn),
@@ -85,9 +85,9 @@ public:
   LogRecord(txn_id_t txn_id,
             lsn_t prev_lsn,
             LogRecordType log_record_type,
-            CRef<RID> update_rid,
-            CRef<Tuple> old_tuple,
-            CRef<Tuple> new_tuple)
+            const RID& update_rid,
+            const Tuple& old_tuple,
+            const Tuple& new_tuple)
     : txn_id_          (txn_id),
       prev_lsn_        (prev_lsn),
       log_record_type_ (log_record_type),
@@ -120,15 +120,15 @@ public:
 
   ~LogRecord() = default;
 
-  CRef<Tuple> delete_tuple()        { return delete_tuple_; }
-  CRef<RID>   delete_rid()          { return delete_rid_.value(); }
+  const Tuple& delete_tuple()        { return delete_tuple_; }
+  const RID&   delete_rid()          { return delete_rid_.value(); }
 
-  CRef<Tuple> insert_tuple()        { return insert_tuple_; }
-  CRef<RID>   insert_rid()          { return insert_rid_.value(); }
+  const Tuple& insert_tuple()        { return insert_tuple_; }
+  const RID&   insert_rid()          { return insert_rid_.value(); }
 
-  CRef<Tuple> original_tuple()      { return old_tuple_; }
-  CRef<Tuple> update_tuple()        { return new_tuple_; }
-  CRef<RID>   update_rid()          { return update_rid_.value(); }
+  const Tuple& original_tuple()      { return old_tuple_; }
+  const Tuple& update_tuple()        { return new_tuple_; }
+  const RID&   update_rid()          { return update_rid_.value(); }
 
   PageId     prev_page_id()         { return prev_page_id_; }
 
@@ -137,10 +137,10 @@ public:
   txn_id_t txn_id() { return txn_id_; }
   lsn_t prev_lsn()  { return prev_lsn_; }
 
-  CRef<LogRecordType> log_record_type() { return log_record_type_; }
+  const LogRecordType& log_record_type() { return log_record_type_; }
 
   // For debug purpose
-  String to_string() const {
+  const string to_string() const {
     std::ostringstream os;
     os << "Log["
        << "size:" << size_ << ", "
@@ -164,15 +164,15 @@ public:
   LogRecordType log_record_type_ = LogRecordType::INVALID;
 
   // case1: for delete operation, delete_tuple_ for UNDO operation
-  MutOption<RID> delete_rid_;
+  optional<RID> delete_rid_;
   Tuple delete_tuple_;
 
   // case2: for insert operation
-  MutOption<RID> insert_rid_;
+  optional<RID> insert_rid_;
   Tuple insert_tuple_;
 
   // case3: for update operation
-  MutOption<RID> update_rid_;
+  optional<RID> update_rid_;
   Tuple old_tuple_, new_tuple_;
 
   // case4: for new page operation

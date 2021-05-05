@@ -14,9 +14,9 @@ public:
       results_ (move(results)) {}
 
   // No copy
-  ResultSet(CRef<ResultSet>) = delete;
+  ResultSet(const ResultSet&) = delete;
   // No copy assign
-  ResultSet& operator=(CRef<ResultSet>) = delete;
+  ResultSet& operator=(const ResultSet&) = delete;
   ~ResultSet() = default;
 
   static Ptr<ResultSet> empty() {
@@ -28,21 +28,23 @@ public:
    **********************************************/
 
   template<typename T>
-  T value(String name, CRef<Tuple> tuple, CRef<ExecCtx> exec_ctx) {
+  T value(String name, const ResultSet& tuple,
+                       const ResultSet& exec_ctx)
+  {
     auto &schema
       = exec_ctx.catalog().find_query_schema(schema_);
     return tuple.value(schema, schema.offset_for(name)).as<T>();
   }
 
   template<typename T>
-  T value_at(String name, size_t index, CRef<ExecCtx> exec_ctx) {
+  T value_at(String name, size_t index, const ResultSet& exec_ctx) {
     assert(results_.size() >= index + 1);
     auto &schema
       = exec_ctx.catalog().find_query_schema(schema_);
     return results_[index].value(schema, schema.offset_for(name)).as<T>();
   }
 
-  CRef<Vec<Tuple>> results() {
+  const ResultSet& results() {
     return results_;
   }
 

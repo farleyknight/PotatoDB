@@ -42,9 +42,9 @@ public:
   bool is_null(const QuerySchema& schema,
                uint32_t column_index) const;
 
-  Tuple key_from_tuple(CRef<QuerySchema> schema,
-                       CRef<QuerySchema> key_schema,
-                       CRef<Vec<uint32_t>> key_attrs) const;
+  Tuple key_from_tuple(const QuerySchema& schema,
+                       const QuerySchema& key_schema,
+                       const vector<uint32_t>& key_attrs) const;
 
   const RID rid()               const { return rid_.value(); }
   void set_rid(RID rid)               { rid_.emplace(rid); }
@@ -70,9 +70,9 @@ public:
            n_bytes);
   }
 
-  const string to_string(CRef<QuerySchema> schema) const;
+  const string to_string(const QuerySchema& schema) const;
 
-  static Tuple random_from(CRef<QuerySchema> schema);
+  static Tuple random_from(const QuerySchema& schema);
 
   Buffer& buffer() {
     return buffer_;

@@ -53,27 +53,27 @@ public:
     return having_ != nullptr;
   }
 
-  CRef<QueryHaving> having() {
+  const QueryHaving& having() {
     return *having_;
   }
 
-  CRef<BaseQuery> group_by_at(uint32_t idx) const {
+  const BaseQuery& group_by_at(uint32_t idx) const {
     return group_bys_.at(idx);
   }
 
-  CRef<Vec<QueryGroupBy>> group_bys() const {
+  const Vec<QueryGroupBy>& group_bys() const {
     return group_bys_;
   }
 
-  CRef<QueryAgg> agg_at(size_t idx) const {
+  const QueryAgg& agg_at(size_t idx) const {
     return aggs_.at(idx);
   }
 
-  CRef<Vec<QueryAgg>> aggs() const {
+  const Vec<QueryAgg>& aggs() const {
     return aggs_;
   }
 
-  CRef<Vec<AggType>> agg_types() const {
+  const Vec<AggType>& agg_types() const {
     return agg_types_;
   }
 

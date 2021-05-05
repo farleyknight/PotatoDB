@@ -12,9 +12,9 @@ QueryGroupBy::QueryGroupBy(string column_name)
     column_name_ (column_name) {}
 
 
-Value QueryGroupBy::eval_agg(CRef<QuerySchema> schema,
-                             CRef<Vec<Value>> group_bys,
-                             UNUSED CRef<Vec<Value>> aggrs)
+Value QueryGroupBy::eval_agg(const QuerySchema& schema,
+                             const Vec<Value>& group_bys,
+                             UNUSED const Vec<Value>& aggrs)
   const
 {
   auto index = schema.column_oid_for(column_name_);

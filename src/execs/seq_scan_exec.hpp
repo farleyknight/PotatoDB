@@ -17,9 +17,9 @@ public:
   Tuple next() override;
 
 private:
-  bool match_found(CRef<Tuple> tuple);
+  bool match_found(const Tuple& tuple);
   bool at_the_end();
-  CRef<QuerySchema> schema();
+  const QuerySchema& schema();
   TableHeap& table_heap();
 
   Ptr<SeqScanPlan> plan_;

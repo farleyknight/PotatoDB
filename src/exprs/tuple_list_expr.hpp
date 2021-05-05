@@ -13,7 +13,7 @@ public:
     tuples_.push_back(expr);
   }
 
-  CRef<MutVec<TupleExpr>> tuples() const {
+  const MutVec<TupleExpr>& tuples() const {
     return tuples_;
   }
 

@@ -46,5 +46,5 @@ public:
     return hash_bytes(reinterpret_cast<const char *>(&ptr), sizeof(void *));
   }
 
-  static hash_t hash_value(CRef<Value> val);
+  static hash_t hash_value(const Value& val);
 };

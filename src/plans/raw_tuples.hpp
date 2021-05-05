@@ -15,9 +15,9 @@ public:
   {}
 
   // Allow copy constructor
-  RawTuples(CRef<RawTuples>) = default;
+  RawTuples(const RawTuples&) = default;
   // Allow copy assign constructor
-  RawTuples& operator=(CRef<RawTuples>) = default;
+  RawTuples& operator=(const RawTuples&) = default;
   // Default destructor
   ~RawTuples() = default;
 
@@ -34,7 +34,7 @@ public:
     Iterator(Data::const_iterator iter)
       : iter_(iter) {}
 
-    CRef<Vec<Value>> values() {
+    const Vec<Value>& values() {
       return *iter_;
     }
 
@@ -43,8 +43,8 @@ public:
       return *this;
     }
 
-    bool operator==(CRef<Iterator> other) { return iter_ == other.iter_; }
-    bool operator!=(CRef<Iterator> other) { return iter_ != other.iter_; }
+    bool operator==(const Iterator& other) { return iter_ == other.iter_; }
+    bool operator!=(const Iterator& other) { return iter_ != other.iter_; }
 
   private:
     Data::const_iterator iter_;

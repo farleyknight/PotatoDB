@@ -41,7 +41,7 @@ bool AggExec::match_found() {
   auto key = table_iter_.key();
   auto value = table_iter_.val();
 
-  auto &schema = find_schema(child_->schema_ref());
+  auto schema = find_schema(child_->schema_ref());
 
   auto pred = plan_->having();
   auto result =
@@ -59,7 +59,7 @@ Tuple AggExec::next() {
   // create tuple according to output schema
   auto key = table_iter_.key();
   auto value = table_iter_.val();
-  auto &schema = find_schema(child_->schema_ref());
+  auto schema = find_schema(child_->schema_ref());
 
   MutVec<Value> tuple_values;
   for (QueryColumn const &col : schema.all()) {
@@ -76,7 +76,7 @@ Tuple AggExec::next() {
  * TODO: Document me
  **********************************************/
 
-AggKey AggExec::make_key(CRef<Tuple> tuple) {
+AggKey AggExec::make_key(const Tuple& tuple) {
   auto &schema = find_schema(child_->schema_ref());
 
   MutVec<Value> keys;
@@ -90,7 +90,7 @@ AggKey AggExec::make_key(CRef<Tuple> tuple) {
  * TODO: Document me
  **********************************************/
 
-AggValue AggExec::make_val(CRef<Tuple> tuple) {
+AggValue AggExec::make_val(const Tuple& tuple) {
   auto &schema = find_schema(child_->schema_ref());
 
   MutVec<Value> values;

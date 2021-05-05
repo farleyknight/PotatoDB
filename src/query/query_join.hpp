@@ -20,20 +20,20 @@ public:
 
   QueryJoin(TypeId type_id,
             JoinSide side,
-            String name)
+            const string name)
     : BaseQuery     (type_id),
       join_side_    (side),
       column_name_  (move(name)) {}
 
-  QueryJoin(CRef<QueryJoin>) = default; // Allow copy
-  QueryJoin& operator=(CRef<QueryJoin>) = default; // Allow copy assign
+  QueryJoin(const QueryJoin&) = default; // Allow copy
+  QueryJoin& operator=(const QueryJoin&) = default; // Allow copy assign
   ~QueryJoin() = default; // Default delete
 
   static QueryJoin make_left(QueryColumn left) {
     return QueryJoin(left.type_id(), JoinSide::LEFT, left.name());
   }
 
-  static QueryJoin make_left(TypeId type_id, String name) {
+  static QueryJoin make_left(TypeId type_id, const string& name) {
     return QueryJoin(type_id, JoinSide::LEFT, name);
   }
 
@@ -41,18 +41,18 @@ public:
     return QueryJoin(right.type_id(), JoinSide::RIGHT, right.name());
   }
 
-  static QueryJoin make_right(TypeId type_id, String name) {
+  static QueryJoin make_right(TypeId type_id, const string& name) {
     return QueryJoin(type_id, JoinSide::RIGHT, name);
   }
 
-  Value eval(CRef<Tuple> tuple, CRef<QuerySchema> schema) const;
-  Value eval_join(CRef<Tuple>  lt,
-                  CRef<QuerySchema> ls,
-                  CRef<Tuple>  rt,
-                  CRef<QuerySchema> rs) const;
+  Value eval(const Tuple& tuple, const QuerySchema& schema) const;
+  Value eval_join(const Tuple& lt,
+                  const QuerySchema& ls,
+                  const Tuple& rt,
+                  const QuerySchema& rs) const;
 
-  Value eval_agg(UNUSED CRef<Vec<Value>> group_bys,
-                 UNUSED CRef<Vec<Value>> aggs) const
+  Value eval_agg(UNUSED const vector<Value>& group_bys,
+                 UNUSED const vector<Value>& aggs) const
   {
     throw NotImplementedException("eval_aggregate not implemented");
   }
@@ -67,7 +67,7 @@ public:
 
     return os.str();
   }
-  size_t column_index(CRef<QuerySchema> schema) const;
+  size_t column_index(const QuerySchema& schema) const;
 
   JoinSide side() const  {
     return join_side_;

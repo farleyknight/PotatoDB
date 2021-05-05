@@ -6,7 +6,7 @@ SeqScanExec::SeqScanExec(ExecCtx& exec_ctx,
     plan_        (move(plan))
 {}
 
-bool SeqScanExec::match_found(CRef<Tuple> tuple) {
+bool SeqScanExec::match_found(const Tuple& tuple) {
   if (plan_->has_pred()) {
     auto result = plan_->pred().
       eval(tuple, schema()).as<bool>();
@@ -50,6 +50,6 @@ void SeqScanExec::init() {
   // TODO: Maybe do a reset here?
 }
 
-CRef<QuerySchema> SeqScanExec::schema()  {
+const QuerySchema& SeqScanExec::schema()  {
   return find_schema(plan_->schema_ref());
 }

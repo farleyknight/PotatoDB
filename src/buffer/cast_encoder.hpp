@@ -21,7 +21,7 @@ private:
   }
 
   template<typename IntT>
-  IntT read_int(CRef<Buffer> buff) const {
+  IntT read_int(const Buffer& buff) const {
     return *reinterpret_cast<const IntT*>(buff.cptr());
   }
 
@@ -29,7 +29,7 @@ private:
     *reinterpret_cast<float*>(buff.ptr()) = f;
   }
 
-  float read_float(CRef<Buffer> buff) const {
+  float read_float(const Buffer& buff) const {
     return *reinterpret_cast<const float*>(buff.cptr());
   }
 
@@ -37,12 +37,11 @@ private:
     *reinterpret_cast<double*>(buff.ptr()) = d;
   }
 
-  double read_double(CRef<Buffer> buff) const {
+  double read_double(const Buffer& buff) const {
     return *reinterpret_cast<const double*>(buff.cptr());
   }
 
-
-  void write_string(Buffer& buff, String s) const {
+  void write_string(Buffer& buff, const string s) const {
     string_size_t size = s.size();
 
     auto c_string = reinterpret_cast<const unsigned char*>(s.c_str());
@@ -52,7 +51,7 @@ private:
                 c_string, size);
   }
 
-  string read_string(CRef<Buffer> buff) const {
+  const string read_string(const Buffer& buff) const {
     string_size_t size = buff.as_bytes()[0];
     string new_string(size, 0);
 

@@ -10,7 +10,7 @@ UpdateExec::UpdateExec(ExecCtx& exec_ctx,
 {}
 
 
-CRef<QuerySchema> UpdateExec::schema() {
+const QuerySchema& UpdateExec::schema() {
   return find_schema(plan_->schema_ref());
 }
 
@@ -39,7 +39,7 @@ TableHeap& UpdateExec::table_heap() {
   return exec_ctx_.table_mgr().table_heap_for(plan_->table_oid());
 }
 
-Tuple UpdateExec::updated_tuple(CRef<Tuple> old_tuple) {
+Tuple UpdateExec::updated_tuple(const Tuple& old_tuple) {
   auto update_attrs = plan_->update_attrs();
   uint32_t col_count = schema().column_count();
   MutVec<Value> values;

@@ -18,7 +18,7 @@ TableSchema::TableSchema(vector<TableColumn> columns,
     table_name_ (table_name)
 {}
 
-QueryColumn TableSchema::operator[](String col_name) const {
+QueryColumn TableSchema::operator[](const string col_name) const {
   if (!has_column(col_name)) {
     throw Exception("No such column " + col_name + " + on table " + table_name_);
   }

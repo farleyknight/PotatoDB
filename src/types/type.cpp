@@ -11,7 +11,7 @@
 
 #include "value/value.hpp"
 
-CRef<Ptr<Type>> Type::instance(TypeId type_id) {
+const Ptr<Type>& Type::instance(TypeId type_id) {
   static MutMap<TypeId, Ptr<Type>> types_;
   if (types_.empty()) {
     types_.emplace(TypeId::BOOLEAN,  make_unique<BooleanType>());

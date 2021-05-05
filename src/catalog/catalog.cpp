@@ -10,7 +10,7 @@
 
 
 void Catalog::register_table(UNUSED Txn& txn,
-                             String table_name,
+                             const string table_name,
                              SchemaRef schema_ref)
 {
   assert(table_oids_.count(table_name) == 0);
@@ -20,13 +20,13 @@ void Catalog::register_table(UNUSED Txn& txn,
   table_schema_refs_.emplace(table_oid, schema_ref);
 
   index_oids_.emplace(table_name,
-                      MutMap<MutString, index_oid_t>());
+                      MutMap<string, index_oid_t>());
 }
 
 
 void Catalog::register_index(UNUSED Txn& txn,
-                             String index_name,
-                             String table_name,
+                             const string index_name,
+                             const string table_name,
                              SchemaRef schema_ref)
 {
   assert(table_oids_.count(table_name) == 1);

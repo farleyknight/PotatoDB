@@ -31,29 +31,35 @@ public:
    * Instance methods
    **********************************************/
 
-  Value eval(CRef<Tuple> tuple, CRef<QuerySchema> schema) const {
+  Value eval(const Tuple& tuple,
+             const Tuple& schema) const {
     Value lhs = left_.eval(tuple, schema);
     Value rhs = right_.eval(tuple, schema);
     return Value::make(compare(lhs, rhs));
   }
 
-  Value eval_join(CRef<Tuple> lt, CRef<QuerySchema> ls,
-                  CRef<Tuple> rt, CRef<QuerySchema> rs) const {
+  Value eval_join(const Tuple& lt,
+                  const Tuple& ls,
+                  const Tuple& rt,
+                  const Tuple& rs) const
+  {
     Value lhs = left_.eval_join(lt, ls, rt, rs);
     Value rhs = right_.eval_join(lt, ls, rt, rs);
     return Value::make(compare(lhs, rhs));
   }
 
-  Value eval_agg(CRef<QuerySchema> schema,
-                 CRef<Vec<Value>> group_bys,
-                 CRef<Vec<Value>> aggregates) const {
+  Value eval_agg(const Tuple& schema,
+                 const Tuple& group_bys,
+                 const Tuple& aggregates) const {
     Value lhs = left_.eval_agg(schema, group_bys, aggregates);
     Value rhs = right_.eval_agg(schema, group_bys, aggregates);
     return Value::make(compare(lhs, rhs));
   }
 
 private:
-  bool compare(CRef<Value> lhs, CRef<Value> rhs) const {
+  bool compare(const Tuple& lhs,
+               const Tuple& rhs) const
+  {
     switch (type_) {
     case CompType::EQ:
       return lhs.eq(rhs);

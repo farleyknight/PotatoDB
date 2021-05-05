@@ -15,7 +15,7 @@ class Type {
 public:
   virtual ~Type() = default;
 
-  static const Ptr<Type>& instance(TypeId type_id);
+  static const ptr<Type>& instance(TypeId type_id);
 
   virtual TypeId type_id() const {
     throw NotImplementedException("type_id not implemented!");
@@ -56,51 +56,51 @@ public:
     return Type::instance(type_id)->size();
   }
 
-  virtual bool eq(UNUSED CRef<Value> left,
-                  UNUSED CRef<Value> right) const {
+  virtual bool eq(UNUSED const Value& left,
+                  UNUSED const Value& right) const {
     throw NotImplementedException("eq not implemented!");
   }
 
-  virtual bool ne(UNUSED CRef<Value> left,
-                  UNUSED CRef<Value> right) const {
+  virtual bool ne(UNUSED const Value& left,
+                  UNUSED const Value& right) const {
     throw NotImplementedException("ne not implemented!");
   }
 
-  virtual bool lt(UNUSED CRef<Value> left,
-                  UNUSED CRef<Value> right) const {
+  virtual bool lt(UNUSED const Value& left,
+                  UNUSED const Value& right) const {
     throw NotImplementedException("lt not implemented!");
   }
 
-  virtual bool gt(UNUSED CRef<Value> left,
-                  UNUSED CRef<Value> right) const {
+  virtual bool gt(UNUSED const Value& left,
+                  UNUSED const Value& right) const {
     throw NotImplementedException("gt not implemented!");
   }
 
-  virtual bool lte(UNUSED CRef<Value> left,
-                   UNUSED CRef<Value> right) const {
+  virtual bool lte(UNUSED const Value& left,
+                   UNUSED const Value& right) const {
     throw NotImplementedException("lte not implemented!");
   }
 
-  virtual bool gte(UNUSED CRef<Value> left,
-                   UNUSED CRef<Value> right) const {
+  virtual bool gte(UNUSED const Value& left,
+                   UNUSED const Value& right) const {
     throw NotImplementedException("gte not implemented!");
   }
 
-  virtual bool cast_as(UNUSED CRef<Value> val,
+  virtual bool cast_as(UNUSED const Value& val,
                        UNUSED TypeId type_id) const {
     throw NotImplementedException("cast_as not implemented!");
   }
 
-  virtual bool copy(UNUSED CRef<Value> val) const {
+  virtual bool copy(UNUSED const Value& val) const {
     throw NotImplementedException("copy not implemented!");
   }
 
-  virtual bool operate_null(UNUSED CRef<Value> val,
-                            UNUSED CRef<Value> right) const {
+  virtual bool operate_null(UNUSED const Value& val,
+                            UNUSED const Value& right) const {
     throw NotImplementedException("operate_null not implemented!");
   }
 
-  virtual bool is_zero(UNUSED CRef<Value> val) const {
+  virtual bool is_zero(UNUSED const Value& val) const {
     throw NotImplementedException("is_zero not implemented!");
   }
 
@@ -123,42 +123,42 @@ public:
     }
   }
 
-  Value add(UNUSED CRef<Value> left,
-            UNUSED CRef<Value> right) const {
+  Value add(UNUSED const Value& left,
+            UNUSED const Value& right) const {
     throw NotImplementedException("add not implemented!");
   }
 
-  Value subtract(UNUSED CRef<Value> left,
-                 UNUSED CRef<Value> right) const {
+  Value subtract(UNUSED const Value& left,
+                 UNUSED const Value& right) const {
     throw NotImplementedException("subtract not implemented!");
   }
 
-  Value multiply(UNUSED CRef<Value> left,
-                 UNUSED CRef<Value> right) const {
+  Value multiply(UNUSED const Value& left,
+                 UNUSED const Value& right) const {
     throw NotImplementedException("multiply not implemented!");
   }
 
-  Value divide(UNUSED CRef<Value> left,
-               UNUSED CRef<Value> right) const {
+  Value divide(UNUSED const Value& left,
+               UNUSED const Value& right) const {
     throw NotImplementedException("divide not implemented!");
   }
 
-  Value modulo(UNUSED CRef<Value> left,
-               UNUSED CRef<Value> right) const {
+  Value modulo(UNUSED const Value& left,
+               UNUSED const Value& right) const {
     throw NotImplementedException("modulo not implemented!");
   }
 
-  Value min(UNUSED CRef<Value> left,
-            UNUSED CRef<Value> right) const {
+  Value min(UNUSED const Value& left,
+            UNUSED const Value& right) const {
     throw NotImplementedException("min not implemented!");
   }
 
-  Value max(UNUSED CRef<Value> left,
-            UNUSED CRef<Value> right) const {
+  Value max(UNUSED const Value& left,
+            UNUSED const Value& right) const {
     throw NotImplementedException("max not implemented!");
   }
 
-  Value sqrt(UNUSED CRef<Value> val) const {
+  Value sqrt(UNUSED const Value& val) const {
     throw NotImplementedException("max not implemented!");
   }
 

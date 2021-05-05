@@ -60,7 +60,7 @@ size_t BaseSchema<ColT>::tuple_length() const {
 }
 
 template<class ColT>
-CRef<Vec<column_oid_t>> BaseSchema<ColT>::unlined_columns() const {
+const vector<column_oid_t>& BaseSchema<ColT>::unlined_columns() const {
   return unlined_columns_;
 }
 
@@ -80,7 +80,7 @@ const ColT& BaseSchema<ColT>::by_offset(size_t offset) const {
 }
 
 template<class ColT>
-const Vec<ColT>& BaseSchema<ColT>::all() const {
+const vector<ColT>& BaseSchema<ColT>::all() const {
   return columns_;
 }
 

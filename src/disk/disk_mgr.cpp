@@ -62,7 +62,7 @@ void DiskMgr::setup_db_directory() {
   fs::current_path(home_path() / ".potatodb");
 }
 
-void DiskMgr::write_buffer(PageId page_id, CRef<Buffer> buffer) {
+void DiskMgr::write_buffer(PageId page_id, const Buffer& buffer) {
   int offset = page_id.block_id() * PAGE_SIZE;
   db_file_.seekp(offset);
   db_file_.write(buffer.char_ptr(), PAGE_SIZE);

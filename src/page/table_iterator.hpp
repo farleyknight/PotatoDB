@@ -12,20 +12,20 @@ class TableIterator {
 public:
 
   TableIterator(TableHeap& table_heap,
-                CRef<RID> rid,
+                const RID& rid,
                 Txn& txn);
   // Copy constructor
-  TableIterator(CRef<TableIterator> other);
+  TableIterator(const TableIterator& other);
 
   // pre-increment
   TableIterator& operator++();
   // post-increment
   TableIterator operator++(int);
-  bool operator==(CRef<TableIterator> it) const;
-  bool operator!=(CRef<TableIterator> it) const;
+  bool operator==(const TableIterator& it) const;
+  bool operator!=(const TableIterator& it) const;
   bool has_tuple() const;
-  CRef<Tuple> tuple() const;
-  CRef<RID> rid() const {
+  const Tuple& tuple() const;
+  const RID& rid() const {
     return rid_;
   }
 

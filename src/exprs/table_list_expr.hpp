@@ -13,7 +13,7 @@ public:
     tables_.push_back(table);
   }
 
-  CRef<MutVec<TableExpr>> tables() const {
+  const MutVec<TableExpr>& tables() const {
     return tables_;
   }
 

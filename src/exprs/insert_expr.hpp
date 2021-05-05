@@ -27,11 +27,11 @@ public:
     return table_.to_string();
   }
 
-  CRef<ColumnListExpr> column_list() const {
+  const ColumnListExpr& column_list() const {
     return columns_;
   }
 
-  CRef<TupleListExpr> tuple_list() const {
+  const TupleListExpr& tuple_list() const {
     return tuples_;
   }
 

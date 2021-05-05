@@ -6,9 +6,9 @@
 
 class CheckPMgr {
 public:
-  CheckPMgr(CRef<TxnMgr> txn_mgr,
-            CRef<LogMgr> log_mgr,
-            CRef<BuffMgr> buff_mgr)
+  CheckPMgr(const TxnMgr& txn_mgr,
+            const LogMgr& log_mgr,
+            const BuffMgr& buff_mgr)
     : txn_mgr_  (txn_mgr),
       log_mgr_  (log_mgr),
       buff_mgr_ (buff_mgr) {}
@@ -19,7 +19,7 @@ public:
   void end();
 
 private:
-  UNUSED CRef<TxnMgr> txn_mgr_;
-  UNUSED CRef<LogMgr> log_mgr_;
-  UNUSED CRef<BuffMgr> buff_mgr_;
+  UNUSED const TxnMgr& txn_mgr_;
+  UNUSED const LogMgr& log_mgr_;
+  UNUSED const BuffMgr& buff_mgr_;
 };

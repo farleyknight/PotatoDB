@@ -33,7 +33,7 @@ public:
     throw NotImplementedException("next() not implemented");
   }
 
-  CRef<ExecCtx> exec_ctx() {
+  const ExecCtx& exec_ctx() {
     return exec_ctx_;
   }
 
@@ -41,11 +41,11 @@ public:
     return exec_ctx_.txn();
   }
 
-  CRef<Catalog> catalog() const {
+  const Catalog& catalog() const {
     return exec_ctx_.catalog();
   }
 
-  CRef<QuerySchema> find_schema(SchemaRef schema_ref) const {
+  const QuerySchema& find_schema(SchemaRef schema_ref) const {
     return catalog().find_query_schema(schema_ref);
   }
 

@@ -25,9 +25,6 @@ enum class IsolationLevel {
 
 class Txn {
 public:
-  /**********************************************
-  * Constructors & destructor
-  **********************************************/
 
   explicit Txn(txn_id_t id,
                IsolationLevel level =
@@ -36,14 +33,11 @@ public:
       level_     (level),
       thread_id_ (std::this_thread::get_id()) {}
 
-  Txn(CRef<Txn>) = delete; // No copy
-  MRef<Txn> operator=(CRef<Txn>) = delete; // No copy assign
-  // Smart pointers manage their own memory.
+  // No copy
+  Txn(const Txn&) = delete;
+  // No copy assign
+  Txn& operator=(const Txn&) = delete;
   ~Txn() = default;
-
-  /**********************************************
-  * Instance methods
-  **********************************************/
 
   // wait-die: When an older txn tries to lock a DB element that has
   // been locked by a younger txn, it waits.
@@ -57,7 +51,7 @@ public:
     return table_write_set_;
   }
 
-  void append_table_write_record(CRef<TableWriteRecord> write_record) {
+  void append_table_write_record(const TableWriteRecord& write_record) {
     table_write_set_.push_back(write_record);
   }
 
@@ -73,12 +67,12 @@ public:
     return exclusive_lock_set_;
   }
 
-  bool is_shared_locked(CRef<RID> rid) const {
+  bool is_shared_locked(const RID& rid) const {
     return shared_lock_set_.find(rid) != shared_lock_set_.end();
   }
 
   /** @return true if rid is exclusively locked by this txn */
-  bool is_exclusive_locked(CRef<RID> rid) const {
+  bool is_exclusive_locked(const RID& rid) const {
     return exclusive_lock_set_.find(rid) != exclusive_lock_set_.end();
   }
 
@@ -91,7 +85,7 @@ public:
 
   txn_id_t id()              const { return id_; }
   IsolationLevel level()     const { return level_; }
-  Thread::id thread_id()     const { return thread_id_; }
+  thread::id thread_id()     const { return thread_id_; }
 
   lsn_t  prev_lsn()          const { return prev_lsn_; }
   void set_prev_lsn(lsn_t lsn)     { prev_lsn_ = lsn; }
@@ -123,7 +117,7 @@ private:
   txn_id_t       id_;
   IsolationLevel level_;
   lsn_t          prev_lsn_  = INVALID_LSN;
-  Thread::id     thread_id_;
+  thread::id     thread_id_;
 
   // NOTE: Every txn caries with it 5 collections:
   // 1) Written records

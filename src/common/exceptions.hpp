@@ -33,14 +33,14 @@ class Exception : public std::runtime_error {
 public:
   explicit Exception(string message)
   : std::runtime_error(message), type_(ExceptionType::INVALID) {
-    String exception_message = "Message :: " + message + "\n";
+    const string exception_message = "Message :: " + message + "\n";
     std::cerr << exception_message;
   }
 
   Exception(ExceptionType exception_type, string message)
   : std::runtime_error(message), type_(exception_type) {
-    String exception_message =
-    "\nException Type :: " + to_string(type_) + "\nMessage :: " + message + "\n";
+    const string exception_message =
+      "\nException Type :: " + to_string(type_) + "\nMessage :: " + message + "\n";
     std::cerr << exception_message;
   }
 
@@ -89,5 +89,5 @@ class NotImplementedException : public Exception {
 public:
   NotImplementedException() = delete;
   explicit NotImplementedException(const std::string &msg)
-  : Exception(ExceptionType::NOT_IMPLEMENTED, msg) {}
+    : Exception(ExceptionType::NOT_IMPLEMENTED, msg) {}
 };

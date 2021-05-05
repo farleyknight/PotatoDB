@@ -16,18 +16,18 @@ public:
   using MappingT = std::pair<K, V>;
   using CompT    = Comp<K>;
 
-  explicit LinearProbeHT(CRef<String> name,
+  explicit LinearProbeHT(const String& name,
                          BuffMgr& buff_mgr,
-                         CRef<CompT> comp,
+                         const CompT& comp,
                          size_t num_buckets,
                          HashFunc<K> hash_fn);
 
-  virtual bool insert(CRef<K> key,
-                      CRef<V> value) override;
+  virtual bool insert(const K& key,
+                      const V& value) override;
 
-  virtual bool remove(CRef<K> key) override;
+  virtual bool remove(const K& key) override;
 
-  virtual vector<V> find_values(CRef<K> key) override;
+  virtual vector<V> find_values(const K& key) override;
 
   void resize(size_t initial_size);
   size_t size();
@@ -35,7 +35,7 @@ public:
 private:
   void append_buckets(HTHeaderPage& page,
                       size_t num_buckets);
-  slot_offset_t slot_index(CRef<K> key);
+  slot_offset_t slot_index(const K& key);
   HTHeaderPage fetch_header_page();
   size_t block_array_size();
 

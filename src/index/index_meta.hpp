@@ -4,13 +4,13 @@
 
 class IndexMeta {
 public:
-  IndexMeta(CRef<TableSchema> key_schema,
+  IndexMeta(const TableSchema& key_schema,
             string index_name)
     : key_schema_ (key_schema),
       index_name_ (index_name)
   {}
 
-  CRef<TableSchema> key_schema() const {
+  const TableSchema& key_schema() const {
     return key_schema_;
   }
 
@@ -19,6 +19,6 @@ public:
   }
 
 private:
-  CRef<TableSchema> key_schema_;
+  const TableSchema& key_schema_;
   string index_name_;
 };

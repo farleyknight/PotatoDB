@@ -6,8 +6,8 @@
 
 class TableMgr {
 public:
-  TableMgr(CRef<DiskMgr> disk_mgr,
-           CRef<BuffMgr> buff_mgr)
+  TableMgr(const DiskMgr& disk_mgr,
+           const BuffMgr& buff_mgr)
     : disk_mgr_ (disk_mgr),
       buff_mgr_ (buff_mgr)
   {}
@@ -15,9 +15,9 @@ public:
   TableHeap& table_heap_for(table_oid_t table_oid);
 
 private:
-  UNUSED CRef<DiskMgr> disk_mgr_;
-  UNUSED CRef<BuffMgr> buff_mgr_;
+  UNUSED const DiskMgr& disk_mgr_;
+  UNUSED const BuffMgr& buff_mgr_;
 
   MutMap<table_oid_t, page_id_t> page_ids_;
-  MutMap<table_oid_t, MutPtr<TableHeap>> table_heaps_;
+  MutMap<table_oid_t, ptr<TableHeap>> table_heaps_;
 };

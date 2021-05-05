@@ -109,7 +109,7 @@ bool TableHeap::insert_tuple(Tuple& tuple,
   return true;
 }
 
-bool TableHeap::mark_delete(CRef<RID> rid, Txn& txn) {
+bool TableHeap::mark_delete(const RID& rid, Txn& txn) {
   // TODO(student): remove empty page
 
   // Find the page which contains the tuple.
@@ -137,7 +137,7 @@ bool TableHeap::mark_delete(CRef<RID> rid, Txn& txn) {
 }
 
 bool TableHeap::update_tuple(Tuple& new_tuple,
-                             CRef<RID> rid,
+                             const RID& rid,
                              Txn& txn) {
 
   // Find the page which contains the tuple.
@@ -187,7 +187,7 @@ bool TableHeap::apply_delete(RID& rid, Txn& txn) {
   return true;
 }
 
-void TableHeap::rollback_delete(CRef<RID> rid, Txn& txn) {
+void TableHeap::rollback_delete(const RID& rid, Txn& txn) {
   auto maybe_page = buff_mgr_.fetch_page(rid.page_id());
   assert(maybe_page);
 
@@ -200,7 +200,7 @@ void TableHeap::rollback_delete(CRef<RID> rid, Txn& txn) {
   buff_mgr_.unpin(page.page_id(), true);
 }
 
-Tuple TableHeap::find_tuple(CRef<RID> rid, Txn& txn) const {
+Tuple TableHeap::find_tuple(const RID& rid, Txn& txn) const {
   // Find the page which contains the tuple.
 
   auto maybe_page = buff_mgr_.fetch_page(rid.page_id());

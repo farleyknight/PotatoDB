@@ -18,27 +18,27 @@ public:
   {}
 
   // Allow copy
-  QueryColumn(CRef<QueryColumn>) = default;
+  QueryColumn(const QueryColumn&) = default;
   // Allow copy assign
-  QueryColumn& operator=(CRef<QueryColumn>) = default;
+  QueryColumn& operator=(const QueryColumn&) = default;
   // Default destructor
   ~QueryColumn() = default;
 
-  Value eval(UNUSED CRef<Tuple> tuple,
-             UNUSED CRef<QuerySchema> schema) const {
+  Value eval(UNUSED const Tuple& tuple,
+             UNUSED const QuerySchema& schema) const {
     throw NotImplementedException("eval_agg not implemented!");
   }
 
-  Value eval_join(UNUSED CRef<Tuple> lt,
-                  UNUSED CRef<QuerySchema> ls,
-                  UNUSED CRef<Tuple> rt,
-                  UNUSED CRef<QuerySchema> rs) const {
+  Value eval_join(UNUSED const Tuple& lt,
+                  UNUSED const QuerySchema& ls,
+                  UNUSED const Tuple& rt,
+                  UNUSED const QuerySchema& rs) const {
     throw NotImplementedException("eval_agg not implemented!");
   }
 
-  Value eval_agg(UNUSED CRef<QuerySchema> schema,
-                 UNUSED CRef<Vec<Value>> group_bys,
-                 UNUSED CRef<Vec<Value>> aggs) const {
+  Value eval_agg(UNUSED const QuerySchema& schema,
+                 UNUSED const vector<Value>& group_bys,
+                 UNUSED const vector<Value>& aggs) const {
     throw NotImplementedException("eval_agg not implemented!");
   }
 

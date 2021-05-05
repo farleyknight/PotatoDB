@@ -21,18 +21,19 @@ public:
   Tuple next() override;
 
 private:
-  hash_t compute_hash(CRef<Tuple> tuple,
-                      CRef<QuerySchema> schema,
+  hash_t compute_hash(const Tuple& tuple,
+                      const Tuple& schema,
                       Vec<BaseQuery> nodes);
 
-  bool match_found(CRef<Tuple> left, CRef<Tuple> right);
+  bool match_found(const Tuple& left,
+                   const Tuple& right);
   Value make_value_at(size_t offset,
-                      CRef<Tuple> left,
-                      CRef<Tuple> right);
+                      const Tuple& left,
+                      const Tuple& right);
 
-  CRef<QuerySchema> left_schema();
-  CRef<QuerySchema> right_schema();
-  CRef<QuerySchema> schema();
+  const Tuple& left_schema();
+  const Tuple& right_schema();
+  const Tuple& schema();
 
   vector<Tuple> output_tuples_;
 

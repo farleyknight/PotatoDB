@@ -10,7 +10,7 @@ public:
     : BasePlan    (schema_ref),
       raw_tuples_ (raw_tuples) {}
 
-  CRef<RawTuples> raw_tuples() const {
+  const RawTuples& raw_tuples() const {
     return raw_tuples_;
   }
 

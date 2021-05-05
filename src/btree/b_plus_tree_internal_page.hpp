@@ -31,44 +31,44 @@ public:
             int max_size = INTERNAL_PAGE_SIZE);
 
   KeyT key_at(int index) const;
-  void set_key_at(int index, CRef<KeyT> key);
-  int value_index(CRef<ValueT> value) const;
+  void set_key_at(int index, const KeyT& key);
+  int value_index(const ValueT& value) const;
   ValueT value_at(int index) const;
 
-  ValueT lookup(CRef<KeyT> key,
-                CRef<KeyComparator> comparator) const;
+  ValueT lookup(const KeyT& key,
+                const KeyComparator& comparator) const;
 
-  void populate_new_root(CRef<ValueT> old_value,
-                         CRef<KeyT> new_key,
-                         CRef<ValueT> new_value);
+  void populate_new_root(const ValueT& old_value,
+                         const KeyT& new_key,
+                         const ValueT& new_value);
 
-  int insert_node_after(CRef<ValueT> old_value,
-                        CRef<KeyT> new_key,
-                        CRef<ValueT> new_value);
+  int insert_node_after(const ValueT& old_value,
+                        const KeyT& new_key,
+                        const ValueT& new_value);
   void remove(int index);
   ValueT remove_and_return_only_child();
 
   // Split and Merge utility methods
   void move_all_to(BPlusTreeInternalPage& recipient,
-                   CRef<KeyT> middle_key,
-                   CRef<BuffMgr> buff_mgr);
+                   const KeyT& middle_key,
+                   const BuffMgr& buff_mgr);
 
   void move_half_to(BPlusTreeInternalPage& recipient,
-                    CRef<BuffMgr> buff_mgr);
+                    const BuffMgr& buff_mgr);
 
   void move_first_to_end_of(BPlusTreeInternalPage& recipient,
-                            CRef<KeyT> middle_key,
-                            CRef<BuffMgr> buff_mgr);
+                            const KeyT& middle_key,
+                            const BuffMgr& buff_mgr);
 
   void move_last_to_front_of(BPlusTreeInternalPage& recipient,
-                             CRef<KeyT> middle_key,
-                             CRef<BuffMgr> buff_mgr);
+                             const KeyT& middle_key,
+                             const BuffMgr& buff_mgr);
 
 private:
-  void copy_n_from(CRef<Vec<MappingT>> items,
+  void copy_n_from(const vector<MappingT>& items,
                    int size,
-                   CRef<BuffMgr> buff_mgr);
+                   const BuffMgr& buff_mgr);
 
-  void copy_last_from(CRef<MappingT> pair, CRef<BuffMgr> buff_mgr);
-  void copy_first_from(CRef<MappingT> pair, CRef<BuffMgr> buff_mgr);
+  void copy_last_from(const MappingT& pair, const BuffMgr& buff_mgr);
+  void copy_first_from(const MappingT& pair, const BuffMgr& buff_mgr);
 };

@@ -7,19 +7,20 @@
 
 class LinearProbeHTIndex : public BaseIndex {
 public:
-  LinearProbeHTIndex(CRef<IndexMeta> metadata,
+  LinearProbeHTIndex(const IndexMeta& metadata,
                      BuffMgr& buff_mgr,
                      size_t num_buckets,
-                     CRef<HashFunc<GenericKey>> hash_fn);
+                     const IndexMeta& hash_fn);
 
   ~LinearProbeHTIndex() override = default;
 
-  void insert_entry(CRef<Tuple> key, CRef<RID> rid) override;
-  void delete_entry(CRef<Tuple> key) override;
-  virtual Vec<RID> scan_key(CRef<Tuple> key) override;
+  void insert_entry(const IndexMeta& key,
+                    const IndexMeta& rid) override;
+  void delete_entry(const IndexMeta& key) override;
+  virtual Vec<RID> scan_key(const IndexMeta& key) override;
 
 protected:
-  CRef<IndexMeta> meta_;
+  const IndexMeta& meta_;
   GenericComp comp_;
   LinearProbeHT<GenericKey, RID> container_;
 };

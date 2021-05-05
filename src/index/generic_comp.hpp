@@ -10,11 +10,11 @@ public:
   // Read the same comment for GenericKey.
   static constexpr int KEY_SIZE = 8;
 
-  GenericComp(CRef<GenericComp> other) : key_schema_{other.key_schema_} {}
+  GenericComp(const GenericComp& other) : key_schema_{other.key_schema_} {}
 
   // constructor
   // TODO: Eventually create IndexSchema for this case
-  explicit GenericComp(CRef<TableSchema> key_schema) :
+  explicit GenericComp(const QuerySchema& key_schema) :
     key_schema_(key_schema) {}
 
   int operator()(GenericKey lhs, GenericKey rhs) const override {
@@ -32,10 +32,9 @@ public:
         return 1;
       }
     }
-    // equals
     return 0;
   }
 
 private:
-  CRef<TableSchema> key_schema_;
+  const QuerySchema& key_schema_;
 };

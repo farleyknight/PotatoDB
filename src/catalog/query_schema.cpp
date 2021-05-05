@@ -14,8 +14,8 @@
  * from or connected to QuerySchemas
  ************************************************/
 
-UNUSED QuerySchema QuerySchema::merge(CRef<QuerySchema> left,
-                                      CRef<QuerySchema> right)
+UNUSED QuerySchema QuerySchema::merge(const QuerySchema& left,
+                                      const QuerySchema& right)
 {
   vector<QueryColumn> cols;
   cols.insert(cols.end(), left.all().begin(), left.all().end());
@@ -32,8 +32,8 @@ UNUSED QuerySchema QuerySchema::merge(CRef<QuerySchema> left,
 }
 
 
-QuerySchema QuerySchema::slice(CRef<TableSchema> from,
-                               CRef<vector<string>> names)
+QuerySchema QuerySchema::slice(const TableSchema& from,
+                               const vector<string>& names)
 {
   vector<QueryColumn> cols;
   for (auto const& name : names) {
@@ -47,8 +47,8 @@ QuerySchema QuerySchema::slice(CRef<TableSchema> from,
   return QuerySchema(cols, names);
 }
 
-QuerySchema QuerySchema::slice(CRef<QuerySchema> from,
-                               CRef<vector<string>> names)
+QuerySchema QuerySchema::slice(const QuerySchema& from,
+                               const vector<string>& names)
 {
   vector<QueryColumn> cols;
   for (auto const& name : names) {
@@ -57,7 +57,7 @@ QuerySchema QuerySchema::slice(CRef<QuerySchema> from,
   return QuerySchema(cols, names);
 }
 
-QuerySchema QuerySchema::copy(CRef<TableSchema> original) {
+QuerySchema QuerySchema::copy(const TableSchema& original) {
   vector<QueryColumn> cols;
   vector<string> names(original.column_count());
   for (auto const& col : original.all()) {

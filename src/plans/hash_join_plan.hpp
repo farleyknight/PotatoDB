@@ -19,14 +19,14 @@ public:
   }
 
   PlanType type() const  { return PlanType::HASH_JOIN; }
-  CRef<BaseQuery> pred() {
+  const BaseQuery& pred() {
     assert(pred_);
     return *pred_;
   }
 
   // NOTE: These arrays are used to create the key schemas.
-  CRef<Vec<BaseQuery>> left_keys()  { return left_hash_keys_; }
-  CRef<Vec<BaseQuery>> right_keys() { return right_hash_keys_; }
+  const Vec<BaseQuery>& left_keys()  { return left_hash_keys_; }
+  const Vec<BaseQuery>& right_keys() { return right_hash_keys_; }
 
 private:
   Ptr<BaseQuery> pred_;

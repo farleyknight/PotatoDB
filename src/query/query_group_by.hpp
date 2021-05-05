@@ -10,9 +10,9 @@ public:
                string column_name);
 
   // Allow copy
-  QueryGroupBy(CRef<QueryGroupBy>) = default;
+  QueryGroupBy(const QueryGroupBy&) = default;
   // Allow copy assign
-  QueryGroupBy& operator=(CRef<QueryGroupBy>) = default;
+  QueryGroupBy& operator=(const QueryGroupBy&) = default;
   // Default destructor
   ~QueryGroupBy() = default;
 
@@ -20,22 +20,22 @@ public:
    * Instance methods
    **********************************************/
 
-  Value eval(UNUSED CRef<Tuple> tuple,
-             UNUSED CRef<QuerySchema> schema) const {
+  Value eval(UNUSED const Tuple& tuple,
+             UNUSED const QuerySchema& schema) const {
     throw NotImplementedException("eval not implemented");
   }
 
-  Value eval_join(UNUSED CRef<Tuple> lt,
-                  UNUSED CRef<QuerySchema> ls,
-                  UNUSED CRef<Tuple> rt,
-                  UNUSED CRef<QuerySchema> rs) const
+  Value eval_join(UNUSED const Tuple& lt,
+                  UNUSED const QuerySchema& ls,
+                  UNUSED const Tuple& rt,
+                  UNUSED const QuerySchema& rs) const
   {
     throw NotImplementedException("eval_join not implemented");
   }
 
-  Value eval_agg(CRef<QuerySchema> schema,
-                 CRef<Vec<Value>> group_bys,
-                 CRef<Vec<Value>>) const;
+  Value eval_agg(const QuerySchema& schema,
+                 const Vec<Value>& group_bys,
+                 const Vec<Value>&) const;
 
 private:
   BaseQuery node_;

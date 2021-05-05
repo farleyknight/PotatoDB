@@ -14,8 +14,8 @@ HashJoinExec::HashJoinExec(ExecCtx& exec_ctx,
 
 // https://github.com/Mrhaha666/15-445_2019fall/blob/42536d7fa034277bf60f78d5124bc0bdc4d69b82/lab3_backup/src/execution/hash_join_executor.cpp#L28
 
-hash_t HashJoinExec::compute_hash(CRef<Tuple> tuple,
-                                  CRef<QuerySchema> schema,
+hash_t HashJoinExec::compute_hash(const Tuple& tuple,
+                                  const Tuple& schema,
                                   Vec<BaseQuery> nodes)
 {
   hash_t curr_hash = 0;
@@ -78,14 +78,15 @@ bool HashJoinExec::has_next() {
 }
 
 Value HashJoinExec::make_value_at(size_t offset,
-                                  CRef<Tuple> left,
-                                  CRef<Tuple> right)
+                                  const Tuple& left,
+                                  const Tuple& right)
 {
   return schema().by_offset(offset).eval_join(left,  left_schema(),
                                               right, right_schema());
 }
 
-bool HashJoinExec::match_found(CRef<Tuple> left, CRef<Tuple> right) {
+bool HashJoinExec::match_found(const Tuple& left,
+                               const Tuple& right) {
   auto result = plan_->pred().eval_join(left, left_schema(),
                                         right, right_schema());
   return result.as<bool>();
@@ -97,14 +98,14 @@ Tuple HashJoinExec::next() {
   return tuple;
 }
 
-CRef<QuerySchema> HashJoinExec::schema() {
+const Tuple& HashJoinExec::schema() {
   return find_schema(plan_->schema_ref());
 }
 
-CRef<QuerySchema> HashJoinExec::left_schema()  {
+const Tuple& HashJoinExec::left_schema()  {
   return find_schema(left_->schema_ref());
 }
 
-CRef<QuerySchema> HashJoinExec::right_schema() {
+const Tuple& HashJoinExec::right_schema() {
   return find_schema(right_->schema_ref());
 }

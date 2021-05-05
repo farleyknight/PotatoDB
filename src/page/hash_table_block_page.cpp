@@ -13,8 +13,8 @@ ValueT HTBlockPage<KeyT, ValueT>::value_at(UNUSED slot_offset_t bucket_ind) cons
 
 template<class KeyT, class ValueT>
 bool HTBlockPage<KeyT, ValueT>::insert(UNUSED slot_offset_t bucket_ind,
-                                       UNUSED CRef<KeyT> key,
-                                       UNUSED CRef<ValueT> value)
+                                       UNUSED const KeyT& key,
+                                       UNUSED const ValueT& value)
 {
   return false;
 }

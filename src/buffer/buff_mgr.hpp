@@ -48,8 +48,8 @@ public:
           DiskMgr& disk_mgr,
           LogMgr& log_mgr);
 
-  BuffMgr(CRef<BuffMgr>) = delete; // No copy
-  BuffMgr& operator=(CRef<BuffMgr>) = delete; // No copy assign
+  BuffMgr(const BuffMgr&) = delete; // No copy
+  BuffMgr& operator=(const BuffMgr&) = delete; // No copy assign
   ~BuffMgr() = default; // Default delete
 
   /**********************************************
@@ -66,7 +66,7 @@ public:
   bool delete_page(PageId page_id);
   void flush_all();
 
-  CRef<Vec<Page>> pages()        { return pages_; }
+  const vector<Page>& pages()    { return pages_; }
   Page& page_at(size_t i)        { return pages_[i]; }
   size_t pool_size()             { return pool_size_; }
 
@@ -81,11 +81,11 @@ private:
   void pin_page(Page& page, frame_id_t frame_id);
 
   size_t pool_size_;
-  MutVec<Page> pages_;
+  vector<Page> pages_;
   MutMap<PageId, frame_id_t> page_table_;
   MutList<frame_id_t> free_list_;
-  MutPtr<Replacer> replacer_;
+  ptr<Replacer> replacer_;
 
   DiskMgr& disk_mgr_;
-  CRef<LogMgr> log_mgr_;
+  const LogMgr& log_mgr_;
 };

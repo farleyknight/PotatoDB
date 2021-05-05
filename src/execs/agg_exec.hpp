@@ -20,7 +20,7 @@ public:
       table_      (*plan),
       table_iter_ (table_.begin()) {}
 
-  CRef<BaseExec> child() {
+  const BaseExec& child() {
     return *child_;
   }
 
@@ -32,8 +32,8 @@ public:
   bool at_the_end() const;
   bool match_found();
 
-  AggKey make_key(CRef<Tuple> tuple);
-  AggValue make_val(CRef<Tuple> tuple);
+  AggKey make_key(const Tuple& tuple);
+  AggValue make_val(const Tuple& tuple);
 
 private:
   MutPtr<AggPlan> plan_;

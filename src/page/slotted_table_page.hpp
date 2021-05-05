@@ -84,7 +84,7 @@ public:
     return true;
   }
 
-  bool mark_delete(CRef<RID> rid,
+  bool mark_delete(const RID& rid,
                    Txn& txn,
                    LockMgr& lock_mgr,
                    LogMgr& log_mgr)
@@ -131,7 +131,7 @@ public:
     return true;
   }
 
-  void rollback_delete(CRef<RID> rid,
+  void rollback_delete(const RID& rid,
                        Txn& txn,
                        LogMgr& log_mgr)
   {
@@ -162,9 +162,9 @@ public:
   }
 
   // TODO: Consider making the return value a std::optional
-  bool update_tuple(CRef<Tuple> new_tuple,
+  bool update_tuple(const Tuple& new_tuple,
                     Tuple& old_tuple,
-                    CRef<RID> rid)
+                    const RID& rid)
   {
     uint32_t slot_id = rid.slot_id();
 
@@ -250,7 +250,7 @@ public:
     }
   }
 
-  Tuple find_tuple(CRef<RID> rid) {
+  Tuple find_tuple(const RID& rid) {
     // Get the current slot number.
     uint32_t slot_id = rid.slot_id();
     // If somehow we have more slots than tuples, abort the txn.
@@ -288,7 +288,7 @@ public:
     return std::nullopt;
   }
 
-  Option<RID> next_tuple_rid(CRef<RID> curr_rid) {
+  Option<RID> next_tuple_rid(const RID& curr_rid) {
     // Find and return the first valid tuple after our current slot number.
     for (uint32_t i = curr_rid.slot_id() + 1; i < tuple_count(); ++i) {
       // Q: Is this suppose to check that it's not invalid?
@@ -314,9 +314,9 @@ public:
 
 private:
 
-  void apply_update(CRef<Tuple> new_tuple,
+  void apply_update(const Tuple& new_tuple,
                     Tuple& old_tuple,
-                    CRef<RID> rid,
+                    const RID& rid,
                     uint32_t slot_id,
                     uint32_t tuple_size)
   {

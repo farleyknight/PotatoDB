@@ -23,7 +23,7 @@ public:
       value_ (value) {}
 
   UpdateType type()   const { return type_; }
-  CRef<Value> value() const { return value_; }
+  const Value& value() const { return value_; }
 
 private:
   UpdateType type_;
@@ -55,7 +55,7 @@ public:
   table_oid_t table_oid() const { return table_oid_; }
   MovePtr<BasePlan> child()     { return move(child_); }
 
-  CRef<Map<uint32_t, UpdateInfo>> update_attrs() const {
+  const Map<uint32_t, UpdateInfo>& update_attrs() const {
     return update_attrs_;
   }
 

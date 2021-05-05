@@ -25,7 +25,7 @@ public:
   TableColumn()
     : fixed_length_(INVALID_LENGTH) {}
 
-  TableColumn(String name,
+  TableColumn(const string name,
               table_oid_t table_oid,
               column_oid_t column_oid,
               TypeId type_id)
@@ -40,7 +40,7 @@ public:
     assert(type_id != TypeId::VARCHAR);
   }
 
-  explicit TableColumn(String name,
+  explicit TableColumn(const string name,
                        table_oid_t table_oid,
                        column_oid_t column_oid,
                        TypeId type_id,
@@ -58,9 +58,9 @@ public:
   }
 
   // Allow copy
-  TableColumn(CRef<TableColumn>) = default;
+  TableColumn(const TableColumn&) = default;
   // Allow copy assign
-  TableColumn& operator=(CRef<TableColumn>) = default;
+  TableColumn& operator=(const TableColumn&) = default;
   // Default destructor
   ~TableColumn() = default;
 
@@ -72,7 +72,7 @@ public:
   column_oid_t oid()        const { return column_oid_; }
   int32_t fixed_length()    const { return fixed_length_; }
   int32_t variable_length() const { return variable_length_; }
-  CRef<String> name()       const { return name_; }
+  const string& name()       const { return name_; }
 
   /**********************************************
    * Debug methods
@@ -97,7 +97,7 @@ public:
 
 private:
   // Name of the column
-  MutString name_;
+  string name_;
   // value type of column
   TypeId type_id_ = TypeId::INVALID;
   // IDs for table and column

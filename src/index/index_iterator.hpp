@@ -32,16 +32,15 @@ public:
     return false;
   }
 
-  // TODO: Not a fan of this. Remove it.
-  CRef<MappingT> operator*();
+  const MappingT& operator*();
 
   IndexIterator& operator++();
 
-  bool operator==(UNUSED CRef<IndexIterator> itr) const {
+  bool operator==(UNUSED const IndexIterator& itr) const {
     throw std::runtime_error("unimplemented");
   }
 
-  bool operator!=(UNUSED CRef<IndexIterator> itr) const {
+  bool operator!=(UNUSED const IndexIterator& itr) const {
     throw std::runtime_error("unimplemented");
   }
 

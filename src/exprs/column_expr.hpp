@@ -4,22 +4,22 @@
 
 class ColumnExpr : public BaseExpr {
 public:
-  ColumnExpr(MutString name)
+  ColumnExpr(const string name)
     : BaseExpr (ExprType::COLUMN),
       name_    (name)
   {}
 
-  ColumnExpr(MutString name, MutString table)
+  ColumnExpr(const string name, string table)
     : BaseExpr (ExprType::COLUMN),
       name_    (name),
       table_   (table)
   {}
 
-  virtual MutString to_string() const override {
+  virtual string to_string() const override {
     return name_;
   }
 
 protected:
-  MutString name_, table_;
+  string name_, table_;
 };
 

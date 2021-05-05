@@ -36,9 +36,9 @@ public:
   }
 
   // Default copy
-  RID(CRef<RID>) = default;
+  RID(const RID&) = default;
   // Default copy assign
-  MRef<RID> operator=(CRef<RID>) = default;
+  RID& operator=(const RID&) = default;
   // Default delete
   ~RID() = default;
 
@@ -70,7 +70,7 @@ public:
     slot_id_ = slot_id;
   }
 
-  bool operator==(CRef<RID> other) const {
+  bool operator==(const RID& other) const {
     return page_id_ == other.page_id_ && slot_id_ == other.slot_id_;
   }
 
@@ -79,7 +79,7 @@ public:
   **********************************************/
 
   // TODO: No move b/c RVO?
-  String to_string() const {
+  const string to_string() const {
     std::stringstream os;
     os << "file_id: " << page_id_.file_id();
     os << "block_id: " << page_id_.block_id();
@@ -88,7 +88,7 @@ public:
     return os.str();
   }
 
-  friend std::ostream &operator<<(std::ostream &os, CRef<RID> rid) {
+  friend std::ostream &operator<<(std::ostream &os, const RID& rid) {
     os << rid.to_string();
     return os;
   }
@@ -101,7 +101,7 @@ private:
 namespace std {
   template <>
   struct hash<RID> {
-    size_t operator()(CRef<RID> obj) const {
+    size_t operator()(const RID& obj) const {
       return hash<int64_t>()(obj.get());
     }
   };

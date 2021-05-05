@@ -19,7 +19,7 @@ public:
     return pred_ != nullptr;
   }
 
-  CRef<BaseQuery> pred() {
+  const BaseQuery& pred() {
     assert(pred_);
     return *pred_;
   }

@@ -17,13 +17,12 @@ public:
    * Constructors & destructor
    **********************************************/
 
-  QueryAgg(BaseQuery node,
-           AggType agg_type);
+  QueryAgg(BaseQuery node, AggType agg_type);
 
   // Allow copy
-  QueryAgg(CRef<QueryAgg>) = default;
+  QueryAgg(const QueryAgg&) = default;
   // Allow copy assign
-  QueryAgg& operator=(CRef<QueryAgg>) = default;
+  QueryAgg& operator=(const QueryAgg&) = default;
   // Default destructor
   ~QueryAgg() = default;
 
@@ -31,20 +30,20 @@ public:
    * Instance methods
    **********************************************/
 
-  Value eval(CRef<Tuple> tuple, CRef<QuerySchema> schema) const;
+  Value eval(const Tuple& tuple, const QuerySchema& schema) const;
 
-  Value eval_join(CRef<Tuple> lt,
-                  CRef<QuerySchema> ls,
-                  CRef<Tuple> rt,
-                  CRef<QuerySchema> rs) const;
+  Value eval_join(const Tuple& lt,
+                  const QuerySchema& ls,
+                  const Tuple& rt,
+                  const QuerySchema& rs) const;
 
   // TODO: Why is it that eval_agg was (from BusTub) the only one w/o a schema param?
   // Not sure if it was the right call. The other two evals have schemas. I think its
   // best to assume it must be passed in. Any other places where this is not already
   // changed should include the schema.
-  Value eval_agg(CRef<QuerySchema> schema,
-                 CRef<Vec<Value>> group_bys,
-                 CRef<Vec<Value>> aggregates) const;
+  Value eval_agg(const QuerySchema& schema,
+                 const vector<Value>& group_bys,
+                 const vector<Value>& aggregates) const;
 
   AggType agg_type() const {
     return agg_type_;
@@ -54,7 +53,7 @@ public:
     return node_.type_id();
   }
 
-  String to_string() const;
+  const string to_string() const;
 
 private:
   BaseQuery node_;

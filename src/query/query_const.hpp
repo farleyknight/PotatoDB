@@ -4,10 +4,6 @@
 
 class QueryConst : public BaseQuery {
 public:
-  /**********************************************
-   * Constructors & destructor
-   **********************************************/
-
   explicit QueryConst(Value value)
     : BaseQuery (value.type_id()),
       value_    (value) {}
@@ -21,39 +17,39 @@ public:
       value_    (Value::make<bool>(boolean)) {}
 
   template<typename T>
-  static MutPtr<QueryConst> make(T data) {
+  static ptr<QueryConst> make(T data) {
     auto value = Value::make<T>(data);
-    return make_unique<QueryConst>(std::move(value));
+    return make_unique<QueryConst>(move(value));
   }
 
-  static MutPtr<QueryConst> make(TypeId type_id, int integer) {
+  static ptr<QueryConst> make(TypeId type_id, int integer) {
     auto value = Value(type_id, integer);
-    return make_unique<QueryConst>(std::move(value));
+    return make_unique<QueryConst>(move(value));
   }
 
-  static MutPtr<QueryConst> make(Move<Value> value) {
-    return make_unique<QueryConst>(std::move(value));
+  static ptr<QueryConst> make(Move<Value> value) {
+    return make_unique<QueryConst>(move(value));
   }
 
   /**********************************************
    * Instance methods
    **********************************************/
 
-  Value eval(UNUSED CRef<Tuple> tuple,
-             UNUSED CRef<QuerySchema> schema) const {
+  Value eval(UNUSED const Tuple& tuple,
+             UNUSED const QuerySchema& schema) const {
     return value_;
   }
 
-  Value eval_join(UNUSED CRef<Tuple> lt,
-                  UNUSED CRef<QuerySchema> ls,
-                  UNUSED CRef<Tuple> rt,
-                  UNUSED CRef<QuerySchema> rs) const
+  Value eval_join(UNUSED const Tuple& lt,
+                  UNUSED const QuerySchema& ls,
+                  UNUSED const Tuple& rt,
+                  UNUSED const QuerySchema& rs) const
   {
     return value_;
   }
 
-  Value eval_agg(UNUSED CRef<Vec<Value>> group_bys,
-                 UNUSED CRef<Vec<Value>> aggs) const
+  Value eval_agg(UNUSED const vector<Value>& group_bys,
+                 UNUSED const vector<Value>& aggs) const
   {
     return value_;
   }

@@ -14,7 +14,7 @@ public:
    * Constructors & destructor
    **********************************************/
 
-  LogMgr(CRef<DiskMgr> disk_mgr);
+  LogMgr(const DiskMgr& disk_mgr);
 
   ~LogMgr() {
     // TODO: Replace these two with our Buffer class
@@ -64,5 +64,5 @@ private:
 
   std::condition_variable cv_;
 
-  UNUSED CRef<DiskMgr> disk_mgr_;
+  UNUSED const DiskMgr& disk_mgr_;
 };

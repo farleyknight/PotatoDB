@@ -2,9 +2,9 @@
 #include "server/session.hpp"
 
 ExecCtx::ExecCtx(Txn& txn,
-                 CRef<BuffMgr>  buff_mgr,
-                 CRef<LockMgr>  lock_mgr,
-                 CRef<TxnMgr>   txn_mgr,
+                 const BuffMgr&  buff_mgr,
+                 const LockMgr&  lock_mgr,
+                 const TxnMgr&   txn_mgr,
                  TableMgr&      table_mgr,
                  Catalog&       catalog)
   : txn_       (txn),

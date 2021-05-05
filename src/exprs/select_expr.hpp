@@ -18,11 +18,11 @@ public:
     table_list_ = tables;
   }
 
-  CRef<TableListExpr> table_list() {
+  const TableListExpr& table_list() {
     return table_list_;
   }
 
-  CRef<ColumnListExpr> column_list() {
+  const ColumnListExpr& column_list() {
     return column_list_;
   }
 

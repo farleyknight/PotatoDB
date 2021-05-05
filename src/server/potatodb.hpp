@@ -17,7 +17,7 @@ public:
     server_.shutdown();
   }
 
-  CRef<Session> make_session() {
+  const Session& make_session() {
     sessions_.emplace_back(this);
     return sessions_.back();
   }

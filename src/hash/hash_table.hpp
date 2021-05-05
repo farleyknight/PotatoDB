@@ -12,10 +12,10 @@ public:
 
   virtual ~HashTable() = default;
 
-  virtual bool insert(CRef<KeyT> key,
-                      CRef<ValueT> value) = 0;
+  virtual bool insert(const KeyT& key,
+                      const ValueT& value) = 0;
 
-  virtual bool remove(CRef<KeyT> key) = 0;
+  virtual bool remove(const KeyT& key) = 0;
 
-  virtual vector<ValueT> find_values(CRef<KeyT> key) = 0;
+  virtual vector<ValueT> find_values(const KeyT& key) = 0;
 };

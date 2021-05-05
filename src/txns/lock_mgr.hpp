@@ -30,18 +30,18 @@ public:
   ~LockMgr();
 
   // No copy
-  LockMgr(CRef<LockMgr>) = delete;
+  LockMgr(const LockMgr&) = delete;
   // No copy assign
-  MRef<LockMgr> operator=(CRef<LockMgr>) = delete;
+  LockMgr& operator=(const LockMgr&) = delete;
 
   /**********************************************
   * Instance methods
   **********************************************/
 
-  bool lock_shared(MRef<Txn> txn, CRef<RID> rid);
-  bool lock_exclusive(MRef<Txn> txn, CRef<RID> rid);
-  bool lock_upgrade(MRef<Txn> txn, CRef<RID> rid);
-  bool unlock(MRef<Txn> txn, CRef<RID> rid);
+  bool lock_shared(Txn& txn, const RID& rid);
+  bool lock_exclusive(Txn& txn, const RID& rid);
+  bool lock_upgrade(Txn& txn, const RID& rid);
+  bool unlock(Txn& txn, const RID& rid);
 
   // void add_edge(txn_id_t t1, txn_id_t t2) const {
   //   // TODO
@@ -54,7 +54,7 @@ public:
   //   return false;
   // }
 
-  Vec<std::pair<txn_id_t, txn_id_t>> edge_list() {
+  const vector<std::pair<txn_id_t, txn_id_t>> edge_list() {
     return Vec<std::pair<txn_id_t, txn_id_t>>();
   }
 
@@ -71,30 +71,30 @@ private:
     return deadlock_mode_ == DeadlockMode::DETECTION;
   }
 
-  bool grant_read_request(MRef<LockRequest> request,
-                          MRef<LockRequestQueue> queue,
-                          MRef<Txn> txn,
-                          CRef<RID> rid);
+  bool grant_read_request(LockRequest& request,
+                          LockRequestQueue& queue,
+                          Txn& txn,
+                          const RID& rid);
 
-  bool grant_write_request(MRef<LockRequest> request,
-                           MRef<Txn> txn,
-                           CRef<RID> rid);
+  bool grant_write_request(LockRequest& request,
+                           Txn& txn,
+                           const RID& rid);
 
-  bool grant_upgrade_request(MRef<LockRequest> request,
-                             MRef<Txn> txn,
-                             CRef<RID> rid);
+  bool grant_upgrade_request(LockRequest& request,
+                             Txn& txn,
+                             const RID& rid);
 
   bool remove_request(MutList<LockRequest>::iterator it,
-                      MRef<LockRequestQueue> queue,
-                      MRef<Txn> txn,
-                      CRef<RID> rid) const;
+                      LockRequestQueue& queue,
+                      Txn& txn,
+                      const RID& rid) const;
 
-  bool can_obtain_lock(MRef<Txn> txn);
-  bool can_unlock(MRef<Txn> txn);
+  bool can_obtain_lock(Txn& txn);
+  bool can_unlock(Txn& txn);
 
   TwoPLMode two_pl_mode_;
   DeadlockMode deadlock_mode_;
-  Mutex latch_;
+  mutex latch_;
   Atomic<bool> enable_cycle_detection_;
   std::thread *cycle_detection_thread_;
   std::chrono::milliseconds cycle_detection_interval_ =

@@ -18,10 +18,10 @@ public:
   Tuple next() override;
 
 private:
-  Tuple updated_tuple(CRef<Tuple> old_tuple);
+  Tuple updated_tuple(const Tuple& old_tuple);
   TableHeap& table_heap();
 
-  CRef<QuerySchema> schema();
+  const QuerySchema& schema();
   Ptr<UpdatePlan> plan_;
   Ptr<BaseExec> child_;
 };

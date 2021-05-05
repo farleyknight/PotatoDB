@@ -11,18 +11,18 @@
 
 class QueryBuilder {
 public:
-  QueryBuilder(CRef<Catalog> catalog)
+  QueryBuilder(const Catalog& catalog)
     : catalog_ (catalog) {}
-  
+
   // No copy
-  QueryBuilder(CRef<QueryBuilder>) = delete;
+  QueryBuilder(const QueryBuilder&) = delete;
   // No copy assign
-  QueryBuilder& operator=(CRef<QueryBuilder>) = delete;
+  QueryBuilder& operator=(const QueryBuilder&) = delete;
   // Default destructor
   ~QueryBuilder() = default;
 
-  TableExpr table(String table_name) const;
+  TableExpr table(const string table_name) const;
 
 private:
-  CRef<Catalog> catalog_;
+  const Catalog& catalog_;
 };
