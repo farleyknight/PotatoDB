@@ -2,6 +2,8 @@
 #include "server/potatodb.hpp"
 #include "server/client_socket.hpp"
 
+PotatoDB potatodb;
+
 PotatoDB::PotatoDB()
   : server_    (this),
     disk_mgr_  (),

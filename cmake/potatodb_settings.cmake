@@ -5,10 +5,15 @@
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(CMAKE_CXX_CPPCHECK "cppcheck")
 
-set(BUILD_SHARED_LIBS ON)
+# NOTE: Turning this off to make builds faster
+# set(CMAKE_CXX_CPPCHECK "cppcheck")
 
+# NOTE: Turning this off to make builds faster
+set(BUILD_SHARED_LIBS OFF)
+# set(BUILD_SHARED_LIBS ON)
+
+# NOTE: Turning this off to make builds faster
 # set(CMAKE_CXX_CLANG_TIDY clang-tidy -checks=-*)
 
 # All target binaries are placed under the directory `builds/`
@@ -40,10 +45,12 @@ include_directories(tests)
 include_directories(perf)
 include_directories(parser)
 
-file(GLOB_RECURSE MAIN_SOURCES   "src/*.cpp")
-file(GLOB_RECURSE TEST_SOURCES   "tests/*.cpp")
-file(GLOB_RECURSE PERF_SOURCES   "perf/*cpp")
-file(GLOB_RECURSE SERVER_SOURCES "server/*.cpp")
+# NOTE: Using GLOB_RECURSE means we have to recompile everything!
+# Need to switch to listing these files by hand..
+file(GLOB_RECURSE main_sources   CONFIGURE_DEPENDS "src/*.cpp")
+file(GLOB_RECURSE test_sources   CONFIGURE_DEPENDS "tests/*.cpp")
+file(GLOB_RECURSE perf_sources   CONFIGURE_DEPENDS "perf/*cpp")
+file(GLOB_RECURSE server_sources CONFIGURE_DEPENDS "server/*.cpp")
 #file(GLOB_RECURSE PARSER_SOURCES "parser/PotatoSQL*.cpp")
 
-set(PARSER_SOURCES "parser/PotatoSQLLexer.cpp;parser/PotatoSQLParser.cpp")
+set(parser_sources "parser/PotatoSQLLexer.cpp;parser/PotatoSQLParser.cpp")

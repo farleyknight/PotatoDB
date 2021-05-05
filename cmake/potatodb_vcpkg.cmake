@@ -2,8 +2,6 @@
 # Bootstrap - Handle environment variables, print them for debugging
 # -----------------------------------------------------------------------------
 
-
-
 if(EXISTS "$ENV{HOME}/.vcpkg/vcpkg.path.txt")
   message(STATUS "Found vcpkg root path via local .vcpkg/")
   file(READ "$ENV{HOME}/.vcpkg/vcpkg.path.txt" VCPKG_ROOT)
@@ -12,7 +10,7 @@ elseif(EXISTS ENV{VCPKG_ROOT})
   set(VCPKG_ROOT ENV{VCPKG_ROOT})
 endif()
 
-
+# TODO: Should not have to set this here!
 set(VCPKG_ROOT "/Users/fknight/code/vcpkg")
 
 if(DEFINED VCPKG_ROOT)
@@ -35,6 +33,9 @@ if(DEFINED VCPKG_ROOT)
 else()
   message(FATAL_ERROR "Could not find vcpkg install! You may have to define VCPKG_ROOT.")
 endif()
+
+# NOTE: Previous build was not picking up "MurmurHash3.h"
+include_directories(${CMAKE_BINARY_DIR}/vcpkg_installed/x64-osx/include)
 
 # -----------------------------------------------------------------------------
 # Packages - Manually maintained duplicate list of packages from `vcpkg.json`

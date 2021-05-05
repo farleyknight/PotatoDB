@@ -57,3 +57,6 @@ builds/
 *.zip
 *.zip
 antlr_generated/
+
+# Graphviz
+potatodb.dot*

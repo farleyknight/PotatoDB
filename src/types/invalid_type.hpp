@@ -31,11 +31,11 @@ public:
     throw Exception("No size for InvalidType");
   }
 
-  static Value min() {
+  Value min() const override {
     throw Exception("No min for InvalidType");
   }
 
-  static Value max() {
+  Value max() const override {
     throw Exception("No max for InvalidType");
   }
 };

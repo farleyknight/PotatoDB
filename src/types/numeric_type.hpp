@@ -55,11 +55,11 @@ public:
     return Value::make(buff.read_numeric<numeric_t>(offset));
   }
 
-  static Value min() {
+  Value min() const override {
     return Value::make(numeric_limits<numeric_t>::min());
   }
 
-  static Value max() {
+  Value max() const override {
     return Value::make(numeric_limits<numeric_t>::max());
   }
 };

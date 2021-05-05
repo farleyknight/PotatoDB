@@ -6,12 +6,13 @@
 
 class VarCharType : public Type {
 public:
-  static Value min() {
+  Value min() const override {
     string s = "";
     return Value::make(s);
   }
 
-  static Value max() {
+  Value max() const override {
+    // TODO: We should have a better value to return back?
     string s = "";
     return Value::make(s);
   }

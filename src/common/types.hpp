@@ -57,6 +57,11 @@ using std::unique_ptr;
 template<class T>
 using ptr      = unique_ptr<T>;
 
+// sptr is shorter than shared_ptr
+template<class T>
+using sptr     = shared_ptr<T>;
+
+
 // NOTE: File descriptors are integers and are pointers to
 // file objects elsewhere in the system.
 //

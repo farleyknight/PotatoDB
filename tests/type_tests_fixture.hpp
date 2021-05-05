@@ -25,13 +25,14 @@ public:
   void SerializeAndDeserialize(TypeId type_id, value_t data1, value_t data2) {
     Buffer buff(sizeof(value_t));
     auto &type_instance = Type::instance(type_id);
+    size_t offset = 0;
 
-    type_instance->serialize_to(buff, Value::make(data1));
-    auto val = type_instance->deserialize_from(buff);
+    type_instance->serialize_to(offset, buff, Value::make(data1));
+    auto val = type_instance->deserialize_from(offset, buff);
     EXPECT_EQ(val.as<value_t>(), data1);
 
-    type_instance->serialize_to(buff, Value::make(data2));
-    auto val2 = type_instance->deserialize_from(buff);
+    type_instance->serialize_to(offset, buff, Value::make(data2));
+    auto val2 = type_instance->deserialize_from(offset, buff);
     EXPECT_EQ(val2.as<value_t>(), data2);
   }
 
@@ -41,6 +42,4 @@ public:
                                      std::numeric_limits<value_t>::min(),
                                      std::numeric_limits<value_t>::max());
   }
-
 };
-

@@ -23,11 +23,11 @@ public:
   Txn&            txn()             { return txn_; }
   TableMgr&       table_mgr()       { return table_mgr_; }
   Catalog&        catalog()         { return catalog_; }
-  const Catalog&   catalog()   const { return catalog_; }
+  const Catalog&  catalog()   const { return catalog_; }
 
-  const BuffMgr&   buff_mgr()  const { return buff_mgr_; }
-  const TxnMgr&    txn_mgr()   const { return txn_mgr_; }
-  const LockMgr&   lock_mgr()  const { return lock_mgr_; }
+  const BuffMgr&  buff_mgr()  const { return buff_mgr_; }
+  const TxnMgr&   txn_mgr()   const { return txn_mgr_; }
+  const LockMgr&  lock_mgr()  const { return lock_mgr_; }
 
 private:
   Txn&             txn_;

@@ -18,6 +18,14 @@ public:
     column_defs_ = column_defs;
   }
 
+  const TableExpr& table() {
+    return table_;
+  }
+
+  const ColumnDefListExpr& column_defs() {
+    return column_defs_;
+  }
+
   virtual string to_string() const override {
     return "CREATE TABLE " + table_.to_string() + "(" +
       column_defs_.to_string() + ")";

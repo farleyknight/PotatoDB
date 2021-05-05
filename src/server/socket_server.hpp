@@ -46,7 +46,7 @@ private:
   void stale_socket_cleanup();
   void finish_tasks();
 
-  shared_ptr<ClientSocket> make_client_socket(file_desc_t client_fd);
+  sptr<ClientSocket> make_client_socket(file_desc_t client_fd);
 
   int         backlog_     =  5;
   int         port_        = -1;

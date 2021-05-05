@@ -16,11 +16,11 @@ public:
     return sizeof(bool);
   }
 
-  static Value min() {
+  Value min() const override {
     return Value::make(false);
   }
 
-  static Value max() {
+  Value max() const override {
     return Value::make(true);
   }
 

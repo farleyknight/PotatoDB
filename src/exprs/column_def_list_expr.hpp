@@ -13,6 +13,10 @@ public:
     column_defs_.push_back(column_def);
   }
 
+  const vector<ColumnDefExpr>& list() const {
+    return column_defs_;
+  }
+
   virtual string to_string() const override {
     std::stringstream stream;
     stream << "[";

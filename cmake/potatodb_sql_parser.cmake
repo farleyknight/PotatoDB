@@ -50,14 +50,15 @@ message(STATUS "The output files for PotatoSQL are ${ANTLR_PotatoSQL_CXX_OUTPUTS
 # SQL Parser target binary
 # -----------------------------------------------------------------------------
 
-set(PARSER_BINARY "${CMAKE_PROJECT_NAME}_parser")
+set(PARSER_BINARY parser)
 
 message(STATUS "Parser binary target is ${PARSER_BINARY}")
 message(STATUS "Parser sources are ${PARSER_SOURCES}")
 
 # add generated grammar to demo binary target
 add_executable(${PARSER_BINARY} "parser/main.cpp"
-  ${PARSER_SOURCES})
+  ${parser_sources}
+  )
 
 target_link_libraries(${PARSER_BINARY}
   PRIVATE -fstandalone-debug # So we can see full parse results in lldb

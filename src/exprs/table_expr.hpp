@@ -23,6 +23,10 @@ public:
     name_ = name;
   }
 
+  const string& name() const {
+    return name_;
+  }
+
   virtual string to_string() const override {
     return name_;
   }

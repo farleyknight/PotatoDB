@@ -29,14 +29,6 @@ public:
     throw NotImplementedException("is_castable_from not implemented!");
   }
 
-  static Value min() {
-    throw NotImplementedException("min not implemented!");
-  }
-
-  static Value max() {
-    throw NotImplementedException("max not implemented!");
-  }
-
   virtual void serialize_to(UNUSED size_t offset,
                             UNUSED Buffer& buff,
                             UNUSED Value val) const {
@@ -148,13 +140,13 @@ public:
     throw NotImplementedException("modulo not implemented!");
   }
 
-  Value min(UNUSED const Value& left,
-            UNUSED const Value& right) const {
+  virtual Value min(UNUSED const Value& left,
+                    UNUSED const Value& right) const {
     throw NotImplementedException("min not implemented!");
   }
 
-  Value max(UNUSED const Value& left,
-            UNUSED const Value& right) const {
+  virtual Value max(UNUSED const Value& left,
+                    UNUSED const Value& right) const {
     throw NotImplementedException("max not implemented!");
   }
 
@@ -162,11 +154,11 @@ public:
     throw NotImplementedException("max not implemented!");
   }
 
-  Value max_value(UNUSED TypeId type_id) {
+  virtual Value min() const {
     throw NotImplementedException("max not implemented!");
   }
 
-  Value min_value(UNUSED TypeId type_id) {
+  virtual Value max() const {
     throw NotImplementedException("max not implemented!");
   }
 };

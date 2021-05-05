@@ -1,7 +1,7 @@
 #include "parser/sql_parser.hpp"
 
 TEST(ParserTest, SimpleSelectTest) {
-  String query = "SELECT *, * FROM foobar";
+  string query = "SELECT *, * FROM foobar";
 
   auto exprs = SQLParser::as_exprs(query);
   EXPECT_EQ(exprs.size(), 1);
@@ -18,7 +18,7 @@ TEST(ParserTest, SimpleSelectTest) {
 }
 
 TEST(ParserTest, SelectMultipleTablesTest) {
-  String query = "SELECT * FROM foo, bar";
+  string query = "SELECT * FROM foo, bar";
 
   auto exprs = SQLParser::as_exprs(query);
   EXPECT_EQ(exprs.size(), 1);
@@ -35,7 +35,7 @@ TEST(ParserTest, SelectMultipleTablesTest) {
 }
 
 TEST(ParserTest, InsertTest) {
-  String query = "INSERT INTO foobar VALUES (1,2)";
+  string query = "INSERT INTO foobar VALUES (1,2)";
 
   auto exprs = SQLParser::as_exprs(query);
   EXPECT_EQ(exprs.size(), 1);
@@ -54,7 +54,7 @@ TEST(ParserTest, InsertTest) {
 }
 
 TEST(ParserTest, InsertWithColumnsTest) {
-  String query = "INSERT INTO foobar (a, b) VALUES (1,2), (3,4)";
+  string query = "INSERT INTO foobar (a, b) VALUES (1,2), (3,4)";
 
   auto exprs = SQLParser::as_exprs(query);
   EXPECT_EQ(exprs.size(), 1);
@@ -87,7 +87,25 @@ TEST(ParserTest, InsertWithColumnsTest) {
 TEST(ParserTest, DISABLED_CreateTableTest) {
   // TODO: Test using SQLParser::as_exprs()
 
-  String statement = "CREATE TABLE foobar (id INT, name VARCHAR(10))";
+  string statement = "CREATE TABLE foobar (id INTEGER PRIMARY KEY, name VARCHAR(10) NOT NULL)";
 
-  // auto expr = dynamic_cast<CreateTableExpr*>(exprs[0].get());
+  auto exprs = SQLParser::as_exprs(statement);
+  EXPECT_EQ(exprs.size(), 1);
+  const auto expr = dynamic_cast<CreateTableExpr*>(exprs[0].get());
+
+  EXPECT_EQ(expr->table().name(), "foobar");
+
+  auto &col_list = expr->column_defs().list();
+  EXPECT_EQ(col_list.size(), 2);
+
+  auto &id_col = col_list[0];
+  EXPECT_EQ(id_col.name(), "id");
+  EXPECT_EQ(id_col.type_name(), "INTEGER");
+  EXPECT_EQ(id_col.is_primary_key(), true);
+
+  auto &name_col = col_list[1];
+  EXPECT_EQ(name_col.name(), "name");
+  EXPECT_EQ(name_col.type_name(), "VARCHAR");
+  EXPECT_EQ(name_col.type_length(), 10);
+  EXPECT_EQ(name_col.not_null(), true);
 }

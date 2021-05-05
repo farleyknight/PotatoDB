@@ -45,3 +45,5 @@ private:
   Catalog catalog_;
   ExecEngine exec_eng_;
 };
+
+extern PotatoDB potatodb;
