@@ -4,16 +4,10 @@
 
 #include "execs/base_exec.hpp"
 #include "execs/exec_ctx.hpp"
-
 #include "plans/delete_plan.hpp"
 
-/**
-* Delete executes a delete from a table.
-* Deleted tuple info comes up from a child executor.
-*/
 class DeleteExec : public BaseExec {
 public:
-
   DeleteExec(ExecCtx& exec_ctx,
              ptr<DeletePlan>&& plan,
              ptr<BaseExec>&& child)

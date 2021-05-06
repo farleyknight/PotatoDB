@@ -2,6 +2,9 @@
 
 #include "common/config.hpp"
 #include "plans/base_plan.hpp"
+#include "plans/table_plan.hpp"
+#include "plans/schema_plan.hpp"
+#include "plans/has_child_plan.hpp"
 
 /**********************************************
  * UpdateType
@@ -22,7 +25,7 @@ public:
     : type_  (type),
       value_ (value) {}
 
-  UpdateType type()   const { return type_; }
+  UpdateType type()    const { return type_; }
   const Value& value() const { return value_; }
 
 private:
@@ -30,37 +33,26 @@ private:
   Value value_;
 };
 
-
 /**********************************************
  * UpdatePlan
  **********************************************/
 
-class UpdatePlan : public BasePlan {
+class UpdatePlan : public BasePlan, public TablePlan, public SchemaPlan, public HasChildPlan {
 public:
-  UpdatePlan(SchemaRef schema_ref,
+  UpdatePlan(QuerySchema schema,
+             table_oid_t table_oid,
              ptr<BasePlan>&& child,
              Move<MutMap<uint32_t, UpdateInfo>> update_attrs)
-    : BasePlan      (schema_ref),
-      table_oid_    (schema_ref.table_oid()),
-      child_        (move(child)),
-      // NOTE: The update attrs vector could be huge!
-      // TODO: Write performance tests where this parameter is huge
+    : BasePlan      (PlanType::UPDATE),
+      TablePlan     (table_oid),
+      SchemaPlan    (schema),
+      HasChildPlan  (move(child)),
       update_attrs_ (update_attrs) {}
-
-  /**********************************************
-   * Instance methods
-   **********************************************/
-
-  PlanType type()         const { return PlanType::UPDATE; }
-  table_oid_t table_oid() const { return table_oid_; }
-  ptr<BasePlan>&& child()     { return move(child_); }
 
   const Map<uint32_t, UpdateInfo>& update_attrs() const {
     return update_attrs_;
   }
 
 private:
-  table_oid_t table_oid_;
-  ptr<BasePlan> child_;
   Map<uint32_t, UpdateInfo> update_attrs_;
 };

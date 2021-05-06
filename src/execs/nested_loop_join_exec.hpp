@@ -55,11 +55,8 @@ public:
 
     auto pred = plan_->pred();
 
-    auto &left_schema =
-      exec_ctx_.catalog().find_query_schema(plan_->left_schema_ref());
-
-    auto &right_schema =
-      exec_ctx_.catalog().find_query_schema(plan_->right_schema_ref());
+    auto left_schema = plan_->left_schema();
+    auto right_schema = plan_->right_schema();
 
     Value match
       = pred.eval_join(left,  left_schema,
@@ -71,23 +68,16 @@ public:
                        const Tuple& right) {
     vector<Value> values;
 
-    auto &schema =
-      exec_ctx_.catalog().find_query_schema(plan_->schema_ref());
+    auto &schema = plan_->schema();
 
     for (auto join : schema.joins()) {
       JoinSide side = join.side();
 
       if (side == JoinSide::LEFT) {
-        auto &left_schema =
-          exec_ctx_.catalog().find_query_schema(plan_->left_schema_ref());
-
-        values.push_back(left.value_by_name(left_schema,
+        values.push_back(left.value_by_name(plan_->left_schema(),
                                             join.name()));
       } else if (side == JoinSide::RIGHT) {
-        auto &right_schema =
-          exec_ctx_.catalog().find_query_schema(plan_->right_schema_ref());
-
-        values.push_back(right.value_by_name(right_schema,
+        values.push_back(right.value_by_name(plan_->right_schema(),
                                              join.name()));
       } else if (side == JoinSide::INVALID) {
         throw Exception("Cannot combine tuples with INVALID_SIDE!");

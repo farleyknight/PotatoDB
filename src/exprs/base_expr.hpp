@@ -16,6 +16,10 @@ public:
     return "BASE EXPR";
   }
 
+  ExprType expr_type() const {
+    return expr_type_;
+  }
+
 protected:
   ExprType expr_type_;
 };

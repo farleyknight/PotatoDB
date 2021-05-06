@@ -11,7 +11,7 @@ UpdateExec::UpdateExec(ExecCtx& exec_ctx,
 
 
 const QuerySchema& UpdateExec::schema() {
-  return find_schema(plan_->schema_ref());
+  return plan_->schema();
 }
 
 void UpdateExec::init() {

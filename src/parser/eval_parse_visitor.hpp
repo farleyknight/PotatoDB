@@ -46,12 +46,31 @@ public:
     TableExpr table(ctx->table_name()->getText());
     create_table.set_table(table);
 
-    const auto &col_def_list_ctx = ctx->column_def();
     ColumnDefListExpr def_list;
-    for (auto &col_def_ctx : col_def_list_ctx) {
+
+    for (auto &col_def_ctx : ctx->column_def()) {
       auto col_name = col_def_ctx->column_name()->getText();
-      auto type_name = col_def_ctx->type_name()->getText();
-      def_list.push_back(ColumnDefExpr(col_name, type_name));
+      auto type_name_ctx = col_def_ctx->type_name();
+      auto type_name = type_name_ctx->name()[0]->getText();
+
+      if (type_name == "VARCHAR") {
+        auto signed_number_ctx = type_name_ctx->signed_number();
+        auto signed_number = signed_number_ctx[0]->getText();
+        uint32_t number = std::stoi(signed_number);
+        def_list.push_back(ColumnDefExpr(col_name, type_name, number));
+      } else {
+        def_list.push_back(ColumnDefExpr(col_name, type_name));
+      }
+
+      auto &col_def = def_list.back();
+
+      for (auto &constraint : col_def_ctx->column_constraint()) {
+        if (constraint->getText() == "NOTNULL") {
+          col_def.is_not_null(true);
+        } else if (constraint->getText() == "PRIMARYKEY") {
+          col_def.is_primary_key(true);
+        }
+      }
     }
 
     create_table.set_column_defs(def_list);

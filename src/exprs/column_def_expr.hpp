@@ -10,7 +10,14 @@ public:
       type_name_ (type_name)
   {}
 
-  virtual string to_string() const override {
+  ColumnDefExpr(string name, string type_name, uint32_t type_length)
+    : BaseExpr     (ExprType::COLUMN_DEF),
+      name_        (name),
+      type_name_   (type_name),
+      type_length_ (type_length)
+  {}
+
+ virtual string to_string() const override {
     return name_ + " " + type_name_;
   }
 
@@ -26,16 +33,24 @@ public:
     return type_length_;
   }
 
-  bool not_null() const {
+  bool is_not_null() const {
     return not_null_;
+  }
+
+  void is_not_null(bool state) {
+    not_null_ = state;
   }
 
   bool is_primary_key() const {
     return primary_key_;
   }
 
+  void is_primary_key(bool state) {
+    primary_key_ = state;
+  }
+
 protected:
   string name_, type_name_;
-  uint32_t type_length_;
-  bool not_null_, primary_key_;
+  uint32_t type_length_ = 0;
+  bool not_null_ = false, primary_key_ = false;
 };

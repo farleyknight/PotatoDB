@@ -4,6 +4,7 @@
 
 #include "execs/agg_ht.hpp"
 #include "execs/base_exec.hpp"
+#include "plans/schema_plan.hpp"
 
 class AggExec : public BaseExec {
 public:
@@ -34,6 +35,10 @@ public:
 
   AggKey make_key(const Tuple& tuple);
   AggValue make_val(const Tuple& tuple);
+
+  const QuerySchema& schema() const {
+    return dynamic_cast<SchemaPlan*>(plan_->child().get())->schema();
+  }
 
 private:
   ptr<AggPlan> plan_;

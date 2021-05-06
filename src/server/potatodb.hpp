@@ -9,20 +9,6 @@
 
 namespace fs = std::filesystem;
 
-const string system_table_sql =
-  "CREATE TABLE system_catalog ( " \
-
-  /*
-    "id         INTEGER PRIMARY KEY, " \
-    "type       INTEGER NOT NULL, " \
-    "name       VARCHAR(32) NOT NULL, " \
-    "table_name VARCHAR(32) NOT NULL, " \
-    "sql        VARCHAR(255) NOT NULL " \
-  */
-
-  ");";
-
-
 class PotatoDB {
 public:
   PotatoDB();
@@ -31,7 +17,7 @@ public:
     server_.shutdown();
   }
 
-  void build_catalog_table();
+  void build_system_catalog();
 
   const Session& make_session() {
     sessions_.emplace_back(this);
@@ -44,7 +30,7 @@ public:
 
   ptr<ResultSet> execute(string query);
 
-  ptr<BasePlan> build_plan(const BaseExpr& expr);
+  ptr<BasePlan> build_plan(const ptr<BaseExpr>& expr);
   void startup();
 
 private:

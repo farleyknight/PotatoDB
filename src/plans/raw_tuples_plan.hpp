@@ -3,19 +3,15 @@
 #include "plans/base_plan.hpp"
 #include "plans/raw_tuples.hpp"
 
-class RawTuplesPlan : public BasePlan {
+class RawTuplesPlan : public BasePlan, public SchemaPlan {
 public:
-  RawTuplesPlan(SchemaRef schema_ref,
-                RawTuples raw_tuples)
-    : BasePlan    (schema_ref),
+  RawTuplesPlan(QuerySchema schema, RawTuples raw_tuples)
+    : BasePlan    (PlanType::RAW_TUPLES),
+      SchemaPlan  (schema),
       raw_tuples_ (raw_tuples) {}
 
   const RawTuples& raw_tuples() const {
     return raw_tuples_;
-  }
-
-  PlanType type() const {
-    return PlanType::RAW_TUPLES;
   }
 
 private:

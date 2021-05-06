@@ -35,8 +35,9 @@ public:
       tuples.push_back(exec->next());
     }
 
-    return make_unique<ResultSet>(plan->schema_ref(),
-                                  move(tuples));
+    auto schema = dynamic_cast<SchemaPlan*>(plan.get())->schema();
+
+    return make_unique<ResultSet>(move(tuples), schema);
   }
 
   // NOTE: This version does not collect results, hence the inner

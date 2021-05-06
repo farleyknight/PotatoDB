@@ -68,10 +68,7 @@ private:
 
   void apply_join(string right_table_name);
 
-  SchemaRef insert_table_schema_ref();
   const QuerySchema& insert_table_schema();
-
-  SchemaRef from_table_schema_ref();
   const QuerySchema& from_table_schema();
   const QuerySchema& right_table_schema();
   const QuerySchema& left_table_schema();
@@ -93,7 +90,7 @@ private:
   table_oid_t left_table_oid_  = INVALID_TABLE_OID;
   table_oid_t right_table_oid_ = INVALID_TABLE_OID;
 
-  MutOption<PlanType> plan_type_;
+  optional<PlanType> plan_type_;
   ptr<QueryComp> where_clause_;
   ptr<QueryComp> join_clause_;
 

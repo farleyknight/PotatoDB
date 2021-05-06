@@ -9,21 +9,19 @@ public:
    * Constructors & destructor
    **********************************************/
 
-  LimitPlan(SchemaRef schema,
-            ptr<BasePlan> child,
+  LimitPlan(ptr<BasePlan> child,
             size_t limit,
             size_t offset)
-   : BasePlan (schema),
-     child_   (move(child)),
-     limit_   (limit),
-     offset_  (offset)
+    : BasePlan (PlanType::LIMIT),
+      child_   (move(child)),
+      limit_   (limit),
+      offset_  (offset)
   {}
 
   /**********************************************
    * Instance methods
    **********************************************/
 
-  PlanType type()     const { return PlanType::LIMIT; }
   size_t limit()      const { return limit_; }
   size_t offset()     const { return offset_; }
   ptr<BasePlan>&& child() { return move(child_); }

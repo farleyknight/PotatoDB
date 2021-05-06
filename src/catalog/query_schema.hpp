@@ -38,7 +38,7 @@ public:
   static QuerySchema merge(const QuerySchema& left,
                            const QuerySchema& right);
 
-  string to_string() const;
+  const string to_string() const;
 
   const vector<string>& names() const {
     return names_;

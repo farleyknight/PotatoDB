@@ -25,14 +25,14 @@ public:
               vector<string> names,
               string table_name,
               table_oid_t table_oid);
-  // No copy
-  TableSchema(const TableSchema&) = delete;
-  // No copy assign
-  TableSchema& operator=(const TableSchema&) = delete;
+  // Allow copy
+  TableSchema(const TableSchema&) = default;
+  // Allow copy assign
+  TableSchema& operator=(const TableSchema&) = default;
   // Default destructor
   ~TableSchema() = default;
 
-  string to_string() const;
+  const string to_string() const;
 
   QueryColumn operator[](string col_name) const;
 

@@ -85,8 +85,6 @@ TEST(ParserTest, InsertWithColumnsTest) {
 
 
 TEST(ParserTest, CreateTableTest) {
-  // TODO: Test using SQLParser::as_exprs()
-
   string statement = "CREATE TABLE foobar (id INTEGER PRIMARY KEY, name VARCHAR(10) NOT NULL)";
 
   auto exprs = SQLParser::as_exprs(statement);
@@ -107,5 +105,5 @@ TEST(ParserTest, CreateTableTest) {
   EXPECT_EQ(name_col.name(), "name");
   EXPECT_EQ(name_col.type_name(), "VARCHAR");
   EXPECT_EQ(name_col.type_length(), 10);
-  EXPECT_EQ(name_col.not_null(), true);
+  EXPECT_EQ(name_col.is_not_null(), true);
 }

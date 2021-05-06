@@ -8,6 +8,8 @@
 #include "catalog/table_schema.hpp"
 #include "catalog/table_meta.hpp"
 
+#include "exprs/column_def_list_expr.hpp"
+
 #include "txns/lock_mgr.hpp"
 
 #include "index/base_index.hpp"
@@ -18,8 +20,7 @@ class SchemaManager;
 
 class Catalog {
 public:
-  Catalog() {
-  }
+  Catalog();
 
   // No copy
   Catalog(const Catalog&) = delete;
@@ -28,16 +29,16 @@ public:
   // Default delete
   ~Catalog() = default;
 
-  void register_table(Txn& txn,
-                      const string table_name,
-                      SchemaRef schema_ref);
+  TableSchema make_schema_from(const string& table_name,
+                               table_oid_t table_oid,
+                               ColumnDefListExpr column_list);
+
+  void create_table(UNUSED Txn& txn,
+                    const string& table_name,
+                    ColumnDefListExpr column_list);
 
   table_oid_t table_oid_for(const string& table_name) const {
     return table_oids_.at(table_name);
-  }
-
-  SchemaRef table_schema_ref_for(const string& table_name) const {
-    return table_schema_refs_.at(table_oid_for(table_name));
   }
 
   void register_index(Txn& txn,
@@ -64,7 +65,7 @@ private:
 
   MutMap<string, table_oid_t> table_oids_;
   Atomic<table_oid_t> next_table_oid_ = 0;
-  MutMap<table_oid_t, SchemaRef> table_schema_refs_;
+  MutMap<table_oid_t, TableSchema> table_schemas_;
 
   MutMap<string,
          MutMap<string, index_oid_t>> index_oids_;

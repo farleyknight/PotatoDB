@@ -17,6 +17,10 @@ public:
     return column_defs_;
   }
 
+  ColumnDefExpr& back() {
+    return column_defs_.back();
+  }
+
   virtual string to_string() const override {
     std::stringstream stream;
     stream << "[";

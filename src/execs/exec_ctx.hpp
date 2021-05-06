@@ -20,7 +20,7 @@ public:
   // Default destructor
   ~ExecCtx() = default;
 
-  Txn&            txn()             { return txn_; }
+  Txn&            txn()       const { return txn_; }
   TableMgr&       table_mgr()       { return table_mgr_; }
   Catalog&        catalog()         { return catalog_; }
   const Catalog&  catalog()   const { return catalog_; }

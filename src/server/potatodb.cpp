@@ -11,33 +11,28 @@ PotatoDB::PotatoDB()
     buff_mgr_  (pool_size(), disk_mgr_, log_mgr_),
     log_mgr_   (disk_mgr_),
     txn_mgr_   (lock_mgr_, log_mgr_, table_mgr_),
-    // catalog_   (buff_mgr_, lock_mgr_, log_mgr_),
     table_mgr_ (disk_mgr_, buff_mgr_),
     catalog_   (),
     exec_eng_  (buff_mgr_, txn_mgr_, catalog_)
 {}
 
-
-void PotatoDB::build_catalog_table() {
-  // TODO: Use some SQL here
-  // 1) Write the necessary SQL [DONE?]
-  // 2) Feed it to the parser [DONE?]
-  // 3) Parser feeds it to the exec eng [DONE?]
-
-  // potatodb.execute(system_table_sql);
-
-  // 4) Need to add operator for creating a table [TODO]
-
-  // 5) DiskMgr should create a TableFile?
-  // 6) TableFile creates TableHeap
-  // 7) TableHeap creates TablePage
-  // 8) TablePage adds tuples to the `system_catalog`
-}
-
-
-ptr<BasePlan> PotatoDB::build_plan(UNUSED const BaseExpr& expr) {
-  auto schema_ref = SchemaRef(SchemaType::QUERY, -1);
-  return make_unique<SeqScanPlan>(schema_ref);
+ptr<BasePlan> PotatoDB::build_plan(const ptr<BaseExpr>& expr) {
+  // TODO: Figure out expr type
+  // Based on type, create specific plan
+  
+  // TODO: CREATE TABLE plan!
+  // 1) First check expr.type == CREATE_TABLE
+  // 2) Extract out new table name, column defs
+  // 3) Extract out primary key
+  // 4) Make sure primary key is used (NEEDS BTREE FIRST!)
+  if (expr->expr_type() == ExprType::CREATE_TABLE) {
+    auto create_table_expr = dynamic_cast<CreateTableExpr*>(expr.get());
+    auto table_name = create_table_expr->table().name();
+    auto column_def_list = create_table_expr->column_defs();
+    return make_unique<CreateTablePlan>(table_name, column_def_list);
+  } else {
+    return make_unique<SeqScanPlan>(QuerySchema::empty(), INVALID_TABLE_OID);
+  }
 }
 
 ptr<ResultSet> PotatoDB::execute(string query) {
@@ -46,7 +41,7 @@ ptr<ResultSet> PotatoDB::execute(string query) {
     auto exprs = SQLParser::as_exprs(query);
     // TODO: Allow for multiple statements
     assert(exprs.size() > 0);
-    auto plan = build_plan(*exprs[0]);
+    auto plan = build_plan(exprs[0]);
 
     // Create and run the txn
     auto &txn = txn_mgr_.begin();
@@ -65,6 +60,35 @@ ptr<ResultSet> PotatoDB::execute(string query) {
   } catch (std::exception& e) {
     return ResultSet::empty();
   }
+}
+
+const string system_catalog_sql =
+  "CREATE TABLE system_catalog ( " \
+
+  "id         INTEGER PRIMARY KEY, "            \
+  "type       INTEGER NOT NULL, "               \
+  "name       VARCHAR(32) NOT NULL, "           \
+  "table_name VARCHAR(32) NOT NULL, "           \
+  "sql        VARCHAR(255) NOT NULL "           \
+
+  ");";
+
+void PotatoDB::build_system_catalog() {
+  std::cout << "Begin loading system catalog" << std::endl;
+
+  // TODO: Use some SQL here
+  // 1) Write the necessary SQL [DONE?]
+  // 2) Feed it to the parser [DONE?]
+  // 3) Parser feeds it to the exec eng [DONE?]
+
+  execute(system_catalog_sql);
+
+  // 4) Need to add operator for creating a table [TODO]
+
+  // 5) DiskMgr should create a TableFile?
+  // 6) TableFile creates TableHeap
+  // 7) TableHeap creates TablePage
+  // 8) TablePage adds tuples to the `system_catalog`
 }
 
 void PotatoDB::startup() {

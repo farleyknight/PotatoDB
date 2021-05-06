@@ -5,11 +5,10 @@
 class ResultSet {
 public:
   ResultSet()
-    : schema_ (SchemaRef::INVALID())
+    : schema_ (QuerySchema::empty())
   {}
 
-  ResultSet(SchemaRef schema,
-            MoveVec<Tuple> results)
+  ResultSet(MoveVec<Tuple> results, QuerySchema schema)
     : schema_  (schema),
       results_ (move(results)) {}
 
@@ -28,24 +27,14 @@ public:
    **********************************************/
 
   template<typename T>
-  T value(const string name,
-          const Tuple& tuple,
-          const ExecCtx& exec_ctx)
-  {
-    auto &schema
-      = exec_ctx.catalog().find_query_schema(schema_);
-    return tuple.value(schema, schema.offset_for(name)).as<T>();
+  T value(const string name, const Tuple& tuple) {
+    return tuple.value(schema_, schema_.offset_for(name)).as<T>();
   }
 
   template<typename T>
-  T value_at(const string name,
-             size_t index,
-             const ExecCtx& exec_ctx)
-  {
+  T value_at(const string name, size_t index) {
     assert(results_.size() >= index + 1);
-    auto &schema
-      = exec_ctx.catalog().find_query_schema(schema_);
-    return results_[index].value(schema, schema.offset_for(name)).as<T>();
+    return results_[index].value(schema_, schema_.offset_for(name)).as<T>();
   }
 
   const vector<Tuple>& results() {
@@ -62,6 +51,6 @@ public:
   }
 
 private:
-  SchemaRef schema_;
+  QuerySchema schema_;
   vector<Tuple> results_;
 };

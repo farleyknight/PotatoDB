@@ -32,7 +32,7 @@ QueryColumn TableSchema::operator[](const string col_name) const {
                      col_name);
 }
 
-string TableSchema::to_string() const {
+const string TableSchema::to_string() const {
   std::ostringstream os;
 
   os << "TableSchema[" <<

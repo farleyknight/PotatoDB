@@ -51,5 +51,5 @@ void SeqScanExec::init() {
 }
 
 const QuerySchema& SeqScanExec::schema()  {
-  return find_schema(plan_->schema_ref());
+  return plan_->schema();
 }

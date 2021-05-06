@@ -2,6 +2,7 @@
 #include "execs/hash_join_exec.hpp"
 #include "execs/exec_ctx.hpp"
 #include "plans/hash_join_plan.hpp"
+#include "plans/schema_plan.hpp"
 
 HashJoinExec::HashJoinExec(ExecCtx& exec_ctx,
                            ptr<HashJoinPlan>&& plan,
@@ -99,13 +100,13 @@ Tuple HashJoinExec::next() {
 }
 
 const QuerySchema& HashJoinExec::schema() {
-  return find_schema(plan_->schema_ref());
+  return plan_->schema();
 }
 
 const QuerySchema& HashJoinExec::left_schema()  {
-  return find_schema(left_->schema_ref());
+  return dynamic_cast<SchemaPlan*>(left_.get())->schema();
 }
 
 const QuerySchema& HashJoinExec::right_schema() {
-  return find_schema(right_->schema_ref());
+  return dynamic_cast<SchemaPlan*>(right_.get())->schema();
 }

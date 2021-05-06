@@ -41,11 +41,9 @@ bool AggExec::match_found() {
   auto key = table_iter_.key();
   auto value = table_iter_.val();
 
-  auto schema = find_schema(child_->schema_ref());
-
   auto pred = plan_->having();
   auto result =
-    pred.eval_agg(schema,
+    pred.eval_agg(schema(),
                   key.group_bys_,
                   value.aggs_).as<bool>();
   return result;
@@ -59,29 +57,22 @@ Tuple AggExec::next() {
   // create tuple according to output schema
   auto key = table_iter_.key();
   auto value = table_iter_.val();
-  auto schema = find_schema(child_->schema_ref());
 
   vector<Value> tuple_values;
-  for (QueryColumn const &col : schema.all()) {
-    auto val = col.eval_agg(schema,
+  for (QueryColumn const &col : schema().all()) {
+    auto val = col.eval_agg(schema(),
                             key.group_bys_,
                             value.aggs_);
     tuple_values.push_back(val);
   }
 
-  return Tuple(tuple_values, schema);
+  return Tuple(tuple_values, schema());
 }
 
-/**********************************************
- * TODO: Document me
- **********************************************/
-
 AggKey AggExec::make_key(const Tuple& tuple) {
-  auto &schema = find_schema(child_->schema_ref());
-
   vector<Value> keys;
   for (auto const &node : plan_->group_bys()) {
-    keys.emplace_back(node.eval(tuple, schema));
+    keys.emplace_back(node.eval(tuple, schema()));
   }
   return AggKey(keys);
 }
@@ -91,11 +82,9 @@ AggKey AggExec::make_key(const Tuple& tuple) {
  **********************************************/
 
 AggValue AggExec::make_val(const Tuple& tuple) {
-  auto &schema = find_schema(child_->schema_ref());
-
   vector<Value> values;
   for (auto const &node : plan_->aggs()) {
-    values.emplace_back(node.eval(tuple, schema));
+    values.emplace_back(node.eval(tuple, schema()));
   }
   return AggValue(values);
 }

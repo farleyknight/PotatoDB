@@ -39,7 +39,7 @@ public:
   const vector<column_oid_t>& unlined_columns() const;
   const vector<ColT>& all() const;
 
-  virtual string to_string() const = 0;
+  virtual const string to_string() const = 0;
 
 protected:
   // Are all tuples inlined when stored on the page?

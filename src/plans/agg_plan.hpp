@@ -11,23 +11,22 @@
 
 #include "plans/agg_key.hpp"
 #include "plans/base_plan.hpp"
+#include "plans/has_child_plan.hpp"
 
-class AggPlan : public BasePlan {
+class AggPlan : public BasePlan, public HasChildPlan {
 public:
   /**********************************************
    * GroupByExpr and HavingExpr are both optional
    **********************************************/
 
-  AggPlan(SchemaRef         schema_ref,
-          ptr<BasePlan>&& child,
+  AggPlan(ptr<BasePlan>&&   child,
           MoveVec<QueryAgg> aggs);
 
   /**********************************************
    * HavingExpr is optional
    **********************************************/
 
-  AggPlan(SchemaRef             schema,
-          ptr<BasePlan>&&     child,
+  AggPlan(ptr<BasePlan>&&       child,
           MoveVec<QueryAgg>     aggs,
           MoveVec<QueryGroupBy> group_bys);
 
@@ -35,25 +34,19 @@ public:
    * All child exprs required
    **********************************************/
 
-  AggPlan(SchemaRef             schema,
-          ptr<BasePlan>&&     child,
+  AggPlan(ptr<BasePlan>&&       child,
           MoveVec<QueryAgg>     aggs,
           MoveVec<QueryGroupBy> group_bys,
-          ptr<QueryHaving>&&  having);
+          ptr<QueryHaving>&&    having);
 
   void build_agg_types();
-
-  PlanType type()  const { return PlanType::AGG; }
-
-  ptr<BasePlan>&& child() {
-    return move(child_);
-  }
 
   bool has_having() {
     return having_ != nullptr;
   }
 
   const QueryHaving& having() {
+    assert(having_);
     return *having_;
   }
 

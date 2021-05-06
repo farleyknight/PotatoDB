@@ -115,6 +115,16 @@ public:
     }
   }
 
+  static TypeId from_string(const string& name) {
+    if (name == "INTEGER") {
+      return TypeId::INTEGER;
+    } else if (name == "VARCHAR") {
+      return TypeId::VARCHAR;
+    } else {
+      return TypeId::INVALID;
+    }
+  }
+
   Value add(UNUSED const Value& left,
             UNUSED const Value& right) const {
     throw NotImplementedException("add not implemented!");

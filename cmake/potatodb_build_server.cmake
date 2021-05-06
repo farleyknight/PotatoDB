@@ -11,9 +11,7 @@ add_executable(${SERVER_BINARY}
 target_link_libraries(${SERVER_BINARY}
   PRIVATE potatodb-main
   PRIVATE potatodb-parser
-  PRIVATE asio asio::asio
-  PRIVATE fmt::fmt
   PRIVATE murmurhash::murmurhash
-  PRIVATE -fsanitize=address # Address Sanitizer
   PRIVATE antlr4_static
+  PRIVATE -fsanitize=address # Address Sanitizer
   )

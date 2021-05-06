@@ -34,10 +34,7 @@ public:
   }
 
   Tuple next() override {
-    auto &schema =
-      exec_ctx_.catalog().find_query_schema(plan_->schema_ref());
-
-    auto tuple = Tuple(iter_.values(), schema);
+    auto tuple = Tuple(iter_.values(), plan_->schema());
     ++iter_;
     return tuple;
   }

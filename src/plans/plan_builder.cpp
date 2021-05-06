@@ -118,31 +118,31 @@ ptr<BasePlan> PlanBuilder::to_plan() {
 }
 
 ptr<BasePlan> PlanBuilder::build_tuples() {
-  return make_unique<RawTuplesPlan>(insert_table_schema_ref(),
+  return make_unique<RawTuplesPlan>(insert_table_schema(),
                                     tuples_);
 }
 
 ptr<BasePlan> PlanBuilder::build_insert(ptr<BasePlan>&& scan_plan) {
-  //auto insert_schema = QuerySchema::slice(insert_table_schema(),
-  //                                        insert_column_names_);
-  return make_unique<InsertPlan>(insert_table_schema_ref(),
+  return make_unique<InsertPlan>(insert_table_schema(),
+                                 insert_table_oid_,
                                  move(scan_plan));
 }
 
 ptr<BasePlan> PlanBuilder::build_delete(ptr<BasePlan>&& scan_plan) {
-  // auto delete_schema = QuerySchema::copy(from_table_schema());
-  return make_unique<DeletePlan>(from_table_schema_ref(),
+  return make_unique<DeletePlan>(from_table_oid_,
                                  move(scan_plan));
 }
 
 ptr<BasePlan> PlanBuilder::build_scan() {
-  //auto scan_schema = QuerySchema::slice(from_table_schema(),
-  //                                      select_column_names_);
   if (where_clause_) {
-    return make_unique<SeqScanPlan>(from_table_schema_ref(),
-                                    move(where_clause_));
+    return make_unique<SeqScanPlan>(from_table_schema(),
+                                    from_table_oid_,
+                                    move(where_clause_)
+                                    );
   } else {
-    return make_unique<SeqScanPlan>(from_table_schema_ref());
+    return make_unique<SeqScanPlan>(from_table_schema(),
+                                    from_table_oid_
+                                    );
   }
 }
 
@@ -150,13 +150,13 @@ ptr<BasePlan> PlanBuilder::build_loop_join() {
   auto left_scan = build_left_scan();
   auto right_scan = build_right_scan();
 
-  auto left_schema  = catalog_.find_query_schema(left_scan->schema_ref());
-  auto right_schema = catalog_.find_query_schema(right_scan->schema_ref());
+  auto left_schema  = dynamic_cast<SchemaPlan*>(left_scan.get())->schema();
+  auto right_schema = dynamic_cast<SchemaPlan*>(right_scan.get())->schema();
 
   auto join_schema = QuerySchema::merge(left_schema, right_schema);
 
   // return make_unique<NestedLoopJoinPlan>(move(join_schema),
-  return make_unique<NestedLoopJoinPlan>(from_table_schema_ref(),
+  return make_unique<NestedLoopJoinPlan>(from_table_schema(),
                                          move(left_scan),
                                          move(right_scan),
                                          move(join_clause_));
@@ -173,8 +173,9 @@ ptr<BasePlan> PlanBuilder::build_left_scan() {
 
   auto scan_schema = QuerySchema::slice(left_table_schema(),
                                         col_names);
-  //return make_unique<SeqScanPlan>(move(scan_schema),
-  return make_unique<SeqScanPlan>(from_table_schema_ref());
+  return make_unique<SeqScanPlan>(from_table_schema(),
+                                  left_table_oid_
+                                  );
 }
 
 ptr<BasePlan> PlanBuilder::build_right_scan() {
@@ -187,7 +188,9 @@ ptr<BasePlan> PlanBuilder::build_right_scan() {
 
   auto scan_schema = QuerySchema::slice(right_table_schema(),
                                         col_names);
-  return make_unique<SeqScanPlan>(from_table_schema_ref());
+  return make_unique<SeqScanPlan>(from_table_schema(),
+                                  right_table_oid_
+                                  );
 }
 
 CompType PlanBuilder::to_comp_type(string op) {
@@ -203,16 +206,8 @@ CompType PlanBuilder::to_comp_type(string op) {
   return CompType::EQ;
 }
 
-SchemaRef PlanBuilder::insert_table_schema_ref() {
-  return SchemaRef(SchemaType::TABLE, insert_table_oid_);
-}
-
 const QuerySchema& PlanBuilder::insert_table_schema() {
   return catalog_.find_query_schema(insert_table_oid_);
-}
-
-SchemaRef PlanBuilder::from_table_schema_ref() {
-  return SchemaRef(SchemaType::TABLE, from_table_oid_);
 }
 
 const QuerySchema& PlanBuilder::from_table_schema() {

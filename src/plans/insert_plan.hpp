@@ -1,21 +1,17 @@
 #pragma once
 
 #include "plans/base_plan.hpp"
+#include "plans/schema_plan.hpp"
+#include "plans/table_plan.hpp"
+#include "plans/has_child_plan.hpp"
 
-class InsertPlan : public BasePlan {
+class InsertPlan : public BasePlan, public SchemaPlan, public HasChildPlan, public TablePlan {
 public:
-  InsertPlan(SchemaRef schema,
-             ptr<BasePlan> child)
-    : BasePlan   (schema),
-      child_     (move(child)),
-      table_oid_ (schema.table_oid()) {}
+  InsertPlan(QuerySchema schema, table_oid_t table_oid, ptr<BasePlan> child)
+    : BasePlan     (PlanType::INSERT),
+      SchemaPlan   (schema),
+      HasChildPlan (move(child)),
+      TablePlan    (table_oid)
+  {}
 
-  PlanType type()         const { return PlanType::INSERT; }
-  table_oid_t table_oid() const { return table_oid_; }
-
-  ptr<BasePlan>&& child()     { return move(child_); }
-
-private:
-  ptr<BasePlan> child_;
-  table_oid_t table_oid_;
 };

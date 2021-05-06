@@ -13,25 +13,11 @@ public:
     : exec_ctx_(exec_ctx) {}
   virtual ~BaseExec() = default;
 
-  /**********************************************
-   * Instance methods
-   **********************************************/
+  virtual void init() = 0;
 
-  virtual SchemaRef schema_ref() {
-    throw NotImplementedException("schema_ref() not implemented");
-  }
+  virtual bool has_next() = 0;
 
-  virtual void init() {
-    throw NotImplementedException("init() not implemented");
-  };
-
-  virtual bool has_next() {
-    throw NotImplementedException("has_next() not implemented");
-  }
-
-  virtual Tuple next() {
-    throw NotImplementedException("next() not implemented");
-  }
+  virtual Tuple next() = 0;
 
   const ExecCtx& exec_ctx() {
     return exec_ctx_;
@@ -43,10 +29,6 @@ public:
 
   const Catalog& catalog() const {
     return exec_ctx_.catalog();
-  }
-
-  const QuerySchema& find_schema(SchemaRef schema_ref) const {
-    return catalog().find_query_schema(schema_ref);
   }
 
 protected:
