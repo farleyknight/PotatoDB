@@ -18,6 +18,7 @@ public:
   }
 
   void build_system_catalog();
+  void start_server();
 
   const Session& make_session() {
     sessions_.emplace_back(this);
@@ -28,7 +29,8 @@ public:
     return 100;
   }
 
-  ptr<ResultSet> execute(string query);
+  void execute(string statement);
+  ptr<ResultSet> query(string statement);
 
   ptr<BasePlan> build_plan(const ptr<BaseExpr>& expr);
   void startup();
@@ -36,15 +38,16 @@ public:
 private:
   int port_ = 7878;
   vector<Session> sessions_;
-
   SocketServer server_;
-  DiskMgr disk_mgr_;
-  BuffMgr buff_mgr_;
-  LogMgr log_mgr_;
-  LockMgr lock_mgr_;
-  TxnMgr txn_mgr_;
-  TableMgr table_mgr_;
-  Catalog catalog_;
+
+  DiskMgr    disk_mgr_;
+  BuffMgr    buff_mgr_;
+  LogMgr     log_mgr_;
+  LockMgr    lock_mgr_;
+  TableMgr   table_mgr_;
+  TxnMgr     txn_mgr_;
+  TableMgr   table_mgr_;
+  Catalog    catalog_;
   ExecEngine exec_eng_;
 };
 

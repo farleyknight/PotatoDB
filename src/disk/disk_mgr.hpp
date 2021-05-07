@@ -9,16 +9,8 @@
 #include "common/config.hpp"
 #include "page/page.hpp"
 
-namespace fs = std::filesystem;
-
 class DiskMgr {
 public:
-  /*********************************************************
-   * DiskMgr - A disk manager for a single-file DB.
-   * - TODO: Create a FileMgr class to give access
-   *         to Blocks which are physical offsets
-   *         but using using multiples of page size.
-   *********************************************************/
   DiskMgr();
 
   // No copy
@@ -32,16 +24,22 @@ public:
   void write_page(PageId page_id, const Page& page);
   void read_page(PageId page_id, Page& page);
 
-  PageId allocate_page() {
-    /*
-     * Allocate new page (operations like create index/table)
-     * For now just keep an increasing counter
-     */
-    // https://github.com/esengie/orbit/blob/5211612d4bf6cdc157bb17dda2c51734e70ef884/src/DiskSpaceManager/DiskSpaceManager.java#L44
+  // TODO:
+  // 1) allocate_page should take a file_id
+  // 2) keep track fo all file_ids
+  // 3) on each call to `allocate_path`, increment a counter just for
+  //    that particular file_id
+  PageId allocate_page(file_id_t file_id) {
+    // TODO! Implement in "CREATE TABLE"
+    // or "CREATE INDEX" context.
 
-    // TODO! Implement in "CREATE TABLE" or "CREATE INDEX" context.
-    auto val = next_page_id_++;
-    return PageId::from(val);
+    if (next_block_ids_.count(file_id) == 0) {
+      next_block_ids_.emplace(make_pair(0, 0));
+      return PageId(file_id, 0);
+    } else {
+      auto block_id = next_block_ids_[file_id]++;
+      return PageId(file_id, block_id);
+    }
   }
 
   void deallocate_page(UNUSED PageId page_id) {
@@ -61,28 +59,40 @@ public:
     db_file_.close();
   }
 
+  fs::path file_path_for(const string& file_name) {
+    return db_directory() / file_name;
+  }
+
 private:
   void setup_log_file();
   void setup_db_file();
   void setup_db_directory();
 
-  fs::path main_file_name() {
-    return home_path() / ".potatodb" / "database.db";
+  fs::path main_file_name() const {
+    return db_directory() / "database.db";
   }
 
-  fs::path config_file_name() {
-    return home_path() / ".potatodb" / "potatodb.yml";
+  fs::path config_file_name() const {
+    return db_directory() / "potatodb.yml";
   }
 
-  fs::path log_file_name() {
-    return home_path() / ".potatodb" / "database.log";
+  fs::path log_file_name() const {
+    return db_directory() / "database.log";
   }
 
-  fs::path home_path() {
+  fs::path db_directory() const {
+    return home_path() / ".potatodb";
+  }
+
+  fs::path home_path() const {
     return std::getenv("HOME");
   }
 
-  std::atomic<page_id_t> next_page_id_{0};
+  MutMap<file_id_t, block_id_t> next_block_ids_;
+
+  // std::atomic<page_id_t> next_page_id_{0};
+
+
   fstream db_file_, log_io_;
 
   // stream to write db file

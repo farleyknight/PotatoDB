@@ -33,6 +33,7 @@ using std::uint32_t;
 using std::fstream;
 
 using std::make_optional;
+using std::make_pair;
 using std::make_shared;
 using std::make_tuple;
 using std::make_unique;
@@ -52,6 +53,8 @@ using std::stringstream;
 using std::tuple;
 
 using std::unique_ptr;
+
+namespace fs = std::filesystem;
 
 // ptr is shorter than unique_ptr
 template<class T>

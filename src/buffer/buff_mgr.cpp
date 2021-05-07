@@ -7,11 +7,11 @@
 #include "page/hash_table_block_page.hpp"
 
 BuffMgr::BuffMgr(size_t pool_size,
-                 DiskMgr& disk_mgr,
+                 FileMgr& file_mgr,
                  LogMgr& log_mgr)
   : pool_size_ (pool_size),
     pages_     (vector<Page>(pool_size)),
-    disk_mgr_  (disk_mgr),
+    file_mgr_  (file_mgr),
     log_mgr_   (log_mgr)
 {
   // TODO: Use a configuration file to allow `LRUReplacer`
@@ -25,7 +25,8 @@ BuffMgr::BuffMgr(size_t pool_size,
   }
 }
 
-std::tuple<Page*, frame_id_t> BuffMgr::pick_or_evict_page() {
+tuple<Page*, frame_id_t>
+BuffMgr::pick_or_evict_page() {
   if (!free_list_.empty()) {
     frame_id_t frame_id = free_list_.front();
     free_list_.pop_front();
@@ -55,7 +56,8 @@ bool BuffMgr::flush_page(PageId page_id) {
     return true;
   }
 
-  disk_mgr_.write_page(page_id, page);
+  file_mgr_.write_page(file_id, block_id, page);
+  // disk_mgr_.write_page(page_id, page);
   page.set_dirty(false);
   return true;
 }
@@ -78,6 +80,11 @@ Page* BuffMgr::fetch_page(PageId page_id) {
   }
   Page& page = *maybe_page;
 
+  // TODO: Deprecate disk_mgr_ here
+  // 1) Replace all occurences of disk_mgr_ in this BuffMgr class
+  //    with the appropriate 'read_page' and 'write_page' from
+  //    the FileMgr class.
+  // 2) Split the PageId into a file_id and block_id to do this.
   disk_mgr_.read_page(page_id, page);
   page_table_[page_id] = frame_id;
   page.set_id(page_id);

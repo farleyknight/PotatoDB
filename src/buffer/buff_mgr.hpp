@@ -37,13 +37,6 @@ class HTHeaderPage;
 
 class BuffMgr {
 public:
-  /**********************************************
-   * BuffMgr - A Buffer Manager for our DBMS
-   * - Manages chunks of memory called 'pages'
-   * - Used for keeping an internal cache of
-   *   tuple data in main memory.
-   **********************************************/
-
   BuffMgr(size_t pool_size,
           DiskMgr& disk_mgr,
           LogMgr& log_mgr);
@@ -51,10 +44,6 @@ public:
   BuffMgr(const BuffMgr&) = delete; // No copy
   BuffMgr& operator=(const BuffMgr&) = delete; // No copy assign
   ~BuffMgr() = default; // Default delete
-
-  /**********************************************
-   * Instance methods
-   **********************************************/
 
   bool flush(PageId page_id);
 

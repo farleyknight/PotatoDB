@@ -11,12 +11,7 @@ class Txn;
 class TableHeap {
 public:
   TableHeap(table_oid_t table_oid,
-            BuffMgr& buff_mgr,
-            LockMgr& lock_mgr,
-            LogMgr& log_mgr,
-            PageId first_page_id);
-
-  TableHeap(table_oid_t table_oid,
+            PageId first_page_id,
             BuffMgr& buff_mgr,
             LockMgr& lock_mgr,
             LogMgr& log_mgr,

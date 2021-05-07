@@ -28,4 +28,8 @@ public:
   void serialize_to(size_t offset, Buffer& buff, Value val) const override {
     buff.write_string(offset, val.as<string>());
   }
+
+  size_t size() const override {
+    return 12; // NOTE Find out if this is correct
+  }
 };

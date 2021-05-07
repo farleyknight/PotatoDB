@@ -5,8 +5,7 @@
 #include "common/exceptions.hpp"
 
 DiskMgr::DiskMgr()
-  : next_page_id_ (0),
-    flush_log_f_  (nullptr)
+  : flush_log_f_  (nullptr)
 {
   setup_db_directory();
   setup_log_file();
@@ -14,7 +13,7 @@ DiskMgr::DiskMgr()
 }
 
 void DiskMgr::setup_log_file() {
-  std::cout << "Attempting to open log with name " << log_file_name() << std::endl;
+  std::cout << "Opening log with name " << log_file_name() << std::endl;
   log_io_.open(log_file_name(),
                std::ios::binary |
                std::ios::in |
@@ -73,7 +72,6 @@ void DiskMgr::write_page(PageId page_id, const Page& page) {
   write_buffer(page_id, page.buffer());
 }
 
-
 void DiskMgr::read_buffer(PageId page_id, Buffer& buffer) {
   // First compute the offset
   int offset = page_id.block_id() * PAGE_SIZE;
@@ -86,7 +84,6 @@ void DiskMgr::read_buffer(PageId page_id, Buffer& buffer) {
 void DiskMgr::read_page(PageId page_id, Page& page) {
   read_buffer(page_id, page.buffer());
 }
-
 
 bool DiskMgr::read_log(Buffer& log_data, size_t size, size_t offset) {
   if (offset >= std::filesystem::file_size(log_file_name())) {

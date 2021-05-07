@@ -13,28 +13,18 @@
 #include "tuple/tuple.hpp"
 
 TableHeap::TableHeap(table_oid_t table_oid,
+                     PageId first_page_id,
                      BuffMgr& buff_mgr,
                      LockMgr& lock_mgr,
                      LogMgr& log_mgr,
-                     PageId first_page_id)
+                     Txn& txn)
   : table_oid_     (table_oid),
     first_page_id_ (first_page_id),
     lock_mgr_      (lock_mgr),
     log_mgr_       (log_mgr),
     buff_mgr_      (buff_mgr)
-{}
-
-TableHeap::TableHeap(table_oid_t table_oid,
-                     BuffMgr& buff_mgr,
-                     LockMgr& lock_mgr,
-                     LogMgr& log_mgr,
-                     Txn& txn)
-  : table_oid_ (table_oid),
-    lock_mgr_  (lock_mgr),
-    log_mgr_   (log_mgr),
-    buff_mgr_  (buff_mgr)
 {
-  SlottedTablePage first_page(buff_mgr.create_page());
+  SlottedTablePage first_page(buff_mgr_.create_page(page_id));
 
   first_page_id_ = first_page.page_id();
   first_page.wlatch();

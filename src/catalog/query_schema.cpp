@@ -71,6 +71,10 @@ QuerySchema QuerySchema::copy(const TableSchema& original) {
   return QuerySchema(cols, names);
 }
 
+QuerySchema QuerySchema::empty() {
+  return QuerySchema(vector<QueryColumn>(), vector<string>());
+}
+
 const string QuerySchema::to_string() const {
   std::ostringstream os;
 

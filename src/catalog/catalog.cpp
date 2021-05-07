@@ -43,6 +43,8 @@ void Catalog::create_table(UNUSED Txn& txn,
   auto schema = make_schema_from(table_name, table_oid, column_list);
   table_schemas_.insert(std::make_pair(table_oid, schema));
 
+  std::cout << "New table created: " << table_name << std::endl;
+
   index_oids_.emplace(table_name,
                       MutMap<string, index_oid_t>());
 }

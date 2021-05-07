@@ -11,12 +11,14 @@ public:
   void init() override {
     auto table_name = plan_->table_name();
 
-    // TODO: Do we need to put any latches around the catalog while we are adding
-    // a new table?
+    // TODO: Do we need to put any latches around the catalog
+    // while we are adding a new table?
 
-    exec_ctx_.catalog().create_table(exec_ctx().txn(),
-                                     table_name,
-                                     plan_->column_list());
+    exec_ctx_.catalog().
+      create_table(exec_ctx().txn(),
+                   table_name,
+                   plan_->column_list(),
+                   exec_ctx.txn());
   }
 
   bool has_next() override {

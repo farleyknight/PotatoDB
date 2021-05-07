@@ -21,9 +21,7 @@ public:
     throw NotImplementedException("type_id not implemented!");
   }
 
-  virtual size_t size() const {
-    throw NotImplementedException("size not implemented!");
-  }
+  virtual size_t size() const = 0;
 
   virtual bool is_castable_from(UNUSED TypeId type_id) const {
     throw NotImplementedException("is_castable_from not implemented!");

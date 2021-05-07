@@ -18,7 +18,7 @@ public:
   // Allow copy assign
   BasePlan& operator=(const BasePlan& plan) = default;
 
-  virtual ~BasePlan() = 0;
+  virtual ~BasePlan() = default;
 
   PlanType type() const { return type_; }
 
