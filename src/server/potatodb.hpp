@@ -7,8 +7,6 @@
 #include "server/session.hpp"
 #include "server/socket_server.hpp"
 
-namespace fs = std::filesystem;
-
 class PotatoDB {
 public:
   PotatoDB();
@@ -32,7 +30,6 @@ public:
   void execute(string statement);
   ptr<ResultSet> query(string statement);
 
-  ptr<BasePlan> build_plan(const ptr<BaseExpr>& expr);
   void startup();
 
 private:
@@ -40,13 +37,13 @@ private:
   vector<Session> sessions_;
   SocketServer server_;
 
+  FileMgr    file_mgr_;
   DiskMgr    disk_mgr_;
   BuffMgr    buff_mgr_;
   LogMgr     log_mgr_;
   LockMgr    lock_mgr_;
   TableMgr   table_mgr_;
   TxnMgr     txn_mgr_;
-  TableMgr   table_mgr_;
   Catalog    catalog_;
   ExecEngine exec_eng_;
 };

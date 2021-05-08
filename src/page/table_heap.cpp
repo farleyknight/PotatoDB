@@ -24,7 +24,7 @@ TableHeap::TableHeap(table_oid_t table_oid,
     log_mgr_       (log_mgr),
     buff_mgr_      (buff_mgr)
 {
-  SlottedTablePage first_page(buff_mgr_.create_page(page_id));
+  SlottedTablePage first_page(buff_mgr_.fetch_page(first_page_id));
 
   first_page_id_ = first_page.page_id();
   first_page.wlatch();
@@ -68,7 +68,9 @@ bool TableHeap::insert_tuple(Tuple& tuple,
     } else {
       // Otherwise we have run out of valid pages.
       // We need to create a new page.
-      auto maybe_new_page = buff_mgr_.create_page();
+
+      // TODO: This should be allocating a page from the FileMgr
+      auto maybe_new_page = buff_mgr_.fetch_page(PageId::INVALID());
       // If we could not create a new page,
       if (maybe_new_page == nullptr) {
         // Then life sucks and we abort the txn.

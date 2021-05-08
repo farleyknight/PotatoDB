@@ -235,7 +235,9 @@ void LinearProbeHT<K, V>::append_buckets(HTHeaderPage& header_page,
   for (; total_current_buckets < num_buckets;
        total_current_buckets += block_array_size()) {
 
-    auto maybe_page = buff_mgr_.create_page();
+    // TODO: This should actually be allocating pages from
+    // a file via the FileMgr
+    auto maybe_page = buff_mgr_.fetch_page(PageId::INVALID());
     assert(maybe_page);
     auto page = HTBlockPage<K,V>(maybe_page);
 

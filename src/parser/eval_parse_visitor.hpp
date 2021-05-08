@@ -128,7 +128,17 @@ public:
 
     ColumnListExpr cols;
     for (auto &col_ctx : col_list_ctx->result_column()) {
-      cols.push_back(ColumnExpr(col_ctx->getText()));
+      if (col_ctx->table_name() == nullptr) {
+        cols.push_back(ColumnExpr(col_ctx->getText()));
+      } else {
+        if (col_ctx->column_name() == nullptr) {
+          cols.push_back(ColumnExpr("*",
+                                    col_ctx->table_name()->getText()));
+        } else {
+          cols.push_back(ColumnExpr(col_ctx->column_name()->getText(),
+                                    col_ctx->table_name()->getText()));
+        }
+      }
     }
 
     const auto &table_list_ctxs = ctx->table_or_subquery();

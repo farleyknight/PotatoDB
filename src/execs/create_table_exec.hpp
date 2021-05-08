@@ -15,10 +15,9 @@ public:
     // while we are adding a new table?
 
     exec_ctx_.catalog().
-      create_table(exec_ctx().txn(),
+      create_table(exec_ctx_.txn(),
                    table_name,
-                   plan_->column_list(),
-                   exec_ctx.txn());
+                   plan_->column_list());
   }
 
   bool has_next() override {

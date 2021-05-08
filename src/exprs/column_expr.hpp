@@ -15,6 +15,14 @@ public:
       table_   (table)
   {}
 
+  const string& name() {
+    return name_;
+  }
+
+  const string& table() {
+    return table_;
+  }
+
   virtual string to_string() const override {
     return name_;
   }
@@ -22,4 +30,3 @@ public:
 protected:
   string name_, table_;
 };
-

@@ -1,5 +1,13 @@
 #pragma once
 
+#include <filesystem>
+#include <fstream>
+
+#include "common/config.hpp"
+#include "buffer/buffer.hpp"
+
+namespace fs = std::filesystem;
+
 class FileHandle {
 public:
   FileHandle(fs::path file_path)
@@ -9,6 +17,17 @@ public:
       create();
     }
     open();
+  }
+
+  void write_buffer(offset_t offset, const Buffer& buffer) {
+    handle_.seekp(offset);
+    handle_.write(buffer.char_ptr(), buffer.size());
+    handle_.flush();
+  }
+
+  void read_buffer(offset_t offset, Buffer& buffer) {
+    handle_.seekp(offset);
+    handle_.read(buffer.char_ptr(), buffer.size());
   }
 
   void create() {

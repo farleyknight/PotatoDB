@@ -1273,9 +1273,7 @@ public:
     antlr4::tree::TerminalNode *BIND_PARAMETER();
     Column_nameContext *column_name();
     Table_nameContext *table_name();
-    std::vector<antlr4::tree::TerminalNode *> DOT();
-    antlr4::tree::TerminalNode* DOT(size_t i);
-    Database_nameContext *database_name();
+    antlr4::tree::TerminalNode *DOT();
     Unary_operatorContext *unary_operator();
     std::vector<ExprContext *> expr();
     ExprContext* expr(size_t i);
@@ -1322,6 +1320,7 @@ public:
     antlr4::tree::TerminalNode *K_IS();
     antlr4::tree::TerminalNode *K_BETWEEN();
     antlr4::tree::TerminalNode *K_IN();
+    Database_nameContext *database_name();
     antlr4::tree::TerminalNode *K_COLLATE();
     Collation_nameContext *collation_name();
     antlr4::tree::TerminalNode *K_LIKE();
@@ -1576,6 +1575,7 @@ public:
     antlr4::tree::TerminalNode *STAR();
     Table_nameContext *table_name();
     antlr4::tree::TerminalNode *DOT();
+    Column_nameContext *column_name();
     ExprContext *expr();
     Column_aliasContext *column_alias();
     antlr4::tree::TerminalNode *K_AS();

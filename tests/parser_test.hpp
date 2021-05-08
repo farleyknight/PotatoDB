@@ -17,6 +17,23 @@ TEST(ParserTest, SimpleSelectTest) {
   EXPECT_EQ(col_list.columns()[1].to_string(), "*");
 }
 
+TEST(ParserTest, SelectTableColumNameTest) {
+  string query = "SELECT foo.bar, baz.* FROM foo, baz";
+
+  auto exprs = SQLParser::as_exprs(query);
+  EXPECT_EQ(exprs.size(), 1);
+  const auto expr = dynamic_cast<SelectExpr*>(exprs[0].get());
+
+  auto &table_list = expr->table_list();
+  EXPECT_EQ(table_list.tables().size(), 2);
+  EXPECT_EQ(table_list.tables()[0].to_string(), "foo");
+  EXPECT_EQ(table_list.tables()[1].to_string(), "bar");
+
+  auto &col_list = expr->column_list();
+  EXPECT_EQ(col_list.columns().size(), 1);
+  EXPECT_EQ(col_list.columns()[0].to_string(), "*");
+}
+
 TEST(ParserTest, SelectMultipleTablesTest) {
   string query = "SELECT * FROM foo, bar";
 
@@ -83,9 +100,9 @@ TEST(ParserTest, InsertWithColumnsTest) {
   EXPECT_EQ(second_values[1].to_string(), "4");
 }
 
-
 TEST(ParserTest, CreateTableTest) {
-  string statement = "CREATE TABLE foobar (id INTEGER PRIMARY KEY, name VARCHAR(10) NOT NULL)";
+  const string statement
+    = "CREATE TABLE foobar (id INTEGER PRIMARY KEY, name VARCHAR(10) NOT NULL)";
 
   auto exprs = SQLParser::as_exprs(statement);
   EXPECT_EQ(exprs.size(), 1);
@@ -107,3 +124,4 @@ TEST(ParserTest, CreateTableTest) {
   EXPECT_EQ(name_col.type_length(), 10);
   EXPECT_EQ(name_col.is_not_null(), true);
 }
+

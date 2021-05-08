@@ -1,41 +1,22 @@
-
 #include "server/potatodb.hpp"
 #include "server/client_socket.hpp"
+
 #include "parser/sql_parser.hpp"
+#include "plans/plan_factory.hpp"
 
 PotatoDB potatodb;
 
 PotatoDB::PotatoDB()
   : server_    (this),
-    disk_mgr_  (),
+    file_mgr_  (),
+    disk_mgr_  (file_mgr_),
     buff_mgr_  (pool_size(), disk_mgr_, log_mgr_),
     log_mgr_   (disk_mgr_),
+    table_mgr_ (disk_mgr_, lock_mgr_, log_mgr_, buff_mgr_),
     txn_mgr_   (lock_mgr_, log_mgr_, table_mgr_),
-    file_mgr_  (disk_mgr_),
-    table_mgr_ (disk_mgr_, file_mgr_, buff_mgr_, lock_mgr_, buff_mgr_),
     catalog_   (),
     exec_eng_  (buff_mgr_, txn_mgr_, catalog_)
 {}
-
-ptr<BasePlan> PotatoDB::build_plan(const ptr<BaseExpr>& expr) {
-  // TODO: Figure out expr type
-  // Based on type, create specific plan
-
-  // TODO: CREATE TABLE plan!
-  // 1) First check expr.type == CREATE_TABLE
-  // 2) Extract out new table name, column defs
-  // 3) Extract out primary key
-  // 4) Make sure primary key is used (NEEDS BTREE FIRST!)
-  if (expr->expr_type() == ExprType::CREATE_TABLE) {
-    auto create_table_expr = dynamic_cast<CreateTableExpr*>(expr.get());
-    auto table_name = create_table_expr->table().name();
-    auto column_def_list = create_table_expr->column_defs();
-    return make_unique<CreateTablePlan>(table_name, column_def_list);
-  } else {
-    return make_unique<SeqScanPlan>(QuerySchema::empty(),
-                                    INVALID_TABLE_OID);
-  }
-}
 
 ptr<ResultSet> PotatoDB::query(string statement) {
   try {
@@ -43,7 +24,7 @@ ptr<ResultSet> PotatoDB::query(string statement) {
     auto exprs = SQLParser::as_exprs(statement);
     // TODO: Allow for multiple statements
     assert(exprs.size() > 0);
-    auto plan = build_plan(exprs[0]);
+    auto plan = PlanFactory::create(catalog_, expr[0]);
 
     // Create and run the txn
     auto &txn = txn_mgr_.begin();
@@ -72,7 +53,7 @@ void PotatoDB::execute(string statement) {
     auto exprs = SQLParser::as_exprs(statement);
     // TODO: Allow for multiple statements
     assert(exprs.size() > 0);
-    auto plan = build_plan(exprs[0]);
+    auto plan = PlanFactory::create(catalog_, expr[0]);
 
     // Create and run the txn
     auto &txn = txn_mgr_.begin();
@@ -94,13 +75,33 @@ void PotatoDB::execute(string statement) {
 }
 
 const string system_catalog_sql =
-  "CREATE TABLE system_catalog ( " \
+  "CREATE TABLE system_catalog ( "              \
 
   "id         INTEGER PRIMARY KEY, "            \
   "type       INTEGER NOT NULL, "               \
   "name       VARCHAR(32) NOT NULL, "           \
   "table_name VARCHAR(32) NOT NULL, "           \
-  "sql        VARCHAR(255) NOT NULL "           \
+
+  ");";
+
+/*
+ * system_catalog.types
+ *
+ * 0 = INVALID
+ * 1 = TABLE
+ * 2 = COLUMN
+ * 3 = INDEX
+ *
+ */
+
+const string insert_system_catalog_sql =
+  "INSERT INTO system_catalog "                 \
+  "("                                           \
+
+  "1,"                                          \
+  "1,"                                          \
+  "'system_catalog',"                           \
+  "'system_catalog'"                            \
 
   ");";
 
@@ -120,6 +121,8 @@ void PotatoDB::build_system_catalog() {
   // 6) TableFile creates TableHeap
   // 7) TableHeap creates TablePage
   // 8) TablePage adds tuples to the `system_catalog`
+
+  execut(insert_system_catalog_sql);
 }
 
 void PotatoDB::start_server() {

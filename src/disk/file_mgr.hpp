@@ -1,32 +1,32 @@
 #pragma once
 
 #include "disk/file_handle.hpp"
+#include "page/page_id.hpp"
 
 class FileMgr {
 public:
-  FileMgr(DiskMgr& disk_mgr)
-    : disk_mgr_ (disk_mgr)
-  {}
+  FileMgr() {}
 
   void load_files() {
-    // TODO:
+    // TODO
     // 1) List all files under the DB directory ($HOME/.potatodb)
     // 2) Create a file handle for each one, add it to `files_`
   }
 
-  file_id_t create_table_file(const string& table_name) {
-    auto file_path = disk_mgr_.file_path_for(table_name + ".tbl");
-    return add_file(file_path);
-  }
+  void write_buffer(PageId page_id, const Buffer& buffer);
+  void read_buffer(PageId page_id, Buffer& buffer);
 
-  file_id_t add_file(fs::path file_path) {
-    auto handle = FileHandle(file_path);
+  void deallocate_page(UNUSED PageId page_id);
+  PageId allocate_page(file_id_t file_id);
+
+  file_id_t create_file(fs::path file_path) {
     file_id_t file_id = files_.size();
-    files_.push_back(handle);
+    auto handle = make_unique<FileHandle>(file_path);
+    files_.emplace_back(move(handle));
     return file_id;
   }
 
 private:
-  DiskMgr& disk_mgr_;
-  vector<FileHandle> files_;
+  MutMap<file_id_t, block_id_t> next_block_ids_;
+  vector<ptr<FileHandle>> files_;
 };

@@ -7,33 +7,12 @@
 
 #include "page/page.hpp"
 #include "page/table_page.hpp"
-#include "disk/disk_mgr.hpp"
+#include "disk/file_mgr.hpp"
 
 #include "recovery/log_mgr.hpp"
 
 class BPlusTreePage;
 class HTHeaderPage;
-
-/*
- * A better Buffer Pool Manager implementation:
- *
- * A buffer pool manager should not couple buffer data to the read/write
- * methods.
- *
- * It should also not couple buffer data to buffer metadata either.
- *
- * To resolve these two ideas, every time we pass around a page of data,
- * what we really should be passing around are a triple:
- *
- * => Page read-write methods. [CONST, pointer to object on HEAP]
- * => Page metadata            [MUT, small copyable object, can be stored on STACK]
- * => Page data                [MUT, pass by reference, pointer to large memory chunk on the HEAP]
- *
- * 1) By decoupling the read-write methods, this makes conversion from one type of page to another
- *    relatively easy.
- * 2) By decoupling page data from page metadata, we can make lots of existing "mutable" methods
- *    const, since we are only mutating the metadata, not the actual data.
- */
 
 class BuffMgr {
 public:
@@ -41,14 +20,16 @@ public:
           DiskMgr& disk_mgr,
           LogMgr& log_mgr);
 
-  BuffMgr(const BuffMgr&) = delete; // No copy
-  BuffMgr& operator=(const BuffMgr&) = delete; // No copy assign
-  ~BuffMgr() = default; // Default delete
+  // No copy
+  BuffMgr(const BuffMgr&) = delete;
+  // No copy assign
+  BuffMgr& operator=(const BuffMgr&) = delete;
+  // Default delete
+  ~BuffMgr() = default;
 
   bool flush(PageId page_id);
 
   Page* fetch_page(PageId page_id);
-  Page* create_page();
 
   bool unpin(PageId page_id, bool is_dirty);
 
@@ -63,7 +44,7 @@ public:
   bool flush_page(Page& page);
 
 private:
-  std::tuple<Page*, frame_id_t> pick_or_evict_page();
+  tuple<Page*, frame_id_t> pick_or_evict_page();
 
   bool contains_page(PageId page_id);
   Page& page_by_id(PageId page_id);
@@ -76,5 +57,5 @@ private:
   ptr<Replacer> replacer_;
 
   DiskMgr& disk_mgr_;
-  const LogMgr& log_mgr_;
+  LogMgr& log_mgr_;
 };

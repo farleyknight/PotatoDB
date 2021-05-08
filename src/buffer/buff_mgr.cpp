@@ -7,11 +7,11 @@
 #include "page/hash_table_block_page.hpp"
 
 BuffMgr::BuffMgr(size_t pool_size,
-                 FileMgr& file_mgr,
+                 DiskMgr& disk_mgr,
                  LogMgr& log_mgr)
   : pool_size_ (pool_size),
     pages_     (vector<Page>(pool_size)),
-    file_mgr_  (file_mgr),
+    disk_mgr_  (disk_mgr),
     log_mgr_   (log_mgr)
 {
   // TODO: Use a configuration file to allow `LRUReplacer`
@@ -56,7 +56,7 @@ bool BuffMgr::flush_page(PageId page_id) {
     return true;
   }
 
-  file_mgr_.write_page(file_id, block_id, page);
+  disk_mgr_.write_page(page_id, page);
   // disk_mgr_.write_page(page_id, page);
   page.set_dirty(false);
   return true;
@@ -80,35 +80,9 @@ Page* BuffMgr::fetch_page(PageId page_id) {
   }
   Page& page = *maybe_page;
 
-  // TODO: Deprecate disk_mgr_ here
-  // 1) Replace all occurences of disk_mgr_ in this BuffMgr class
-  //    with the appropriate 'read_page' and 'write_page' from
-  //    the FileMgr class.
-  // 2) Split the PageId into a file_id and block_id to do this.
   disk_mgr_.read_page(page_id, page);
   page_table_[page_id] = frame_id;
   page.set_id(page_id);
-  pin_page(page, frame_id);
-
-  return maybe_page;
-}
-
-// NOTE: At some point this method should take a `file_id_t`
-// and allocate an extra block on the page via the `disk_mgr`.
-Page* BuffMgr::create_page() {
-  frame_id_t frame_id;
-  Page *maybe_page = nullptr;
-  std::tie(maybe_page, frame_id) = pick_or_evict_page();
-  if (maybe_page == nullptr) {
-    return nullptr;
-  }
-  Page& page = *maybe_page;
-
-  PageId page_id = disk_mgr_.allocate_page();
-  page_table_[page_id] = frame_id;
-  page.reset_memory();
-  page.set_id(page_id);
-  page.set_dirty(true);
   pin_page(page, frame_id);
 
   return maybe_page;

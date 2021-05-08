@@ -41,6 +41,46 @@ public:
     return table_oids_.at(table_name);
   }
 
+  QuerySchema query_schema_for(vector<string> table_names,
+                               const ColumnListExpr& column_list)
+  {
+    // TODO: Support the * expression
+    vector<QueryColumn> columns;
+    for (const auto column : column_list.list()) {
+      if (column.has_table_name()) {
+        columns.push_back(QueryColumn(...));
+      } else {
+        auto column_info = column_for(table_names, column->name());
+        columns.push_back(QueryColumn(...));
+      }
+    }
+
+    return QuerySchema(columns);
+  }
+
+  QueryColumn column_for(vector<string> table_names, const string& column_name) {
+    vector<QueryColumn> candidates;
+    for (const auto &table_name : table_names) {
+      if (table_has_column_named(table_name, column_name)) {
+        auto query_column = table_column_for(table_name, column_name);
+        candidates.push_back(query_column);
+      }
+    }
+
+    if (candidates.size() == 0) {
+      // TODO Create new exception type
+      // message = "No column named " + column_name + " in the tables given in the query"
+      throw NoColumnsNamedException(column_name);
+    } else if (candidates.size() > 1) {
+      // TODO: Give a better error message that shows the list of all tables that have
+      // a matching column name.
+      // message = "More than one table has a column named " + column_name;
+      throw MoreThanOneColumnException(column_name);
+    } else {
+      return candidates[0];
+    }
+  }
+
   void register_index(Txn& txn,
                       const string table_name,
                       const string index_name,

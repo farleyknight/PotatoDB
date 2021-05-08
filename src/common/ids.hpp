@@ -21,6 +21,7 @@ using page_id_t     = std::uint32_t;
 // The above can be decomposed into these two:
 using file_id_t     = std::uint16_t;
 using block_id_t    = std::uint16_t;
+using offset_t      = std::uint32_t;
 
 // This is stored separately in a RID
 using slot_id_t     = std::uint16_t;

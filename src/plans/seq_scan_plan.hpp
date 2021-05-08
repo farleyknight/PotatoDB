@@ -6,14 +6,12 @@
 #include "plans/schema_plan.hpp"
 #include "plans/maybe_pred_plan.hpp"
 
-class SeqScanPlan : public BasePlan, public TablePlan, public SchemaPlan, public MaybePredPlan {
+class SeqScanPlan : public BasePlan,
+                    public TablePlan,
+                    public SchemaPlan,
+                    public MaybePredPlan
+{
 public:
-  SeqScanPlan(QuerySchema schema, table_oid_t table_oid)
-    : BasePlan   (PlanType::TABLE_SCAN),
-      TablePlan  (table_oid),
-      SchemaPlan (schema)
-  {}
-
   SeqScanPlan(QuerySchema schema, table_oid_t table_oid, ptr<BaseQuery>&& pred)
     : BasePlan      (PlanType::TABLE_SCAN),
       TablePlan     (table_oid),

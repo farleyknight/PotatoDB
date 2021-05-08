@@ -48,6 +48,11 @@ public:
     return joins_;
   }
 
+  bool operator==(const QuerySchema& schema) {
+    // TODO!
+    return false;
+  }
+
 private:
   vector<string> names_;
   vector<QueryJoin> joins_; // TODO: Need to populate this
