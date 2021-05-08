@@ -22,8 +22,7 @@ public:
    *******************************************************/
 
   TableSchema(vector<TableColumn> columns,
-              vector<string> names,
-              string table_name,
+              const table_name_t& table_name,
               table_oid_t table_oid);
   // Allow copy
   TableSchema(const TableSchema&) = default;
@@ -34,7 +33,7 @@ public:
 
   const string to_string() const;
 
-  QueryColumn operator[](string col_name) const;
+  QueryColumn operator[](const column_name_t& name) const;
 
   table_oid_t table_oid() const {
     return table_oid_;
@@ -42,5 +41,5 @@ public:
 
 private:
   table_oid_t table_oid_;
-  string table_name_;
+  table_name_t table_name_;
 };

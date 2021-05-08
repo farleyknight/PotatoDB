@@ -10,7 +10,7 @@
 template<class ColT>
 class BaseSchema {
 public:
-  BaseSchema(vector<ColT> columns, vector<string> names);
+  BaseSchema(vector<ColT> columns);
 
   // Allow copy
   BaseSchema(const BaseSchema&) = default;
@@ -22,25 +22,39 @@ public:
   size_t column_count() const;
   size_t tuple_length() const;
 
-  bool has_column(const string& name) const;
-  size_t index_for(const string& name) const;
-  column_oid_t column_oid_for(const string& name) const;
+  bool has_column(const column_name_t& name) const;
+  size_t index_for(const column_name_t& name) const;
+  column_oid_t column_oid_for(const column_name_t& name) const;
   size_t offset_for(column_oid_t oid) const;
-  size_t offset_for(const string& name) const;
+  size_t offset_for(const column_name_t& name) const;
 
-  const ColT& by_offset(size_t offset) const;
-  const ColT& by_index(size_t index) const {
+  const ColT& by_offset(offset_t offset) const;
+  const ColT& by_index(index_t index) const {
     return by_offset(index);
   }
 
   const ColT& by_column_oid(column_oid_t oid) const;
-  const ColT& by_name(string name) const;
+  const ColT& by_name(const column_name_t& name) const;
 
   const vector<column_oid_t>& unlined_columns() const;
   const vector<ColT>& all() const;
+  const vector<ColT>& columns() const;
 
   virtual const string to_string() const = 0;
 
+  bool operator==(const BaseSchema& other) const {
+    if (other.columns_.size() != columns_.size()) {
+      return false;
+    }
+
+    for (index_t i = 0; i < columns_.size(); ++i) {
+      if (other.columns_[i] != columns_[i]) {
+        return false;
+      }
+    }
+
+    return true;
+  }
 protected:
   // Are all tuples inlined when stored on the page?
   // If some of them are not inlined, the page layout will differ.
@@ -50,8 +64,8 @@ protected:
   // keeps track of unlined columns, using logical position(start with 0)
   vector<column_oid_t> unlined_columns_;
 
-  MutMap<string, column_oid_t> column_oids_;
-  vector<size_t> offsets_;
+  MutMap<column_name_t, column_oid_t> column_oids_;
+  vector<offset_t> offsets_;
 
   // size of fixed length columns
   // NOTE: This *must* be uint32_t to keep consistent with page

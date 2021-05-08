@@ -74,10 +74,6 @@ public:
   int32_t variable_length() const { return variable_length_; }
   const string& name()       const { return name_; }
 
-  /**********************************************
-   * Debug methods
-   **********************************************/
-
   const string to_string() const {
     std::ostringstream os;
 
@@ -93,6 +89,32 @@ public:
     }
     os << "]";
     return os.str();
+  }
+
+  bool operator==(const TableColumn& other) const {
+    return
+      name_            == other.name_ &&
+      type_id_         == other.type_id_ &&
+      table_oid_       == other.table_oid_ &&
+      column_oid_      == other.column_oid_ &&
+      inlined_         == other.inlined_ &&
+      nullable_        == other.nullable_ &&
+      primary_key_     == other.primary_key_ &&
+      fixed_length_    == other.fixed_length_ &&
+      variable_length_ == other.variable_length_;
+  }
+
+  bool operator!=(const TableColumn& other) const {
+    return
+      name_            != other.name_ ||
+      type_id_         != other.type_id_ ||
+      table_oid_       != other.table_oid_ ||
+      column_oid_      != other.column_oid_ ||
+      inlined_         != other.inlined_ ||
+      nullable_        != other.nullable_ ||
+      primary_key_     != other.primary_key_ ||
+      fixed_length_    != other.fixed_length_ ||
+      variable_length_ != other.variable_length_;
   }
 
 private:

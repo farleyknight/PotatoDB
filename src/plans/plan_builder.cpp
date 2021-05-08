@@ -207,11 +207,11 @@ CompType PlanBuilder::to_comp_type(string op) {
 }
 
 const QuerySchema& PlanBuilder::insert_table_schema() {
-  return catalog_.find_query_schema(insert_table_oid_);
+  return catalog_.query_schema_for(insert_table_oid_);
 }
 
 const QuerySchema& PlanBuilder::from_table_schema() {
-  return catalog_.find_query_schema(from_table_oid_);
+  return catalog_.query_schema_for(from_table_oid_);
 }
 
 const QuerySchema& PlanBuilder::right_table_schema() {

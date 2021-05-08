@@ -4,20 +4,20 @@
 
 class ColumnDefExpr : public BaseExpr {
 public:
-  ColumnDefExpr(string name, string type_name)
+  ColumnDefExpr(column_name_t name, string type_name)
     : BaseExpr   (ExprType::COLUMN_DEF),
       name_      (name),
       type_name_ (type_name)
   {}
 
-  ColumnDefExpr(string name, string type_name, uint32_t type_length)
+  ColumnDefExpr(column_name_t name, string type_name, uint32_t type_length)
     : BaseExpr     (ExprType::COLUMN_DEF),
       name_        (name),
       type_name_   (type_name),
       type_length_ (type_length)
   {}
 
- virtual string to_string() const override {
+ virtual const string to_string() const override {
     return name_ + " " + type_name_;
   }
 
@@ -50,7 +50,8 @@ public:
   }
 
 protected:
-  string name_, type_name_;
+  column_name_t name_;
+  string type_name_;
   uint32_t type_length_ = 0;
   bool not_null_ = false, primary_key_ = false;
 };

@@ -21,14 +21,7 @@ UNUSED QuerySchema QuerySchema::merge(const QuerySchema& left,
   cols.insert(cols.end(), left.all().begin(), left.all().end());
   cols.insert(cols.end(), right.all().begin(), right.all().end());
 
-  vector<string> names(left.column_count() + right.column_count());
-  for (auto const& name : left.names()) {
-    names.push_back(name);
-  }
-  for (auto const& name : right.names()) {
-    names.push_back(name);
-  }
-  return QuerySchema(cols, names);
+  return QuerySchema(cols);
 }
 
 
@@ -44,7 +37,7 @@ QuerySchema QuerySchema::slice(const TableSchema& from,
                                  col.name());
     cols.push_back(query_col);
   }
-  return QuerySchema(cols, names);
+  return QuerySchema(cols);
 }
 
 QuerySchema QuerySchema::slice(const QuerySchema& from,
@@ -54,7 +47,7 @@ QuerySchema QuerySchema::slice(const QuerySchema& from,
   for (auto const& name : names) {
     cols.push_back(from.by_name(name));
   }
-  return QuerySchema(cols, names);
+  return QuerySchema(cols);
 }
 
 QuerySchema QuerySchema::copy(const TableSchema& original) {
@@ -66,13 +59,12 @@ QuerySchema QuerySchema::copy(const TableSchema& original) {
                                  // col.oid(),
                                  col.name());
     cols.push_back(query_col);
-    names.push_back(col.name());
   }
-  return QuerySchema(cols, names);
+  return QuerySchema(cols);
 }
 
 QuerySchema QuerySchema::empty() {
-  return QuerySchema(vector<QueryColumn>(), vector<string>());
+  return QuerySchema(vector<QueryColumn>());
 }
 
 const string QuerySchema::to_string() const {

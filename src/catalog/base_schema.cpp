@@ -2,11 +2,9 @@
 #include "catalog/base_schema.hpp"
 
 template<class ColT>
-BaseSchema<ColT>::BaseSchema(vector<ColT> cols, vector<string> names) {
-  assert(cols.size() == names.size());
-
+BaseSchema<ColT>::BaseSchema(vector<ColT> cols) {
   size_t offset = 0;
-  for (size_t oid = 0; oid < cols.size(); ++oid) {
+  for (index_t oid = 0; oid < cols.size(); ++oid) {
     auto &col = cols[oid];
 
     if (!col.is_inlined()) {
@@ -17,7 +15,7 @@ BaseSchema<ColT>::BaseSchema(vector<ColT> cols, vector<string> names) {
     offsets_.push_back(offset);
     offset += col.fixed_length();
 
-    column_oids_[names[oid]] = oid;
+    column_oids_[col.name()] = oid;
     columns_.push_back(col);
   }
 
@@ -25,12 +23,12 @@ BaseSchema<ColT>::BaseSchema(vector<ColT> cols, vector<string> names) {
 }
 
 template<class ColT>
-bool BaseSchema<ColT>::has_column(const string& name) const {
+bool BaseSchema<ColT>::has_column(const column_name_t& name) const {
   return column_oids_.count(name) > 0;
 }
 
 template<class ColT>
-column_oid_t BaseSchema<ColT>::column_oid_for(const string& name) const {
+column_oid_t BaseSchema<ColT>::column_oid_for(const column_name_t& name) const {
   return column_oids_.at(name);
 }
 
@@ -40,12 +38,12 @@ size_t BaseSchema<ColT>::offset_for(column_oid_t oid) const {
 }
 
 template<class ColT>
-size_t BaseSchema<ColT>::offset_for(const string& name) const {
+size_t BaseSchema<ColT>::offset_for(const column_name_t& name) const {
   return offset_for(column_oid_for(name));
 }
 
 template<class ColT>
-size_t BaseSchema<ColT>::index_for(const string& name) const {
+size_t BaseSchema<ColT>::index_for(const column_name_t& name) const {
   return column_oid_for(name);
 }
 
@@ -65,7 +63,7 @@ const vector<column_oid_t>& BaseSchema<ColT>::unlined_columns() const {
 }
 
 template<class ColT>
-const ColT& BaseSchema<ColT>::by_name(string name) const {
+const ColT& BaseSchema<ColT>::by_name(const column_name_t& name) const {
   return columns_.at(column_oid_for(name));
 }
 
@@ -75,12 +73,17 @@ const ColT& BaseSchema<ColT>::by_column_oid(column_oid_t oid) const {
 }
 
 template<class ColT>
-const ColT& BaseSchema<ColT>::by_offset(size_t offset) const {
+const ColT& BaseSchema<ColT>::by_offset(offset_t offset) const {
   return columns_.at(offset);
 }
 
 template<class ColT>
 const vector<ColT>& BaseSchema<ColT>::all() const {
+  return columns_;
+}
+
+template<class ColT>
+const vector<ColT>& BaseSchema<ColT>::columns() const {
   return columns_;
 }
 

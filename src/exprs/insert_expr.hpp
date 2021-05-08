@@ -35,7 +35,7 @@ public:
     return tuples_;
   }
 
-  virtual string to_string() const override {
+  virtual const string to_string() const override {
     return "INSERT INTO " + table_.to_string() +
       columns_.to_string() +
       "VALUES " + tuples_.to_string();

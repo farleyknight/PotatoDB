@@ -9,7 +9,7 @@ public:
       data_    (data)
   {}
 
-  virtual string to_string() const override {
+  virtual const string to_string() const override {
     return data_;
   }
 

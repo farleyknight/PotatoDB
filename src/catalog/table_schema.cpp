@@ -10,15 +10,14 @@
  **********************************************/
 
 TableSchema::TableSchema(vector<TableColumn> columns,
-                         vector<string> names,
-                         string table_name,
+                         const table_name_t& table_name,
                          table_oid_t table_oid)
-  : BaseSchema  (columns, names),
+  : BaseSchema  (columns),
     table_oid_  (table_oid),
     table_name_ (table_name)
 {}
 
-QueryColumn TableSchema::operator[](const string col_name) const {
+QueryColumn TableSchema::operator[](const column_name_t& col_name) const {
   if (!has_column(col_name)) {
     throw Exception("No such column " + col_name + " + on table " + table_name_);
   }

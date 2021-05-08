@@ -8,11 +8,8 @@ class QuerySchema;
 
 class QueryColumn : public BaseQuery {
 public:
-
-  // TODO: We should be able to create a QueryColumn via a TableColumn
-  // Can we inherit both from BaseQuery and BaseColumn?
   QueryColumn(TypeId type_id,
-              string name)
+              const column_name_t name)
     : BaseQuery (type_id),
       name_     (name)
   {}
@@ -58,6 +55,14 @@ public:
     return 0; // TODO!
   }
 
+  bool operator==(const QueryColumn& other) const {
+    return name_ == other.name_;
+  }
+
+  bool operator!=(const QueryColumn& other) const {
+    return name_ != other.name_;
+  }
+
 private:
-  string name_;
+  column_name_t name_;
 };

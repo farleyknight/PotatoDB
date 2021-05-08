@@ -27,7 +27,7 @@ public:
     return name_;
   }
 
-  virtual string to_string() const override {
+  virtual const string to_string() const override {
     return name_;
   }
 

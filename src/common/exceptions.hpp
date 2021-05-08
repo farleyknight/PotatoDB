@@ -26,7 +26,11 @@ enum class ExceptionType {
   /** Method not implemented. */
   NOT_IMPLEMENTED = 11,
 
-  BAD_FILE = 12
+  BAD_FILE = 12,
+
+  NO_COLUMNS_NAMED = 13,
+
+  MORE_THAN_ONE_COLUMN = 14
 };
 
 class Exception : public std::runtime_error {
@@ -88,6 +92,21 @@ private:
 class NotImplementedException : public Exception {
 public:
   NotImplementedException() = delete;
-  explicit NotImplementedException(const std::string &msg)
+  explicit NotImplementedException(const string &msg)
     : Exception(ExceptionType::NOT_IMPLEMENTED, msg) {}
 };
+
+class NoColumnsNamedException : public Exception {
+public:
+  NoColumnsNamedException() = delete;
+  explicit NoColumnsNamedException(const string &msg)
+    : Exception(ExceptionType::NO_COLUMNS_NAMED, msg) {}
+};
+
+class MoreThanOneColumnException : public Exception {
+public:
+  MoreThanOneColumnException() = delete;
+  explicit MoreThanOneColumnException(const string &msg)
+    : Exception(ExceptionType::MORE_THAN_ONE_COLUMN, msg) {}
+};
+

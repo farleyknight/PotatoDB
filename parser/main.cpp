@@ -4,8 +4,10 @@
 
 #include "parser/sql_parser.hpp"
 
-int main(int argc, const char* argv[]) {
-  std::string input = std::string(argv[1]);
+int main(UNUSED int argc,
+         const char* argv[])
+{
+  string input = string(argv[1]);
 
   // std::cout << SQLParser::as_tree(input);
 

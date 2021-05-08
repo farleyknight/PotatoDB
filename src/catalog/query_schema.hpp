@@ -8,8 +8,8 @@ class TableSchema;
 
 class QuerySchema : public BaseSchema<QueryColumn> {
 public:
-  QuerySchema(vector<QueryColumn> cols, vector<string> names)
-    : BaseSchema (cols, names)
+  QuerySchema(vector<QueryColumn> cols)
+    : BaseSchema (cols)
   {}
 
   // Allow copy
@@ -46,11 +46,6 @@ public:
 
   const vector<QueryJoin>& joins() const {
     return joins_;
-  }
-
-  bool operator==(const QuerySchema& schema) {
-    // TODO!
-    return false;
   }
 
 private:
