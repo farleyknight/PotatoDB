@@ -15,12 +15,6 @@
 
 class TableSchema : public BaseSchema<TableColumn> {
 public:
-  /*******************************************************
-   * TableSchema : Represents an actual table schema in the
-   * database. Can be created, modified, or deleted using
-   * the DDL portion of SQL.
-   *******************************************************/
-
   TableSchema(vector<TableColumn> columns,
               const table_name_t& table_name,
               table_oid_t table_oid);

@@ -54,6 +54,9 @@ using std::tuple;
 
 using std::unique_ptr;
 
+template<typename K, typename V>
+using map         = std::unordered_map<K, V>;
+
 namespace fs = std::filesystem;
 
 // ptr is shorter than unique_ptr

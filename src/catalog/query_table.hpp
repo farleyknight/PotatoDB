@@ -28,6 +28,6 @@ public:
 
 private:
   table_oid_t table_oid_;
-  const table_name_t table_name_;
+  table_name_t table_name_;
   const Catalog* catalog_;
 };

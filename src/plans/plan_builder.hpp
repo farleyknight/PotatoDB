@@ -33,7 +33,9 @@ public:
                   string op,
                   string right_name);
 
-  PlanBuilder& delete_from(QueryTable name);
+  PlanBuilder& update(QueryTable table);
+
+  PlanBuilder& delete_from(QueryTable table);
 
   PlanBuilder& where(QueryComp comp);
 
@@ -43,7 +45,7 @@ private:
   ptr<BasePlan> build_tuples();
   ptr<BasePlan> build_insert(ptr<BasePlan>&& scan_plan);
   ptr<BasePlan> build_delete(ptr<BasePlan>&& scan_plan);
-  // TODO: Need to add build_update in here.
+  ptr<BasePlan> build_update(ptr<BasePlan>&& scan_plan);
   ptr<BasePlan> build_scan();
   ptr<BasePlan> build_loop_join();
   ptr<BasePlan> build_left_scan();
@@ -53,27 +55,44 @@ private:
   PlanBuilder& hash_join(QueryTable right_table);
 
   PlanBuilder& on(QueryColumn left,
-                  string op,
                   QueryColumn right);
 
   void apply_join(QueryTable right_table);
 
+  const QuerySchema update_table_schema();
   const QuerySchema insert_table_schema();
   const QuerySchema from_table_schema();
   const QuerySchema right_table_schema();
   const QuerySchema left_table_schema();
 
-  CompType to_comp_type(string op);
+  PlanBuilder& set(QueryColumn column, Value value);
+
 
   vector<QueryColumn> select_columns_;
   vector<QueryColumn> insert_columns_;
 
+  // TODO: The syntax allows for multiple set pairs:
+  //
+  // UPDATE table_name
+  // SET column1 = value1, column2 = value2, ...
+  // WHERE condition;
+  //
+  // Therefore we get both of these vectors:
+  vector<QueryColumn> update_columns_;
+  vector<Value>  update_values_;
+
+  // TODO: Instead of having 5 of these things,
+  // let's just make a MutMap<PlanType, QueryTable>
+  //
+  // That way we can handle each plan type we need,
+  // which should usually be a small number.
   ptr<QueryTable> from_table_;
   ptr<QueryTable> insert_table_;
   ptr<QueryTable> left_table_;
   ptr<QueryTable> right_table_;
+  ptr<QueryTable> update_table_;
 
-  optional<PlanType> plan_type_;
+  PlanType plan_type_ = PlanType::INVALID;
 
   ptr<QueryComp> where_clause_;
   ptr<QueryComp> join_clause_;

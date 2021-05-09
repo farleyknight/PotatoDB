@@ -1,5 +1,6 @@
 #include "plans/base_plan.hpp"
 #include "plans/insert_plan.hpp"
+#include "plans/update_plan.hpp"
 #include "plans/raw_tuples_plan.hpp"
 #include "plans/seq_scan_plan.hpp"
 #include "plans/delete_plan.hpp"
@@ -8,7 +9,7 @@
 #include "plans/plan_builder.hpp"
 
 PlanBuilder& PlanBuilder::select(vector<QueryColumn> columns) {
-  if (!plan_type_) {
+  if (plan_type_ == PlanType::INVALID) {
     plan_type_ = PlanType::TABLE_SCAN;
   }
 
@@ -40,27 +41,31 @@ void PlanBuilder::apply_join(QueryTable right_table) {
 
 
 PlanBuilder& PlanBuilder::on(QueryColumn left,
-                             string op,
                              QueryColumn right)
 {
+  // TODO: The schema needs to be updated somehow?
+  // I recall we added a vector to QuerySchema called `joins`
+  // The left & right join tables should be added to the
+  // QuerySchema somehow in this method.
+
   auto left_col = QueryJoin::make_left(left);
   auto right_col = QueryJoin::make_right(right);
 
   join_clause_ = make_unique<QueryComp>(move(left_col),
-                                        to_comp_type(op),
+                                        CompType::EQ,
                                         move(right_col));
 
   return *this;
 }
 
-PlanBuilder& PlanBuilder::insert_into(QueryTable insert_table) {
-  insert_table_ = make_unique<QueryTable>(insert_table);
+PlanBuilder& PlanBuilder::insert_into(QueryTable table) {
+  insert_table_ = make_unique<QueryTable>(table);
   plan_type_ = PlanType::INSERT;
   return *this;
 }
 
-PlanBuilder& PlanBuilder::update(QueryTable update_table) {
-  update_table_ = update_table;
+PlanBuilder& PlanBuilder::update(QueryTable table) {
+  update_table_ = make_unique<QueryTable>(table);
   plan_type_ = PlanType::UPDATE;
   return *this;
 }
@@ -107,24 +112,24 @@ ptr<BasePlan> PlanBuilder::build_tuples() {
                                     tuples_);
 }
 
-PlanBuilder& PlanBuilder::set(QueryColumn column, QueryConst value) {
-  update_column_ = column;
-  update_value_  = value;
+PlanBuilder& PlanBuilder::set(QueryColumn column, Value value) {
+  update_columns_.push_back(column);
+  update_values_.push_back(value);
   return *this;
 }
 
 ptr<BasePlan> PlanBuilder::build_update(ptr<BasePlan>&& scan_plan) {
-  MutMap<column_oid_t, UpdateInfo> update_attrs = {
-    {
-      update_column_.column_oid(),
-      UpdateInfo(UpdateType::SET, update_value_)
-    }
-  };
+  MutMap<column_oid_t, UpdateInfo> update_attrs;
+
+  for (index_t i = 0; i < update_columns_.size(); ++i) {
+    update_attrs.emplace(update_columns_[i].column_oid(),
+                         UpdateInfo(UpdateType::SET, update_values_[i]));
+  }
 
   return make_unique<UpdatePlan>(update_table_schema(),
+                                 update_table_->table_oid(),
                                  move(scan_plan),
-                                 update_table_.table_oid(),
-                                 update_attrs);
+                                 move(update_attrs));
 }
 
 ptr<BasePlan> PlanBuilder::build_insert(ptr<BasePlan>&& scan_plan) {
@@ -153,6 +158,9 @@ ptr<BasePlan> PlanBuilder::build_loop_join() {
   auto right_schema
     = dynamic_cast<SchemaPlan*>(right_scan.get())->schema();
 
+  // TODO We should be adding the two join columns here!
+  // Check the `QuerySchema::on` method.
+  // TODO: Rename `QuerySchema::merge` to `QuerySchema::join`
   auto join_schema = QuerySchema::merge(left_schema, right_schema);
 
   // return make_unique<NestedLoopJoinPlan>(move(join_schema),
@@ -164,46 +172,31 @@ ptr<BasePlan> PlanBuilder::build_loop_join() {
 
 
 ptr<BasePlan> PlanBuilder::build_left_scan() {
-  vector<string> col_names;
+  vector<QueryColumn> cols;
   for (const auto &col : select_columns_) {
-    if (col.name().rfind(left_table_name_) == 0) {
-      col_names.push_back(col.name());
+    if (col.table_oid() == left_table_->table_oid()) {
+      cols.push_back(col);
     }
   }
 
-  auto scan_schema = QuerySchema::slice(left_table_schema(),
-                                        col_names);
-  return make_unique<SeqScanPlan>(from_table_schema(),
+  auto scan_schema = QuerySchema(cols);
+  return make_unique<SeqScanPlan>(scan_schema,
                                   left_table_->table_oid(),
                                   move(where_clause_));
 }
 
 ptr<BasePlan> PlanBuilder::build_right_scan() {
-  vector<string> col_names;
+  vector<QueryColumn> cols;
   for (const auto &col : select_columns_) {
-    if (col.name().rfind(right_table_name_) == 0) {
-      col_names.push_back(col.name());
+    if (col.table_oid() == right_table_->table_oid()) {
+      cols.push_back(col);
     }
   }
 
-  auto scan_schema = QuerySchema::slice(right_table_schema(),
-                                        col_names);
-  return make_unique<SeqScanPlan>(from_table_schema(),
+  auto scan_schema = QuerySchema(cols);
+  return make_unique<SeqScanPlan>(scan_schema,
                                   right_table_->table_oid(),
                                   move(where_clause_));
-}
-
-CompType PlanBuilder::to_comp_type(string op) {
-  if (op == "<") {
-    return CompType::LT;
-  } else if (op == ">") {
-    return CompType::GT;
-  } else if (op == "==") {
-    return CompType::EQ;
-  }
-
-  // NOTE: Default is equals
-  return CompType::EQ;
 }
 
 const QuerySchema PlanBuilder::update_table_schema() {

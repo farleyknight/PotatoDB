@@ -11,9 +11,13 @@ class QuerySchema;
 class QueryColumn : public BaseQuery {
 public:
   QueryColumn(TypeId type_id,
-              const column_name_t name)
-    : BaseQuery (type_id),
-      name_     (name)
+              table_oid_t table_oid,
+              column_oid_t column_oid,
+              column_name_t name)
+    : BaseQuery   (type_id),
+      table_oid_  (table_oid),
+      column_oid_ (column_oid),
+      name_       (name)
   {}
 
   // Allow copy
@@ -22,6 +26,13 @@ public:
   QueryColumn& operator=(const QueryColumn&) = default;
   // Default destructor
   ~QueryColumn() = default;
+
+  static QueryColumn from(TableColumn col) {
+    return QueryColumn(col.type_id(),
+                       col.table_oid(),
+                       col.oid(),
+                       col.name());
+  }
 
   Value eval(UNUSED const Tuple& tuple,
              UNUSED const QuerySchema& schema) const {
@@ -73,6 +84,16 @@ public:
     return name_ != other.name_;
   }
 
+  column_oid_t column_oid() const {
+    return column_oid_;
+  }
+
+  table_oid_t table_oid() const {
+    return table_oid_;
+  }
+
 private:
+  table_oid_t table_oid_;
+  column_oid_t column_oid_;
   column_name_t name_;
 };

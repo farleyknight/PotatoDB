@@ -6,22 +6,27 @@ class Catalog;
 
 class TableBuilder {
 public:
-  TableBuilder(Ref<Catalog> catalog)
+  TableBuilder(const Catalog& catalog)
     : catalog_ (catalog) {}
 
-  using Self = TableBuilder&;
-  Self table_name(String table_name);
+  TableBuilder& name(table_name_t name) {
+    table_name_ = name;
+  }
 
-  Self add_column(String name, TypeId type_id);
-  Self add_column(String name, TypeId type_id, size_t length);
+  TableBuilder& column(column_name_t name, TypeId type_id);
 
-  Self not_null();
-  Self auto_increment();
-  Self primary_keys(Vec<String> names);
+  TableBuilder&
+  column(column_name_t name, TypeId type_id, size_t length);
 
-  SchemaRef to_schema();
+  TableBuilder& not_null();
+  TableBuilder& auto_increment();
+  TableBuilder& primary_key();
+
+  ptr<BasePlan> to_plan();
 
 private:
-  Ref<Catalog> catalog_;
+  table_name_t table_name_;
+  vector<TableColumn> table_columns_;
+  const Catalog& catalog_;
 };
 

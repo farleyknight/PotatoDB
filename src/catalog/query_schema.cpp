@@ -2,18 +2,6 @@
 #include "catalog/table_schema.hpp"
 #include "query/query_column.hpp"
 
-/************************************************
- * QuerySchema - A schema in the
- * context of a query.
- *
- * This is in contrast to QuerySchema
- * which represents a table as seen by
- * the DB's catalog.
- *
- * QuerySchema objects are often built
- * from or connected to QuerySchemas
- ************************************************/
-
 UNUSED QuerySchema QuerySchema::merge(const QuerySchema& left,
                                       const QuerySchema& right)
 {
@@ -25,17 +13,12 @@ UNUSED QuerySchema QuerySchema::merge(const QuerySchema& left,
 }
 
 
-QuerySchema QuerySchema::slice(const TableSchema& from,
+QuerySchema QuerySchema::slice(const TableSchema& schema,
                                const vector<string>& names)
 {
   vector<QueryColumn> cols;
   for (auto const& name : names) {
-    auto col = from.by_name(name);
-    auto query_col = QueryColumn(col.type_id(),
-                                 // col.table_oid(),
-                                 // col.oid(),
-                                 col.name());
-    cols.push_back(query_col);
+    cols.push_back(QueryColumn::from(schema.by_name(name)));
   }
   return QuerySchema(cols);
 }
@@ -52,13 +35,8 @@ QuerySchema QuerySchema::slice(const QuerySchema& from,
 
 QuerySchema QuerySchema::copy(const TableSchema& original) {
   vector<QueryColumn> cols;
-  vector<string> names(original.column_count());
   for (auto const& col : original.all()) {
-    auto query_col = QueryColumn(col.type_id(),
-                                 // col.table_oid(),
-                                 // col.oid(),
-                                 col.name());
-    cols.push_back(query_col);
+    cols.push_back(QueryColumn::from(col));
   }
   return QuerySchema(cols);
 }

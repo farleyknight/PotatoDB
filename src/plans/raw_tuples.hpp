@@ -10,8 +10,8 @@ public:
   // Default constructor
   RawTuples() = default;
   // Constructor to accept 2D vector of tuples
-  RawTuples(PageId page_id)
-    : page_id_ (page_id)
+  RawTuples(Data data)
+    : data_ (data)
   {}
 
   // Allow copy constructor

@@ -21,8 +21,6 @@ public:
 
   static QuerySchema empty();
 
-  static QuerySchema make(vector<QueryColumn> cols);
-
   static QuerySchema copy(const TableSchema& original);
   static QuerySchema copy(const QuerySchema& original);
 
@@ -40,7 +38,7 @@ public:
 
   const string to_string() const;
 
-  const vector<string>& names() const {
+  const vector<column_name_t>& names() const {
     return names_;
   }
 
@@ -49,7 +47,7 @@ public:
   }
 
 private:
-  vector<string> names_;
+  vector<column_name_t> names_;
   vector<QueryJoin> joins_; // TODO: Need to populate this
 };
 

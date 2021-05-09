@@ -37,22 +37,27 @@ private:
  * UpdatePlan
  **********************************************/
 
-class UpdatePlan : public BasePlan, public TablePlan, public SchemaPlan, public HasChildPlan {
+class UpdatePlan : public BasePlan,
+                   public TablePlan,
+                   public SchemaPlan,
+                   public HasChildPlan
+{
 public:
   UpdatePlan(QuerySchema schema,
              table_oid_t table_oid,
              ptr<BasePlan>&& child,
-             Move<MutMap<uint32_t, UpdateInfo>> update_attrs)
+             map<column_oid_t, UpdateInfo>&& update_attrs)
     : BasePlan      (PlanType::UPDATE),
       TablePlan     (table_oid),
       SchemaPlan    (schema),
       HasChildPlan  (move(child)),
-      update_attrs_ (update_attrs) {}
+      update_attrs_ (move(update_attrs))
+  {}
 
-  const Map<uint32_t, UpdateInfo>& update_attrs() const {
+  const map<column_oid_t, UpdateInfo>& update_attrs() const {
     return update_attrs_;
   }
 
 private:
-  Map<uint32_t, UpdateInfo> update_attrs_;
+  map<column_oid_t, UpdateInfo> update_attrs_;
 };

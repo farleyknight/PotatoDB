@@ -82,11 +82,11 @@ vector<QueryColumn>
 Catalog::all_columns_for(table_oid_t table_oid) const
 {
   auto table_schema = table_schemas_.at(table_oid);
-  vector<QueryColumn> columns;
-  for (const auto &table_col : table_schema.columns()) {
-    columns.push_back(QueryColumn(table_col.type_id(), table_col.name()));
+  vector<QueryColumn> cols;
+  for (const auto &col : table_schema.columns()) {
+    cols.push_back(QueryColumn::from(col));
   }
-  return columns;
+  return cols;
 }
 
 bool
@@ -100,8 +100,8 @@ QueryColumn
 Catalog::query_column_for(const table_name_t& table_name,
                           const column_name_t& column_name) const
 {
-  auto table_column = table_schemas_.at(table_oids_.at(table_name)).by_name(column_name);
-  return QueryColumn(table_column.type_id(), table_column.name());
+  const auto &col = table_schemas_.at(table_oids_.at(table_name)).by_name(column_name);
+  return QueryColumn::from(col);
 }
 
 QueryColumn
@@ -130,7 +130,9 @@ Catalog::query_column_for(const vector<table_name_t>& table_names,
 }
 
 
-void Catalog::create_table(UNUSED Txn& txn, // TODO: We should be attempting to get an exclusive lock on the table
+void Catalog::create_table(// TODO: We should be attempting to get an exclusive lock
+                           // on the table, and abort the txn if we cannot get it.
+                           UNUSED Txn& txn,
                            const table_name_t& table_name,
                            ColumnDefListExpr column_list)
 {
@@ -142,10 +144,11 @@ void Catalog::create_table(UNUSED Txn& txn, // TODO: We should be attempting to 
   auto schema = make_schema_from(table_name, table_oid, column_list);
   table_schemas_.insert(std::make_pair(table_oid, schema));
 
+  // TODO: This should be sent to a logger.
   std::cout << "New table created: " << table_name << std::endl;
 
   index_oids_.emplace(table_name,
-                      MutMap<string, index_oid_t>());
+                      MutMap<index_name_t, index_oid_t>());
 }
 
 
