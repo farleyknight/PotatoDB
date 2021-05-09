@@ -122,7 +122,7 @@ void PotatoDB::build_system_catalog() {
   // 7) TableHeap creates TablePage
   // 8) TablePage adds tuples to the `system_catalog`
 
-  execut(insert_system_catalog_sql);
+  execute(insert_system_catalog_sql);
 }
 
 void PotatoDB::start_server() {
@@ -154,6 +154,8 @@ void PotatoDB::start_server() {
 }
 
 void PotatoDB::startup() {
+  state_ = ServerState::STARTING_UP;
   build_system_catalog();
   start_server();
+  state_ = ServerState::RUNNING;
 }

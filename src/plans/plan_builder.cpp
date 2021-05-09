@@ -7,38 +7,35 @@
 
 #include "plans/plan_builder.hpp"
 
-PlanBuilder& PlanBuilder::select(vector<string> names) {
+PlanBuilder& PlanBuilder::select(vector<QueryColumn> columns) {
   if (!plan_type_) {
     plan_type_ = PlanType::TABLE_SCAN;
   }
 
-  select_column_names_ = names;
+  select_columns_ = columns;
   return *this;
 }
 
-PlanBuilder& PlanBuilder::from(string from_table) {
-  from_table_name_ = from_table;
+PlanBuilder& PlanBuilder::from(QueryTable from_table) {
+  from_table_ = make_unique<QueryTable>(from_table);
   return *this;
 }
 
-PlanBuilder& PlanBuilder::loop_join(string right_table) {
+PlanBuilder& PlanBuilder::loop_join(QueryTable right_table) {
   plan_type_ = PlanType::LOOP_JOIN;
   apply_join(right_table);
   return *this;
 }
 
-PlanBuilder& PlanBuilder::hash_join(string right_table) {
+PlanBuilder& PlanBuilder::hash_join(QueryTable right_table) {
   plan_type_ = PlanType::HASH_JOIN;
   apply_join(right_table);
   return *this;
 }
 
-void PlanBuilder::apply_join(string right_table_name) {
-  left_table_name_  = from_table_name_;
-  // left_table_oid_  = left_table.oid();
-
-  right_table_name_ = right_table_name;
-  // right_table_oid_ = right_table.oid();
+void PlanBuilder::apply_join(QueryTable right_table) {
+  left_table_  = move(from_table_);
+  right_table_ = make_unique<QueryTable>(right_table);
 }
 
 
@@ -56,50 +53,30 @@ PlanBuilder& PlanBuilder::on(QueryColumn left,
   return *this;
 }
 
-PlanBuilder& PlanBuilder::insert_into(string name) {
-  insert_table_name_ = name;
-  insert_table_oid_ = catalog_.table_oid_for(name);
+PlanBuilder& PlanBuilder::insert_into(QueryTable insert_table) {
+  insert_table_ = make_unique<QueryTable>(insert_table);
   plan_type_ = PlanType::INSERT;
   return *this;
 }
 
-PlanBuilder& PlanBuilder::tuples(Move<RawTuples> tuples) {
+PlanBuilder& PlanBuilder::tuples(RawTuples&& tuples) {
   tuples_ = move(tuples);
   return *this;
 }
 
-PlanBuilder& PlanBuilder::delete_from(string name) {
-  plan_type_ = PlanType::DELETE;
-  from_table_name_ = name;
-  from_table_oid_  = catalog_.table_oid_for(name);
+PlanBuilder& PlanBuilder::delete_from(QueryTable from_table) {
+  plan_type_  = PlanType::DELETE;
+  from_table_ = make_unique<QueryTable>(from_table);
   return *this;
 }
 
-PlanBuilder& PlanBuilder::where(string name,
-                                string op,
-                                int val) {
-  auto const_val = Value::make<int>(val);
-  return where(move(name), op, move(const_val));
-}
-
-PlanBuilder& PlanBuilder::where(string column_name,
-                                string op,
-                                Value value) {
-
-  auto &query_schema = from_table_schema();
-  auto column        = query_schema.by_name(column_name);
-
-  auto constant = QueryConst(value);
-  auto clause   = make_unique<QueryComp>(column,
-                                         to_comp_type(op),
-                                         constant);
-
-  where_clause_ = move(clause);
-
+PlanBuilder& PlanBuilder::where(QueryComp clause) {
+  where_clause_ = make_unique<QueryComp>(clause);
   return *this;
 }
 
 ptr<BasePlan> PlanBuilder::to_plan() {
+  // TODO: Change this to switch/case
   if (plan_type_ == PlanType::TABLE_SCAN) {
     return build_scan();
   } else if (plan_type_ == PlanType::LOOP_JOIN) {
@@ -124,34 +101,29 @@ ptr<BasePlan> PlanBuilder::build_tuples() {
 
 ptr<BasePlan> PlanBuilder::build_insert(ptr<BasePlan>&& scan_plan) {
   return make_unique<InsertPlan>(insert_table_schema(),
-                                 insert_table_oid_,
+                                 insert_table_->table_oid(),
                                  move(scan_plan));
 }
 
 ptr<BasePlan> PlanBuilder::build_delete(ptr<BasePlan>&& scan_plan) {
-  return make_unique<DeletePlan>(from_table_oid_,
+  return make_unique<DeletePlan>(from_table_->table_oid(),
                                  move(scan_plan));
 }
 
 ptr<BasePlan> PlanBuilder::build_scan() {
-  if (where_clause_) {
-    return make_unique<SeqScanPlan>(from_table_schema(),
-                                    from_table_oid_,
-                                    move(where_clause_)
-                                    );
-  } else {
-    return make_unique<SeqScanPlan>(from_table_schema(),
-                                    from_table_oid_
-                                    );
-  }
+  return make_unique<SeqScanPlan>(from_table_schema(),
+                                  from_table_->table_oid(),
+                                  move(where_clause_));
 }
 
 ptr<BasePlan> PlanBuilder::build_loop_join() {
   auto left_scan = build_left_scan();
   auto right_scan = build_right_scan();
 
-  auto left_schema  = dynamic_cast<SchemaPlan*>(left_scan.get())->schema();
-  auto right_schema = dynamic_cast<SchemaPlan*>(right_scan.get())->schema();
+  auto left_schema
+    = dynamic_cast<SchemaPlan*>(left_scan.get())->schema();
+  auto right_schema
+    = dynamic_cast<SchemaPlan*>(right_scan.get())->schema();
 
   auto join_schema = QuerySchema::merge(left_schema, right_schema);
 
@@ -165,32 +137,32 @@ ptr<BasePlan> PlanBuilder::build_loop_join() {
 
 ptr<BasePlan> PlanBuilder::build_left_scan() {
   vector<string> col_names;
-  for (auto name : select_column_names_) {
-    if (name.rfind(left_table_name_) == 0) {
-      col_names.push_back(name);
+  for (const auto &col : select_columns_) {
+    if (col.name().rfind(left_table_name_) == 0) {
+      col_names.push_back(col.name());
     }
   }
 
   auto scan_schema = QuerySchema::slice(left_table_schema(),
                                         col_names);
   return make_unique<SeqScanPlan>(from_table_schema(),
-                                  left_table_oid_
-                                  );
+                                  left_table_->table_oid(),
+                                  move(where_clause_));
 }
 
 ptr<BasePlan> PlanBuilder::build_right_scan() {
   vector<string> col_names;
-  for (auto name : select_column_names_) {
-    if (name.rfind(right_table_name_) == 0) {
-      col_names.push_back(name);
+  for (const auto &col : select_columns_) {
+    if (col.name().rfind(right_table_name_) == 0) {
+      col_names.push_back(col.name());
     }
   }
 
   auto scan_schema = QuerySchema::slice(right_table_schema(),
                                         col_names);
   return make_unique<SeqScanPlan>(from_table_schema(),
-                                  right_table_oid_
-                                  );
+                                  right_table_->table_oid(),
+                                  move(where_clause_));
 }
 
 CompType PlanBuilder::to_comp_type(string op) {
@@ -206,18 +178,18 @@ CompType PlanBuilder::to_comp_type(string op) {
   return CompType::EQ;
 }
 
-const QuerySchema& PlanBuilder::insert_table_schema() {
-  return catalog_.query_schema_for(insert_table_oid_);
+const QuerySchema PlanBuilder::insert_table_schema() {
+  return catalog_.query_schema_for(insert_table_->table_oid());
 }
 
-const QuerySchema& PlanBuilder::from_table_schema() {
-  return catalog_.query_schema_for(from_table_oid_);
+const QuerySchema PlanBuilder::from_table_schema() {
+  return catalog_.query_schema_for(from_table_->table_oid());
 }
 
-const QuerySchema& PlanBuilder::right_table_schema() {
-  return catalog_.find_query_schema(right_table_oid_);
+const QuerySchema PlanBuilder::right_table_schema() {
+  return catalog_.query_schema_for(right_table_->table_oid());
 }
 
-const QuerySchema& PlanBuilder::left_table_schema() {
-  return catalog_.find_query_schema(left_table_oid_);
+const QuerySchema PlanBuilder::left_table_schema() {
+  return catalog_.query_schema_for(left_table_->table_oid());
 }

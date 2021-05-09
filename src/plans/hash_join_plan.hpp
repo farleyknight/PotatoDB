@@ -7,9 +7,9 @@
 class HashJoinPlan : public BasePlan, public SchemaPlan, public MaybePredPlan {
 public:
   HashJoinPlan(QuerySchema schema,
-               ptr<BaseQuery>&& pred,
-               MoveVec<BaseQuery> left_hash_keys,
-               MoveVec<BaseQuery> right_hash_keys)
+               ptr<QueryComp>&& pred,
+               vector<BaseQuery>&& left_hash_keys,
+               vector<BaseQuery>&& right_hash_keys)
     : BasePlan         (PlanType::HASH_JOIN),
       SchemaPlan       (schema),
       MaybePredPlan    (move(pred)),
@@ -22,9 +22,9 @@ public:
   }
 
   // NOTE: These arrays are used to create the key schemas.
-  const Vec<BaseQuery>& left_keys()  { return left_hash_keys_; }
-  const Vec<BaseQuery>& right_keys() { return right_hash_keys_; }
+  const vector<BaseQuery>& left_keys()  { return left_hash_keys_; }
+  const vector<BaseQuery>& right_keys() { return right_hash_keys_; }
 
 private:
-  Vec<BaseQuery> left_hash_keys_, right_hash_keys_;
+  const vector<BaseQuery> left_hash_keys_, right_hash_keys_;
 };

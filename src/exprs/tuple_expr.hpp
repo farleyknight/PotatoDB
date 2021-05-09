@@ -12,4 +12,7 @@ public:
     : BaseExpr (ExprType::TUPLE)
   {}
 
+  const string to_string() const override {
+    return ListExpr<ValueExpr>::to_string();
+  }
 };

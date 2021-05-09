@@ -12,7 +12,7 @@ public:
     : BaseExpr (ExprType::COLUMN_LIST)
   {}
 
-  const string to_string() const {
+  const string to_string() const override {
     return ListExpr<ColumnExpr>::to_string();
   }
 };

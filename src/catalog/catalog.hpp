@@ -43,34 +43,41 @@ public:
 
   bool
   table_has_column_named(const table_name_t& table_name,
-                         const column_name_t& column_name);
+                         const column_name_t& column_name) const;
 
   QuerySchema
-  query_schema_for(table_oid_t table_oid);
+  query_schema_for(table_oid_t table_oid) const;
 
   QuerySchema
   query_schema_for(const vector<string>& table_names,
-                   const ColumnListExpr& column_list);
+                   const ColumnListExpr& column_list) const;
 
   QueryColumn
   query_column_for(const table_name_t& table_name,
-                   const column_name_t& column_name);
+                   const column_name_t& column_name) const;
 
   QueryColumn
   query_column_for(const vector<table_name_t>& table_names,
-                   const column_name_t& column_name);
+                   const column_name_t& column_name) const;
 
   void create_index(Txn& txn,
                     const string table_name,
                     const string index_name);
-  vector<QueryColumn> all_columns_for(const vector<table_name_t>& table_names);
-  vector<QueryColumn> all_columns_for(const table_name_t& table_name);
-  vector<QueryColumn> all_columns_for(table_oid_t table_oid);
+
+  vector<QueryColumn>
+  all_columns_for(const vector<table_name_t>& table_names) const;
+
+  vector<QueryColumn>
+  all_columns_for(const table_name_t& table_name) const;
+
+  vector<QueryColumn>
+  all_columns_for(table_oid_t table_oid) const;
 
 private:
   MutMap<table_name_t, table_oid_t> table_oids_;
   Atomic<table_oid_t> next_table_oid_ = 0;
   MutMap<table_oid_t, TableSchema> table_schemas_;
+
   // MutMap<column_name_t, vector<table_oid_t>> column_name_to_table_oids_;
 
   MutMap<table_name_t,

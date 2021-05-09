@@ -5,7 +5,11 @@
 
 class ShowTablesExpr : public BaseExpr {
 public:
-  ShowTablesExpr() 
+  ShowTablesExpr()
     : BaseExpr (ExprType::SHOW_TABLES)
   {}
+
+  const string to_string() const {
+    return "SHOW TABLES";
+  }
 };

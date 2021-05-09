@@ -1,13 +1,12 @@
 #pragma once
 
-#include "query/base_query.hpp"
+#include "query/query_comp.hpp"
 
 class MaybePredPlan {
 public:
-  MaybePredPlan()
-  {}
+  MaybePredPlan() {}
 
-  MaybePredPlan(ptr<BaseQuery>&& pred)
+  MaybePredPlan(ptr<QueryComp>&& pred)
     : pred_ (move(pred))
   {}
 
@@ -21,5 +20,5 @@ public:
   }
 
 private:
-  ptr<BaseQuery> pred_;
+  ptr<QueryComp> pred_;
 };

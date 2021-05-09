@@ -2,6 +2,8 @@
 
 #include "catalog/table_column.hpp"
 #include "query/base_query.hpp"
+#include "query/query_comp.hpp"
+#include "query/query_const.hpp"
 
 class TableSchema;
 class QuerySchema;
@@ -53,6 +55,14 @@ public:
 
   size_t variable_length() const {
     return 0; // TODO!
+  }
+
+  QueryComp lt(QueryConst constant) {
+    return QueryComp(*this, CompType::LT, constant);
+  }
+
+  QueryComp gt(QueryConst constant) {
+    return QueryComp(*this, CompType::GT, constant);
   }
 
   bool operator==(const QueryColumn& other) const {

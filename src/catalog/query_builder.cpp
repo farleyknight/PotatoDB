@@ -1,8 +1,8 @@
 
 #include "catalog/query_builder.hpp"
-#include "exprs/table_expr.hpp"
+#include "catalog/query_table.hpp"
 
-TableExpr QueryBuilder::table(const string table_name) const {
+QueryTable QueryBuilder::table(const table_name_t table_name) const {
   auto table_oid = catalog_.table_oid_for(table_name);
-  return TableExpr(table_oid, table_name);
+  return QueryTable(&catalog_, table_oid, table_name);
 }

@@ -1,13 +1,8 @@
 #pragma once
 
-#include "exprs/table_expr.hpp"
-#include "exprs/column_expr.hpp"
+#include "catalog/query_table.hpp"
 
 #include "catalog/catalog.hpp"
-
-/*************************************
- * QueryBuilder
- *************************************/
 
 class QueryBuilder {
 public:
@@ -21,7 +16,7 @@ public:
   // Default destructor
   ~QueryBuilder() = default;
 
-  TableExpr table(const string table_name) const;
+  QueryTable table(const table_name_t table_name) const;
 
 private:
   const Catalog& catalog_;

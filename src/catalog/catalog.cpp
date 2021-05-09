@@ -31,14 +31,14 @@ Catalog::make_schema_from(const table_name_t& table_name,
 }
 
 QuerySchema
-Catalog::query_schema_for(table_oid_t table_oid)
+Catalog::query_schema_for(table_oid_t table_oid) const
 {
   return QuerySchema(all_columns_for(table_oid));
 }
 
 QuerySchema
 Catalog::query_schema_for(const vector<table_name_t>& table_names,
-                          const ColumnListExpr& column_list)
+                          const ColumnListExpr& column_list) const
 {
   vector<QueryColumn> columns;
   for (const auto &column : column_list.list()) {
@@ -61,7 +61,7 @@ Catalog::query_schema_for(const vector<table_name_t>& table_names,
 }
 
 vector<QueryColumn>
-Catalog::all_columns_for(const vector<table_name_t>& table_names)
+Catalog::all_columns_for(const vector<table_name_t>& table_names) const
 {
   vector<QueryColumn> columns;
   for (const auto &table_name : table_names) {
@@ -73,13 +73,13 @@ Catalog::all_columns_for(const vector<table_name_t>& table_names)
 }
 
 vector<QueryColumn>
-Catalog::all_columns_for(const table_name_t& table_name)
+Catalog::all_columns_for(const table_name_t& table_name) const
 {
   return all_columns_for(table_oids_.at(table_name));
 }
 
 vector<QueryColumn>
-Catalog::all_columns_for(table_oid_t table_oid)
+Catalog::all_columns_for(table_oid_t table_oid) const
 {
   auto table_schema = table_schemas_.at(table_oid);
   vector<QueryColumn> columns;
@@ -91,14 +91,14 @@ Catalog::all_columns_for(table_oid_t table_oid)
 
 bool
 Catalog::table_has_column_named(const table_name_t& table_name,
-                                const column_name_t& column_name)
+                                const column_name_t& column_name) const
 {
   return table_schemas_.at(table_oids_.at(table_name)).has_column(column_name);
 }
 
 QueryColumn
 Catalog::query_column_for(const table_name_t& table_name,
-                          const column_name_t& column_name)
+                          const column_name_t& column_name) const
 {
   auto table_column = table_schemas_.at(table_oids_.at(table_name)).by_name(column_name);
   return QueryColumn(table_column.type_id(), table_column.name());
@@ -106,7 +106,7 @@ Catalog::query_column_for(const table_name_t& table_name,
 
 QueryColumn
 Catalog::query_column_for(const vector<table_name_t>& table_names,
-                          const column_name_t& column_name)
+                          const column_name_t& column_name) const
 {
   vector<QueryColumn> candidates;
   for (const auto &table_name : table_names) {

@@ -11,6 +11,18 @@ public:
     return list_;
   }
 
+  T& front() {
+    return list_.front();
+  }
+
+  const T& front() const {
+    return list_.front();
+  }
+
+  T& back() {
+    return list_.back();
+  }
+
   const T& back() const {
     return list_.back();
   }

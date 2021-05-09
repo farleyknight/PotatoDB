@@ -8,13 +8,13 @@ TEST(ParserTest, SimpleSelectTest) {
   const auto expr = dynamic_cast<SelectExpr*>(exprs[0].get());
 
   const auto &table_list = expr->table_list();
-  EXPECT_EQ(table_list.tables().size(), 1);
-  EXPECT_EQ(table_list.tables()[0].to_string(), "foobar");
+  EXPECT_EQ(table_list.list().size(), 1);
+  EXPECT_EQ(table_list.list()[0].to_string(), "foobar");
 
   const auto &col_list = expr->column_list();
-  EXPECT_EQ(col_list.columns().size(), 2);
-  EXPECT_EQ(col_list.columns()[0].to_string(), "*");
-  EXPECT_EQ(col_list.columns()[1].to_string(), "*");
+  EXPECT_EQ(col_list.list().size(), 2);
+  EXPECT_EQ(col_list.list()[0].to_string(), "*");
+  EXPECT_EQ(col_list.list()[1].to_string(), "*");
 }
 
 TEST(ParserTest, SelectTableColumNameTest) {
@@ -25,13 +25,13 @@ TEST(ParserTest, SelectTableColumNameTest) {
   const auto expr = dynamic_cast<SelectExpr*>(exprs[0].get());
 
   auto &table_list = expr->table_list();
-  EXPECT_EQ(table_list.tables().size(), 2);
-  EXPECT_EQ(table_list.tables()[0].to_string(), "foo");
-  EXPECT_EQ(table_list.tables()[1].to_string(), "bar");
+  EXPECT_EQ(table_list.list().size(), 2);
+  EXPECT_EQ(table_list.list()[0].to_string(), "foo");
+  EXPECT_EQ(table_list.list()[1].to_string(), "bar");
 
   auto &col_list = expr->column_list();
-  EXPECT_EQ(col_list.columns().size(), 1);
-  EXPECT_EQ(col_list.columns()[0].to_string(), "*");
+  EXPECT_EQ(col_list.list().size(), 1);
+  EXPECT_EQ(col_list.list()[0].to_string(), "*");
 }
 
 TEST(ParserTest, SelectMultipleTablesTest) {
@@ -42,13 +42,13 @@ TEST(ParserTest, SelectMultipleTablesTest) {
   const auto expr = dynamic_cast<SelectExpr*>(exprs[0].get());
 
   auto &table_list = expr->table_list();
-  EXPECT_EQ(table_list.tables().size(), 2);
-  EXPECT_EQ(table_list.tables()[0].to_string(), "foo");
-  EXPECT_EQ(table_list.tables()[1].to_string(), "bar");
+  EXPECT_EQ(table_list.list().size(), 2);
+  EXPECT_EQ(table_list.list()[0].to_string(), "foo");
+  EXPECT_EQ(table_list.list()[1].to_string(), "bar");
 
   auto &col_list = expr->column_list();
-  EXPECT_EQ(col_list.columns().size(), 1);
-  EXPECT_EQ(col_list.columns()[0].to_string(), "*");
+  EXPECT_EQ(col_list.list().size(), 1);
+  EXPECT_EQ(col_list.list()[0].to_string(), "*");
 }
 
 TEST(ParserTest, InsertTest) {
@@ -61,10 +61,10 @@ TEST(ParserTest, InsertTest) {
   EXPECT_EQ(expr->table_name(), "foobar");
 
   auto &tuple_list = expr->tuple_list();
-  EXPECT_EQ(tuple_list.tuples().size(), 1);
-  auto &tuple = tuple_list.tuples()[0];
+  EXPECT_EQ(tuple_list.list().size(), 1);
+  auto &tuple = tuple_list.list()[0];
 
-  auto &values = tuple.values();
+  auto &values = tuple.list();
   EXPECT_EQ(values.size(), 2);
   EXPECT_EQ(values[0].to_string(), "1");
   EXPECT_EQ(values[1].to_string(), "2");
@@ -80,21 +80,21 @@ TEST(ParserTest, InsertWithColumnsTest) {
   EXPECT_EQ(expr->table_name(), "foobar");
 
   auto &col_list = expr->column_list();
-  EXPECT_EQ(col_list.columns().size(), 2);
-  EXPECT_EQ(col_list.columns()[0].to_string(), "a");
-  EXPECT_EQ(col_list.columns()[1].to_string(), "b");
+  EXPECT_EQ(col_list.list().size(), 2);
+  EXPECT_EQ(col_list.list()[0].to_string(), "a");
+  EXPECT_EQ(col_list.list()[1].to_string(), "b");
 
   auto &tuple_list = expr->tuple_list();
-  EXPECT_EQ(tuple_list.tuples().size(), 2);
+  EXPECT_EQ(tuple_list.list().size(), 2);
 
-  auto &first_tuple = tuple_list.tuples()[0];
-  auto &first_values = first_tuple.values();
+  auto &first_tuple = tuple_list.front();
+  auto &first_values = first_tuple.list();
   EXPECT_EQ(first_values.size(), 2);
   EXPECT_EQ(first_values[0].to_string(), "1");
   EXPECT_EQ(first_values[1].to_string(), "2");
 
-  auto &second_tuple = tuple_list.tuples()[1];
-  auto &second_values = second_tuple.values();
+  auto &second_tuple = tuple_list.list()[1];
+  auto &second_values = second_tuple.list();
   EXPECT_EQ(second_values.size(), 2);
   EXPECT_EQ(second_values[0].to_string(), "3");
   EXPECT_EQ(second_values[1].to_string(), "4");

@@ -2,8 +2,11 @@
 
 #include "plans/base_plan.hpp"
 #include "plans/raw_tuples.hpp"
+#include "plans/schema_plan.hpp"
 
-class RawTuplesPlan : public BasePlan, public SchemaPlan {
+class RawTuplesPlan : public BasePlan,
+                      public SchemaPlan
+{
 public:
   RawTuplesPlan(QuerySchema schema, RawTuples raw_tuples)
     : BasePlan    (PlanType::RAW_TUPLES),

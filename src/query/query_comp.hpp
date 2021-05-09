@@ -15,9 +15,6 @@ enum class CompType {
 
 class QueryComp : public BaseQuery {
 public:
-  /**********************************************
-   * Constructors & destructor
-   **********************************************/
 
   QueryComp(BaseQuery left,
             CompType type,
@@ -26,10 +23,6 @@ public:
       left_     (left),
       type_     (type),
       right_    (right) {}
-
-  /**********************************************
-   * Instance methods
-   **********************************************/
 
   Value eval(const Tuple& tuple,
              const QuerySchema& schema) const {

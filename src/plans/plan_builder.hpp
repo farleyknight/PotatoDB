@@ -3,11 +3,11 @@
 #include "common/config.hpp"
 
 #include "catalog/catalog.hpp"
+#include "catalog/query_table.hpp"
 
 #include "query/query_comp.hpp"
 #include "query/query_column.hpp"
 #include "query/query_const.hpp"
-#include "query/query_table.hpp"
 
 #include "plans/base_plan.hpp"
 #include "plans/raw_tuples_plan.hpp"
@@ -23,33 +23,23 @@ public:
   PlanBuilder operator=(const PlanBuilder&) = delete;
   ~PlanBuilder() = default;
 
+  PlanBuilder& insert_into(QueryTable insert_table);
+  PlanBuilder& tuples(RawTuples&& tuples);
 
-  PlanBuilder& insert_into(string name);
-  PlanBuilder& tuples(Move<RawTuples> tuples);
-
-  PlanBuilder& select(vector<string> names);
-  PlanBuilder& from(string name);
-  PlanBuilder& join(string name);
+  PlanBuilder& select(vector<QueryColumn> columns);
+  PlanBuilder& from(QueryTable table);
+  PlanBuilder& join(QueryTable table);
   PlanBuilder& on(string left_name,
                   string op,
                   string right_name);
 
-  PlanBuilder& delete_from(string name);
+  PlanBuilder& delete_from(QueryTable name);
 
-  PlanBuilder& where(string name,
-                     string op,
-                     int val);
-  PlanBuilder& where(string name,
-                     string operation,
-                     Value val);
+  PlanBuilder& where(QueryComp comp);
 
   ptr<BasePlan> to_plan();
 
 private:
-  /**********************************************
-   * Private Instance Methods
-   **********************************************/
-
   ptr<BasePlan> build_tuples();
   ptr<BasePlan> build_insert(ptr<BasePlan>&& scan_plan);
   ptr<BasePlan> build_delete(ptr<BasePlan>&& scan_plan);
@@ -59,38 +49,32 @@ private:
   ptr<BasePlan> build_left_scan();
   ptr<BasePlan> build_right_scan();
 
-  PlanBuilder& loop_join(string right_table);
-  PlanBuilder& hash_join(string right_table);
+  PlanBuilder& loop_join(QueryTable right_table);
+  PlanBuilder& hash_join(QueryTable right_table);
 
   PlanBuilder& on(QueryColumn left,
                   string op,
                   QueryColumn right);
 
-  void apply_join(string right_table_name);
+  void apply_join(QueryTable right_table);
 
-  const QuerySchema& insert_table_schema();
-  const QuerySchema& from_table_schema();
-  const QuerySchema& right_table_schema();
-  const QuerySchema& left_table_schema();
+  const QuerySchema insert_table_schema();
+  const QuerySchema from_table_schema();
+  const QuerySchema right_table_schema();
+  const QuerySchema left_table_schema();
 
   CompType to_comp_type(string op);
 
-  vector<string> select_column_names_;
-  vector<string> insert_column_names_;
+  vector<QueryColumn> select_columns_;
+  vector<QueryColumn> insert_columns_;
 
-  string from_table_name_;
-  string insert_table_name_;
-
-  table_oid_t from_table_oid_   = INVALID_TABLE_OID;
-  table_oid_t insert_table_oid_ = INVALID_TABLE_OID;
-
-  string left_table_name_;
-  string right_table_name_;
-
-  table_oid_t left_table_oid_  = INVALID_TABLE_OID;
-  table_oid_t right_table_oid_ = INVALID_TABLE_OID;
+  ptr<QueryTable> from_table_;
+  ptr<QueryTable> insert_table_;
+  ptr<QueryTable> left_table_;
+  ptr<QueryTable> right_table_;
 
   optional<PlanType> plan_type_;
+
   ptr<QueryComp> where_clause_;
   ptr<QueryComp> join_clause_;
 

@@ -8,33 +8,6 @@ public:
     : BaseQuery (value.type_id()),
       value_    (value) {}
 
-  explicit QueryConst(int8_t integer)
-    : BaseQuery (TypeId::SMALLINT),
-      value_    (Value::make<int8_t>(integer)) {}
-
-  explicit QueryConst(bool boolean)
-    : BaseQuery (TypeId::BOOLEAN),
-      value_    (Value::make<bool>(boolean)) {}
-
-  template<typename T>
-  static ptr<QueryConst> make(T data) {
-    auto value = Value::make<T>(data);
-    return make_unique<QueryConst>(move(value));
-  }
-
-  static ptr<QueryConst> make(TypeId type_id, int integer) {
-    auto value = Value(type_id, integer);
-    return make_unique<QueryConst>(move(value));
-  }
-
-  static ptr<QueryConst> make(Move<Value> value) {
-    return make_unique<QueryConst>(move(value));
-  }
-
-  /**********************************************
-   * Instance methods
-   **********************************************/
-
   Value eval(UNUSED const Tuple& tuple,
              UNUSED const QuerySchema& schema) const {
     return value_;

@@ -1,9 +1,13 @@
 #pragma once
 
+#include "exprs/create_table_expr.hpp"
+#include "exprs/select_expr.hpp"
+#include "exprs/insert_expr.hpp"
+
 class PlanFactory {
 public:
   static ptr<BasePlan> create(Catalog& catalog_,
-                              ptr<BaseExpr&& expr)
+                              ptr<BaseExpr>&& expr)
   {
     switch (expr->expr_type()) {
 
@@ -14,7 +18,7 @@ public:
       return make_unique<CreateTablePlan>(table_name, column_def_list);
 
     case ExprType::SELECT_FROM:
-      auto select_from_expr = dynamic_cast<SelectFromExpr*>(expr.get());
+      auto select_from_expr = dynamic_cast<SelectExpr*>(expr.get());
       auto table_name = select_from_expr->table().name();
 
       auto table_oid = catalog_.table_oid_for(table_name);
@@ -26,7 +30,7 @@ public:
                                       table_oid,
                                       maybe_pred);
     case ExprType::INSERT_INTO:
-      auto insert_into_expr = dynamic_cast<InsertIntoExpr*>(expr.get());
+      auto insert_into_expr = dynamic_cast<InsertExpr*>(expr.get());
 
 
       return make_unique<InsertPlan>(schema,

@@ -3,33 +3,15 @@
 #include "exprs/base_expr.hpp"
 #include "exprs/table_expr.hpp"
 
-class TableListExpr : public BaseExpr {
+class TableListExpr : public BaseExpr,
+                      public ListExpr<TableExpr>
+{
 public:
   TableListExpr()
     : BaseExpr (ExprType::TABLE_LIST)
   {}
 
-  void push_back(TableExpr table) {
-    tables_.push_back(table);
+  const string to_string() const override {
+    return ListExpr<TableExpr>::to_string();
   }
-
-  const vector<TableExpr>& tables() const {
-    return tables_;
-  }
-
-  string to_string() const override {
-    std::stringstream stream;
-    stream << "[";
-    for (size_t i = 0; i < tables_.size(); ++i) {
-      stream << tables_[i].to_string();
-      if (i != tables_.size() - 1) {
-        stream << ", ";
-      }
-    }
-    stream << "]" << std::endl;;
-    return stream.str();
-  }
-
-protected:
-  vector<TableExpr> tables_;
 };
