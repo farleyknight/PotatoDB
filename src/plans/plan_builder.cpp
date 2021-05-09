@@ -59,6 +59,12 @@ PlanBuilder& PlanBuilder::insert_into(QueryTable insert_table) {
   return *this;
 }
 
+PlanBuilder& PlanBuilder::update(QueryTable update_table) {
+  update_table_ = update_table;
+  plan_type_ = PlanType::UPDATE;
+  return *this;
+}
+
 PlanBuilder& PlanBuilder::tuples(RawTuples&& tuples) {
   tuples_ = move(tuples);
   return *this;
@@ -76,20 +82,22 @@ PlanBuilder& PlanBuilder::where(QueryComp clause) {
 }
 
 ptr<BasePlan> PlanBuilder::to_plan() {
-  // TODO: Change this to switch/case
-  if (plan_type_ == PlanType::TABLE_SCAN) {
+  switch (plan_type_) {
+  case PlanType::TABLE_SCAN:
     return build_scan();
-  } else if (plan_type_ == PlanType::LOOP_JOIN) {
+  case PlanType::LOOP_JOIN:
     return build_loop_join();
-  } else if (plan_type_ == PlanType::INSERT) {
+  case PlanType::UPDATE:
+    return build_update(build_scan());
+  case PlanType::INSERT:
     if (tuples_.empty()) {
       return build_insert(build_scan());
     } else {
       return build_insert(build_tuples());
     }
-  } else if (plan_type_ == PlanType::DELETE) {
+  case PlanType::DELETE:
     return build_delete(build_scan());
-  } else {
+  default:
     throw Exception("Unimplemented! Need to handle this type in to_plan()");
   }
 }
@@ -97,6 +105,26 @@ ptr<BasePlan> PlanBuilder::to_plan() {
 ptr<BasePlan> PlanBuilder::build_tuples() {
   return make_unique<RawTuplesPlan>(insert_table_schema(),
                                     tuples_);
+}
+
+PlanBuilder& PlanBuilder::set(QueryColumn column, QueryConst value) {
+  update_column_ = column;
+  update_value_  = value;
+  return *this;
+}
+
+ptr<BasePlan> PlanBuilder::build_update(ptr<BasePlan>&& scan_plan) {
+  MutMap<column_oid_t, UpdateInfo> update_attrs = {
+    {
+      update_column_.column_oid(),
+      UpdateInfo(UpdateType::SET, update_value_)
+    }
+  };
+
+  return make_unique<UpdatePlan>(update_table_schema(),
+                                 move(scan_plan),
+                                 update_table_.table_oid(),
+                                 update_attrs);
 }
 
 ptr<BasePlan> PlanBuilder::build_insert(ptr<BasePlan>&& scan_plan) {
@@ -176,6 +204,10 @@ CompType PlanBuilder::to_comp_type(string op) {
 
   // NOTE: Default is equals
   return CompType::EQ;
+}
+
+const QuerySchema PlanBuilder::update_table_schema() {
+  return catalog_.query_schema_for(update_table_->table_oid());
 }
 
 const QuerySchema PlanBuilder::insert_table_schema() {

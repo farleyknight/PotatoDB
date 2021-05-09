@@ -124,8 +124,10 @@ TEST_F(ExecTest, InconsistentTupleLengthTest) {
   };
 
   try {
+    auto table_with_two_cols = QueryBuilder(catalog()).table("table_with_two_cols");
+
     auto insert_plan = PlanBuilder(catalog()).
-      insert_into("table_with_two_columns").
+      insert_into(table_with_two_cols).
       values(move(raw_tuples)).
       to_plan();
     FAIL() << failure_message;
@@ -167,8 +169,10 @@ TEST_F(ExecTest, WrongLengthOfTuplesTest) {
 
   bool success = false;
   try {
+    auto table_with_two_cols = QueryBuilder(catalog()).table("table_with_two_cols");
+
     auto insert_plan = PlanBuilder(catalog()).
-      insert_into("table_with_two_columns").
+      insert_into(table_with_two_cols).
       values(move(raw_tuples)).
       to_plan();
     FAIL() << failure_message;
@@ -189,8 +193,10 @@ TEST_F(ExecTest, SimpleRawInsertTest) {
     {Value::make(102), Value::make(12)}
   };
 
+  auto empty_table2 = QueryBuilder(catalog()).table("empty_table2");
+
   auto insert_plan = PlanBuilder(catalog()).
-    insert_into("empty_table2").
+    insert_into(empty_table2).
     values(move(raw_tuples)).
     to_plan();
 
@@ -200,8 +206,11 @@ TEST_F(ExecTest, SimpleRawInsertTest) {
   // Iterate through table make sure that values were inserted.
   // SELECT colA, colB FROM empty_table2;
   auto scan_plan = PlanBuilder(catalog()).
-    select({"colA", "colB"}).
-    from("empty_table2").
+    select({
+        empty_table2["colA"],
+        empty_table2["colB"]
+      }).
+    from(empty_table2).
     to_plan();
 
   auto result_set = query(move(scan_plan));
@@ -228,45 +237,32 @@ TEST_F(ExecTest, SimpleRawInsertAndUpdateTest) {
     {Value::make(100), Value::make(10)}
   };
 
+  auto empty_table2 = QueryBuilder(catalog()).table("empty_table2");
+
   auto insert_plan = PlanBuilder(catalog()).
-    insert_into("empty_table2").
+    insert_into(empty_table2).
     values(move(raw_values)).
     to_plan();
 
   execute(move(insert_plan));
 
-  auto &meta = catalog().table("empty_table2");
   // NOTE: This should update every raw in the table to be 50
   // UPDATE empty_table2 SET colA = 50
   // Scan child plan
 
-  auto update_scan_schema = Schema::make({
-      Schema::pair("colA", ColumnExpr(meta.schema(), "colA"))
-  });
-  auto update_scan_plan = SeqScanPlan::make(move(update_scan_schema),
-                                            meta.oid());
-
-  // Update plan
-  // 0 = first column of the SeqScanPlan created above.
-  // TODO: A better idea is to map ColumnExprs to UpdateInfos
-  // NOTE: Probably stick with the column name.
-  // NOTE: Event better, a unique, system-wide, ColumnID,
-  // which could be a table_oid_t + column_offset
-  MutMap<uint32_t, UpdateInfo> update_attrs = {
-    {0, UpdateInfo(UpdateType::SET, Value::make<int>(50))}
-  };
-
-  auto update_schema = Schema::copy(meta.schema());
-  auto update_plan = UpdatePlan::make(move(update_schema),
-                                      move(update_scan_plan),
-                                      meta.oid(),
-                                      move(update_attrs));
+  auto update_plan = PlanBuilder(catalog()).
+    update(empty_table2).
+    set(empty_table2["colA"], QueryConst(Value::make(50)))
+    to_plan();
 
   execute(move(update_plan));
 
   auto select_plan = PlanBuilder(catalog()).
-    select({"colA", "colB"}).
-    from("empty_table2").
+    select({
+        empty_table2["colA"],
+        empty_table2["colB"]
+      }).
+    from(empty_table2).
     to_plan();
 
   auto result_set = query(move(select_plan));
