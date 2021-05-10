@@ -17,7 +17,7 @@ public:
       auto column_def_list = create_table_expr->column_defs();
       return make_unique<CreateTablePlan>(table_name, column_def_list);
 
-    case ExprType::SELECT_FROM:
+    case ExprType::SELECT:
       auto select_from_expr = dynamic_cast<SelectExpr*>(expr.get());
       auto table_name = select_from_expr->table().name();
 
@@ -29,7 +29,7 @@ public:
       return make_unique<SeqScanPlan>(schema,
                                       table_oid,
                                       maybe_pred);
-    case ExprType::INSERT_INTO:
+    case ExprType::INSERT:
       auto insert_into_expr = dynamic_cast<InsertExpr*>(expr.get());
 
 

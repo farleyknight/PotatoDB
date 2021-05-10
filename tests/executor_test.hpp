@@ -12,6 +12,7 @@
 
 #include "catalog/catalog.hpp"
 #include "catalog/query_builder.hpp"
+#include "catalog/table_builder.hpp"
 
 #include "plans/raw_tuples_plan.hpp"
 #include "plans/plan_builder.hpp"

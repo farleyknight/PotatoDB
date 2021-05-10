@@ -64,15 +64,15 @@ public:
   // Default destructor
   ~TableColumn() = default;
 
-  bool is_inlined()         const { return inlined_; }
-  bool primary_key()        const { return primary_key_; }
-  bool is_nullable()        const { return nullable_; }
-  TypeId type_id()          const { return type_id_; }
-  table_oid_t table_oid()   const { return table_oid_; }
-  column_oid_t oid()        const { return column_oid_; }
-  int32_t fixed_length()    const { return fixed_length_; }
-  int32_t variable_length() const { return variable_length_; }
-  const string& name()       const { return name_; }
+  bool is_inlined()           const { return inlined_; }
+  bool primary_key()          const { return primary_key_; }
+  bool is_nullable()          const { return nullable_; }
+  TypeId type_id()            const { return type_id_; }
+  table_oid_t table_oid()     const { return table_oid_; }
+  column_oid_t oid()          const { return column_oid_; }
+  int32_t fixed_length()      const { return fixed_length_; }
+  int32_t variable_length()   const { return variable_length_; }
+  const column_name_t& name() const { return name_; }
 
   const string to_string() const {
     std::ostringstream os;
@@ -119,12 +119,14 @@ public:
 
 private:
   // Name of the column
-  string name_;
+  column_name_t name_;
   // value type of column
   TypeId type_id_ = TypeId::INVALID;
+
   // IDs for table and column
   table_oid_t table_oid_;
   column_oid_t column_oid_;
+
   // is the column inlined ?
   bool inlined_ = true;
   // is the column nullable?
