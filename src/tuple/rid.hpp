@@ -92,6 +92,10 @@ public:
     return page_id_.is_valid();
   }
 
+  bool stop_iterating() const {
+    return page_id_.stop_iterating();
+  }
+
 private:
   PageId page_id_    = PageId::INVALID();
   slot_id_t slot_id_ = 0;

@@ -43,7 +43,23 @@ public:
     } else if (left.is_null() || right.is_null()) {
       return false;
     } else {
+      // NOTE: This could cause slicing! :(
+      // Need to do something more intelligent here
+      // Likely cast both Value objects to be of the same integer size
       return left.as<numeric_t>() == right.as<numeric_t>();
+    }
+  }
+
+  bool lt(const Value& left, const Value& right) const override {
+    if (left.is_null() && right.is_null()) {
+      return true;
+    } else if (left.is_null() || right.is_null()) {
+      return false;
+    } else {
+      // NOTE: This could cause slicing! :(
+      // Need to do something more intelligent here
+      // Likely cast both Value objects to be of the same integer size
+      return left.as<numeric_t>() < right.as<numeric_t>();
     }
   }
 

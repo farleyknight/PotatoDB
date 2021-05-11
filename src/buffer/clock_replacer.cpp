@@ -1,7 +1,7 @@
 
 #include "buffer/clock_replacer.hpp"
 
-ClockReplacer::ClockReplacer(size_t max_frames)
+ClockReplacer::ClockReplacer(frame_id_t max_frames)
   : max_frame_id_     (max_frames),
     available_frames_ (0),
     curr_frame_id_    (0)

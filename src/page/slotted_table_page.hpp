@@ -269,16 +269,15 @@ public:
       return unique_ptr<Tuple>(nullptr);
     }
 
-    std::cout << "Creating tuple of size " << tuple_size << std::endl;
     // At this point, we have at least a shared lock on the RID.
     // Copy the tuple data into our result.
     uint32_t tuple_offset = tuple_offset_at_slot(slot_id);
-    auto tuple = ptr<Tuple>();
-    tuple->reset(tuple_size);
+    auto tuple = make_unique<Tuple>(tuple_size);
+    // tuple->reset(tuple_size);
     tuple->copy_n_bytes(tuple_offset, // Source offset
-                       0, // Destination offset
-                       page_->buffer(), // Source buffer
-                       tuple_size); // N bytes
+                        0, // Destination offset
+                        page_->buffer(), // Source buffer
+                        tuple_size); // N bytes
 
     tuple->set_rid(rid);
     return tuple;

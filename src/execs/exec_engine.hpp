@@ -30,10 +30,13 @@ public:
     auto schema = dynamic_cast<SchemaPlan*>(plan.get())->schema();
     auto exec = ExecFactory::create(exec_ctx, move(plan));
 
+    int result_count = 0;
     exec->init();
 
     while (exec->has_next()) {
       tuples.push_back(exec->next());
+      ++result_count;
+      std::cout << "Tuple count: " << result_count << std::endl;
     }
 
     return make_unique<ResultSet>(move(tuples), schema);

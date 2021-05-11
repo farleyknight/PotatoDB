@@ -31,6 +31,7 @@ TableIterator& TableIterator::operator++() {
   // NOTE: For some reason, the algorithm is stuck at only looking at
   // one page.. Page 9 in this case.
   auto page_id   = tuple_->page_id();
+  auto file_id   = page_id.file_id();
   SlottedTablePage curr_page(buff_mgr.fetch_page(page_id));
 
   auto next_tuple_rid = curr_page.next_tuple_rid(tuple_->rid());
@@ -40,7 +41,7 @@ TableIterator& TableIterator::operator++() {
     // If you find yourself asking this, then there might
     // be a better condition to check for than == INVALID_PAGE_ID.
     // Might have to find a way to surface Buffer Pool issues here?
-    while (curr_page.next_page_id() != PageId::INVALID()) {
+    while (curr_page.next_page_id() != PageId::STOP_ITERATING(file_id)) {
       page_id = curr_page.next_page_id();
       auto next_page = SlottedTablePage(buff_mgr.fetch_page(page_id));
 
@@ -54,9 +55,9 @@ TableIterator& TableIterator::operator++() {
   }
 
   if (!next_tuple_rid.has_value()) {
-    // NOTE: Setting RID to have an invalid page ID means
-    // we have exhausted this table iterator
-    rid_.set(PageId::INVALID(), 0);
+    // NOTE: Setting RID to have an STOP_ITERATING
+    // means we have exhausted this table iterator
+    rid_.set(PageId::STOP_ITERATING(file_id), 0);
     return *this;
   }
 
@@ -76,15 +77,43 @@ TableIterator TableIterator::operator++(int) {
   return clone;
 }
 
-bool TableIterator::operator==(const TableIterator& it) const {
+bool TableIterator::operator==(const TableIterator& iter) const {
   if (tuple_ == nullptr) {
     return false;
   }
+  /*
+   *
+   if (tuple_ == nullptr && iter.tuple_ == nullptr) {
+   return true;
+   }
 
-  RID first_rid = rid();
-  RID second_rid = it.rid();
+   if (tuple_ == nullptr) {
+   std::cout << "tuple_ is null" << std::endl;
+   }
+
+   if (iter.tuple_ == nullptr) {
+   std::cout << "iter.tuple_ is null" << std::endl;
+   }
+
+   if (tuple_ != nullptr || iter.tuple_ != nullptr) {
+   return false;
+   }
+
+   */
+
+  auto tuple_rid = tuple_->rid();
+  auto first_rid = rid();
+  auto second_rid = iter.rid();
+
+  std::cout << "Tuple RID: " << tuple_rid.to_string() << std::endl;
+  std::cout << "First RID: " << first_rid.to_string() << std::endl;
+  std::cout << "Second RID: " << second_rid.to_string() << std::endl;
 
   return first_rid.get() == second_rid.get();
+}
+
+bool TableIterator::stop_iterating() const {
+  return rid_.stop_iterating();
 }
 
 bool TableIterator::operator!=(const TableIterator& it) const {
@@ -97,7 +126,6 @@ bool TableIterator::has_tuple() const {
 
 const Tuple& TableIterator::tuple() const {
   assert(tuple_);
-  std::cout << "Tuple size is " << tuple_->size() << std::endl;
   assert(tuple_->size() > 0);
   return *tuple_;
 }

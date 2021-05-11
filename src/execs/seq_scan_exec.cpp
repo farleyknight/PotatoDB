@@ -7,9 +7,6 @@ SeqScanExec::SeqScanExec(ExecCtx& exec_ctx,
 {}
 
 bool SeqScanExec::match_found(const Tuple& tuple) {
-  std::cout << "Do we have a predicate? " <<
-    (plan_->has_pred() ? "true" : "false") << std::endl;
-
   if (plan_->has_pred()) {
     auto result = plan_->pred().
       eval(tuple, schema()).as<bool>();
@@ -20,7 +17,8 @@ bool SeqScanExec::match_found(const Tuple& tuple) {
 }
 
 bool SeqScanExec::at_the_end() {
-  return *table_iter_ == table_heap().end(txn());
+  return table_iter_->stop_iterating();
+  // return *table_iter_ == table_heap().end(txn());
 }
 
 bool SeqScanExec::has_next()  {

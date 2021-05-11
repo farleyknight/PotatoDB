@@ -22,11 +22,6 @@ const string query_node_to_string(QueryNodeType type)  {
 Value QueryComp::eval(const Tuple& tuple,
                       const QuerySchema& schema) const
 {
-  std::cout << "Left QueryNodeType is " <<
-    query_node_to_string(left_->node_type()) << std::endl;
-
-  std::cout << "Right QueryNodeType is " <<
-    query_node_to_string(right_->node_type()) << std::endl;
   auto lhs = left_->eval(tuple, schema);
   auto rhs = right_->eval(tuple, schema);
   return Value::make(compare(lhs, rhs));

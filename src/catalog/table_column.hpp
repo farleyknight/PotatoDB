@@ -18,10 +18,6 @@ static constexpr int32_t INVALID_LENGTH = -1;
 // TODO: Add `AUTOINCREMENT` stuff to this class
 class TableColumn {
 public:
-  /**********************************************
-   * Constructors & destructor
-   **********************************************/
-
   TableColumn()
     : fixed_length_(INVALID_LENGTH) {}
 

@@ -12,6 +12,10 @@ class Tuple {
 public:
   Tuple() = default;
 
+  Tuple(uint32_t size)
+    : buffer_ (size)
+  {}
+
   // Constructor for table heap tuple
   // NOTE: Has no data
   Tuple(RID rid) : rid_(rid) {}

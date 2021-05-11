@@ -25,6 +25,9 @@ public:
   bool operator!=(const TableIterator& it) const;
   bool has_tuple() const;
   const Tuple& tuple() const;
+
+  bool stop_iterating() const;
+
   const RID& rid() const {
     return rid_;
   }

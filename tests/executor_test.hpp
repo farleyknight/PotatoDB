@@ -113,6 +113,19 @@ TEST_F(ExecTest, SimpleSeqScanTest) {
   //    between 1 and 1000
   // 3) colB should be whatever I guess, but always less than 10
 
+  // Create Values to insert
+  vector<vector<Value>> data;
+  for (int32_t i = 1; i <= 1000; ++i) {
+    data.push_back({ Value::make(i), Value::make(3) });
+  }
+
+  auto insert_values_plan = PlanBuilder(catalog()).
+    insert_into(test_1).
+    tuples(RawTuples(data)).
+    to_plan();
+
+  execute(move(insert_values_plan));
+
   auto scan_plan = PlanBuilder(catalog()).
     select({
         test_1["colA"],

@@ -18,6 +18,10 @@ public:
     return PageId(file_id, BLOCK_SENTINEL);
   }
 
+  bool stop_iterating() const {
+    return block_id_ == BLOCK_SENTINEL;
+  }
+
   static PageId from(uint32_t page_id) {
     auto file_id  = static_cast<file_id_t>(page_id >> 16);
     auto block_id = static_cast<slot_id_t>(page_id);
