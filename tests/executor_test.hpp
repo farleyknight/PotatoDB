@@ -107,6 +107,12 @@ TEST_F(ExecTest, SimpleSeqScanTest) {
 
   auto test_1 = QueryBuilder(catalog()).table("test_1");
 
+  // TODO Test does not pass because it returns no results
+  // 1) Write a loop that adds 1000 tuples to the test_1 table
+  // 2) Make sure that colA has one entry for every integer
+  //    between 1 and 1000
+  // 3) colB should be whatever I guess, but always less than 10
+
   auto scan_plan = PlanBuilder(catalog()).
     select({
         test_1["colA"],

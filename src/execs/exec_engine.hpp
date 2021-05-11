@@ -27,6 +27,7 @@ public:
   {
     vector<Tuple> tuples;
 
+    auto schema = dynamic_cast<SchemaPlan*>(plan.get())->schema();
     auto exec = ExecFactory::create(exec_ctx, move(plan));
 
     exec->init();
@@ -34,8 +35,6 @@ public:
     while (exec->has_next()) {
       tuples.push_back(exec->next());
     }
-
-    auto schema = dynamic_cast<SchemaPlan*>(plan.get())->schema();
 
     return make_unique<ResultSet>(move(tuples), schema);
   }

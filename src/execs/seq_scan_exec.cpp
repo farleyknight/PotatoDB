@@ -24,6 +24,10 @@ bool SeqScanExec::at_the_end() {
 }
 
 bool SeqScanExec::has_next()  {
+  if (!table_iter_->has_tuple()) {
+    return false;
+  }
+
   while (!at_the_end()) {
     if (match_found(table_iter_->tuple())) {
       return true;
@@ -45,12 +49,6 @@ TableHeap& SeqScanExec::table_heap() {
 
 void SeqScanExec::init() {
   table_iter_ = make_unique<TableIterator>(table_heap().begin(txn()));
-  // TODO: This might fail for empty tables?
-  // Maybe we should check if the table is empty
-  // befor doing a scan?
-  assert(table_iter_->has_tuple());
-  // NOTE: Iter object created in constructor
-  // TODO: Maybe do a reset here?
 }
 
 const QuerySchema& SeqScanExec::schema()  {

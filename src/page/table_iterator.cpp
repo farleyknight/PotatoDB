@@ -10,8 +10,7 @@ TableIterator::TableIterator(TableHeap& table_heap,
     txn_        (txn)
 {
   if (rid_.is_valid()) {
-    tuple_ = make_unique<Tuple>(table_heap_.find_tuple(rid_, txn));
-    assert(tuple_->size() > 0);
+    tuple_ = table_heap_.find_tuple(rid_, txn);
   }
 }
 
@@ -21,8 +20,7 @@ TableIterator::TableIterator(const TableIterator& other)
     txn_        (other.txn_)
 {
   if (rid_.is_valid()) {
-    tuple_ = make_unique<Tuple>(table_heap_.find_tuple(rid_, other.txn_));
-    assert(tuple_->size() > 0);
+    tuple_ = table_heap_.find_tuple(rid_, other.txn_);
   }
 }
 
@@ -65,8 +63,7 @@ TableIterator& TableIterator::operator++() {
   auto &rid = next_tuple_rid.value();
 
   if (*this != table_heap_.end(txn_)) {
-    tuple_ = make_unique<Tuple>(table_heap_.find_tuple(rid, txn_));
-    assert(tuple_->size() > 0);
+    tuple_ = table_heap_.find_tuple(rid, txn_);
   }
 
   buff_mgr.unpin(curr_page.table_page_id(), false);
@@ -100,7 +97,7 @@ bool TableIterator::has_tuple() const {
 
 const Tuple& TableIterator::tuple() const {
   assert(tuple_);
-  assert(tuple_->size() > 0);
   std::cout << "Tuple size is " << tuple_->size() << std::endl;
+  assert(tuple_->size() > 0);
   return *tuple_;
 }

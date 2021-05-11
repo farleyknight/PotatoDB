@@ -196,7 +196,7 @@ void TableHeap::rollback_delete(const RID& rid, Txn& txn) {
   buff_mgr_.unpin(page.page_id(), true);
 }
 
-Tuple TableHeap::find_tuple(const RID& rid, Txn& txn) const {
+ptr<Tuple> TableHeap::find_tuple(const RID& rid, Txn& txn) const {
   // Find the page which contains the tuple.
 
   auto maybe_page = buff_mgr_.fetch_page(rid.page_id());
@@ -205,13 +205,13 @@ Tuple TableHeap::find_tuple(const RID& rid, Txn& txn) const {
   if (maybe_page == nullptr) {
     std::cout << "Maybe Page was NULL! No valid tuple!" << std::endl;
     txn.abort_with_reason(AbortReason::PAGE_NOT_AVAILABLE);
-    return Tuple();
+    return unique_ptr<Tuple>(nullptr);
   }
 
   SlottedTablePage page(maybe_page);
 
   page.rlatch();
-  Tuple tuple = page.find_tuple(rid);
+  auto tuple = page.find_tuple(rid);
   page.runlatch();
   buff_mgr_.unpin(rid.page_id(), false);
 

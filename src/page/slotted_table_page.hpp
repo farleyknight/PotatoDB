@@ -252,35 +252,35 @@ public:
 
   // TODO: This should return a ptr<Tuple>
   // There are two cases below that should return a ptr<Tuple> with nullptr
-  Tuple find_tuple(const RID& rid) {
+  ptr<Tuple> find_tuple(const RID& rid) {
     // Get the current slot number.
     uint32_t slot_id = rid.slot_id();
     // If somehow we have more slots than tuples, abort the txn.
     if (slot_id >= tuple_count()) {
       std::cout << "Slot ID is greater or equal to tuple count! " << slot_id << std::endl;
       std::cout << "Tuple count " << tuple_count() << std::endl;
-      return Tuple();
+      return unique_ptr<Tuple>(nullptr);
     }
     // Otherwise get the current tuple size too.
     uint32_t tuple_size = tuple_size_at(slot_id);
     // If the tuple is deleted, abort the txn.
     if (is_deleted(tuple_size)) {
       std::cout << "This tuple is deleted! " << slot_id << std::endl;
-      return Tuple();
+      return unique_ptr<Tuple>(nullptr);
     }
 
     std::cout << "Creating tuple of size " << tuple_size << std::endl;
     // At this point, we have at least a shared lock on the RID.
     // Copy the tuple data into our result.
     uint32_t tuple_offset = tuple_offset_at_slot(slot_id);
-    Tuple tuple;
-    tuple.reset(tuple_size);
-    tuple.copy_n_bytes(tuple_offset, // Source offset
+    auto tuple = ptr<Tuple>();
+    tuple->reset(tuple_size);
+    tuple->copy_n_bytes(tuple_offset, // Source offset
                        0, // Destination offset
                        page_->buffer(), // Source buffer
                        tuple_size); // N bytes
 
-    tuple.set_rid(rid);
+    tuple->set_rid(rid);
     return tuple;
   }
 

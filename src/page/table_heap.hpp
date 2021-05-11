@@ -40,7 +40,7 @@ public:
                     Txn& txn);
   void rollback_delete(const RID& rid, Txn& txn);
 
-  Tuple find_tuple(const RID& rid, Txn& txn) const;
+  ptr<Tuple> find_tuple(const RID& rid, Txn& txn) const;
 
   TableIterator begin(Txn& txn);
   TableIterator end(Txn& txn);
