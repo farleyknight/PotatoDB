@@ -42,7 +42,7 @@ public:
   // Default delete
   ~RID() = default;
 
-  static Option<RID> make_opt(PageId page_id, slot_id_t slot_id) {
+  static optional<RID> make_opt(PageId page_id, slot_id_t slot_id) {
     return make_optional<RID>(page_id, slot_id);
   }
 
@@ -74,11 +74,6 @@ public:
     return page_id_ == other.page_id_ && slot_id_ == other.slot_id_;
   }
 
-  /**********************************************
-  * Debug methods
-  **********************************************/
-
-  // TODO: No move b/c RVO?
   const string to_string() const {
     std::stringstream os;
     os << "file_id: " << page_id_.file_id();
@@ -93,9 +88,13 @@ public:
     return os;
   }
 
+  bool is_valid() const {
+    return page_id_.is_valid();
+  }
+
 private:
-  PageId page_id_;
-  slot_id_t slot_id_ = 0;  // logical offset from 0, 1...
+  PageId page_id_    = PageId::INVALID();
+  slot_id_t slot_id_ = 0;
 };
 
 namespace std {

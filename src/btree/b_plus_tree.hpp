@@ -15,8 +15,7 @@
 /*
  * Main class providing the API for the Interactive B+ Tree.
  *
- * Implementation of simple b+ tree data structure where internal pages direct
- * the search and leaf pages contain actual data.
+ * Implementation of simple b+ tree data structure where internal pages direct * the search and leaf pages contain actual data.
  * (1) We only support unique key
  * (2) support insert & remove
  * (3) The structure should shrink and grow dynamically
@@ -134,7 +133,7 @@ public:
 
   // member variable
   string index_name_;
-  PageId root_page_id_;
+  PageId root_page_id_ = PageId::INVALID();
   const BuffMgr& buff_mgr_;
   KeyComp comp_;
   int leaf_size_;

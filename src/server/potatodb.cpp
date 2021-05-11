@@ -24,7 +24,7 @@ ptr<ResultSet> PotatoDB::query(string statement) {
     auto exprs = SQLParser::as_exprs(statement);
     // TODO: Allow for multiple statements
     assert(exprs.size() > 0);
-    auto plan = PlanFactory::create(catalog_, expr[0]);
+    auto plan = PlanFactory::create(catalog_, move(exprs[0]));
 
     // Create and run the txn
     auto &txn = txn_mgr_.begin();
@@ -53,7 +53,7 @@ void PotatoDB::execute(string statement) {
     auto exprs = SQLParser::as_exprs(statement);
     // TODO: Allow for multiple statements
     assert(exprs.size() > 0);
-    auto plan = PlanFactory::create(catalog_, expr[0]);
+    auto plan = PlanFactory::create(catalog_, move(exprs[0]));
 
     // Create and run the txn
     auto &txn = txn_mgr_.begin();

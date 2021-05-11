@@ -8,18 +8,18 @@ public:
     : BaseExpr (ExprType::TABLE)
   {}
 
-  TableExpr(string name)
+  TableExpr(table_name_t name)
     : BaseExpr (ExprType::TABLE),
       name_    (name)
   {}
 
-  TableExpr(table_oid_t table_oid, string name)
+  TableExpr(table_oid_t table_oid, table_name_t name)
     : BaseExpr   (ExprType::TABLE),
       name_      (name),
       table_oid_ (table_oid)
   {}
 
-  void set_name(string name) {
+  void set_name(table_name_t name) {
     name_ = name;
   }
 
@@ -32,8 +32,6 @@ public:
   }
 
 protected:
-  string name_;
-  table_oid_t table_oid_;
+  table_name_t name_;
+  table_oid_t table_oid_ = INVALID_TABLE_OID;
 };
-
-

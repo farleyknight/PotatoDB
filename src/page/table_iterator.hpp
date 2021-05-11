@@ -32,6 +32,6 @@ public:
 private:
   TableHeap& table_heap_;
   RID rid_;
-  Tuple tuple_;
+  ptr<Tuple> tuple_;
   Txn& txn_;
 };

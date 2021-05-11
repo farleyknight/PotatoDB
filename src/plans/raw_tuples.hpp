@@ -1,7 +1,7 @@
 #pragma once
 
-#include "page/page_id.hpp"
 #include "value/value.hpp"
+#include "exprs/tuple_list_expr.hpp"
 
 class RawTuples {
 public:
@@ -14,16 +14,22 @@ public:
     : data_ (data)
   {}
 
+  RawTuples(TupleListExpr expr) {
+    for (const auto &tuple_expr : expr.list()) {
+      vector<Value> raw_tuple;
+      for (const auto &value_expr : tuple_expr.list()) {
+        raw_tuple.push_back(value_expr.to_value());
+      }
+      data_.push_back(raw_tuple);
+    }
+  }
+
   // Allow copy constructor
   RawTuples(const RawTuples&) = default;
   // Allow copy assign constructor
   RawTuples& operator=(const RawTuples&) = default;
   // Default destructor
   ~RawTuples() = default;
-
-  PageId page_id() {
-    return page_id_;
-  }
 
   Data data() {
     return data_;
@@ -58,6 +64,5 @@ public:
   }
 
 private:
-  PageId page_id_;
   Data data_;
 };

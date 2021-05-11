@@ -5,24 +5,26 @@
 class QueryConst : public BaseQuery {
 public:
   explicit QueryConst(Value value)
-    : BaseQuery (value.type_id()),
+    : BaseQuery (QueryNodeType::CONST, value.type_id()),
       value_    (value) {}
 
-  Value eval(UNUSED const Tuple& tuple,
-             UNUSED const QuerySchema& schema) const {
-    return value_;
-  }
-
-  Value eval_join(UNUSED const Tuple& lt,
-                  UNUSED const QuerySchema& ls,
-                  UNUSED const Tuple& rt,
-                  UNUSED const QuerySchema& rs) const
+  virtual Value eval(UNUSED const Tuple& tuple,
+                     UNUSED const QuerySchema& schema) const override
   {
     return value_;
   }
 
-  Value eval_agg(UNUSED const vector<Value>& group_bys,
-                 UNUSED const vector<Value>& aggs) const
+  virtual Value eval_join(UNUSED const Tuple& lt,
+                          UNUSED const QuerySchema& ls,
+                          UNUSED const Tuple& rt,
+                          UNUSED const QuerySchema& rs) const override
+  {
+    return value_;
+  }
+
+  virtual Value eval_agg(UNUSED const QuerySchema& schema,
+                         UNUSED const vector<Value>& group_bys,
+                         UNUSED const vector<Value>& aggs) const override
   {
     return value_;
   }

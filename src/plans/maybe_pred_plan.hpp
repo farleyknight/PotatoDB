@@ -14,7 +14,7 @@ public:
     return pred_ != nullptr;
   }
 
-  const BaseQuery& pred() {
+  const QueryComp& pred() {
     assert(pred_);
     return *pred_;
   }

@@ -1,35 +1,36 @@
 #pragma once
 
 #include "exprs/base_expr.hpp"
+#include "types/type.hpp"
 
 class ColumnDefExpr : public BaseExpr {
 public:
-  ColumnDefExpr(column_name_t name, string type_name)
+  ColumnDefExpr(column_name_t name, TypeId type_id)
     : BaseExpr   (ExprType::COLUMN_DEF),
       name_      (name),
-      type_name_ (type_name)
+      type_id_   (type_id)
   {}
 
-  ColumnDefExpr(column_name_t name, string type_name, uint32_t type_length)
+  ColumnDefExpr(column_name_t name, TypeId type_id, length_t type_length)
     : BaseExpr     (ExprType::COLUMN_DEF),
       name_        (name),
-      type_name_   (type_name),
+      type_id_     (type_id),
       type_length_ (type_length)
   {}
 
  virtual const string to_string() const override {
-    return name_ + " " + type_name_;
+   return name_ + " " + Type::as_string(type_id_);
   }
 
-  const string& name() const {
+  const column_name_t& name() const {
     return name_;
   }
 
-  const string& type_name() const {
-    return type_name_;
+  TypeId type_id() const {
+    return type_id_;
   }
 
-  uint32_t type_length() const {
+  length_t type_length() const {
     return type_length_;
   }
 
@@ -49,9 +50,19 @@ public:
     primary_key_ = state;
   }
 
+  bool auto_increment() {
+    return auto_increment_;
+  }
+
+  void is_auto_increment(bool value) {
+    auto_increment_ = value;
+  }
+
 protected:
   column_name_t name_;
-  string type_name_;
-  uint32_t type_length_ = 0;
-  bool not_null_ = false, primary_key_ = false;
+  TypeId type_id_;
+  length_t type_length_ = 0;
+  bool not_null_ = false,
+    primary_key_ = false,
+    auto_increment_ = false;
 };

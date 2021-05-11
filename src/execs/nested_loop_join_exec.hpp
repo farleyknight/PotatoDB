@@ -53,7 +53,7 @@ public:
       return true;
     }
 
-    auto pred = plan_->pred();
+    auto &pred = plan_->pred();
 
     auto left_schema = plan_->left_schema();
     auto right_schema = plan_->right_schema();

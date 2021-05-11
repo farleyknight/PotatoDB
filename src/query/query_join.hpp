@@ -13,7 +13,7 @@ enum class JoinSide {
 class QueryJoin : public BaseQuery {
 public:
   QueryJoin()
-    : BaseQuery    (TypeId::INVALID),
+    : BaseQuery    (QueryNodeType::JOIN, TypeId::INVALID),
       join_side_   (JoinSide::INVALID),
       column_name_ ("")
   {}
@@ -21,38 +21,43 @@ public:
   QueryJoin(TypeId type_id,
             JoinSide side,
             const string name)
-    : BaseQuery     (type_id),
+    : BaseQuery     (QueryNodeType::JOIN, type_id),
       join_side_    (side),
       column_name_  (move(name)) {}
 
-  QueryJoin(const QueryJoin&) = default; // Allow copy
-  QueryJoin& operator=(const QueryJoin&) = default; // Allow copy assign
+  // Allow copy
+  QueryJoin(const QueryJoin&) = default;
+  // Allow copy assign
+  QueryJoin& operator=(const QueryJoin&) = default;
   ~QueryJoin() = default; // Default delete
 
-  static QueryJoin make_left(QueryColumn left) {
-    return QueryJoin(left.type_id(), JoinSide::LEFT, left.name());
+  static ptr<QueryJoin> make_left(QueryColumn left) {
+    return make_unique<QueryJoin>(left.type_id(), JoinSide::LEFT, left.name());
   }
 
-  static QueryJoin make_left(TypeId type_id, const string& name) {
-    return QueryJoin(type_id, JoinSide::LEFT, name);
+  static ptr<QueryJoin> make_left(TypeId type_id, const string& name) {
+    return make_unique<QueryJoin>(type_id, JoinSide::LEFT, name);
   }
 
-  static QueryJoin make_right(QueryColumn right) {
-    return QueryJoin(right.type_id(), JoinSide::RIGHT, right.name());
+  static ptr<QueryJoin> make_right(QueryColumn right) {
+    return make_unique<QueryJoin>(right.type_id(), JoinSide::RIGHT, right.name());
   }
 
-  static QueryJoin make_right(TypeId type_id, const string& name) {
-    return QueryJoin(type_id, JoinSide::RIGHT, name);
+  static ptr<QueryJoin> make_right(TypeId type_id, const string& name) {
+    return make_unique<QueryJoin>(type_id, JoinSide::RIGHT, name);
   }
 
-  Value eval(const Tuple& tuple, const QuerySchema& schema) const;
+  Value eval(const Tuple& tuple,
+             const QuerySchema& schema) const override;
+
   Value eval_join(const Tuple& lt,
                   const QuerySchema& ls,
                   const Tuple& rt,
-                  const QuerySchema& rs) const;
+                  const QuerySchema& rs) const override;
 
-  Value eval_agg(UNUSED const vector<Value>& group_bys,
-                 UNUSED const vector<Value>& aggs) const
+  Value eval_agg(UNUSED const QuerySchema& schema,
+                 UNUSED const vector<Value>& group_bys,
+                 UNUSED const vector<Value>& aggs) const override
   {
     throw NotImplementedException("eval_aggregate not implemented");
   }

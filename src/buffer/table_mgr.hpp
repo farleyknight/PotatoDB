@@ -32,7 +32,8 @@ public:
 
     //auto maybe_page   = buff_mgr_.fetch_page(page_id);
     //assert(maybe_page);
-    auto heap = make_unique<TableHeap>(table_oid,
+    auto heap = make_unique<TableHeap>(file_id,
+                                       table_oid,
                                        page_id,
                                        buff_mgr_,
                                        lock_mgr_,

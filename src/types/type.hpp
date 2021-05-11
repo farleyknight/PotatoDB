@@ -113,7 +113,7 @@ public:
     }
   }
 
-  static TypeId from_string(const string& name) {
+  static TypeId type_id_for(const string& name) {
     if (name == "INTEGER") {
       return TypeId::INTEGER;
     } else if (name == "VARCHAR") {

@@ -33,6 +33,6 @@ public:
 private:
   lsn_t lsn_;
   size_t size_;
-  PageId page_id_;
+  PageId page_id_ = PageId::INVALID();
   size_t next_index_;
 };

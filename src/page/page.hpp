@@ -23,10 +23,6 @@ public:
 
   virtual ~Page() {} // Make Page polymorphic
 
-  /**********************************************
-   * Instance methods
-   **********************************************/
-
   Buffer& buffer() {
     return buffer_;
   }
@@ -102,7 +98,7 @@ public:
 
 private:
 
-  PageId  page_id_;
+  PageId  page_id_ = PageId::INVALID();
   Buffer  buffer_;
   int     pin_count_ = 0;
   bool    is_dirty_ = false;

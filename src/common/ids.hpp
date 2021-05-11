@@ -40,3 +40,4 @@ using index_name_t  = std::string;
 
 // Index type is mostly meant for for-loops
 using index_t       = std::uint32_t;
+using length_t      = std::uint32_t;

@@ -12,13 +12,15 @@
 #include "tuple/rid.hpp"
 #include "tuple/tuple.hpp"
 
-TableHeap::TableHeap(table_oid_t table_oid,
+TableHeap::TableHeap(file_id_t file_id,
+                     table_oid_t table_oid,
                      PageId first_page_id,
                      BuffMgr& buff_mgr,
                      LockMgr& lock_mgr,
                      LogMgr& log_mgr,
                      Txn& txn)
-  : table_oid_     (table_oid),
+  : file_id_       (file_id),
+    table_oid_     (table_oid),
     first_page_id_ (first_page_id),
     lock_mgr_      (lock_mgr),
     log_mgr_       (log_mgr),
@@ -26,10 +28,9 @@ TableHeap::TableHeap(table_oid_t table_oid,
 {
   SlottedTablePage first_page(buff_mgr_.fetch_page(first_page_id));
 
-  first_page_id_ = first_page.page_id();
   first_page.wlatch();
   first_page.init(first_page_id_,
-                  PageId::INVALID(),
+                  PageId::STOP_ITERATING(file_id),
                   txn,
                   log_mgr_);
   first_page.wunlatch();
@@ -60,7 +61,7 @@ bool TableHeap::insert_tuple(Tuple& tuple,
     auto next_page_id = curr_page.next_page_id();
 
     // If the next page is a valid page,
-    if (next_page_id != PageId::INVALID()) {
+    if (next_page_id != PageId::STOP_ITERATING(file_id_)) {
       // Unlatch and unpin the current page.
       buff_mgr_.unpin(curr_page.table_page_id(), false);
       // And repeat the process with the next page.
@@ -68,9 +69,12 @@ bool TableHeap::insert_tuple(Tuple& tuple,
     } else {
       // Otherwise we have run out of valid pages.
       // We need to create a new page.
+      auto page_id = curr_page.page_id();
+      auto next_block_id = page_id.block_id() + 1;
+      auto next_page_id = PageId(file_id_, next_block_id);
+      curr_page.set_next_page_id(next_page_id);
 
-      // TODO: This should be allocating a page from the FileMgr
-      auto maybe_new_page = buff_mgr_.fetch_page(PageId::INVALID());
+      auto maybe_new_page = buff_mgr_.fetch_page(next_page_id);
       // If we could not create a new page,
       if (maybe_new_page == nullptr) {
         // Then life sucks and we abort the txn.
@@ -199,6 +203,7 @@ Tuple TableHeap::find_tuple(const RID& rid, Txn& txn) const {
 
   // If the page could not be found, then abort the txn.
   if (maybe_page == nullptr) {
+    std::cout << "Maybe Page was NULL! No valid tuple!" << std::endl;
     txn.abort_with_reason(AbortReason::PAGE_NOT_AVAILABLE);
     return Tuple();
   }
@@ -215,9 +220,9 @@ Tuple TableHeap::find_tuple(const RID& rid, Txn& txn) const {
 
 TableIterator TableHeap::begin(Txn& txn) {
   auto page_id = first_page_id_;
-  RID rid;
+  RID rid(page_id, 0);
 
-  while (page_id != PageId::INVALID()) {
+  while (page_id != PageId::STOP_ITERATING(file_id_)) {
     auto maybe_page = buff_mgr_.fetch_page(page_id);
     assert(maybe_page);
 
@@ -227,12 +232,14 @@ TableIterator TableHeap::begin(Txn& txn) {
 
     buff_mgr_.unpin(page_id, false);
     if (maybe_rid.has_value()) {
-      // NOTE: This uses copy-assign constructor
       rid = maybe_rid.value();
+      std::cout << "Got RID: " << rid << std::endl;
       break;
     }
     page_id = page.next_page_id();
   }
+
+  assert(rid.page_id().is_valid());
 
   return TableIterator(*this, rid, txn);
 }

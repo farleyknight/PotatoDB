@@ -20,7 +20,7 @@ public:
       child_      (move(child)),
       directions_ (directions)
   {
-    assert(schema->column_count() == directions_.size());
+    // assert(schema->column_count() == directions_.size());
   }
 
   ptr<BasePlan>&& child() { return move(child_); }

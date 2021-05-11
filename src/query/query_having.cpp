@@ -4,7 +4,7 @@
 
 QueryHaving::QueryHaving(TypeId type_id,
                          BaseQuery having_clause)
-  : BaseQuery      (type_id),
+  : BaseQuery      (QueryNodeType::HAVING, type_id),
     having_clause_ (having_clause) {}
 
 

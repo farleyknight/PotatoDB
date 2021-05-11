@@ -115,12 +115,12 @@ TEST(ParserTest, CreateTableTest) {
 
   auto &id_col = col_list[0];
   EXPECT_EQ(id_col.name(), "id");
-  EXPECT_EQ(id_col.type_name(), "INTEGER");
+  EXPECT_EQ(id_col.type_id(), TypeId::INTEGER);
   EXPECT_EQ(id_col.is_primary_key(), true);
 
   auto &name_col = col_list[1];
   EXPECT_EQ(name_col.name(), "name");
-  EXPECT_EQ(name_col.type_name(), "VARCHAR");
+  EXPECT_EQ(name_col.type_id(), TypeId::VARCHAR);
   EXPECT_EQ(name_col.type_length(), 10);
   EXPECT_EQ(name_col.is_not_null(), true);
 }

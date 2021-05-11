@@ -11,6 +11,9 @@
 
 #include "plans/base_plan.hpp"
 #include "plans/raw_tuples_plan.hpp"
+#include "exprs/create_table_expr.hpp"
+#include "exprs/select_expr.hpp"
+#include "exprs/insert_expr.hpp"
 
 class PlanBuilder {
 public:
@@ -34,12 +37,18 @@ public:
                   string right_name);
 
   PlanBuilder& update(QueryTable table);
+  PlanBuilder& set(QueryColumn column, Value value);
 
   PlanBuilder& delete_from(QueryTable table);
 
-  PlanBuilder& where(QueryComp comp);
+  PlanBuilder& where(ptr<QueryComp>&& comp);
+
 
   ptr<BasePlan> to_plan();
+
+  ptr<BasePlan> from_expr(CreateTableExpr* expr);
+  ptr<BasePlan> from_expr(SelectExpr* expr);
+  ptr<BasePlan> from_expr(InsertExpr* expr);
 
 private:
   ptr<BasePlan> build_tuples();
@@ -58,14 +67,6 @@ private:
                   QueryColumn right);
 
   void apply_join(QueryTable right_table);
-
-  const QuerySchema update_table_schema();
-  const QuerySchema insert_table_schema();
-  const QuerySchema from_table_schema();
-  const QuerySchema right_table_schema();
-  const QuerySchema left_table_schema();
-
-  PlanBuilder& set(QueryColumn column, Value value);
 
 
   vector<QueryColumn> select_columns_;
@@ -91,6 +92,12 @@ private:
   ptr<QueryTable> left_table_;
   ptr<QueryTable> right_table_;
   ptr<QueryTable> update_table_;
+
+  const QuerySchema update_table_schema();
+  const QuerySchema insert_table_schema();
+  const QuerySchema from_table_schema();
+  const QuerySchema right_table_schema();
+  const QuerySchema left_table_schema();
 
   PlanType plan_type_ = PlanType::INVALID;
 

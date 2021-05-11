@@ -40,7 +40,7 @@ private:
   size_t block_array_size();
 
   string name_;
-  PageId header_page_id_;
+  PageId header_page_id_ = PageId::INVALID();
   CompT comp_;
   int num_buckets_;
 

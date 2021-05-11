@@ -15,39 +15,25 @@ enum class CompType {
 
 class QueryComp : public BaseQuery {
 public:
-
-  QueryComp(BaseQuery left,
+  QueryComp(ptr<BaseQuery>&& left,
             CompType type,
-            BaseQuery right)
-    : BaseQuery (TypeId::BOOLEAN),
-      left_     (left),
+            ptr<BaseQuery>&& right)
+    : BaseQuery (QueryNodeType::COMP, TypeId::BOOLEAN),
+      left_     (move(left)),
       type_     (type),
-      right_    (right) {}
+      right_    (move(right)) {}
 
   Value eval(const Tuple& tuple,
-             const QuerySchema& schema) const {
-    auto lhs = left_.eval(tuple, schema);
-    auto rhs = right_.eval(tuple, schema);
-    return Value::make(compare(lhs, rhs));
-  }
+             const QuerySchema& schema) const override;
 
   Value eval_join(const Tuple& lt,
                   const QuerySchema& ls,
                   const Tuple& rt,
-                  const QuerySchema& rs) const
-  {
-    auto lhs = left_.eval_join(lt, ls, rt, rs);
-    auto rhs = right_.eval_join(lt, ls, rt, rs);
-    return Value::make(compare(lhs, rhs));
-  }
+                  const QuerySchema& rs) const override;
 
   Value eval_agg(const QuerySchema& schema,
                  const vector<Value>& group_bys,
-                 const vector<Value>& aggregates) const {
-    auto lhs = left_.eval_agg(schema, group_bys, aggregates);
-    auto rhs = right_.eval_agg(schema, group_bys, aggregates);
-    return Value::make(compare(lhs, rhs));
-  }
+                 const vector<Value>& aggregates) const override;
 
 private:
   bool compare(const Value& lhs,
@@ -71,7 +57,7 @@ private:
     }
   }
 
-  BaseQuery left_;
+  ptr<BaseQuery> left_;
   CompType type_;
-  BaseQuery right_;
+  ptr<BaseQuery> right_;
 };

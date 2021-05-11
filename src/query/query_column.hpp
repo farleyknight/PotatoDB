@@ -14,7 +14,7 @@ public:
               table_oid_t table_oid,
               column_oid_t column_oid,
               column_name_t name)
-    : BaseQuery   (type_id),
+    : BaseQuery   (QueryNodeType::COLUMN, type_id),
       table_oid_  (table_oid),
       column_oid_ (column_oid),
       name_       (name)
@@ -35,22 +35,16 @@ public:
   }
 
   Value eval(UNUSED const Tuple& tuple,
-             UNUSED const QuerySchema& schema) const {
-    throw NotImplementedException("eval_agg not implemented!");
-  }
+             UNUSED const QuerySchema& schema) const override;
 
   Value eval_join(UNUSED const Tuple& lt,
                   UNUSED const QuerySchema& ls,
                   UNUSED const Tuple& rt,
-                  UNUSED const QuerySchema& rs) const {
-    throw NotImplementedException("eval_agg not implemented!");
-  }
+                  UNUSED const QuerySchema& rs) const override;
 
   Value eval_agg(UNUSED const QuerySchema& schema,
                  UNUSED const vector<Value>& group_bys,
-                 UNUSED const vector<Value>& aggs) const {
-    throw NotImplementedException("eval_agg not implemented!");
-  }
+                 UNUSED const vector<Value>& aggs) const override;
 
   string name() const {
     return name_;
@@ -68,13 +62,8 @@ public:
     return 0; // TODO!
   }
 
-  QueryComp lt(QueryConst constant) {
-    return QueryComp(*this, CompType::LT, constant);
-  }
-
-  QueryComp gt(QueryConst constant) {
-    return QueryComp(*this, CompType::GT, constant);
-  }
+  ptr<QueryComp> lt(Value constant);
+  ptr<QueryComp> gt(Value constant);
 
   bool operator==(const QueryColumn& other) const {
     return name_ == other.name_;

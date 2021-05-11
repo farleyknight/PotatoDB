@@ -4,7 +4,8 @@
 #include "query/query_group_by.hpp"
 
 QueryAgg::QueryAgg(BaseQuery node, AggType agg_type)
-  : BaseQuery (node.type_id()),
+  : BaseQuery (QueryNodeType::AGG, node.type_id()),
+    node_     (node),
     agg_type_ (agg_type) {}
 
 Value QueryAgg::eval_agg(const QuerySchema& schema,

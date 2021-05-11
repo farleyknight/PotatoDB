@@ -10,33 +10,52 @@
 class Tuple;
 class QuerySchema;
 
+enum class QueryNodeType {
+  BASE     = 0,
+  COLUMN   = 1,
+  CONST    = 2,
+  COMP     = 3,
+  AGG      = 4,
+  JOIN     = 5,
+  GROUP_BY = 6,
+  HAVING   = 7
+};
+
 class BaseQuery {
 public:
-  BaseQuery() : type_id_{TypeId::INVALID} {}
-  BaseQuery(TypeId type_id) : type_id_{type_id} {}
+  BaseQuery()
+    : node_type_ (QueryNodeType::BASE),
+      type_id_   (TypeId::INVALID)
+  {}
+
+  BaseQuery(QueryNodeType type, TypeId type_id)
+    : node_type_ (type),
+      type_id_   (type_id)
+  {}
 
   // Allow copy
   BaseQuery(const BaseQuery&) = default;
   // Allow copy assign
   BaseQuery& operator=(const BaseQuery&) = default;
   // Default destructor
-  ~BaseQuery() = default;
+  virtual ~BaseQuery() = default;
 
-  Value eval_join(UNUSED const Tuple& lt, UNUSED const QuerySchema& ls,
-                  UNUSED const Tuple& rt, UNUSED const QuerySchema& rs) const
+  virtual Value eval_join(UNUSED const Tuple& lt, UNUSED const QuerySchema& ls,
+                          UNUSED const Tuple& rt, UNUSED const QuerySchema& rs) const
   {
     throw NotImplementedException("eval_join not implemented");
   }
 
-  Value eval_agg(UNUSED const QuerySchema& schema,
-                 UNUSED const vector<Value>& group_bys,
-                 UNUSED const vector<Value>& aggregates) const
+  virtual Value eval_agg(UNUSED const QuerySchema& schema,
+                         UNUSED const vector<Value>& group_bys,
+                         UNUSED const vector<Value>& aggregates) const
   {
     throw NotImplementedException("eval_agg not implemented");
   }
 
-  Value eval(UNUSED const Tuple& tuple,
-             UNUSED const QuerySchema& schema) const {
+  virtual Value eval(UNUSED const Tuple& tuple,
+                     UNUSED const QuerySchema& schema) const
+  {
     throw NotImplementedException("eval not implemented");
   }
 
@@ -78,6 +97,11 @@ public:
     throw NotImplementedException("name is not implemented for BaseQuery");
   }
 
+  QueryNodeType node_type() {
+    return node_type_;
+  }
+
 protected:
+  QueryNodeType node_type_;
   TypeId type_id_;
 };

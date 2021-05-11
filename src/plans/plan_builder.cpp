@@ -5,8 +5,53 @@
 #include "plans/seq_scan_plan.hpp"
 #include "plans/delete_plan.hpp"
 #include "plans/nested_loop_join_plan.hpp"
+#include "plans/create_table_plan.hpp"
 
 #include "plans/plan_builder.hpp"
+
+#include "exprs/create_table_expr.hpp"
+#include "exprs/select_expr.hpp"
+#include "exprs/insert_expr.hpp"
+
+ptr<BasePlan> PlanBuilder::from_expr(CreateTableExpr* expr) {
+  auto table_name = expr->table().name();
+  auto column_def_list = expr->column_defs();
+  return make_unique<CreateTablePlan>(table_name, column_def_list);
+}
+
+ptr<BasePlan> PlanBuilder::from_expr(SelectExpr* expr) {
+  // TODO: A SELECT statement can have multiple tables!
+  // Need to support this at some point.
+  auto table_name = expr->table_list().front().name();
+  auto table_oid = catalog_.table_oid_for(table_name);
+
+  auto schema = catalog_.query_schema_for(table_name,
+                                          expr->column_list());
+  auto maybe_pred = expr->pred();
+
+  return make_unique<SeqScanPlan>(schema,
+                                  table_oid,
+                                  move(maybe_pred));
+}
+
+ptr<BasePlan> PlanBuilder::from_expr(InsertExpr* expr) {
+  auto table_name = expr->table_name();
+  auto table_oid = catalog_.table_oid_for(table_name);
+
+  auto schema = catalog_.query_schema_for(table_name,
+                                          expr->column_list());
+
+  // TODO: For now, we only support INSERT with it's own raw tuples.
+  // However, we need to support SQL of the form:
+  // > INSERT INTO ... (SELECT ...)
+
+  auto raw_tuples = RawTuples(expr->tuple_list());
+  auto child_plan = make_unique<RawTuplesPlan>(schema, raw_tuples);
+
+  return make_unique<InsertPlan>(schema,
+                                 table_oid,
+                                 move(child_plan));
+}
 
 PlanBuilder& PlanBuilder::select(vector<QueryColumn> columns) {
   if (plan_type_ == PlanType::INVALID) {
@@ -81,8 +126,8 @@ PlanBuilder& PlanBuilder::delete_from(QueryTable from_table) {
   return *this;
 }
 
-PlanBuilder& PlanBuilder::where(QueryComp clause) {
-  where_clause_ = make_unique<QueryComp>(clause);
+PlanBuilder& PlanBuilder::where(ptr<QueryComp>&& clause) {
+  where_clause_ = move(clause);
   return *this;
 }
 

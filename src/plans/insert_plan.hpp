@@ -11,7 +11,7 @@ class InsertPlan : public BasePlan,
                    public TablePlan
 {
 public:
-  InsertPlan(QuerySchema schema, table_oid_t table_oid, ptr<BasePlan> child)
+  InsertPlan(QuerySchema schema, table_oid_t table_oid, ptr<BasePlan>&& child)
     : BasePlan     (PlanType::INSERT),
       SchemaPlan   (schema),
       HasChildPlan (move(child)),

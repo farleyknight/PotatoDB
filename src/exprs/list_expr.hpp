@@ -3,6 +3,11 @@
 template<typename T>
 class ListExpr {
 public:
+  ListExpr() = default;
+
+  ListExpr(vector<T> list)
+    : list_ (list) {}
+
   void push_back(T expr) {
     list_.push_back(expr);
   }

@@ -63,7 +63,7 @@ public:
                     const Buffer& source_buffer,
                     size_t n_bytes)
   {
-    assert(buffer_.size() >= n);
+    //assert(buffer_.size() >= n);
     // TODO: Handle this inside the Buffer
     memcpy(buffer_.ptr() + dest_offset,
            source_buffer.cptr() + source_offset,

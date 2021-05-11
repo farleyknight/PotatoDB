@@ -52,7 +52,7 @@ private:
 
   size_t pool_size_;
   vector<Page> pages_;
-  MutMap<PageId, frame_id_t> page_table_;
+  map<uint32_t, frame_id_t> page_table_;
   MutList<frame_id_t> free_list_;
   ptr<Replacer> replacer_;
 

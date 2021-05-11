@@ -33,7 +33,7 @@ public:
     // Set the previous and next page IDs.
     set_table_page_id(page_id);
     set_prev_page_id(prev_page_id);
-    set_next_page_id(PageId::INVALID());
+    set_next_page_id(PageId::STOP_ITERATING(page_id.file_id()));
 
     set_free_space_pointer(page_->size());
     set_tuple_count(0);
@@ -150,8 +150,8 @@ public:
       txn.set_prev_lsn(lsn);
     }
 
-    int slot_id = rid.slot_id();
-    assert(slot_num < tuple_count());
+    slot_id_t slot_id = rid.slot_id();
+    assert(slot_id < tuple_count());
     int32_t tuple_size = tuple_size_at(slot_id);
 
     // set tuple size to positive value
@@ -166,7 +166,7 @@ public:
                     Tuple& old_tuple,
                     const RID& rid)
   {
-    uint32_t slot_id = rid.slot_id();
+    slot_id_t slot_id = rid.slot_id();
 
     if (slot_id >= tuple_count()) {
       return false;
@@ -250,20 +250,26 @@ public:
     }
   }
 
+  // TODO: This should return a ptr<Tuple>
+  // There are two cases below that should return a ptr<Tuple> with nullptr
   Tuple find_tuple(const RID& rid) {
     // Get the current slot number.
     uint32_t slot_id = rid.slot_id();
     // If somehow we have more slots than tuples, abort the txn.
     if (slot_id >= tuple_count()) {
+      std::cout << "Slot ID is greater or equal to tuple count! " << slot_id << std::endl;
+      std::cout << "Tuple count " << tuple_count() << std::endl;
       return Tuple();
     }
     // Otherwise get the current tuple size too.
     uint32_t tuple_size = tuple_size_at(slot_id);
     // If the tuple is deleted, abort the txn.
     if (is_deleted(tuple_size)) {
+      std::cout << "This tuple is deleted! " << slot_id << std::endl;
       return Tuple();
     }
 
+    std::cout << "Creating tuple of size " << tuple_size << std::endl;
     // At this point, we have at least a shared lock on the RID.
     // Copy the tuple data into our result.
     uint32_t tuple_offset = tuple_offset_at_slot(slot_id);

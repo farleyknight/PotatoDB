@@ -7,12 +7,10 @@ Catalog::make_schema_from(const table_name_t& table_name,
                           table_oid_t table_oid,
                           const ColumnDefListExpr& column_list)
 {
-  // 1) Iterate over column_list
-  // 2) Add TableColumn elements to schema object
   vector<TableColumn> columns;
   for (size_t col_index = 0; col_index < column_list.list().size(); ++col_index) {
-    auto &column = column_list.list()[col_index];
-    auto type_id = Type::from_string(column.type_name());
+    const auto &column = column_list.list()[col_index];
+    auto type_id = column.type_id();
     if (type_id == TypeId::VARCHAR) {
       columns.push_back(TableColumn(column.name(),
                                     table_oid,
@@ -96,6 +94,17 @@ Catalog::table_has_column_named(const table_name_t& table_name,
   return table_schemas_.at(table_oids_.at(table_name)).has_column(column_name);
 }
 
+QuerySchema
+Catalog::query_schema_for(const table_name_t& table_name,
+                          const ColumnListExpr& column_list) const
+{
+  vector<QueryColumn> cols;
+  for (const auto& col : column_list.list()) {
+    cols.push_back(query_column_for(table_name, col.name()));
+  }
+  return QuerySchema(cols);
+}
+
 QueryColumn
 Catalog::query_column_for(const table_name_t& table_name,
                           const column_name_t& column_name) const
@@ -130,11 +139,12 @@ Catalog::query_column_for(const vector<table_name_t>& table_names,
 }
 
 
-void Catalog::create_table(// TODO: We should be attempting to get an exclusive lock
-                           // on the table, and abort the txn if we cannot get it.
-                           UNUSED Txn& txn,
-                           const table_name_t& table_name,
-                           ColumnDefListExpr column_list)
+table_oid_t
+Catalog::create_table(// TODO: We should be attempting to get an exclusive lock
+                      // on the table, and abort the txn if we cannot get it.
+                      UNUSED Txn& txn,
+                      const table_name_t& table_name,
+                      ColumnDefListExpr column_list)
 {
   assert(table_oids_.count(table_name) == 0);
 
@@ -149,6 +159,8 @@ void Catalog::create_table(// TODO: We should be attempting to get an exclusive 
 
   index_oids_.emplace(table_name,
                       MutMap<index_name_t, index_oid_t>());
+
+  return table_oid;
 }
 
 

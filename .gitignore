@@ -58,6 +58,11 @@ builds/
 *.zip
 antlr_generated/
 
+GPATH
+GRTAGS
+GTAGS
+
+
 # Graphviz
 potatodb.dot*
 build.ninja

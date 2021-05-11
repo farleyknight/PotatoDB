@@ -25,6 +25,6 @@ include(potatodb_build_tests)
 include(potatodb_build_server)
 
 # Release Build
-set(CMAKE_BUILD_TYPE "Release")
-include(potatodb_build_perf)
-include(potatodb_build_server)
+#set(CMAKE_BUILD_TYPE "Release")
+#include(potatodb_build_perf)
+#include(potatodb_build_server)

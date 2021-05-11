@@ -33,9 +33,9 @@ public:
                                table_oid_t table_oid,
                                const ColumnDefListExpr& column_list);
 
-  void create_table(UNUSED Txn& txn,
-                    const string& table_name,
-                    ColumnDefListExpr column_list);
+  table_oid_t create_table(UNUSED Txn& txn,
+                           const string& table_name,
+                           ColumnDefListExpr column_list);
 
   table_oid_t table_oid_for(const string& table_name) const {
     return table_oids_.at(table_name);
@@ -44,6 +44,10 @@ public:
   bool
   table_has_column_named(const table_name_t& table_name,
                          const column_name_t& column_name) const;
+
+  QuerySchema
+  query_schema_for(const table_name_t& table_name,
+                   const ColumnListExpr& column_list) const;
 
   QuerySchema
   query_schema_for(table_oid_t table_oid) const;

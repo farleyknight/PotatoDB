@@ -130,7 +130,7 @@ public:
   const Tuple& update_tuple()        { return new_tuple_; }
   const RID&   update_rid()          { return update_rid_.value(); }
 
-  PageId     prev_page_id()         { return prev_page_id_; }
+  PageId       prev_page_id()        { return prev_page_id_; }
 
   size_t size()     { return size_; }
   lsn_t lsn()       { return lsn_; }
@@ -176,6 +176,8 @@ public:
   Tuple old_tuple_, new_tuple_;
 
   // case4: for new page operation
-  PageId page_id_, prev_page_id_;
+  PageId page_id_ = PageId::INVALID(),
+    prev_page_id_ = PageId::INVALID();
+  
   static const int HEADER_SIZE = 20;
 };

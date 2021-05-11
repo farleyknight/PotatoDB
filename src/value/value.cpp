@@ -12,10 +12,6 @@ Value Value::deserialize_from(size_t offset,
   return Type::instance(type_id)->deserialize_from(offset, buff);
 }
 
-bool Value::eq(const Value& other) const {
-  return value_type()->eq(*this, other);
-}
-
 const ptr<Type>& Value::value_type() const {
   return Type::instance(type_id_);
 }
@@ -51,6 +47,15 @@ Value Value::divide(const Value& other) const {
   return value_type()->divide(*this, other);
 }
 
+bool Value::eq(const Value& other) const {
+  return value_type()->eq(*this, other);
+}
+
+
+bool Value::ne(const Value& other) const {
+  return value_type()->ne(*this, other);
+}
+
 bool Value::lt(const Value& other) const {
   return value_type()->lt(*this, other);
 }
@@ -58,6 +63,15 @@ bool Value::lt(const Value& other) const {
 bool Value::gt(const Value& other) const {
   return value_type()->gt(*this, other);
 }
+
+bool Value::lte(const Value& other) const {
+  return value_type()->lte(*this, other);
+}
+
+bool Value::gte(const Value& other) const {
+  return value_type()->gte(*this, other);
+}
+
 
 Value Value::max(const Value& other) const {
   return value_type()->max(*this, other);

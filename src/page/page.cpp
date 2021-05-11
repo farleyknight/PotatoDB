@@ -2,6 +2,7 @@
 #include "page/page.hpp"
 
 Page::Page() {
+  buffer_.resize(PAGE_SIZE);
   reset_memory();
 }
 

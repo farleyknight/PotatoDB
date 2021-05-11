@@ -14,10 +14,15 @@ public:
     // TODO: Do we need to put any latches around the catalog
     // while we are adding a new table?
 
-    exec_ctx_.catalog().
+    auto table_oid = exec_ctx_.catalog().
       create_table(exec_ctx_.txn(),
                    table_name,
                    plan_->column_list());
+
+    exec_ctx_.table_mgr().
+      create_table(table_name,
+                   table_oid,
+                   exec_ctx_.txn());
   }
 
   bool has_next() override {

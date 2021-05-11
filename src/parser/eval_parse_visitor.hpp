@@ -52,14 +52,15 @@ public:
       auto col_name = col_def_ctx->column_name()->getText();
       auto type_name_ctx = col_def_ctx->type_name();
       auto type_name = type_name_ctx->name()[0]->getText();
+      auto type_id = Type::type_id_for(type_name);
 
       if (type_name == "VARCHAR") {
         auto signed_number_ctx = type_name_ctx->signed_number();
         auto signed_number = signed_number_ctx[0]->getText();
         uint32_t number = std::stoi(signed_number);
-        def_list.push_back(ColumnDefExpr(col_name, type_name, number));
+        def_list.push_back(ColumnDefExpr(col_name, type_id, number));
       } else {
-        def_list.push_back(ColumnDefExpr(col_name, type_name));
+        def_list.push_back(ColumnDefExpr(col_name, type_id));
       }
 
       auto &col_def = def_list.back();

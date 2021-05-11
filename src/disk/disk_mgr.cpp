@@ -13,8 +13,8 @@ DiskMgr::DiskMgr(FileMgr& file_mgr)
 }
 
 void DiskMgr::setup_log_file() {
-  std::cout << "Opening log with name " <<
-    log_file_name() << std::endl;
+  // TODO: Move this to a logger
+  // std::cout << "Opening log with name " << log_file_name() << std::endl;
 
   log_io_.open(log_file_name(),
                std::ios::binary |

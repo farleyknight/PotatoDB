@@ -10,7 +10,8 @@ class Txn;
 
 class TableHeap {
 public:
-  TableHeap(table_oid_t table_oid,
+  TableHeap(file_id_t file_id,
+            table_oid_t table_oid,
             PageId first_page_id,
             BuffMgr& buff_mgr,
             LockMgr& lock_mgr,
@@ -47,6 +48,7 @@ public:
   BuffMgr& buff_mgr() { return buff_mgr_; }
 
 private:
+  file_id_t file_id_;
   table_oid_t table_oid_;
   PageId first_page_id_;
   LockMgr& lock_mgr_;
