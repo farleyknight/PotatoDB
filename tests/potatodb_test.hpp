@@ -17,11 +17,18 @@ TEST(PotatoDBTest, CreateTableTest) {
 
 TEST(PotatoDBTest, CreateInsertSelectTest) {
   PotatoDB db;
+
+  // TODO: We should delete all existing files here
+
   db.run_statement("CREATE TABLE foo_bar ( colA INTEGER, colB INTEGER )");
-  db.run_statement("INSERT INTO foo_bar VALUES (1, 1)");
+  db.run_statement("INSERT INTO foo_bar VALUES (1, 2)");
   auto result = db.run_statement("SELECT * FROM foo_bar");
 
   EXPECT_TRUE(result.set() != nullptr);
   EXPECT_EQ(result.set()->size(), 1);
+
+  // TODO: Get these lines working
+  EXPECT_EQ(result.set()->value_at<int32_t>("colA", 0), 1);
+  EXPECT_EQ(result.set()->value_at<int32_t>("colB", 0), 2);
 }
 

@@ -6,7 +6,7 @@ public:
     : schema_ (QuerySchema::empty())
   {}
 
-  ResultSet(MoveVec<Tuple> results, QuerySchema schema)
+  ResultSet(vector<Tuple>&& results, QuerySchema schema)
     : schema_  (schema),
       results_ (move(results)) {}
 
@@ -19,10 +19,6 @@ public:
   static ptr<ResultSet> empty() {
     return make_unique<ResultSet>();
   }
-
-  /**********************************************
-   * Instance methods
-   **********************************************/
 
   template<typename T>
   T value(const string name, const Tuple& tuple) {
