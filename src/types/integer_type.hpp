@@ -9,4 +9,8 @@ public:
   TypeId type_id() const override {
     return TypeId::INTEGER;
   }
+
+  size_t size() const override {
+    return 4;
+  }
 };

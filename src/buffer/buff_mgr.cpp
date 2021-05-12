@@ -75,8 +75,6 @@ Page* BuffMgr::fetch_page(PageId page_id) {
   }
   Page& page = *maybe_page;
 
-  std::cout << "PageID: " << page_id << std::endl;
-
   disk_mgr_.read_page(page_id, page);
   page_table_[page_id.as_uint32()] = frame_id;
   page.set_id(page_id);

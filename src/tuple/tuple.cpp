@@ -22,6 +22,7 @@ Tuple::Tuple(vector<Value> values, const QuerySchema& schema) {
   for (uint32_t i = 0; i < column_count; i++) {
     const auto &col = schema.by_offset(i);
     auto col_offset = schema.offset_for(i);
+
     if (col.is_inlined()) {
       // TODO: Just realized that serialize_to and write_uint32
       // both use the offset, but in either the 1st or 2nd
@@ -87,9 +88,10 @@ Value Tuple::value(const QuerySchema& schema,
 }
 
 Value Tuple::value_by_name(const QuerySchema& schema,
-                           string name) const
+                           const column_name_t& name) const
 {
-  return value(schema, schema.index_for(name));
+  auto index = schema.index_for(name);
+  return value(schema, index);
 }
 
 bool Tuple::is_null(const QuerySchema& schema,

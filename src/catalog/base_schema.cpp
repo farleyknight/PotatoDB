@@ -28,7 +28,9 @@ bool BaseSchema<ColT>::has_column(const column_name_t& name) const {
 }
 
 template<class ColT>
-column_oid_t BaseSchema<ColT>::column_oid_for(const column_name_t& name) const {
+column_oid_t BaseSchema<ColT>::column_oid_for(const column_name_t& name)
+  const
+{
   return column_oids_.at(name);
 }
 

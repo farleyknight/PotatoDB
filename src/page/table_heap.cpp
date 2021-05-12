@@ -233,7 +233,6 @@ TableIterator TableHeap::begin(Txn& txn) {
     buff_mgr_.unpin(page_id, false);
     if (maybe_rid.has_value()) {
       rid = maybe_rid.value();
-      std::cout << "Got RID: " << rid << std::endl;
       break;
     }
     page_id = page.next_page_id();

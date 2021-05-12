@@ -18,7 +18,6 @@ bool SeqScanExec::match_found(const Tuple& tuple) {
 
 bool SeqScanExec::at_the_end() {
   return table_iter_->stop_iterating();
-  // return *table_iter_ == table_heap().end(txn());
 }
 
 bool SeqScanExec::has_next()  {

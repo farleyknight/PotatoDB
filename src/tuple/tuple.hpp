@@ -41,7 +41,7 @@ public:
               uint32_t column_index) const;
 
   Value value_by_name(const QuerySchema& schema,
-                      string name) const;
+                      const column_name_t& name) const;
 
   bool is_null(const QuerySchema& schema,
                uint32_t column_index) const;

@@ -51,5 +51,5 @@ public:
 private:
   table_name_t table_name_;
   vector<ColumnDefExpr> column_defs_;
-  const Catalog& catalog_;
+  UNUSED const Catalog& catalog_;
 };

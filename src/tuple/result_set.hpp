@@ -28,13 +28,13 @@ public:
 
   template<typename T>
   T value(const string name, const Tuple& tuple) {
-    return tuple.value(schema_, schema_.offset_for(name)).as<T>();
+    return tuple.value(schema_, schema_.index_for(name)).as<T>();
   }
 
   template<typename T>
   T value_at(const string name, size_t index) {
     assert(results_.size() >= index + 1);
-    return results_[index].value(schema_, schema_.offset_for(name)).as<T>();
+    return results_[index].value(schema_, schema_.index_for(name)).as<T>();
   }
 
   const vector<Tuple>& results() {

@@ -40,7 +40,7 @@ public:
     Iterator(Data::const_iterator iter)
       : iter_(iter) {}
 
-    const Vec<Value>& values() {
+    const vector<Value>& values() {
       return *iter_;
     }
 

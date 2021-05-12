@@ -54,11 +54,12 @@ public:
     return false; // TODO!
   }
 
-  bool fixed_length() {
-    return 0; // TODO!
+  offset_t fixed_length() {
+    auto size = Type::size_of(type_id_);
+    return size;
   }
 
-  size_t variable_length() const {
+  offset_t variable_length() const {
     return 0; // TODO!
   }
 

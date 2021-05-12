@@ -115,7 +115,7 @@ TEST_F(ExecTest, SimpleSeqScanTest) {
 
   // Create Values to insert
   vector<vector<Value>> data;
-  for (int32_t i = 1; i <= 1000; ++i) {
+  for (int32_t i = 0; i < 10; ++i) {
     data.push_back({ Value::make(i), Value::make(3) });
   }
 
@@ -132,18 +132,18 @@ TEST_F(ExecTest, SimpleSeqScanTest) {
         test_1["colB"]
       }).
     from(test_1).
-    where(test_1["colA"].lt(Value::make(500))).
+    where(test_1["colA"].lt(Value::make(5))).
     to_plan();
 
   auto result_set = query(move(scan_plan));
 
   // Verify
   for (const auto &tuple : result_set->results()) {
-    ASSERT_TRUE(result_set->value<int>("colA", tuple) < 500);
+    ASSERT_TRUE(result_set->value<int>("colA", tuple) < 5);
     ASSERT_TRUE(result_set->value<int>("colB", tuple) < 10);
   }
 
-  ASSERT_EQ(result_set->size(), 500);
+  ASSERT_EQ(result_set->size(), 5);
 }
 
 TEST_F(ExecTest, InconsistentTupleLengthTest) {

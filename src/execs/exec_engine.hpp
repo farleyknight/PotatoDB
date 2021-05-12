@@ -36,7 +36,6 @@ public:
     while (exec->has_next()) {
       tuples.push_back(exec->next());
       ++result_count;
-      std::cout << "Tuple count: " << result_count << std::endl;
     }
 
     return make_unique<ResultSet>(move(tuples), schema);

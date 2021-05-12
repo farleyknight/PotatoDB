@@ -16,6 +16,7 @@ public:
       iter_        (plan_->raw_tuples().begin())
   {}
 
+  // TODO: Delete this
   static ptr<BaseExec> make(ExecCtx& exec_ctx,
                             ptr<RawTuplesPlan>&& plan) {
     return make_unique<RawTuplesExec>(exec_ctx, move(plan));
