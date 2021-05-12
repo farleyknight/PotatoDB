@@ -27,6 +27,10 @@ class LimitExec : public BaseExec {
     return Tuple();
   }
 
+  const string message_on_completion(size_t result_count) const override {
+    return "Found " + std::to_string(result_count) + " record(s)";
+  }
+
 private:
   ptr<LimitPlan> plan_;
   ptr<BaseExec> child_;

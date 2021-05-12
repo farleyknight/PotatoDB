@@ -5,7 +5,6 @@
 
 #include "plans/plan_type.hpp"
 #include "catalog/query_schema.hpp"
-#include "catalog/schema_ref.hpp"
 
 class BasePlan {
 public:
@@ -21,6 +20,8 @@ public:
   virtual ~BasePlan() = default;
 
   PlanType type() const { return type_; }
+
+  virtual bool is_query() const = 0;
 
 private:
   PlanType type_ = PlanType::INVALID;

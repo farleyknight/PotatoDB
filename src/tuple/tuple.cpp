@@ -100,7 +100,8 @@ Value Tuple::value_by_name(const QuerySchema& schema,
 }
 
 bool Tuple::is_null(const QuerySchema& schema,
-                    uint32_t column_index) const {
+                    uint32_t column_index) const
+{
   return value(schema, column_index).is_null();
 }
 

@@ -13,4 +13,7 @@ public:
       HasChildPlan (move(child))
   {}
 
+  bool is_query() const {
+    return false;
+  }
 };

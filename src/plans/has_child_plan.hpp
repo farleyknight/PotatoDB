@@ -10,6 +10,6 @@ public:
 
   ptr<BasePlan>&& child() { return move(child_); }
 
-private:
+protected:
   ptr<BasePlan> child_;
 };

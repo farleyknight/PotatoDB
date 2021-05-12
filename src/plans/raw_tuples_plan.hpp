@@ -17,6 +17,10 @@ public:
     return raw_tuples_;
   }
 
+  bool is_query() const {
+    return false;
+  }
+
 private:
   RawTuples raw_tuples_;
 };

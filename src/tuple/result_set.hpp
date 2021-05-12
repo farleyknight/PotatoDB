@@ -1,7 +1,5 @@
 #pragma once
 
-#include "catalog/schema_ref.hpp"
-
 class ResultSet {
 public:
   ResultSet()
@@ -45,9 +43,17 @@ public:
     return results_.size();
   }
 
-  string to_string() {
-    // TODO: Send this back to the client in a structured way
-    return "<a result set should appear here>";
+  const string to_string() {
+    stringstream os;
+
+    for (index_t i = 0; i < results_.size(); ++i) {
+      if (i > 0) {
+        os << ",";
+      }
+      os << results_[i].to_string(schema_);
+    }
+
+    return os.str();
   }
 
 private:

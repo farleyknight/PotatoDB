@@ -20,6 +20,10 @@ public:
     return column_list_;
   }
 
+  bool is_query() const {
+    return false;
+  }
+
 private:
   string table_name_;
   ColumnDefListExpr column_list_;

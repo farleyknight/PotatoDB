@@ -148,13 +148,13 @@ const int one_second = 1;
 UNUSED const int one_minute = 60;
 
 bool SocketServer::update_socket_set() {
-  struct timeval timeout = {one_second, 0};  // Sleep for one minute
+  struct timeval timeout = {one_second, 0};
 
   int fd_count = select(curr_high_fd_ + 1,
                         &client_socket_set_,
                         nullptr,  // no descriptors to write into
                         nullptr,  // no descriptors with exceptions
-                        &timeout); // no timeout
+                        &timeout);
 
   std::cout << "FD count: " << fd_count << std::endl;
   return (fd_count != -1);

@@ -41,8 +41,11 @@ class SortExec : public BaseExec {
     return Tuple();
   }
 
+  const string message_on_completion(size_t result_count) const override {
+    return "Found " + std::to_string(result_count) + " record(s)";
+  }
+
 private:
-  /** The sort plan node to be executed. */
   ptr<SortPlan> plan_;
   ptr<BaseExec> child_;
 };

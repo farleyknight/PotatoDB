@@ -30,6 +30,10 @@ public:
     return Tuple();
   }
 
+  const string message_on_completion(size_t result_count) const override {
+    return "Deleted " + std::to_string(result_count) + " record(s)";
+  }
+
 private:
   ptr<DeletePlan> plan_;
   ptr<BaseExec> child_;

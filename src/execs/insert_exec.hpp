@@ -2,10 +2,6 @@
 
 class InsertExec : public BaseExec {
 public:
-  /**********************************************
-   * Constructors & destructor
-   **********************************************/
-
   InsertExec(ExecCtx& exec_ctx,
              ptr<InsertPlan>&& plan,
              ptr<BaseExec>&& child)
@@ -29,6 +25,10 @@ public:
     heap.insert_tuple(tuple, txn());
 
     return tuple;
+  }
+
+  const string message_on_completion(size_t result_count) const override {
+    return "Inserted " + std::to_string(result_count) + " record(s)";
   }
 
 private:

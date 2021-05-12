@@ -192,5 +192,4 @@ void Catalog::create_index(UNUSED Txn& txn,
 
   index_oid_t index_oid = next_index_oid_++;
   index_oids_[table_name][index_name] = index_oid;
-  // index_schema_refs_.emplace(index_oid, schema_ref);
 }

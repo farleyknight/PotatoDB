@@ -17,4 +17,8 @@ public:
       HasChildPlan (move(child)),
       TablePlan    (table_oid)
   {}
+
+  bool is_query() const {
+    return false;
+  }
 };

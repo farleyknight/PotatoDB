@@ -4,6 +4,7 @@
 #include "execs/exec_engine.hpp"
 
 #include "tuple/result_set.hpp"
+#include "server/statement_result.hpp"
 
 class PotatoDB;
 
@@ -12,8 +13,7 @@ public:
   Session(PotatoDB* db) : db_ (db) {}
   ~Session() = default;
 
-  ptr<ResultSet> query(string statement);
-  void execute(string statement);
+  StatementResult run_statement(const string& statement);
 
 private:
   PotatoDB* db_; // Use as a reference

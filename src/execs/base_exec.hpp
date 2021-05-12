@@ -1,12 +1,8 @@
 #pragma once
 
 #include "execs/exec_ctx.hpp"
-#include "catalog/schema_ref.hpp"
 #include "tuple/tuple.hpp"
 
-/**
- * BaseExec implements the Volcano tuple-at-a-time iterator model.
- */
 class BaseExec {
 public:
   explicit BaseExec(ExecCtx& exec_ctx)
@@ -30,6 +26,8 @@ public:
   const Catalog& catalog() const {
     return exec_ctx_.catalog();
   }
+
+  virtual const string message_on_completion(size_t result_count) const = 0;
 
 protected:
   ExecCtx& exec_ctx_;

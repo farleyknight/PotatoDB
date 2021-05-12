@@ -43,9 +43,9 @@ public:
 
   // NOTE: This version does not collect results, hence the inner
   // loop does not do anything with the Tuple & RID
-  int execute(ptr<BasePlan>&& plan,
-              UNUSED const Txn& txn,
-              ExecCtx& exec_ctx)
+  const string execute(ptr<BasePlan>&& plan,
+                       UNUSED const Txn& txn,
+                       ExecCtx& exec_ctx)
   {
     auto exec = ExecFactory::create(exec_ctx, move(plan));
 
@@ -61,7 +61,7 @@ public:
       return 0;
     }
 
-    return result_count;
+    return exec->message_on_completion(result_count);
   }
 
 private:

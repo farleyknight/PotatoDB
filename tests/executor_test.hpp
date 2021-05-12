@@ -71,17 +71,17 @@ public:
     return result_set;
   }
 
-  bool execute(ptr<BasePlan>&& plan) {
+  const string execute(ptr<BasePlan>&& plan) {
     auto &txn = txn_mgr().begin();
     auto exec_ctx = db_.make_exec_ctx(txn);
 
-    auto status = exec_eng().execute(move(plan),
-                                     txn,
-                                     *exec_ctx);
+    auto message = exec_eng().execute(move(plan),
+                                      txn,
+                                      *exec_ctx);
 
     // TODO: If status == false, likely we should abort the txn.
     txn_mgr().commit(txn);
-    return status;
+    return message;
   }
 
 private:
@@ -193,7 +193,6 @@ TEST_F(ExecTest, DISABLED_WrongLengthOfTuplesTest) {
 
   auto raw_tuples = RawTuples(data);
 
-  bool success = false;
   try {
     auto table_with_two_cols = QueryBuilder(catalog()).table("table_with_two_cols");
 
@@ -228,8 +227,7 @@ TEST_F(ExecTest, DISABLED_SimpleRawInsertTest) {
     tuples(move(raw_tuples)).
     to_plan();
 
-  auto result = execute(move(insert_plan));
-  ASSERT_TRUE(result);
+  execute(move(insert_plan));
 
   // Iterate through table make sure that values were inserted.
   // SELECT colA, colB FROM empty_table2;

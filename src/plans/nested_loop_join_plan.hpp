@@ -33,8 +33,12 @@ public:
     return dynamic_cast<SchemaPlan*>(right_child_.get())->schema();
   }
 
-  ptr<BasePlan>&& left_plan()      { return move(left_child_); }
-  ptr<BasePlan>&& right_plan()     { return move(right_child_); }
+  ptr<BasePlan>&& left_plan()  { return move(left_child_); }
+  ptr<BasePlan>&& right_plan() { return move(right_child_); }
+
+  bool is_query() const {
+    return true;
+  }
 
 private:
   ptr<BasePlan> left_child_;

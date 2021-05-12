@@ -19,4 +19,8 @@ public:
       MaybePredPlan (move(pred))
   {}
 
+  bool is_query() const {
+    return true;
+  }
+
 };

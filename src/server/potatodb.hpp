@@ -45,8 +45,9 @@ public:
     return 100;
   }
 
-  void execute(const string& statement);
-  ptr<ResultSet> query(const string& statement);
+  StatementResult run_statement(const string& statement);
+
+  void verify_system_files();
 
   ExecEngine& exec_eng() {
     return exec_eng_;

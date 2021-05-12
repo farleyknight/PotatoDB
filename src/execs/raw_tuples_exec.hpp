@@ -32,6 +32,9 @@ public:
     return tuple;
   }
 
+  const string message_on_completion(size_t result_count) const override {
+    return "Inserted " + std::to_string(result_count) + " record(s)";
+  }
 private:
   ptr<RawTuplesPlan> plan_;
   RawTuples::Iterator iter_;

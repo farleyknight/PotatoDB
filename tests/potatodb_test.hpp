@@ -17,10 +17,11 @@ TEST(PotatoDBTest, CreateTableTest) {
 
 TEST(PotatoDBTest, CreateInsertSelectTest) {
   PotatoDB db;
-  db.execute("CREATE TABLE foo_bar ( colA INTEGER, colB INTEGER )");
-  db.execute("INSERT INTO foo_bar VALUES (1, 1)");
-  auto result_set = db.query("SELECT * FROM foo_bar");
+  db.run_statement("CREATE TABLE foo_bar ( colA INTEGER, colB INTEGER )");
+  db.run_statement("INSERT INTO foo_bar VALUES (1, 1)");
+  auto result = db.run_statement("SELECT * FROM foo_bar");
 
-  EXPECT_EQ(result_set->size(), 1);
+  EXPECT_TRUE(result.set() != nullptr);
+  EXPECT_EQ(result.set()->size(), 1);
 }
 

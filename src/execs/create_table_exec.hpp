@@ -33,6 +33,11 @@ public:
     throw NotImplementedException("next is not implemented for CreateTableExec!");
   }
 
+  const string message_on_completion(UNUSED size_t result_count) const override {
+    return "Created table " + plan_->table_name();
+  }
+
+
 private:
   ptr<CreateTablePlan> plan_;
 };

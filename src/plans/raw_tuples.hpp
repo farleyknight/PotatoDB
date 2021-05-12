@@ -59,7 +59,11 @@ public:
   Iterator begin() const { return Iterator(data_.begin()); }
   Iterator end()   const { return Iterator(data_.end());   }
 
-  bool empty() {
+  size_t size() const {
+    return data_.size();
+  }
+
+  bool empty() const {
     return data_.size() == 0;
   }
 

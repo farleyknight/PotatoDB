@@ -18,7 +18,7 @@ PotatoDB::PotatoDB()
     exec_eng_  (buff_mgr_, txn_mgr_, catalog_)
 {}
 
-ptr<ResultSet> PotatoDB::query(const string& statement) {
+StatementResult PotatoDB::run_statement(const string& statement) {
   try {
     // TODO: Rename as_exprs to as_stmts
     auto exprs = SQLParser::as_exprs(statement);
@@ -35,42 +35,21 @@ ptr<ResultSet> PotatoDB::query(const string& statement) {
                      table_mgr_,
                      catalog_);
 
-    auto result_set = exec_eng_.query(move(plan),
-                                      txn,
-                                      exec_ctx);
-
-    txn_mgr_.commit(txn);
-    return result_set;
+    if (plan->is_query()) {
+      auto result_set = exec_eng_.query(move(plan),
+                                        txn,
+                                        exec_ctx);
+      txn_mgr_.commit(txn);
+      return StatementResult(move(result_set));
+    } else {
+      auto message = exec_eng_.execute(move(plan),
+                                       txn,
+                                       exec_ctx);
+      return StatementResult(message);
+    }
   } catch (std::exception& e) {
     std::cout << e.what() << std::endl;
-    return ResultSet::empty();
-  }
-}
-
-void PotatoDB::execute(const string& statement) {
-  try {
-    // TODO: Rename as_exprs to as_stmts
-    auto exprs = SQLParser::as_exprs(statement);
-    // TODO: Allow for multiple statements
-    assert(exprs.size() > 0);
-    auto plan = PlanFactory::create(catalog_, move(exprs[0]));
-
-    // Create and run the txn
-    auto &txn = txn_mgr_.begin();
-    ExecCtx exec_ctx(txn,
-                     buff_mgr_,
-                     lock_mgr_,
-                     txn_mgr_,
-                     table_mgr_,
-                     catalog_);
-
-    exec_eng_.execute(move(plan),
-                      txn,
-                      exec_ctx);
-
-    txn_mgr_.commit(txn);
-  } catch (std::exception& e) {
-    std::cout << e.what() << std::endl;
+    return StatementResult(e.what());
   }
 }
 
@@ -80,7 +59,7 @@ const string system_catalog_sql =
   "id         INTEGER PRIMARY KEY, "            \
   "type       INTEGER NOT NULL, "               \
   "name       VARCHAR(32) NOT NULL, "           \
-  "table_name VARCHAR(32) NOT NULL, "           \
+  "table_name VARCHAR(32) NOT NULL "            \
 
   ");";
 
@@ -95,7 +74,7 @@ const string system_catalog_sql =
  */
 
 const string insert_system_catalog_sql =
-  "INSERT INTO system_catalog "                 \
+  "INSERT INTO system_catalog VALUES"           \
   "("                                           \
 
   "1,"                                          \
@@ -107,23 +86,18 @@ const string insert_system_catalog_sql =
 
 void PotatoDB::build_system_catalog() {
   std::cout << "Begin loading system catalog" << std::endl;
-
-  // TODO: Use some SQL here
-  // 1) Write the necessary SQL [DONE?]
-  // 2) Feed it to the parser [DONE?]
-  // 3) Parser feeds it to the exec eng [DONE?]
-
-  execute(system_catalog_sql);
-
-  // 4) Need to add operator for creating a table [TODO]
-
-  // 5) DiskMgr should create a TableFile?
-  // 6) TableFile creates TableHeap
-  // 7) TableHeap creates TablePage
-  // 8) TablePage adds tuples to the `system_catalog`
-
-  execute(insert_system_catalog_sql);
+  // NOTE: These steps only need to be run if the system_catalog
+  // table does not already exist.
+  //
+  // TODO: Write a conditional here to check for that table.
+  // 
+  // TODO: Wrap this all in a try block and capture any errors
+  run_statement(system_catalog_sql);
+  run_statement(insert_system_catalog_sql);
 }
+
+// TODO: During testing, we sometimes want to delete all database files.
+// Write a method here to delete them.
 
 void PotatoDB::start_server() {
   // TODO: Add logging for this line
@@ -135,8 +109,8 @@ void PotatoDB::start_server() {
       std::cout << "Client Socket got query " << statement << std::endl;
 
       try {
-        auto result = client->session().query(statement);
-        client->write(result->to_string());
+        auto result = client->session().run_statement(statement);
+        client->write(result.to_string());
       } catch (std::exception &e) {
         // TODO: Send better error message
         client->write("Got an error! :(");
@@ -153,9 +127,21 @@ void PotatoDB::start_server() {
   server_.accept_connections();
 }
 
+void PotatoDB::verify_system_files() {
+  // TODO: During system start up, we should be
+  // 1) Looking for all existing tables
+  // 2) verifying that each table has it's own file
+  // 3) and that every file has it's own table. (or is the log file)
+  //
+  // Write a method to verify everything is lined up correctly.
+}
+
 void PotatoDB::startup() {
   state_ = ServerState::STARTING_UP;
+ 
   build_system_catalog();
+  verify_system_files();
+
   start_server();
   state_ = ServerState::RUNNING;
 }

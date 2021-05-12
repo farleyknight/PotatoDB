@@ -5,10 +5,6 @@
 
 class UpdateExec : public BaseExec {
 public:
-  /**********************************************
-   * Constructors & destructor
-   **********************************************/
-
   UpdateExec(ExecCtx& exec_ctx,
              ptr<UpdatePlan>&& plan,
              ptr<BaseExec>&& child);
@@ -16,6 +12,10 @@ public:
   void init() override;
   bool has_next() override;
   Tuple next() override;
+
+  const string message_on_completion(size_t result_count) const override {
+    return "Updated " + std::to_string(result_count) + " record(s)";
+  }
 
 private:
   Tuple updated_tuple(const Tuple& old_tuple);

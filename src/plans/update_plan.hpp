@@ -58,6 +58,10 @@ public:
     return update_attrs_;
   }
 
+  bool is_query() const {
+    return false;
+  }
+
 private:
   map<column_oid_t, UpdateInfo> update_attrs_;
 };
