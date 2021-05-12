@@ -28,9 +28,12 @@ bool BaseSchema<ColT>::has_column(const column_name_t& name) const {
 }
 
 template<class ColT>
-column_oid_t BaseSchema<ColT>::column_oid_for(const column_name_t& name)
-  const
+column_oid_t BaseSchema<ColT>::column_oid_for(const column_name_t& name) const
 {
+  if (column_oids_.count(name) == 0) {
+    std::cout << "Could not find column with name " << name << std::endl;
+  }
+  assert(column_oids_.count(name) == 1);
   return column_oids_.at(name);
 }
 

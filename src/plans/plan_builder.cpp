@@ -40,7 +40,7 @@ ptr<BasePlan> PlanBuilder::from_expr(InsertExpr* expr) {
 
   auto schema = catalog_.query_schema_for(table_name,
                                           expr->column_list());
-
+  assert(schema.column_count() > 0);
   // TODO: For now, we only support INSERT with it's own raw tuples.
   // However, we need to support SQL of the form:
   // > INSERT INTO ... (SELECT ...)

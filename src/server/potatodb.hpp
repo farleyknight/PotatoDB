@@ -45,8 +45,8 @@ public:
     return 100;
   }
 
-  void execute(string statement);
-  ptr<ResultSet> query(string statement);
+  void execute(const string& statement);
+  ptr<ResultSet> query(const string& statement);
 
   ExecEngine& exec_eng() {
     return exec_eng_;

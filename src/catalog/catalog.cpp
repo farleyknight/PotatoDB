@@ -35,6 +35,12 @@ Catalog::query_schema_for(table_oid_t table_oid) const
 }
 
 QuerySchema
+Catalog::query_schema_for(const table_name_t& table_name) const
+{
+  return QuerySchema(all_columns_for(table_name));
+}
+
+QuerySchema
 Catalog::query_schema_for(const vector<table_name_t>& table_names,
                           const ColumnListExpr& column_list) const
 {
@@ -98,10 +104,22 @@ QuerySchema
 Catalog::query_schema_for(const table_name_t& table_name,
                           const ColumnListExpr& column_list) const
 {
+  if (column_list.list().size() == 0) {
+    return QuerySchema(all_columns_for(table_name));
+  }
+
   vector<QueryColumn> cols;
   for (const auto& col : column_list.list()) {
-    cols.push_back(query_column_for(table_name, col.name()));
+    if (col.name() == "*") {
+      for (const auto& query_col : all_columns_for(table_name)) {
+        cols.push_back(query_col);
+      }
+    } else {
+      cols.push_back(query_column_for(table_name, col.name()));
+    }
   }
+
+  assert(cols.size() > 0);
   return QuerySchema(cols);
 }
 

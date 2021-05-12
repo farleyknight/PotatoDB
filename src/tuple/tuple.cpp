@@ -3,6 +3,11 @@
 // Constructor for creating a new tuple based on input value
 // TODO: It does not look like nulls are supported. Add a null bitmap?
 Tuple::Tuple(vector<Value> values, const QuerySchema& schema) {
+  if (values.size() != schema.column_count()) {
+    std::cout << "values.size() == " << values.size() << std::endl;
+    std::cout << "schema.column_count() == " << schema.column_count() << std::endl;
+  }
+
   assert(values.size() == schema.column_count());
 
   // 1. Calculate the size of the tuple.

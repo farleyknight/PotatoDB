@@ -2,7 +2,6 @@
 
 void FileMgr::write_buffer(PageId page_id, const Buffer& buffer) {
   file_id_t file_id = page_id.file_id();
-  // TODO: Let's change the type of offsets from
   offset_t offset = page_id.block_id() * buffer.size();
   files_[file_id]->write_buffer(offset, buffer);
 }

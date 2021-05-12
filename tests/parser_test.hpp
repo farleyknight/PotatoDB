@@ -17,7 +17,7 @@ TEST(ParserTest, SimpleSelectTest) {
   EXPECT_EQ(col_list.list()[1].to_string(), "*");
 }
 
-TEST(ParserTest, SelectTableColumNameTest) {
+TEST(ParserTest, DISABLED_SelectTableColumNameTest) {
   string query = "SELECT foo.bar, baz.* FROM foo, baz";
 
   auto exprs = SQLParser::as_exprs(query);

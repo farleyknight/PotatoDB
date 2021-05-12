@@ -5,10 +5,6 @@
 
 class RawTuplesExec : public BaseExec {
 public:
-  /**********************************************
-   * Constructors & destructor
-   **********************************************/
-
   RawTuplesExec(ExecCtx& exec_ctx,
                 ptr<RawTuplesPlan>&& plan)
     : BaseExec     (exec_ctx),
@@ -21,10 +17,6 @@ public:
                             ptr<RawTuplesPlan>&& plan) {
     return make_unique<RawTuplesExec>(exec_ctx, move(plan));
   }
-
-  /**********************************************
-   * Instance methods
-   **********************************************/
 
   void init() override {
     // NOTE: Taken care of in constructor

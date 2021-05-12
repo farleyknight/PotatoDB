@@ -18,7 +18,7 @@ PotatoDB::PotatoDB()
     exec_eng_  (buff_mgr_, txn_mgr_, catalog_)
 {}
 
-ptr<ResultSet> PotatoDB::query(string statement) {
+ptr<ResultSet> PotatoDB::query(const string& statement) {
   try {
     // TODO: Rename as_exprs to as_stmts
     auto exprs = SQLParser::as_exprs(statement);
@@ -47,7 +47,7 @@ ptr<ResultSet> PotatoDB::query(string statement) {
   }
 }
 
-void PotatoDB::execute(string statement) {
+void PotatoDB::execute(const string& statement) {
   try {
     // TODO: Rename as_exprs to as_stmts
     auto exprs = SQLParser::as_exprs(statement);

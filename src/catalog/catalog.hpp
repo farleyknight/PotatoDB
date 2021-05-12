@@ -53,6 +53,9 @@ public:
   query_schema_for(table_oid_t table_oid) const;
 
   QuerySchema
+  query_schema_for(const table_name_t& table_name) const;
+
+  QuerySchema
   query_schema_for(const vector<string>& table_names,
                    const ColumnListExpr& column_list) const;
 

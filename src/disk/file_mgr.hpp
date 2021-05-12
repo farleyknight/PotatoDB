@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 #include "disk/file_handle.hpp"
 #include "page/page_id.hpp"
 
@@ -20,6 +22,7 @@ public:
   PageId allocate_page(file_id_t file_id);
 
   file_id_t create_file(fs::path file_path) {
+    std::cout << "Creating file " << file_path << std::endl;
     file_id_t file_id = files_.size();
     auto handle = make_unique<FileHandle>(file_path);
     files_.emplace_back(move(handle));
@@ -27,6 +30,6 @@ public:
   }
 
 private:
-  MutMap<file_id_t, block_id_t> next_block_ids_;
+  map<file_id_t, block_id_t> next_block_ids_;
   vector<ptr<FileHandle>> files_;
 };

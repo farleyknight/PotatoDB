@@ -5,6 +5,7 @@
 #include "executor_test.hpp"
 
 #include "parser_test.hpp"
+#include "potatodb_test.hpp"
 
 #include "schema_test.hpp"
 

@@ -31,21 +31,13 @@ public:
   }
 
   void create() {
-    handle_.open(file_path_,
-                 std::ios::binary |
-                 std::ios::trunc |
-                 std::ios::app |
-                 std::ios::out);
-
+    handle_.open(file_path_, fstream::out);
+    handle_ << "";
     handle_.close();
   }
-
+  
   void open() {
-    handle_.open(file_path_,
-                 std::ios::binary |
-                 std::ios::trunc |
-                 std::ios::app |
-                 std::ios::out);
+    handle_.open(file_path_, fstream::out);
   }
 
   void close() {
