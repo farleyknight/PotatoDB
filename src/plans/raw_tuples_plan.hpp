@@ -11,7 +11,10 @@ public:
   RawTuplesPlan(QuerySchema schema, RawTuples raw_tuples)
     : BasePlan    (PlanType::RAW_TUPLES),
       SchemaPlan  (schema),
-      raw_tuples_ (raw_tuples) {}
+      raw_tuples_ (raw_tuples)
+  {
+    std::cout << "Raw Tuples " << raw_tuples.to_string() << std::endl;
+  }
 
   const RawTuples& raw_tuples() const {
     return raw_tuples_;

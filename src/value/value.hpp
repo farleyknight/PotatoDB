@@ -28,6 +28,8 @@ public:
     return StoreT::template cast_as<target_t>(data_);
   }
 
+  Value cast_as(TypeId type_id) const;
+
   size_t size() const;
   size_t length() const {
     return size();

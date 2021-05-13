@@ -81,27 +81,7 @@ bool TableIterator::operator==(const TableIterator& iter) const {
   if (tuple_ == nullptr) {
     return false;
   }
-  /*
-   *
-   if (tuple_ == nullptr && iter.tuple_ == nullptr) {
-   return true;
-   }
 
-   if (tuple_ == nullptr) {
-   std::cout << "tuple_ is null" << std::endl;
-   }
-
-   if (iter.tuple_ == nullptr) {
-   std::cout << "iter.tuple_ is null" << std::endl;
-   }
-
-   if (tuple_ != nullptr || iter.tuple_ != nullptr) {
-   return false;
-   }
-
-   */
-
-  // auto tuple_rid = tuple_->rid();
   auto first_rid = rid();
   auto second_rid = iter.rid();
 

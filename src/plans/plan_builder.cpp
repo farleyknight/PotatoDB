@@ -45,6 +45,8 @@ ptr<BasePlan> PlanBuilder::from_expr(InsertExpr* expr) {
   // However, we need to support SQL of the form:
   // > INSERT INTO ... (SELECT ...)
 
+  std::cout << "Raw Tuples " << expr->tuple_list().to_string() << std::endl;
+
   auto raw_tuples = RawTuples(expr->tuple_list());
   auto child_plan = make_unique<RawTuplesPlan>(schema, raw_tuples);
 

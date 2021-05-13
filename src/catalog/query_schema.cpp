@@ -46,20 +46,16 @@ QuerySchema QuerySchema::empty() {
 }
 
 const string QuerySchema::to_string() const {
-  std::ostringstream os;
+  stringstream os;
 
   os << "QuerySchema[" <<
     "NumColumns:" << column_count() << ", " <<
     "IsInlined:" << all_tuples_inlined_ << ", " <<
     "TupleLength:" << tuple_length_ << "]";
 
-  bool first = true;
   os << " :: (\n";
   for (size_t i = 0; i < column_count(); i++) {
-    // TODO: Is there a better way to interleave these strings with commas?
-    if (first) {
-      first = false;
-    } else {
+    if (i > 0) {
       os << ", \n";
     }
     os << columns_[i].to_string();

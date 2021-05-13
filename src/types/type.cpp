@@ -26,4 +26,3 @@ const ptr<Type>& Type::instance(TypeId type_id) {
 
   return types_.at(type_id);
 }
-

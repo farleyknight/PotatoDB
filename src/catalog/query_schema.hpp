@@ -50,4 +50,3 @@ private:
   vector<column_name_t> names_;
   vector<QueryJoin> joins_; // TODO: Need to populate this
 };
-

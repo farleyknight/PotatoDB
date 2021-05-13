@@ -5,5 +5,8 @@
 
 class DecimalType : public NumericType<double> {
 public:
+  TypeId type_id() const override {
+    return TypeId::DECIMAL;
+  }
 
 };

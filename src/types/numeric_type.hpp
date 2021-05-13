@@ -6,8 +6,6 @@
 
 template<typename numeric_t>
 class NumericType : public Type {
-private:
-  using Type::serialize_to;
 public:
 
   size_t size() const override {
@@ -64,6 +62,7 @@ public:
   }
 
   void serialize_to(size_t offset, Buffer& buff, Value val) const override {
+    std::cout << "Serializing value " << val.to_string() << " at offset " << offset << std::endl;
     buff.write_numeric<numeric_t>(offset, val.as<numeric_t>());
   }
 

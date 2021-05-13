@@ -7,9 +7,7 @@ class RawTuples {
 public:
   using Data = vector<vector<Value>>;
 
-  // Default constructor
   RawTuples() = default;
-  // Constructor to accept 2D vector of tuples
   RawTuples(Data data)
     : data_ (data)
   {}
@@ -18,10 +16,25 @@ public:
     for (const auto &tuple_expr : expr.list()) {
       vector<Value> raw_tuple;
       for (const auto &value_expr : tuple_expr.list()) {
-        raw_tuple.push_back(value_expr.to_value());
+        auto value = value_expr.to_value();
+        std::cout << "Got value " << value.to_string() << std::endl;
+        // TODO! What is the type for this value?
+        // That needs to be addressed somewhere..
+        raw_tuple.push_back(value);
       }
       data_.push_back(raw_tuple);
     }
+  }
+
+  const string to_string() const {
+    stringstream os;
+    for (const auto &row : data_) {
+      for (const auto &value : row) {
+        os << value.to_string() << ",";
+      }
+      os << ";" << std::endl;
+    }
+    return os.str();
   }
 
   // Allow copy constructor

@@ -28,11 +28,6 @@ public:
   size_t offset_for(column_oid_t oid) const;
   size_t offset_for(const column_name_t& name) const;
 
-  const ColT& by_offset(offset_t offset) const;
-  const ColT& by_index(index_t index) const {
-    return by_offset(index);
-  }
-
   const ColT& by_column_oid(column_oid_t oid) const;
   const ColT& by_name(const column_name_t& name) const;
 

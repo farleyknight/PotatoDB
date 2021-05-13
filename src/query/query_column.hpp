@@ -51,7 +51,7 @@ public:
   }
 
   bool is_inlined() const {
-    return false; // TODO!
+    return type_id_ != TypeId::VARCHAR;
   }
 
   offset_t fixed_length() {
@@ -80,6 +80,13 @@ public:
 
   table_oid_t table_oid() const {
     return table_oid_;
+  }
+
+  const string to_string() const {
+    stringstream os;
+    os << "Name : " << name_ << std::endl;
+    os << "Type : " << Type::as_string(type_id_) << std::endl;
+    return os.str();
   }
 
 private:

@@ -63,7 +63,7 @@ public:
     return type_id_;
   }
 
-  string to_string() const {
+  const string to_string() const {
     throw NotImplementedException("to_string not implemented");
   }
 

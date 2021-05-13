@@ -231,12 +231,6 @@ public:
                         page_->buffer(),
                         tuple_offset - pointer); // N bytes
 
-    // memmove(
-    //   data() + pointer + tuple_size,
-    //   data() + pointer,
-    //   tuple_offset - pointer
-    // );
-
     set_free_space_pointer(pointer + tuple_size);
     set_tuple_size_at(slot_id, 0);
     set_tuple_offset_at_slot(slot_id, 0);
@@ -250,8 +244,6 @@ public:
     }
   }
 
-  // TODO: This should return a ptr<Tuple>
-  // There are two cases below that should return a ptr<Tuple> with nullptr
   ptr<Tuple> find_tuple(const RID& rid) {
     // Get the current slot number.
     uint32_t slot_id = rid.slot_id();

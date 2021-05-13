@@ -17,9 +17,7 @@ public:
 
   static const ptr<Type>& instance(TypeId type_id);
 
-  virtual TypeId type_id() const {
-    throw NotImplementedException("type_id not implemented!");
-  }
+  virtual TypeId type_id() const = 0;
 
   virtual size_t size() const = 0;
 
@@ -76,10 +74,7 @@ public:
     throw NotImplementedException("gte not implemented!");
   }
 
-  virtual bool cast_as(UNUSED const Value& val,
-                       UNUSED TypeId type_id) const {
-    throw NotImplementedException("cast_as not implemented!");
-  }
+  virtual Value cast_as(const Value& value, TypeId type_id) const = 0;
 
   virtual bool copy(UNUSED const Value& val) const {
     throw NotImplementedException("copy not implemented!");

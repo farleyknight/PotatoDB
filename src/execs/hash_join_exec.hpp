@@ -27,7 +27,7 @@ private:
 
   bool match_found(const Tuple& left,
                    const Tuple& right);
-  Value make_value_at(size_t offset,
+  Value make_value_at(column_oid_t oid,
                       const Tuple& left,
                       const Tuple& right);
 

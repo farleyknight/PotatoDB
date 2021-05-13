@@ -22,6 +22,10 @@ public:
     auto &heap = exec_ctx_.table_mgr().table_heap_for(plan_->table_oid());
     auto tuple = child_->next();
 
+    auto schema = exec_ctx_.catalog().query_schema_for(plan_->table_oid());
+
+    std::cout << "Tuple to be inserted " << tuple.to_string(schema) << std::endl;
+
     heap.insert_tuple(tuple, txn());
 
     return tuple;

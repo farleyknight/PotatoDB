@@ -78,11 +78,6 @@ const ColT& BaseSchema<ColT>::by_column_oid(column_oid_t oid) const {
 }
 
 template<class ColT>
-const ColT& BaseSchema<ColT>::by_offset(offset_t offset) const {
-  return columns_.at(offset);
-}
-
-template<class ColT>
 const vector<ColT>& BaseSchema<ColT>::all() const {
   return columns_;
 }

@@ -21,30 +21,41 @@ Tuple::Tuple(vector<Value> values, const QuerySchema& schema) {
   assert(buffer_.size() == tuple_length);
 
   // 3. Serialize each attribute based on the input value.
-  uint32_t column_count = schema.column_count();
+  column_oid_t column_count = schema.column_count();
   uint32_t offset = schema.tuple_length();
 
-  for (uint32_t i = 0; i < column_count; i++) {
-    const auto &col = schema.by_offset(i);
+  for (column_oid_t i = 0; i < column_count; i++) {
+    const auto &col = schema.by_column_oid(i);
     auto col_offset = schema.offset_for(i);
+
+    std::cout << "FOUND COL " << col.to_string() << std::endl;
 
     if (col.is_inlined()) {
       // TODO: Just realized that serialize_to and write_uint32
       // both use the offset, but in either the 1st or 2nd
       // argument. Fix this inconsistency!
-      values[i].serialize_to(col_offset, buffer_);
+
+      std::cout << "Writing value " << values[i].to_string() << std::endl;
+      std::cout << "Writing at offset " << col_offset << std::endl;
+
+      // TODO: Need to cast values[i] to column value
+      values[i].cast_as(col.type_id()).serialize_to(col_offset, buffer_);
     } else {
+      std::cout << "Not inlined, working with col_offset " << col_offset << std::endl;
+
       buffer_.write_uint32(col_offset, offset);
       // Serialize varchar value, in place (size+data).
-      values[i].serialize_to(offset, buffer_);
+      values[i].cast_as(col.type_id()).serialize_to(offset, buffer_);
       offset += (values[i].length() + sizeof(uint32_t));
     }
   }
+
+  std::cout << "Final result: " << to_string(schema) << std::endl;
 }
 
 size_t Tuple::buffer_offset_for(const QuerySchema& schema,
                                 column_oid_t column_oid) const {
-  auto is_inlined = schema.by_index(column_oid).is_inlined();
+  auto is_inlined = schema.by_column_oid(column_oid).is_inlined();
   auto offset     = schema.offset_for(column_oid);
 
   // For inlined data types, data is stored where it is.
@@ -61,17 +72,14 @@ size_t Tuple::buffer_offset_for(const QuerySchema& schema,
 const string Tuple::to_string(const QuerySchema& schema) const {
   stringstream os;
 
-  int column_count = schema.column_count();
-  bool first = true;
   os << "(";
-  for (int i = 0; i < column_count; ++i) {
-    if (first) {
-      first = false;
-    } else {
+  for (index_t i = 0; i < schema.column_count(); ++i) {
+    if (i > 0) {
       os << ", ";
     }
+
     if (is_null(schema, i)) {
-      os << "<NULL>";
+      os << "NULL";
     } else {
       os << value(schema, i).to_string();
     }
@@ -82,11 +90,11 @@ const string Tuple::to_string(const QuerySchema& schema) const {
 }
 
 Value Tuple::value(const QuerySchema& schema,
-                   uint32_t column_index) const
+                   column_oid_t column_index) const
 {
   assert(column_index < schema.column_count());
 
-  const TypeId type_id = schema.by_index(column_index).type_id();
+  const TypeId type_id = schema.by_column_oid(column_index).type_id();
   const auto offset = buffer_offset_for(schema, column_index);
 
   return Value::deserialize_from(offset, buffer_, type_id);

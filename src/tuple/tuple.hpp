@@ -38,7 +38,7 @@ public:
   }
 
   Value value(const QuerySchema& schema,
-              uint32_t column_index) const;
+              column_oid_t column_index) const;
 
   Value value_by_name(const QuerySchema& schema,
                       const column_name_t& name) const;
