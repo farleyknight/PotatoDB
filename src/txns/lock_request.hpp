@@ -20,9 +20,9 @@ public:
       lock_mode (mode) {}
 
   // Allow copy
-  LockRequest(CRef<LockRequest>) = default;
+  LockRequest(const LockRequest&) = default;
   // Allow copy assign
-  MRef<LockRequest> operator=(CRef<LockRequest>) = default;
+  LockRequest& operator=(const LockRequest&) = default;
 
   /**********************************************
   * Instance methods
@@ -40,7 +40,7 @@ public:
     lock_mode = mode;
   }
 
-  bool operator==(CRef<LockRequest> other) {
+  bool operator==(const LockRequest& other) {
     return (
       txn_id == other.txn_id &&
       granted == other.granted &&
@@ -48,7 +48,7 @@ public:
     );
   }
 
-  bool operator!=(CRef<LockRequest> other) {
+  bool operator!=(const LockRequest& other) {
     return (
       txn_id != other.txn_id ||
       granted != other.granted ||

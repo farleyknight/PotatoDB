@@ -1,27 +1,55 @@
 #pragma once
 
-#include "catalog/schema_ref.hpp"
+#include "catalog/catalog.hpp"
+#include "catalog/table_column.hpp"
+#include "catalog/table_builder.hpp"
 
-class Catalog;
+#include "plans/base_plan.hpp"
+#include "plans/create_table_plan.hpp"
+#include "exprs/column_def_expr.hpp"
 
 class TableBuilder {
 public:
-  TableBuilder(Ref<Catalog> catalog)
+  TableBuilder(const Catalog& catalog)
     : catalog_ (catalog) {}
 
-  using Self = MRef<TableBuilder>;
-  Self table_name(String table_name);
+  TableBuilder& table_name(table_name_t name) {
+    table_name_ = name;
+    return *this;
+  }
 
-  Self add_column(String name, TypeId type_id);
-  Self add_column(String name, TypeId type_id, size_t length);
+  TableBuilder& column(column_name_t name, TypeId type_id) {
+    column_defs_.push_back(ColumnDefExpr(name, type_id));
+    return *this;
+  }
 
-  Self not_null();
-  Self auto_increment();
-  Self primary_keys(Vec<String> names);
+  TableBuilder& column(column_name_t name, TypeId type_id, length_t length) {
+    column_defs_.push_back(ColumnDefExpr(name, type_id, length));
+    return *this;
+  }
 
-  SchemaRef to_schema();
+  TableBuilder& not_null() {
+    column_defs_.back().is_not_null();
+    return *this;
+  }
+
+  TableBuilder& auto_increment() {
+    column_defs_.back().is_auto_increment(true);
+    return *this;
+  }
+
+  TableBuilder& primary_key() {
+    column_defs_.back().is_primary_key(true);
+    return *this;
+  }
+
+  ptr<BasePlan> to_plan() {
+    return make_unique<CreateTablePlan>(table_name_,
+                                        ColumnDefListExpr(column_defs_));
+  }
 
 private:
-  Ref<Catalog> catalog_;
+  table_name_t table_name_;
+  vector<ColumnDefExpr> column_defs_;
+  UNUSED const Catalog& catalog_;
 };
-

@@ -4,13 +4,13 @@
 
 QueryHaving::QueryHaving(TypeId type_id,
                          BaseQuery having_clause)
-  : BaseQuery      (type_id),
+  : BaseQuery      (QueryNodeType::HAVING, type_id),
     having_clause_ (having_clause) {}
 
 
-Value QueryHaving::eval_agg(CRef<QuerySchema> schema,
-                            UNUSED CRef<Vec<Value>> group_bys,
-                            CRef<Vec<Value>> aggs) const
+Value QueryHaving::eval_agg(const QuerySchema& schema,
+                            UNUSED const Vec<Value>& group_bys,
+                            const Vec<Value>& aggs) const
 {
   // TODO: This should evaluate the having_clause_ predicate on
   // the group_bys tuple? The comparison expression takes a

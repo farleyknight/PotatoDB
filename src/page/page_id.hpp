@@ -2,14 +2,24 @@
 
 class PageId {
 public:
-  PageId() = default;
+  static const file_id_t  INVALID_FILE_ID = 65535;
+  static const block_id_t BLOCK_SENTINEL  = 65535;
+
   PageId(file_id_t file_id, block_id_t block_id)
     : file_id_  (file_id),
       block_id_ (block_id)
   {}
 
   static PageId INVALID() {
-    return PageId();
+    return PageId(INVALID_FILE_ID, BLOCK_SENTINEL);
+  }
+
+  static PageId STOP_ITERATING(file_id_t file_id) {
+    return PageId(file_id, BLOCK_SENTINEL);
+  }
+
+  bool stop_iterating() const {
+    return block_id_ == BLOCK_SENTINEL;
   }
 
   static PageId from(uint32_t page_id) {
@@ -20,7 +30,11 @@ public:
   }
 
   uint32_t as_uint32() const {
-    return (static_cast<uint16_t>(file_id_) << 16) | block_id_;
+    return (static_cast<uint16_t>(file_id()) << 16) | block_id();
+  }
+
+  bool is_valid() const {
+    return (file_id_ != INVALID_FILE_ID && block_id_ != BLOCK_SENTINEL);
   }
 
   file_id_t file_id() const {
@@ -31,24 +45,30 @@ public:
     return block_id_;
   }
 
-  bool operator==(CRef<PageId> other) const {
+  bool operator==(const PageId& other) const {
     return file_id_ == other.file_id_ && block_id_ == other.block_id_;
   }
 
-  bool operator!=(CRef<PageId> other) const {
+  bool operator!=(const PageId& other) const {
     return file_id_ != other.file_id_ || block_id_ != other.block_id_;
   }
 
+  friend std::ostream &operator<<(std::ostream &os, const PageId& page_id) {
+    os << string("file_id: ") << std::to_string(page_id.file_id()) <<
+      string(" block_id: ") << std::to_string(page_id.block_id());
+    return os;
+  }
+
 private:
-  file_id_t file_id_   = -1;
-  block_id_t block_id_ = -1;
+  file_id_t file_id_;
+  block_id_t block_id_;
 };
 
 
 namespace std {
   template <>
   struct hash<PageId> {
-    size_t operator()(CRef<PageId> page_id) const {
+    size_t operator()(const PageId& page_id) const {
       return hash<int64_t>()(page_id.as_uint32());
     }
   };

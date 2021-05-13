@@ -10,7 +10,7 @@
 
 class ClockReplacer : public Replacer {
 public:
-  ClockReplacer(size_t max_frames);
+  ClockReplacer(frame_id_t max_frames);
 
   // No copy
   ClockReplacer(const ClockReplacer& other) = delete;
@@ -34,8 +34,8 @@ public:
   }
 
 private:
-  size_t max_frame_id_;
-  size_t available_frames_;
+  frame_id_t max_frame_id_;
+  frame_id_t available_frames_;
   frame_id_t curr_frame_id_;
   vector<bool> pinned_;
   vector<bool> recently_used_;

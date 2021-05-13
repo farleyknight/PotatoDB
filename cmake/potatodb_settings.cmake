@@ -5,10 +5,15 @@
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(CMAKE_CXX_CPPCHECK "cppcheck")
 
-set(BUILD_SHARED_LIBS ON)
+# NOTE: Turning this off to make builds faster
+# set(CMAKE_CXX_CPPCHECK "cppcheck")
 
+# NOTE: Turning this off to make builds faster
+set(BUILD_SHARED_LIBS OFF)
+# set(BUILD_SHARED_LIBS ON)
+
+# NOTE: Turning this off to make builds faster
 # set(CMAKE_CXX_CLANG_TIDY clang-tidy -checks=-*)
 
 # All target binaries are placed under the directory `builds/`
@@ -40,10 +45,67 @@ include_directories(tests)
 include_directories(perf)
 include_directories(parser)
 
-file(GLOB_RECURSE MAIN_SOURCES   "src/*.cpp")
-file(GLOB_RECURSE TEST_SOURCES   "tests/*.cpp")
-file(GLOB_RECURSE PERF_SOURCES   "perf/*cpp")
-file(GLOB_RECURSE SERVER_SOURCES "server/*.cpp")
-#file(GLOB_RECURSE PARSER_SOURCES "parser/PotatoSQL*.cpp")
+set(test_sources
+  "tests/main.cpp")
 
-set(PARSER_SOURCES "parser/PotatoSQLLexer.cpp;parser/PotatoSQLParser.cpp")
+set(perf_sources
+  "perf/main.cpp")
+
+set(server_sources
+  "server/main.cpp")
+
+set(parser_sources
+  "parser/PotatoSQLLexer.cpp"
+  "parser/PotatoSQLParser.cpp")
+
+set(main_sources
+  "src/btree/b_plus_tree.cpp"
+  "src/buffer/buff_mgr.cpp"
+  "src/buffer/clock_replacer.cpp"
+  "src/buffer/lru_replacer.cpp"
+  "src/buffer/replacer.cpp"
+  "src/buffer/table_mgr.cpp"
+  "src/catalog/base_schema.cpp"
+  "src/catalog/catalog.cpp"
+  "src/catalog/query_builder.cpp"
+  "src/catalog/query_schema.cpp"
+  "src/catalog/table_schema.cpp"
+  "src/common/hash_util.cpp"
+  "src/disk/disk_mgr.cpp"
+  "src/disk/file_mgr.cpp"
+  "src/execs/agg_exec.cpp"
+  "src/execs/exec_ctx.cpp"
+  "src/execs/hash_join_exec.cpp"
+  "src/execs/seq_scan_exec.cpp"
+  "src/execs/update_exec.cpp"
+  "src/hash/linear_probe_hash_table.cpp"
+  "src/index/index_iterator.cpp"
+  "src/index/linear_probe_hash_table_index.cpp"
+  "src/page/hash_table_block_page.cpp"
+  "src/page/hash_table_header_page.cpp"
+  "src/page/page.cpp"
+  "src/page/table_heap.cpp"
+  "src/page/table_iterator.cpp"
+  "src/plans/agg_plan.cpp"
+  "src/plans/plan_builder.cpp"
+  "src/query/query_agg.cpp"
+  "src/query/query_group_by.cpp"
+  "src/query/query_having.cpp"
+  "src/query/query_comp.cpp"
+  "src/query/query_column.cpp"
+  "src/query/query_join.cpp"
+  "src/recovery/checkpoint_manager.cpp"
+  "src/recovery/log_mgr.cpp"
+  "src/recovery/log_recovery.cpp"
+  "src/server/client_socket.cpp"
+  "src/server/potatodb.cpp"
+  "src/server/session.cpp"
+  "src/server/socket_server.cpp"
+  "src/tuple/tuple.cpp"
+  "src/txns/lock_mgr.cpp"
+  "src/txns/txn.cpp"
+  "src/txns/txn_mgr.cpp"
+  "src/types/type.cpp"
+  "src/value/value.cpp"
+  "src/value/value_factory.cpp"
+  )

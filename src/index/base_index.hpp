@@ -14,16 +14,16 @@ public:
   BaseIndex() = default;
   virtual ~BaseIndex() = default;
 
-  virtual void insert_entry(UNUSED CRef<Tuple> key,
-                            UNUSED CRef<RID> rid) {
+  virtual void insert_entry(UNUSED const Tuple& key,
+                            UNUSED const RID& rid) {
     throw Exception("insert_entry is not implemented on BaseIndex");
   }
 
-  virtual void delete_entry(UNUSED CRef<Tuple> key) {
+  virtual void delete_entry(UNUSED const Tuple& key) {
     throw Exception("delete_entry is not implemented on BaseIndex");
   }
 
-  virtual Vec<RID> scan_key(UNUSED CRef<Tuple> key) {
+  virtual vector<RID> scan_key(UNUSED const Tuple& key) {
     throw Exception("scan_key is not implemented on BaseIndex");
   }
 };

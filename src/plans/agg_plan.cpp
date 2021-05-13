@@ -1,38 +1,34 @@
-
 #include "plans/agg_plan.hpp"
 
-AggPlan::AggPlan(SchemaRef         schema,
-                 MovePtr<BasePlan> child,
+AggPlan::AggPlan(ptr<BasePlan>&& child,
                  MoveVec<QueryAgg> aggs)
-  : BasePlan (schema),
-    child_   (move(child)),
-    aggs_    (move(aggs))
+  : BasePlan     (PlanType::AGG),
+    HasChildPlan (move(child)),
+    aggs_        (move(aggs))
 {
   build_agg_types();
 }
 
-AggPlan::AggPlan(SchemaRef             schema,
-                 MovePtr<BasePlan>     child,
+AggPlan::AggPlan(ptr<BasePlan>&&       child,
                  MoveVec<QueryAgg>     aggs,
                  MoveVec<QueryGroupBy> group_bys)
-  : BasePlan   (schema),
-    child_     (move(child)),
-    aggs_      (move(aggs)),
-    group_bys_ (move(group_bys))
+  : BasePlan     (PlanType::AGG),
+    HasChildPlan (move(child)),
+    aggs_        (move(aggs)),
+    group_bys_   (move(group_bys))
 {
   build_agg_types();
 }
 
-AggPlan::AggPlan(SchemaRef             schema,
-                 MovePtr<BasePlan>     child,
+AggPlan::AggPlan(ptr<BasePlan>&&     child,
                  MoveVec<QueryAgg>     aggs,
                  MoveVec<QueryGroupBy> group_bys,
-                 MovePtr<QueryHaving>  having)
-  : BasePlan   (schema),
-    child_     (move(child)),
-    aggs_      (move(aggs)),
-    group_bys_ (move(group_bys)),
-    having_    (move(having))
+                 ptr<QueryHaving>&&  having)
+  : BasePlan     (PlanType::AGG),
+    HasChildPlan (move(child)),
+    aggs_        (move(aggs)),
+    group_bys_   (move(group_bys)),
+    having_      (move(having))
 {
   build_agg_types();
 }

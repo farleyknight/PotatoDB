@@ -1,8 +1,7 @@
-
 #include "server/session.hpp"
 #include "server/potatodb.hpp"
 
-MutPtr<ResultSet> Session::execute(string query) {
-  return db_->execute(query);
+StatementResult Session::run_statement(const string& statement) {
+  return db_->run_statement(statement);
 }
 

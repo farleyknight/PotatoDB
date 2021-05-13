@@ -29,7 +29,7 @@ private:
   }
 
   template<typename IntT>
-  IntT read_int(CRef<Buffer> buff) const {
+  IntT read_int(const Buffer& buff) const {
     size_t num_bytes = sizeof(IntT);
     IntT n = 0;
     for (size_t i = 0; i < num_bytes; ++i) {
@@ -54,7 +54,7 @@ private:
     }
   }
 
-  float read_float(CRef<Buffer> buff) const {
+  float read_float(const Buffer& buff) const {
     float_bytes_t data;
     for (size_t i = 0; i < sizeof(float); ++i) {
       data.bytes[i] = buff.data_[i];
@@ -75,7 +75,7 @@ private:
     }
   }
 
-  float read_double(CRef<Buffer> buff) const {
+  float read_double(const Buffer& buff) const {
     double_bytes_t data;
     for (size_t i = 0; i < sizeof(double); ++i) {
       data.bytes[i] = buff.data_[i];
@@ -85,7 +85,7 @@ private:
 
   using string_size_t = Buffer::string_size_t;
 
-  void write_string(Buffer& buff, String s) {
+  void write_string(Buffer& buff, string s) {
     assert(s.size() < std::numeric_limits<string_size_t>::max());
     int8_t string_size = s.size();
 
@@ -98,7 +98,7 @@ private:
     }
   }
 
-  string read_string(CRef<Buffer> buff) {
+  string read_string(const Buffer& buff) {
     string_size_t size = buff.data_[0];
 
     string new_string(size, 0);

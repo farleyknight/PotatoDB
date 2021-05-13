@@ -1,19 +1,19 @@
 #pragma once
 
-class DeletePlan : public BasePlan {
+#include "plans/base_plan.hpp"
+#include "plans/table_plan.hpp"
+#include "plans/has_child_plan.hpp"
+
+class DeletePlan : public BasePlan, public TablePlan, public HasChildPlan {
 public:
-  DeletePlan(SchemaRef schema,
-             MovePtr<BasePlan> child)
-    : BasePlan   (schema),
-      child_     (move(child)),
-      table_oid_ (schema.table_oid())
+  DeletePlan(table_oid_t table_oid,
+             ptr<BasePlan>&& child)
+    : BasePlan     (PlanType::DELETE),
+      TablePlan    (table_oid),
+      HasChildPlan (move(child))
   {}
 
-  PlanType type()           const { return PlanType::DELETE; }
-  table_oid_t table_oid()   const { return table_oid_; }
-  MovePtr<BasePlan> child()       { return move(child_); }
-
-private:
-  MutPtr<BasePlan> child_;
-  table_oid_t table_oid_;
+  bool is_query() const {
+    return false;
+  }
 };

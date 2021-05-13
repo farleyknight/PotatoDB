@@ -33,7 +33,7 @@ public:
     // Set the previous and next page IDs.
     set_table_page_id(page_id);
     set_prev_page_id(prev_page_id);
-    set_next_page_id(PageId::INVALID());
+    set_next_page_id(PageId::STOP_ITERATING(page_id.file_id()));
 
     set_free_space_pointer(page_->size());
     set_tuple_count(0);
@@ -84,7 +84,7 @@ public:
     return true;
   }
 
-  bool mark_delete(CRef<RID> rid,
+  bool mark_delete(const RID& rid,
                    Txn& txn,
                    LockMgr& lock_mgr,
                    LogMgr& log_mgr)
@@ -131,7 +131,7 @@ public:
     return true;
   }
 
-  void rollback_delete(CRef<RID> rid,
+  void rollback_delete(const RID& rid,
                        Txn& txn,
                        LogMgr& log_mgr)
   {
@@ -150,8 +150,8 @@ public:
       txn.set_prev_lsn(lsn);
     }
 
-    int slot_id = rid.slot_id();
-    assert(slot_num < tuple_count());
+    slot_id_t slot_id = rid.slot_id();
+    assert(slot_id < tuple_count());
     int32_t tuple_size = tuple_size_at(slot_id);
 
     // set tuple size to positive value
@@ -162,11 +162,11 @@ public:
   }
 
   // TODO: Consider making the return value a std::optional
-  bool update_tuple(CRef<Tuple> new_tuple,
+  bool update_tuple(const Tuple& new_tuple,
                     Tuple& old_tuple,
-                    CRef<RID> rid)
+                    const RID& rid)
   {
-    uint32_t slot_id = rid.slot_id();
+    slot_id_t slot_id = rid.slot_id();
 
     if (slot_id >= tuple_count()) {
       return false;
@@ -231,12 +231,6 @@ public:
                         page_->buffer(),
                         tuple_offset - pointer); // N bytes
 
-    // memmove(
-    //   data() + pointer + tuple_size,
-    //   data() + pointer,
-    //   tuple_offset - pointer
-    // );
-
     set_free_space_pointer(pointer + tuple_size);
     set_tuple_size_at(slot_id, 0);
     set_tuple_offset_at_slot(slot_id, 0);
@@ -250,31 +244,34 @@ public:
     }
   }
 
-  Tuple find_tuple(CRef<RID> rid) {
+  ptr<Tuple> find_tuple(const RID& rid) {
     // Get the current slot number.
     uint32_t slot_id = rid.slot_id();
     // If somehow we have more slots than tuples, abort the txn.
     if (slot_id >= tuple_count()) {
-      return Tuple();
+      std::cout << "Slot ID is greater or equal to tuple count! " << slot_id << std::endl;
+      std::cout << "Tuple count " << tuple_count() << std::endl;
+      return unique_ptr<Tuple>(nullptr);
     }
     // Otherwise get the current tuple size too.
     uint32_t tuple_size = tuple_size_at(slot_id);
     // If the tuple is deleted, abort the txn.
     if (is_deleted(tuple_size)) {
-      return Tuple();
+      std::cout << "This tuple is deleted! " << slot_id << std::endl;
+      return unique_ptr<Tuple>(nullptr);
     }
 
     // At this point, we have at least a shared lock on the RID.
     // Copy the tuple data into our result.
     uint32_t tuple_offset = tuple_offset_at_slot(slot_id);
-    Tuple tuple;
-    tuple.reset(tuple_size);
-    tuple.copy_n_bytes(tuple_offset, // Source offset
-                       0, // Destination offset
-                       page_->buffer(), // Source buffer
-                       tuple_size); // N bytes
+    auto tuple = make_unique<Tuple>(tuple_size);
+    // tuple->reset(tuple_size);
+    tuple->copy_n_bytes(tuple_offset, // Source offset
+                        0, // Destination offset
+                        page_->buffer(), // Source buffer
+                        tuple_size); // N bytes
 
-    tuple.set_rid(rid);
+    tuple->set_rid(rid);
     return tuple;
   }
 
@@ -288,7 +285,7 @@ public:
     return std::nullopt;
   }
 
-  Option<RID> next_tuple_rid(CRef<RID> curr_rid) {
+  Option<RID> next_tuple_rid(const RID& curr_rid) {
     // Find and return the first valid tuple after our current slot number.
     for (uint32_t i = curr_rid.slot_id() + 1; i < tuple_count(); ++i) {
       // Q: Is this suppose to check that it's not invalid?
@@ -314,9 +311,9 @@ public:
 
 private:
 
-  void apply_update(CRef<Tuple> new_tuple,
+  void apply_update(const Tuple& new_tuple,
                     Tuple& old_tuple,
-                    CRef<RID> rid,
+                    const RID& rid,
                     uint32_t slot_id,
                     uint32_t tuple_size)
   {

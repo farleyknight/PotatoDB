@@ -27,7 +27,7 @@ public:
     return data_;
   }
 
-  CRef<Data> as_bytes() const {
+  const Data& as_bytes() const {
     return data_;
   }
 
@@ -57,7 +57,7 @@ public:
 
   void copy_n_bytes(size_t source_offset,
                     size_t dest_offset,
-                    CRef<Buffer> source,
+                    const Buffer& source,
                     size_t n_bytes)
   {
     // TODO: Add assert to prevent out-of-bounds memory operations
@@ -66,7 +66,7 @@ public:
                 n_bytes);
   }
 
-  void copy_from(CRef<Buffer> other) {
+  void copy_from(const Buffer& other) {
     data_ = other.data_;
   }
 
@@ -156,7 +156,7 @@ public:
     return *reinterpret_cast<const double*>(cptr(offset));
   }
 
-  void write_string(size_t offset, String value) {
+  void write_string(size_t offset, const string& value) {
     string_size_t size = value.size();
 
     auto c_string = reinterpret_cast<const unsigned char*>(value.c_str());
@@ -166,12 +166,12 @@ public:
                 c_string, size);
   }
 
-  MutString read_string(size_t offset) {
+  string read_string(size_t offset) const {
     string_size_t size = as_bytes()[0];
-    MutString new_string(size, 0);
+    string new_string(size, 0);
 
     std::memcpy(new_string.data(),
-                ptr(offset) + sizeof(string_size_t),
+                cptr(offset) + sizeof(string_size_t),
                 size);
 
     return new_string;

@@ -2,74 +2,92 @@
 
 #include <memory>
 
-#include "catalog/schema_mgr.hpp"
+#include "common/config.hpp"
+
 #include "catalog/table_schema.hpp"
 #include "catalog/table_meta.hpp"
-#include "catalog/index_meta.hpp"
 
-#include "common/config.hpp"
+#include "exprs/column_list_expr.hpp"
+#include "exprs/column_def_list_expr.hpp"
 
 #include "txns/lock_mgr.hpp"
 
 #include "index/base_index.hpp"
+#include "index/index_meta.hpp"
 
 class SchemaRef;
 class SchemaManager;
 
 class Catalog {
 public:
-  /**********************************************
-  * Constructors & destructor
-  **********************************************/
-  Catalog() {}
+  Catalog();
 
   // No copy
-  Catalog(CRef<Catalog>) = delete;
+  Catalog(const Catalog&) = delete;
   // No copy assign
-  Catalog& operator=(CRef<Catalog>) = delete;
+  Catalog& operator=(const Catalog&) = delete;
   // Default delete
   ~Catalog() = default;
 
-  void register_table(Txn& txn,
-                      String table_name,
-                      SchemaRef schema_ref);
+  TableSchema make_schema_from(const table_name_t& table_name,
+                               table_oid_t table_oid,
+                               const ColumnDefListExpr& column_list);
 
-  table_oid_t table_oid_for(CRef<String> table_name) const {
+  table_oid_t create_table(UNUSED Txn& txn,
+                           const string& table_name,
+                           ColumnDefListExpr column_list);
+
+  table_oid_t table_oid_for(const string& table_name) const {
     return table_oids_.at(table_name);
   }
 
-  SchemaRef table_schema_ref_for(CRef<String> table_name) const {
-    return table_schema_refs_.at(table_oid_for(table_name));
-  }
+  bool
+  table_has_column_named(const table_name_t& table_name,
+                         const column_name_t& column_name) const;
 
-  void register_index(Txn& txn,
-                      String table_name,
-                      String index_name,
-                      SchemaRef schema_ref);
+  QuerySchema
+  query_schema_for(const table_name_t& table_name,
+                   const ColumnListExpr& column_list) const;
 
-  CRef<QuerySchema> find_query_schema(table_oid_t table_oid) const {
-    return schema_mgr_.query_schema_for(table_oid);
-  }
+  QuerySchema
+  query_schema_for(table_oid_t table_oid) const;
 
-  CRef<QuerySchema> find_query_schema(SchemaRef schema_ref) const {
-    if (schema_ref.is_query_schema()) {
-      return schema_mgr_.query_schema_for(schema_ref);
-    } else if (schema_ref.is_table_schema()) {
-      return schema_mgr_.as_query_schema(schema_ref);
-    } else {
-      throw NotImplementedException("could not handle schema type!");
-    }
-  }
+  QuerySchema
+  query_schema_for(const table_name_t& table_name) const;
+
+  QuerySchema
+  query_schema_for(const vector<string>& table_names,
+                   const ColumnListExpr& column_list) const;
+
+  QueryColumn
+  query_column_for(const table_name_t& table_name,
+                   const column_name_t& column_name) const;
+
+  QueryColumn
+  query_column_for(const vector<table_name_t>& table_names,
+                   const column_name_t& column_name) const;
+
+  void create_index(Txn& txn,
+                    const string table_name,
+                    const string index_name);
+
+  vector<QueryColumn>
+  all_columns_for(const vector<table_name_t>& table_names) const;
+
+  vector<QueryColumn>
+  all_columns_for(const table_name_t& table_name) const;
+
+  vector<QueryColumn>
+  all_columns_for(table_oid_t table_oid) const;
 
 private:
-  SchemaMgr schema_mgr_;
-
-  MutMap<MutString, table_oid_t> table_oids_;
+  MutMap<table_name_t, table_oid_t> table_oids_;
   Atomic<table_oid_t> next_table_oid_ = 0;
-  MutMap<table_oid_t, SchemaRef> table_schema_refs_;
+  MutMap<table_oid_t, TableSchema> table_schemas_;
 
-  MutMap<MutString,
-         MutMap<MutString, index_oid_t>> index_oids_;
+  // MutMap<column_name_t, vector<table_oid_t>> column_name_to_table_oids_;
+
+  MutMap<table_name_t,
+         MutMap<index_name_t, index_oid_t>> index_oids_;
   Atomic<index_oid_t> next_index_oid_ = 0;
-  MutMap<index_oid_t, SchemaRef> index_schema_refs_;
 };

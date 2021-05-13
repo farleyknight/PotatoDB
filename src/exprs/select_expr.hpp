@@ -4,6 +4,8 @@
 #include "exprs/table_list_expr.hpp"
 #include "exprs/column_list_expr.hpp"
 
+#include "query/query_comp.hpp"
+
 class SelectExpr : public BaseExpr {
 public:
   SelectExpr()
@@ -18,15 +20,21 @@ public:
     table_list_ = tables;
   }
 
-  CRef<TableListExpr> table_list() {
+  const TableListExpr& table_list() {
     return table_list_;
   }
 
-  CRef<ColumnListExpr> column_list() {
+  // TODO: This should return an actual predicate
+  // For now just return an empty unique_ptr
+  ptr<QueryComp> pred() {
+    return ptr<QueryComp>();
+  }
+
+  const ColumnListExpr& column_list() {
     return column_list_;
   }
 
-  virtual MutString to_string() const override {
+  virtual const string to_string() const override {
     return "SELECT " + column_list_.to_string() +
       "FROM " + table_list_.to_string();
   }

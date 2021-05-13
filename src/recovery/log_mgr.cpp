@@ -1,7 +1,7 @@
 
 #include "recovery/log_mgr.hpp"
 
-LogMgr::LogMgr(CRef<DiskMgr> disk_mgr)
+LogMgr::LogMgr(const DiskMgr& disk_mgr)
   : disk_mgr_(disk_mgr)
 {
   // TODO: Use smart pointers here in some way

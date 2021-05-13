@@ -17,21 +17,17 @@ public:
   Page();
 
   // No copy
-  Page(CRef<Page>) = delete;
+  Page(const Page&) = delete;
   // No copy assign
-  Page& operator=(CRef<Page>) = delete;
+  Page& operator=(const Page&) = delete;
 
   virtual ~Page() {} // Make Page polymorphic
-
-  /**********************************************
-   * Instance methods
-   **********************************************/
 
   Buffer& buffer() {
     return buffer_;
   }
 
-  CRef<Buffer> buffer() const {
+  const Buffer& buffer() const {
     return buffer_;
   }
 
@@ -39,7 +35,7 @@ public:
 
   void copy_n_bytes(size_t source_offset,
                     size_t dest_offset,
-                    CRef<Buffer> source,
+                    const Buffer& source,
                     size_t n_bytes)
   {
     buffer_.copy_n_bytes(source_offset,
@@ -102,7 +98,7 @@ public:
 
 private:
 
-  PageId  page_id_;
+  PageId  page_id_ = PageId::INVALID();
   Buffer  buffer_;
   int     pin_count_ = 0;
   bool    is_dirty_ = false;

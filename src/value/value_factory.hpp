@@ -3,11 +3,8 @@
 #include <random>
 
 #include "catalog/base_column.hpp"
-
 #include "common/config.hpp"
-
 #include "types/comp_bool.hpp"
-
 #include "value/value.hpp"
 
 class ValueFactory {
@@ -72,15 +69,10 @@ public:
     return Value(TypeId::BIGINT, bigint);
   }
 
-  static Value abcde_varchar() {
-    String value("abcde");
-    return Value(TypeId::VARCHAR, value);
-  }
-
   static Value random_varchar(uint32_t length) {
     return Value(TypeId::VARCHAR, random_string(length));
   }
 
-  static String random_string(uint32_t length);
+  static const string random_string(uint32_t length);
   static Value from_column(BaseColumn column);
 };

@@ -36,13 +36,13 @@ public:
   }
 
   // Default copy
-  RID(CRef<RID>) = default;
+  RID(const RID&) = default;
   // Default copy assign
-  MRef<RID> operator=(CRef<RID>) = default;
+  RID& operator=(const RID&) = default;
   // Default delete
   ~RID() = default;
 
-  static Option<RID> make_opt(PageId page_id, slot_id_t slot_id) {
+  static optional<RID> make_opt(PageId page_id, slot_id_t slot_id) {
     return make_optional<RID>(page_id, slot_id);
   }
 
@@ -70,16 +70,11 @@ public:
     slot_id_ = slot_id;
   }
 
-  bool operator==(CRef<RID> other) const {
+  bool operator==(const RID& other) const {
     return page_id_ == other.page_id_ && slot_id_ == other.slot_id_;
   }
 
-  /**********************************************
-  * Debug methods
-  **********************************************/
-
-  // TODO: No move b/c RVO?
-  String to_string() const {
+  const string to_string() const {
     std::stringstream os;
     os << "file_id: " << page_id_.file_id();
     os << "block_id: " << page_id_.block_id();
@@ -88,20 +83,28 @@ public:
     return os.str();
   }
 
-  friend std::ostream &operator<<(std::ostream &os, CRef<RID> rid) {
+  friend std::ostream &operator<<(std::ostream &os, const RID& rid) {
     os << rid.to_string();
     return os;
   }
 
+  bool is_valid() const {
+    return page_id_.is_valid();
+  }
+
+  bool stop_iterating() const {
+    return page_id_.stop_iterating();
+  }
+
 private:
-  PageId page_id_;
-  slot_id_t slot_id_ = 0;  // logical offset from 0, 1...
+  PageId page_id_    = PageId::INVALID();
+  slot_id_t slot_id_ = 0;
 };
 
 namespace std {
   template <>
   struct hash<RID> {
-    size_t operator()(CRef<RID> obj) const {
+    size_t operator()(const RID& obj) const {
       return hash<int64_t>()(obj.get());
     }
   };

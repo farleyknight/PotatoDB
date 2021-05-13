@@ -15,26 +15,19 @@
 
 class TableSchema : public BaseSchema<TableColumn> {
 public:
-  /*******************************************************
-   * TableSchema : Represents an actual table schema in the
-   * database. Can be created, modified, or deleted using
-   * the DDL portion of SQL.
-   *******************************************************/
-
   TableSchema(vector<TableColumn> columns,
-              vector<string> names,
-              string table_name,
+              const table_name_t& table_name,
               table_oid_t table_oid);
-  // No copy
-  TableSchema(CRef<TableSchema>) = delete;
-  // No copy assign
-  TableSchema& operator=(CRef<TableSchema>) = delete;
+  // Allow copy
+  TableSchema(const TableSchema&) = default;
+  // Allow copy assign
+  TableSchema& operator=(const TableSchema&) = default;
   // Default destructor
   ~TableSchema() = default;
 
-  string to_string() const;
+  const string to_string() const;
 
-  QueryColumn operator[](string col_name) const;
+  QueryColumn operator[](const column_name_t& name) const;
 
   table_oid_t table_oid() const {
     return table_oid_;
@@ -42,5 +35,5 @@ public:
 
 private:
   table_oid_t table_oid_;
-  string table_name_;
+  table_name_t table_name_;
 };

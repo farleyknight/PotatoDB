@@ -2,62 +2,95 @@
 
 #include "catalog/table_column.hpp"
 #include "query/base_query.hpp"
+#include "query/query_comp.hpp"
+#include "query/query_const.hpp"
 
 class TableSchema;
 class QuerySchema;
 
 class QueryColumn : public BaseQuery {
 public:
-
-  // TODO: We should be able to create a QueryColumn via a TableColumn
-  // Can we inherit both from BaseQuery and BaseColumn?
   QueryColumn(TypeId type_id,
-              string name)
-    : BaseQuery (type_id),
-      name_     (name)
+              table_oid_t table_oid,
+              column_oid_t column_oid,
+              column_name_t name)
+    : BaseQuery   (QueryNodeType::COLUMN, type_id),
+      table_oid_  (table_oid),
+      column_oid_ (column_oid),
+      name_       (name)
   {}
 
   // Allow copy
-  QueryColumn(CRef<QueryColumn>) = default;
+  QueryColumn(const QueryColumn&) = default;
   // Allow copy assign
-  QueryColumn& operator=(CRef<QueryColumn>) = default;
+  QueryColumn& operator=(const QueryColumn&) = default;
   // Default destructor
   ~QueryColumn() = default;
 
-  Value eval(UNUSED CRef<Tuple> tuple,
-             UNUSED CRef<QuerySchema> schema) const {
-    throw NotImplementedException("eval_agg not implemented!");
+  static QueryColumn from(TableColumn col) {
+    return QueryColumn(col.type_id(),
+                       col.table_oid(),
+                       col.oid(),
+                       col.name());
   }
 
-  Value eval_join(UNUSED CRef<Tuple> lt,
-                  UNUSED CRef<QuerySchema> ls,
-                  UNUSED CRef<Tuple> rt,
-                  UNUSED CRef<QuerySchema> rs) const {
-    throw NotImplementedException("eval_agg not implemented!");
-  }
+  Value eval(UNUSED const Tuple& tuple,
+             UNUSED const QuerySchema& schema) const override;
 
-  Value eval_agg(UNUSED CRef<QuerySchema> schema,
-                 UNUSED CRef<Vec<Value>> group_bys,
-                 UNUSED CRef<Vec<Value>> aggs) const {
-    throw NotImplementedException("eval_agg not implemented!");
-  }
+  Value eval_join(UNUSED const Tuple& lt,
+                  UNUSED const QuerySchema& ls,
+                  UNUSED const Tuple& rt,
+                  UNUSED const QuerySchema& rs) const override;
+
+  Value eval_agg(UNUSED const QuerySchema& schema,
+                 UNUSED const vector<Value>& group_bys,
+                 UNUSED const vector<Value>& aggs) const override;
 
   string name() const {
     return name_;
   }
 
   bool is_inlined() const {
-    return false; // TODO!
+    return type_id_ != TypeId::VARCHAR;
   }
 
-  bool fixed_length() {
+  offset_t fixed_length() {
+    auto size = Type::size_of(type_id_);
+    return size;
+  }
+
+  offset_t variable_length() const {
     return 0; // TODO!
   }
 
-  size_t variable_length() const {
-    return 0; // TODO!
+  ptr<QueryComp> lt(Value constant);
+  ptr<QueryComp> gt(Value constant);
+
+  bool operator==(const QueryColumn& other) const {
+    return name_ == other.name_;
+  }
+
+  bool operator!=(const QueryColumn& other) const {
+    return name_ != other.name_;
+  }
+
+  column_oid_t column_oid() const {
+    return column_oid_;
+  }
+
+  table_oid_t table_oid() const {
+    return table_oid_;
+  }
+
+  const string to_string() const {
+    stringstream os;
+    os << "Name : " << name_ << std::endl;
+    os << "Type : " << Type::as_string(type_id_) << std::endl;
+    return os.str();
   }
 
 private:
-  string name_;
+  table_oid_t table_oid_;
+  column_oid_t column_oid_;
+  column_name_t name_;
 };

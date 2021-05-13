@@ -16,11 +16,11 @@ public:
     return sizeof(bool);
   }
 
-  static Value min() {
+  Value min() const override {
     return Value::make(false);
   }
 
-  static Value max() {
+  Value max() const override {
     return Value::make(true);
   }
 
@@ -54,5 +54,10 @@ public:
     } else {
       return value.as<bool>() ? "true" : "false";
     }
+  }
+
+  Value cast_as(UNUSED const Value& value,
+                UNUSED TypeId type_id) const override {
+    throw Exception("Not implemented yet for BooleanType");
   }
 };

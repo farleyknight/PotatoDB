@@ -2,20 +2,26 @@
 
 #include "plans/base_plan.hpp"
 #include "plans/raw_tuples.hpp"
+#include "plans/schema_plan.hpp"
 
-class RawTuplesPlan : public BasePlan {
+class RawTuplesPlan : public BasePlan,
+                      public SchemaPlan
+{
 public:
-  RawTuplesPlan(SchemaRef schema_ref,
-                RawTuples raw_tuples)
-    : BasePlan    (schema_ref),
-      raw_tuples_ (raw_tuples) {}
+  RawTuplesPlan(QuerySchema schema, RawTuples raw_tuples)
+    : BasePlan    (PlanType::RAW_TUPLES),
+      SchemaPlan  (schema),
+      raw_tuples_ (raw_tuples)
+  {
+    // std::cout << "Raw Tuples " << raw_tuples.to_string() << std::endl;
+  }
 
-  CRef<RawTuples> raw_tuples() const {
+  const RawTuples& raw_tuples() const {
     return raw_tuples_;
   }
 
-  PlanType type() const {
-    return PlanType::RAW_TUPLES;
+  bool is_query() const {
+    return false;
   }
 
 private:

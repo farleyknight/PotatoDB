@@ -15,45 +15,30 @@ enum class CompType {
 
 class QueryComp : public BaseQuery {
 public:
-  /**********************************************
-   * Constructors & destructor
-   **********************************************/
-
-  QueryComp(BaseQuery left,
+  QueryComp(ptr<BaseQuery>&& left,
             CompType type,
-            BaseQuery right)
-    : BaseQuery (TypeId::BOOLEAN),
-      left_     (left),
+            ptr<BaseQuery>&& right)
+    : BaseQuery (QueryNodeType::COMP, TypeId::BOOLEAN),
+      left_     (move(left)),
       type_     (type),
-      right_    (right) {}
+      right_    (move(right)) {}
 
-  /**********************************************
-   * Instance methods
-   **********************************************/
+  Value eval(const Tuple& tuple,
+             const QuerySchema& schema) const override;
 
-  Value eval(CRef<Tuple> tuple, CRef<QuerySchema> schema) const {
-    Value lhs = left_.eval(tuple, schema);
-    Value rhs = right_.eval(tuple, schema);
-    return Value::make(compare(lhs, rhs));
-  }
+  Value eval_join(const Tuple& lt,
+                  const QuerySchema& ls,
+                  const Tuple& rt,
+                  const QuerySchema& rs) const override;
 
-  Value eval_join(CRef<Tuple> lt, CRef<QuerySchema> ls,
-                  CRef<Tuple> rt, CRef<QuerySchema> rs) const {
-    Value lhs = left_.eval_join(lt, ls, rt, rs);
-    Value rhs = right_.eval_join(lt, ls, rt, rs);
-    return Value::make(compare(lhs, rhs));
-  }
-
-  Value eval_agg(CRef<QuerySchema> schema,
-                 CRef<Vec<Value>> group_bys,
-                 CRef<Vec<Value>> aggregates) const {
-    Value lhs = left_.eval_agg(schema, group_bys, aggregates);
-    Value rhs = right_.eval_agg(schema, group_bys, aggregates);
-    return Value::make(compare(lhs, rhs));
-  }
+  Value eval_agg(const QuerySchema& schema,
+                 const vector<Value>& group_bys,
+                 const vector<Value>& aggregates) const override;
 
 private:
-  bool compare(CRef<Value> lhs, CRef<Value> rhs) const {
+  bool compare(const Value& lhs,
+               const Value& rhs) const
+  {
     switch (type_) {
     case CompType::EQ:
       return lhs.eq(rhs);
@@ -72,7 +57,7 @@ private:
     }
   }
 
-  BaseQuery left_;
+  ptr<BaseQuery> left_;
   CompType type_;
-  BaseQuery right_;
+  ptr<BaseQuery> right_;
 };

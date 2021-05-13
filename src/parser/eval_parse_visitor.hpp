@@ -3,6 +3,7 @@
 #include "PotatoSQLBaseVisitor.h"
 
 #include "common/types.hpp"
+#include "exprs/show_tables_expr.hpp"
 #include "exprs/insert_expr.hpp"
 #include "exprs/select_expr.hpp"
 #include "exprs/create_table_expr.hpp"
@@ -11,45 +12,83 @@ using antlrcpp::Any;
 using potatosql::PotatoSQLBaseVisitor;
 using potatosql::PotatoSQLParser;
 
-class EvalParseVisitor : public PotatoSQLBaseVisitor {
-public:
-  MutVec<MutString> results;
-  MutVec<MutPtr<BaseExpr>> exprs;
+// TODO: Rename these! Not a fan of underscores in class names
+using SelectStmtContext      = PotatoSQLParser::Select_stmtContext;
+using CreateTableStmtContext = PotatoSQLParser::Create_table_stmtContext;
+using ShowTablesStmtContext  = PotatoSQLParser::Show_tables_stmtContext;
+using InsertStmtContext      = PotatoSQLParser::Insert_stmtContext;
+using SelectCoreContext      = PotatoSQLParser::Select_coreContext;
+using ExprContext            = PotatoSQLParser::ExprContext;
 
-  Any visitSelect_stmt(PotatoSQLParser::Select_stmtContext *ctx)
-    override
-  {
+class EvalParseVisitor : public PotatoSQLBaseVisitor {
+private:
+  vector<string> results_;
+  vector<ptr<BaseExpr>> exprs_;
+
+public:
+  vector<string>&& results() {
+    return move(results_);
+  }
+
+  vector<ptr<BaseExpr>>&& exprs() {
+    return move(exprs_);
+  }
+
+  Any visitSelect_stmt(SelectStmtContext *ctx) override {
     // TODO?
     return visitChildren(ctx);
   }
 
-  Any visitCreate_table_stmt(PotatoSQLParser::Create_table_stmtContext *ctx)
-    override
-  {
+  Any visitCreate_table_stmt(CreateTableStmtContext *ctx) override {
     CreateTableExpr create_table;
     assert(ctx->table_name());
 
     TableExpr table(ctx->table_name()->getText());
     create_table.set_table(table);
 
-    const auto &col_def_list_ctx = ctx->column_def();
     ColumnDefListExpr def_list;
-    for (auto &col_def_ctx : col_def_list_ctx) {
+
+    for (auto &col_def_ctx : ctx->column_def()) {
       auto col_name = col_def_ctx->column_name()->getText();
-      auto type_name = col_def_ctx->type_name()->getText();
-      def_list.push_back(ColumnDefExpr(col_name, type_name));
+      auto type_name_ctx = col_def_ctx->type_name();
+      auto type_name = type_name_ctx->name()[0]->getText();
+      auto type_id = Type::type_id_for(type_name);
+
+      if (type_name == "VARCHAR") {
+        auto signed_number_ctx = type_name_ctx->signed_number();
+        auto signed_number = signed_number_ctx[0]->getText();
+        uint32_t number = std::stoi(signed_number);
+        def_list.push_back(ColumnDefExpr(col_name, type_id, number));
+      } else {
+        def_list.push_back(ColumnDefExpr(col_name, type_id));
+      }
+
+      auto &col_def = def_list.back();
+
+      for (auto &constraint : col_def_ctx->column_constraint()) {
+        if (constraint->getText() == "NOTNULL") {
+          col_def.is_not_null(true);
+        } else if (constraint->getText() == "PRIMARYKEY") {
+          col_def.is_primary_key(true);
+        }
+      }
     }
 
     create_table.set_column_defs(def_list);
 
-    exprs.emplace_back(make_unique<CreateTableExpr>(create_table));
+    exprs_.emplace_back(make_unique<CreateTableExpr>(create_table));
 
     return visitChildren(ctx);
   }
 
-  Any visitInsert_stmt(PotatoSQLParser::Insert_stmtContext *ctx)
-    override
-  {
+  Any visitShow_tables_stmt(ShowTablesStmtContext *ctx) override {
+    ShowTablesExpr show_tables;
+    exprs_.emplace_back(make_unique<ShowTablesExpr>());
+
+    return visitChildren(ctx);
+  }
+
+  Any visitInsert_stmt(InsertStmtContext *ctx) override {
     InsertExpr insert;
     assert(ctx->table_name());
 
@@ -80,19 +119,27 @@ public:
     }
     insert.set_tuples(tuples);
 
-    exprs.emplace_back(make_unique<InsertExpr>(insert));
+    exprs_.emplace_back(make_unique<InsertExpr>(insert));
 
     return visitChildren(ctx);
   }
 
-  Any visitSelect_core(PotatoSQLParser::Select_coreContext *ctx)
-    override
-  {
+  Any visitSelect_core(SelectCoreContext *ctx) override {
     const auto &col_list_ctx = ctx->column_list();
 
     ColumnListExpr cols;
     for (auto &col_ctx : col_list_ctx->result_column()) {
-      cols.push_back(ColumnExpr(col_ctx->getText()));
+      if (col_ctx->table_name() == nullptr) {
+        cols.push_back(ColumnExpr(col_ctx->getText()));
+      } else {
+        if (col_ctx->column_name() == nullptr) {
+          cols.push_back(ColumnExpr("*",
+                                    col_ctx->table_name()->getText()));
+        } else {
+          cols.push_back(ColumnExpr(col_ctx->column_name()->getText(),
+                                    col_ctx->table_name()->getText()));
+        }
+      }
     }
 
     const auto &table_list_ctxs = ctx->table_or_subquery();
@@ -110,14 +157,12 @@ public:
     select.set_columns(cols);
     select.set_tables(tables);
 
-    exprs.emplace_back(make_unique<SelectExpr>(select));
+    exprs_.emplace_back(make_unique<SelectExpr>(select));
 
     return visitChildren(ctx);
   }
 
-  Any visitExpr(PotatoSQLParser::ExprContext *ctx)
-    override
-  {
+  Any visitExpr(ExprContext *ctx) override {
     return visitChildren(ctx);
   }
 };

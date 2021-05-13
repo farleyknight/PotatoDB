@@ -5,23 +5,23 @@
 
 class UpdateExec : public BaseExec {
 public:
-  /**********************************************
-   * Constructors & destructor
-   **********************************************/
-
   UpdateExec(ExecCtx& exec_ctx,
-             MovePtr<UpdatePlan> plan,
-             MovePtr<BaseExec> child);
+             ptr<UpdatePlan>&& plan,
+             ptr<BaseExec>&& child);
 
   void init() override;
   bool has_next() override;
   Tuple next() override;
 
+  const string message_on_completion(size_t result_count) const override {
+    return "Updated " + std::to_string(result_count) + " record(s)";
+  }
+
 private:
-  Tuple updated_tuple(CRef<Tuple> old_tuple);
+  Tuple updated_tuple(const Tuple& old_tuple);
   TableHeap& table_heap();
 
-  CRef<QuerySchema> schema();
-  Ptr<UpdatePlan> plan_;
-  Ptr<BaseExec> child_;
+  const QuerySchema& schema();
+  ptr<UpdatePlan> plan_;
+  ptr<BaseExec> child_;
 };

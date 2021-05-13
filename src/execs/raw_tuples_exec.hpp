@@ -5,25 +5,18 @@
 
 class RawTuplesExec : public BaseExec {
 public:
-  /**********************************************
-   * Constructors & destructor
-   **********************************************/
-
   RawTuplesExec(ExecCtx& exec_ctx,
-                MovePtr<RawTuplesPlan> plan)
+                ptr<RawTuplesPlan>&& plan)
     : BaseExec     (exec_ctx),
       plan_        (move(plan)),
       iter_        (plan_->raw_tuples().begin())
   {}
 
-  static Ptr<BaseExec> make(ExecCtx& exec_ctx,
-                            MovePtr<RawTuplesPlan> plan) {
+  // TODO: Delete this
+  static ptr<BaseExec> make(ExecCtx& exec_ctx,
+                            ptr<RawTuplesPlan>&& plan) {
     return make_unique<RawTuplesExec>(exec_ctx, move(plan));
   }
-
-  /**********************************************
-   * Instance methods
-   **********************************************/
 
   void init() override {
     // NOTE: Taken care of in constructor
@@ -34,15 +27,22 @@ public:
   }
 
   Tuple next() override {
-    auto &schema =
-      exec_ctx_.catalog().find_query_schema(plan_->schema_ref());
+    auto values = iter_.values();
 
-    auto tuple = Tuple(iter_.values(), schema);
+    //for (const auto &value : values) {
+      // std::cout << "Building new tuple with value " << value.to_string() << std::endl;
+    //}
+
+    auto tuple = Tuple(iter_.values(), plan_->schema());
+    // std::cout << "Next Tuple " << tuple.to_string(plan_->schema()) << std::endl;
     ++iter_;
     return tuple;
   }
 
+  const string message_on_completion(size_t result_count) const override {
+    return "Inserted " + std::to_string(result_count) + " record(s)";
+  }
 private:
-  Ptr<RawTuplesPlan> plan_;
+  ptr<RawTuplesPlan> plan_;
   RawTuples::Iterator iter_;
 };

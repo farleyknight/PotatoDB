@@ -4,9 +4,9 @@
 
 #include "common/config.hpp"
 
-// TODO: Find a way to bundle up all of these files?
 #include "plans/base_plan.hpp"
 #include "plans/agg_plan.hpp"
+#include "plans/create_table_plan.hpp"
 #include "plans/insert_plan.hpp"
 #include "plans/update_plan.hpp"
 #include "plans/delete_plan.hpp"
@@ -15,9 +15,9 @@
 #include "plans/sort_plan.hpp"
 #include "plans/nested_loop_join_plan.hpp"
 
-// TODO: Find a way to bundle up all of these files?
 #include "execs/base_exec.hpp"
 #include "execs/agg_exec.hpp"
+#include "execs/create_table_exec.hpp"
 #include "execs/delete_exec.hpp"
 #include "execs/insert_exec.hpp"
 #include "execs/limit_exec.hpp"
@@ -32,21 +32,23 @@ class ExecFactory {
 public:
 
   template <class T>
-  static MutPtr<T> cast(MutPtr<BasePlan>& plan) {
+  static ptr<T> cast(ptr<BasePlan>& plan) {
     return unique_ptr<T>(static_cast<T*>(plan.release()));
   }
 
-  /**********************************************
-   * Class methods
-   **********************************************/
-
-  static MutPtr<BaseExec> create(ExecCtx& exec_ctx,
-                                 MovePtr<BasePlan> plan) {
+  static ptr<BaseExec> create(ExecCtx& exec_ctx,
+                              ptr<BasePlan>&& plan)
+  {
     switch (plan->type()) {
     case PlanType::TABLE_SCAN: {
       auto scan_plan = cast<SeqScanPlan>(plan);
       return make_unique<SeqScanExec>(exec_ctx,
                                       move(scan_plan));
+    }
+
+    case PlanType::CREATE_TABLE: {
+      auto create_plan = cast<CreateTablePlan>(plan);
+      return make_unique<CreateTableExec>(exec_ctx, move(create_plan));
     }
 
     case PlanType::RAW_TUPLES: {

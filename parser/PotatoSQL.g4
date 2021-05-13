@@ -8,9 +8,9 @@ main
  ;
 
 error
- : UNEXPECTED_CHAR 
-   { 
-     throw new RuntimeException("UNEXPECTED_CHAR=" + $UNEXPECTED_CHAR.text); 
+ : UNEXPECTED_CHAR
+   {
+     throw new RuntimeException("UNEXPECTED_CHAR=" + $UNEXPECTED_CHAR.text);
    }
  ;
 
@@ -46,6 +46,7 @@ sql_stmt
                                       | savepoint_stmt
                                       | simple_select_stmt
                                       | select_stmt
+                                      | show_tables_stmt
                                       | update_stmt
                                       | update_stmt_limited
                                       | vacuum_stmt )
@@ -57,6 +58,10 @@ alter_table_stmt
    | K_ADD K_COLUMN? column_def
    )
  ;
+
+show_tables_stmt
+    : K_SHOW K_TABLES
+    ;
 
 analyze_stmt
  : K_ANALYZE ( database_name | table_or_index_name | database_name '.' table_or_index_name )?
@@ -166,26 +171,26 @@ insert_prefix
     ;
 
 insert_tuple
-    : '(' expr ( ',' expr )* ')'
-    ;
+ : '(' expr ( ',' expr )* ')'
+ ;
 
 insert_tuples
-    : insert_tuple ( ',' insert_tuple )*
-    ;
+ : insert_tuple ( ',' insert_tuple )*
+ ;
 
 insert_columns
-    : '(' column_name ( ',' column_name )* ')'
-    ;
+ : '(' column_name ( ',' column_name )* ')'
+ ;
 
 insert_stmt
-    : with_clause? insert_prefix K_INTO
-        ( database_name '.' )?
-        table_name insert_columns?
-        ( K_VALUES insert_tuples
-        | select_stmt
-        | K_DEFAULT K_VALUES
-        )
-    ;
+ : with_clause? insert_prefix K_INTO
+     ( database_name '.' )?
+     table_name insert_columns?
+     ( K_VALUES insert_tuples
+     | select_stmt
+     | K_DEFAULT K_VALUES
+     )
+ ;
 
 pragma_stmt
  : K_PRAGMA ( database_name '.' )? pragma_name ( '=' pragma_value
@@ -248,7 +253,7 @@ update_stmt_limited
                          | K_OR K_IGNORE )? qualified_table_name
    K_SET column_name '=' expr ( ',' column_name '=' expr )* ( K_WHERE expr )?
    ( ( K_ORDER K_BY ordering_term ( ',' ordering_term )* )?
-     K_LIMIT expr ( ( K_OFFSET | ',' ) expr )? 
+     K_LIMIT expr ( ( K_OFFSET | ',' ) expr )?
    )?
  ;
 
@@ -300,20 +305,21 @@ conflict_clause
     AND
     OR
 */
+
 expr
  : literal_value
  | BIND_PARAMETER
- | ( ( database_name '.' )? table_name '.' )? column_name
+ | ( table_name '.' )? column_name
  | unary_operator expr
  | expr '||' expr
  | expr ( '*' | '/' | '%' ) expr
  | expr ( '+' | '-' ) expr
  | expr ( '<<' | '>>' | '&' | '|' ) expr
  | expr ( '<' | '<=' | '>' | '>=' ) expr
- | expr ( '=' | '==' | '!=' | '<>' ) expr
+ | expr ( '=' | '==' | '!=' | NOT_EQ2 ) expr
  | expr K_NOT? K_IN ( '(' ( select_stmt
                           | expr ( ',' expr )*
-                          )? 
+                          )?
                       ')'
                     | ( database_name '.' )? table_name )
  | expr K_AND expr
@@ -339,13 +345,13 @@ foreign_key_clause
                                     | K_RESTRICT
                                     | K_NO K_ACTION )
      | K_MATCH name
-     ) 
+     )
    )*
    ( K_NOT? K_DEFERRABLE ( K_INITIALLY K_DEFERRED | K_INITIALLY K_IMMEDIATE )? )?
  ;
 
 raise_function
- : K_RAISE '(' ( K_IGNORE 
+ : K_RAISE '(' ( K_IGNORE
                | ( K_ROLLBACK | K_ABORT | K_FAIL ) ',' error_message )
            ')'
  ;
@@ -388,6 +394,7 @@ common_table_expression
 result_column
  : '*'
  | table_name '.' '*'
+ | table_name '.' column_name
  | expr ( K_AS? column_alias )?
  ;
 
@@ -618,31 +625,31 @@ table_function_name
  : any_name
  ;
 
-table_name 
+table_name
  : any_name
  ;
 
-table_or_index_name 
+table_or_index_name
  : any_name
  ;
 
-new_table_name 
+new_table_name
  : any_name
  ;
 
-column_name 
+column_name
  : any_name
  ;
 
-collation_name 
+collation_name
  : any_name
  ;
 
-foreign_table 
+foreign_table
  : any_name
  ;
 
-index_name 
+index_name
  : any_name
  ;
 
@@ -650,19 +657,19 @@ trigger_name
  : any_name
  ;
 
-view_name 
+view_name
  : any_name
  ;
 
-module_name 
+module_name
  : any_name
  ;
 
-pragma_name 
+pragma_name
  : any_name
  ;
 
-savepoint_name 
+savepoint_name
  : any_name
  ;
 
@@ -677,7 +684,7 @@ transaction_name
  ;
 
 any_name
- : IDENTIFIER 
+ : IDENTIFIER
  | keyword
  | STRING_LITERAL
  | '(' any_name ')'
@@ -814,7 +821,9 @@ K_ROW : R O W;
 K_SAVEPOINT : S A V E P O I N T;
 K_SELECT : S E L E C T;
 K_SET : S E T;
+K_SHOW : S H O W;
 K_TABLE : T A B L E;
+K_TABLES : T A B L E S;
 K_TEMP : T E M P;
 K_TEMPORARY : T E M P O R A R Y;
 K_THEN : T H E N;

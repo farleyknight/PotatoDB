@@ -3,7 +3,7 @@
 #include "common/hash_util.hpp"
 #include "value/value.hpp"
 
-hash_t HashUtil::hash_value(CRef<Value> val) {
+hash_t HashUtil::hash_value(const Value& val) {
   switch (val.type_id()) {
   case TypeId::TINYINT: {
     auto raw = static_cast<int8_t>(val.as<int8_t>());

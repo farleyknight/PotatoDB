@@ -24,7 +24,7 @@ template<class KeyT, class ValueT>
 class HTBlockPage {
 public:
   using CompT    = Comp<KeyT>;
-  using MappingT = std::pair<KeyT, ValueT>;
+  using MappingT = pair<KeyT, ValueT>;
 
   static const int BLOCK_ARRAY_SIZE =
     (4 * PAGE_SIZE / (4 * sizeof(MappingT) + 1));
@@ -36,8 +36,8 @@ public:
   KeyT key_at(slot_offset_t bucket_ind) const;
   ValueT value_at(slot_offset_t bucket_ind) const;
   bool insert(slot_offset_t bucket_ind,
-              CRef<KeyT> key,
-              CRef<ValueT> value);
+              const KeyT& key,
+              const ValueT& value);
 
   void remove(slot_offset_t bucket_ind);
   bool is_occupied(slot_offset_t bucket_ind) const;

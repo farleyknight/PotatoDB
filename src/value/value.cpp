@@ -3,6 +3,8 @@
 #include "types/type.hpp"
 
 void Value::serialize_to(size_t offset, Buffer& buff) const {
+  // std::cout << "Serializing value " << to_string() << std::endl;
+  // std::cout << "TYPE ID " << Type::as_string(value_type()->type_id()) << std::endl;
   value_type()->serialize_to(offset, buff, *this);
 }
 
@@ -12,11 +14,7 @@ Value Value::deserialize_from(size_t offset,
   return Type::instance(type_id)->deserialize_from(offset, buff);
 }
 
-bool Value::eq(const Value& other) const {
-  return value_type()->eq(*this, other);
-}
-
-const Ptr<Type>& Value::value_type() const {
+const ptr<Type>& Value::value_type() const {
   return Type::instance(type_id_);
 }
 
@@ -29,6 +27,10 @@ size_t Value::size() const {
 
 bool Value::is_null() const {
   return is_null_;
+}
+
+Value Value::cast_as(TypeId type_id) const {
+  return value_type()->cast_as(*this, type_id);
 }
 
 const string Value::to_string() const {
@@ -51,6 +53,15 @@ Value Value::divide(const Value& other) const {
   return value_type()->divide(*this, other);
 }
 
+bool Value::eq(const Value& other) const {
+  return value_type()->eq(*this, other);
+}
+
+
+bool Value::ne(const Value& other) const {
+  return value_type()->ne(*this, other);
+}
+
 bool Value::lt(const Value& other) const {
   return value_type()->lt(*this, other);
 }
@@ -58,6 +69,15 @@ bool Value::lt(const Value& other) const {
 bool Value::gt(const Value& other) const {
   return value_type()->gt(*this, other);
 }
+
+bool Value::lte(const Value& other) const {
+  return value_type()->lte(*this, other);
+}
+
+bool Value::gte(const Value& other) const {
+  return value_type()->gte(*this, other);
+}
+
 
 Value Value::max(const Value& other) const {
   return value_type()->max(*this, other);

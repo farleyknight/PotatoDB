@@ -39,7 +39,7 @@ public:
     set_from_integer(key);
   }
 
-  void set_from_key(CRef<Tuple> tuple) {
+  void set_from_key(const Tuple& tuple) {
     data_.copy_n_bytes(0,
                        0,
                        tuple.buffer(),
@@ -51,8 +51,7 @@ public:
     data_.write_int64(0, key);
   }
 
-  template<class C>
-  Value to_value(CRef<BaseSchema<C>> schema, size_t index) const {
+  Value to_value(const QuerySchema& schema, size_t index) const {
     size_t offset = 0;
     const auto &col = schema.by_column_oid(index);
     const TypeId column_type = col.type_id();

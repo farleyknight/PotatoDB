@@ -8,48 +8,45 @@ class TableSchema;
 
 class QuerySchema : public BaseSchema<QueryColumn> {
 public:
-  QuerySchema(vector<QueryColumn> cols, vector<string> names)
-    : BaseSchema (cols, names)
+  QuerySchema(vector<QueryColumn> cols)
+    : BaseSchema (cols)
   {}
 
   // Allow copy
-  QuerySchema(CRef<QuerySchema>) = default;
+  QuerySchema(const QuerySchema&) = default;
   // Allow copy-assign
-  QuerySchema& operator=(CRef<QuerySchema>) = default;
+  QuerySchema& operator=(const QuerySchema&) = default;
   // Default destructor
   ~QuerySchema() = default;
 
   static QuerySchema empty();
 
-  static QuerySchema make(vector<QueryColumn> cols);
+  static QuerySchema copy(const TableSchema& original);
+  static QuerySchema copy(const QuerySchema& original);
 
-  static QuerySchema copy(CRef<TableSchema> original);
-  static QuerySchema copy(CRef<QuerySchema> original);
+  static QuerySchema slice(const QuerySchema& from,
+                           const vector<column_oid_t>& oids);
 
-  static QuerySchema slice(CRef<QuerySchema> from,
-                           CRef<vector<column_oid_t>> oids);
+  static QuerySchema slice(const QuerySchema& from,
+                           const vector<string>& names);
 
-  static QuerySchema slice(CRef<QuerySchema> from,
-                           CRef<vector<string>> names);
+  static QuerySchema slice(const TableSchema& from,
+                           const vector<string>& names);
 
-  static QuerySchema slice(CRef<TableSchema> from,
-                           CRef<vector<string>> names);
+  static QuerySchema merge(const QuerySchema& left,
+                           const QuerySchema& right);
 
-  static QuerySchema merge(CRef<QuerySchema> left,
-                           CRef<QuerySchema> right);
+  const string to_string() const;
 
-  string to_string() const;
-
-  CRef<vector<string>> names() const {
+  const vector<column_name_t>& names() const {
     return names_;
   }
 
-  CRef<vector<QueryJoin>> joins() const {
+  const vector<QueryJoin>& joins() const {
     return joins_;
   }
 
 private:
-  vector<string> names_;
+  vector<column_name_t> names_;
   vector<QueryJoin> joins_; // TODO: Need to populate this
 };
-

@@ -20,7 +20,7 @@ void ClientSocket::shutdown() {
   server_->remove_socket(file_desc_);
 }
 
-void ClientSocket::write(CRef<String> data) const {
+void ClientSocket::write(const string& data) const {
   auto result = send(file_desc_,
                      reinterpret_cast<const void*>(data.c_str()),
                      data.size(),
@@ -33,7 +33,7 @@ void ClientSocket::write(CRef<String> data) const {
 
 const size_t buffer_size = 256;
 
-MutString ClientSocket::read() const {
+string ClientSocket::read() const {
   string message;
 
   char buffer[buffer_size] = {0};

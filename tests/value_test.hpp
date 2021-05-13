@@ -10,7 +10,7 @@
 class ValueTest : public ::testing::Test {
 public:
   template<typename value_t>
-  void SerializeAndDeserializeTest(TypeId type_id) {
+  void SerializeAndDeserializeTest(UNUSED TypeId type_id) {
     // TODO!
   }
 };

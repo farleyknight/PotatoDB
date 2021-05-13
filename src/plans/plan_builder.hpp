@@ -3,14 +3,17 @@
 #include "common/config.hpp"
 
 #include "catalog/catalog.hpp"
+#include "catalog/query_table.hpp"
 
 #include "query/query_comp.hpp"
 #include "query/query_column.hpp"
 #include "query/query_const.hpp"
-#include "query/query_table.hpp"
 
 #include "plans/base_plan.hpp"
 #include "plans/raw_tuples_plan.hpp"
+#include "exprs/create_table_expr.hpp"
+#include "exprs/select_expr.hpp"
+#include "exprs/insert_expr.hpp"
 
 class PlanBuilder {
 public:
@@ -18,84 +21,88 @@ public:
     : catalog_(catalog) {}
 
   // No copy
-  PlanBuilder(CRef<PlanBuilder>) = delete;
+  PlanBuilder(const PlanBuilder&) = delete;
   // No copy assign
-  PlanBuilder operator=(CRef<PlanBuilder>) = delete;
+  PlanBuilder operator=(const PlanBuilder&) = delete;
   ~PlanBuilder() = default;
 
+  PlanBuilder& insert_into(QueryTable insert_table);
+  PlanBuilder& tuples(RawTuples&& tuples);
 
-  PlanBuilder& insert_into(String name);
-  PlanBuilder& tuples(Move<RawTuples> tuples);
-
-  PlanBuilder& select(vector<string> names);
-  PlanBuilder& from(string name);
-  PlanBuilder& join(string name);
+  PlanBuilder& select(vector<QueryColumn> columns);
+  PlanBuilder& from(QueryTable table);
+  PlanBuilder& join(QueryTable table);
   PlanBuilder& on(string left_name,
                   string op,
                   string right_name);
 
-  PlanBuilder& delete_from(string name);
+  PlanBuilder& update(QueryTable table);
+  PlanBuilder& set(QueryColumn column, Value value);
 
-  PlanBuilder& where(string name,
-                     string op,
-                     int val);
-  PlanBuilder& where(string name,
-                     string operation,
-                     Value val);
+  PlanBuilder& delete_from(QueryTable table);
 
-  MutPtr<BasePlan> to_plan();
+  PlanBuilder& where(ptr<QueryComp>&& comp);
+
+
+  ptr<BasePlan> to_plan();
+
+  ptr<BasePlan> from_expr(CreateTableExpr* expr);
+  ptr<BasePlan> from_expr(SelectExpr* expr);
+  ptr<BasePlan> from_expr(InsertExpr* expr);
 
 private:
-  /**********************************************
-   * Private Instance Methods
-   **********************************************/
+  ptr<BasePlan> build_tuples();
+  ptr<BasePlan> build_insert(ptr<BasePlan>&& scan_plan);
+  ptr<BasePlan> build_delete(ptr<BasePlan>&& scan_plan);
+  ptr<BasePlan> build_update(ptr<BasePlan>&& scan_plan);
+  ptr<BasePlan> build_scan();
+  ptr<BasePlan> build_loop_join();
+  ptr<BasePlan> build_left_scan();
+  ptr<BasePlan> build_right_scan();
 
-  MutPtr<BasePlan> build_tuples();
-  MutPtr<BasePlan> build_insert(MovePtr<BasePlan> scan_plan);
-  MutPtr<BasePlan> build_delete(MovePtr<BasePlan> scan_plan);
-  // TODO: Need to add build_update in here.
-  MutPtr<BasePlan> build_scan();
-  MutPtr<BasePlan> build_loop_join();
-  MutPtr<BasePlan> build_left_scan();
-  MutPtr<BasePlan> build_right_scan();
-
-  PlanBuilder& loop_join(string right_table);
-  PlanBuilder& hash_join(string right_table);
+  PlanBuilder& loop_join(QueryTable right_table);
+  PlanBuilder& hash_join(QueryTable right_table);
 
   PlanBuilder& on(QueryColumn left,
-                  string op,
                   QueryColumn right);
 
-  void apply_join(string right_table_name);
+  void apply_join(QueryTable right_table);
 
-  SchemaRef insert_table_schema_ref();
-  CRef<QuerySchema> insert_table_schema();
 
-  SchemaRef from_table_schema_ref();
-  CRef<QuerySchema> from_table_schema();
-  CRef<QuerySchema> right_table_schema();
-  CRef<QuerySchema> left_table_schema();
+  vector<QueryColumn> select_columns_;
+  vector<QueryColumn> insert_columns_;
 
-  CompType to_comp_type(string op);
+  // TODO: The syntax allows for multiple set pairs:
+  //
+  // UPDATE table_name
+  // SET column1 = value1, column2 = value2, ...
+  // WHERE condition;
+  //
+  // Therefore we get both of these vectors:
+  vector<QueryColumn> update_columns_;
+  vector<Value>  update_values_;
 
-  vector<string> select_column_names_;
-  vector<string> insert_column_names_;
+  // TODO: Instead of having 5 of these things,
+  // let's just make a MutMap<PlanType, QueryTable>
+  //
+  // That way we can handle each plan type we need,
+  // which should usually be a small number.
+  ptr<QueryTable> from_table_;
+  ptr<QueryTable> insert_table_;
+  ptr<QueryTable> left_table_;
+  ptr<QueryTable> right_table_;
+  ptr<QueryTable> update_table_;
 
-  string from_table_name_;
-  string insert_table_name_;
+  const QuerySchema update_table_schema();
+  const QuerySchema insert_table_schema();
+  const QuerySchema from_table_schema();
+  const QuerySchema right_table_schema();
+  const QuerySchema left_table_schema();
 
-  table_oid_t from_table_oid_   = INVALID_TABLE_OID;
-  table_oid_t insert_table_oid_ = INVALID_TABLE_OID;
+  PlanType plan_type_ = PlanType::INVALID;
 
-  string left_table_name_;
-  string right_table_name_;
-
-  table_oid_t left_table_oid_  = INVALID_TABLE_OID;
-  table_oid_t right_table_oid_ = INVALID_TABLE_OID;
-
-  MutOption<PlanType> plan_type_;
-  MutPtr<QueryComp> where_clause_;
-  MutPtr<QueryComp> join_clause_;
+  ptr<QueryComp> where_clause_;
+  ptr<QueryComp> join_clause_;
 
   Catalog& catalog_;
   RawTuples tuples_;

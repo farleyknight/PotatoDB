@@ -13,8 +13,8 @@
  */
 class LogRecovery {
  public:
-  LogRecovery(CRef<DiskMgr> disk_mgr,
-              CRef<BuffMgr> buff_mgr)
+  LogRecovery(const DiskMgr& disk_mgr,
+              const BuffMgr& buff_mgr)
     : disk_mgr_ (disk_mgr),
       buff_mgr_ (buff_mgr)
   {
@@ -34,8 +34,8 @@ class LogRecovery {
   bool deserialize_log_record(const char *data, LogRecord *log_record);
 
 private:
-  UNUSED CRef<DiskMgr> disk_mgr_;
-  UNUSED CRef<BuffMgr> buff_mgr_;
+  UNUSED const DiskMgr& disk_mgr_;
+  UNUSED const BuffMgr& buff_mgr_;
 
   MutMap<txn_id_t, lsn_t> active_txn_;
   MutMap<lsn_t, int> lsn_mapping_;

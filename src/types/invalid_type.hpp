@@ -19,7 +19,7 @@ public:
     throw Exception("No serialize_to for InvalidType");
   }
 
-  Value deserialize_from(UNUSED const Buffer& buff) const {
+  Value deserialize_from(UNUSED size_t offset, UNUSED const Buffer& buff) const {
     throw Exception("No deserialize_from for InvalidType");
   }
 
@@ -31,12 +31,16 @@ public:
     throw Exception("No size for InvalidType");
   }
 
-  static Value min() {
+  Value min() const override {
     throw Exception("No min for InvalidType");
   }
 
-  static Value max() {
+  Value max() const override {
     throw Exception("No max for InvalidType");
+  }
+
+  Value cast_as(UNUSED const Value& value, UNUSED TypeId type_id) const override {
+    throw Exception("No cast_as for InvalidType");
   }
 };
 

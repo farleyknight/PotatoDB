@@ -18,14 +18,10 @@ static constexpr int32_t INVALID_LENGTH = -1;
 // TODO: Add `AUTOINCREMENT` stuff to this class
 class TableColumn {
 public:
-  /**********************************************
-   * Constructors & destructor
-   **********************************************/
-
   TableColumn()
     : fixed_length_(INVALID_LENGTH) {}
 
-  TableColumn(String name,
+  TableColumn(const string name,
               table_oid_t table_oid,
               column_oid_t column_oid,
               TypeId type_id)
@@ -40,7 +36,7 @@ public:
     assert(type_id != TypeId::VARCHAR);
   }
 
-  explicit TableColumn(String name,
+  explicit TableColumn(const string name,
                        table_oid_t table_oid,
                        column_oid_t column_oid,
                        TypeId type_id,
@@ -58,25 +54,21 @@ public:
   }
 
   // Allow copy
-  TableColumn(CRef<TableColumn>) = default;
+  TableColumn(const TableColumn&) = default;
   // Allow copy assign
-  TableColumn& operator=(CRef<TableColumn>) = default;
+  TableColumn& operator=(const TableColumn&) = default;
   // Default destructor
   ~TableColumn() = default;
 
-  bool is_inlined()         const { return inlined_; }
-  bool primary_key()        const { return primary_key_; }
-  bool is_nullable()        const { return nullable_; }
-  TypeId type_id()          const { return type_id_; }
-  table_oid_t table_oid()   const { return table_oid_; }
-  column_oid_t oid()        const { return column_oid_; }
-  int32_t fixed_length()    const { return fixed_length_; }
-  int32_t variable_length() const { return variable_length_; }
-  CRef<String> name()       const { return name_; }
-
-  /**********************************************
-   * Debug methods
-   **********************************************/
+  bool is_inlined()           const { return inlined_; }
+  bool primary_key()          const { return primary_key_; }
+  bool is_nullable()          const { return nullable_; }
+  TypeId type_id()            const { return type_id_; }
+  table_oid_t table_oid()     const { return table_oid_; }
+  column_oid_t oid()          const { return column_oid_; }
+  int32_t fixed_length()      const { return fixed_length_; }
+  int32_t variable_length()   const { return variable_length_; }
+  const column_name_t& name() const { return name_; }
 
   const string to_string() const {
     std::ostringstream os;
@@ -95,14 +87,42 @@ public:
     return os.str();
   }
 
+  bool operator==(const TableColumn& other) const {
+    return
+      name_            == other.name_ &&
+      type_id_         == other.type_id_ &&
+      table_oid_       == other.table_oid_ &&
+      column_oid_      == other.column_oid_ &&
+      inlined_         == other.inlined_ &&
+      nullable_        == other.nullable_ &&
+      primary_key_     == other.primary_key_ &&
+      fixed_length_    == other.fixed_length_ &&
+      variable_length_ == other.variable_length_;
+  }
+
+  bool operator!=(const TableColumn& other) const {
+    return
+      name_            != other.name_ ||
+      type_id_         != other.type_id_ ||
+      table_oid_       != other.table_oid_ ||
+      column_oid_      != other.column_oid_ ||
+      inlined_         != other.inlined_ ||
+      nullable_        != other.nullable_ ||
+      primary_key_     != other.primary_key_ ||
+      fixed_length_    != other.fixed_length_ ||
+      variable_length_ != other.variable_length_;
+  }
+
 private:
   // Name of the column
-  MutString name_;
+  column_name_t name_;
   // value type of column
   TypeId type_id_ = TypeId::INVALID;
+
   // IDs for table and column
   table_oid_t table_oid_;
   column_oid_t column_oid_;
+
   // is the column inlined ?
   bool inlined_ = true;
   // is the column nullable?

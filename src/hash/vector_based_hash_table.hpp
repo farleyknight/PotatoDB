@@ -6,7 +6,7 @@
 template<class K, class V>
 class VectorBasedHT : public HashTable<K, V> {
 public:
-  using KVPair = std::pair<K, V>;
+  using KVPair = pair<K, V>;
 
   VectorBasedHT(size_t capacity)
     : capacity_ (capacity)
@@ -15,13 +15,15 @@ public:
     table_.resize(capacity);
   }
 
-  virtual bool insert(CRef<K> key, CRef<V> value) override {
+  virtual bool insert(const K& key,
+                      const V& value) override
+  {
     auto index = slot_index(key);
     table_[index].push_back(KVPair(key, value));
     return true;
   }
 
-  virtual vector<V> find_values(CRef<K> key) override {
+  virtual vector<V> find_values(const K& key) override {
     auto index = slot_index(key);
     auto pairs = table_[index];
 
@@ -34,7 +36,7 @@ public:
     return values;
   }
 
-  virtual bool remove(CRef<K> key) override {
+  virtual bool remove(const K& key) override {
     auto index = slot_index(key);
     auto pairs = table_[index];
     auto removed = false;
@@ -49,12 +51,12 @@ public:
   }
 
 private:
-  slot_offset_t slot_index(CRef<Value> key) {
+  slot_offset_t slot_index(const Value& key) {
     // NOTE: hash_fn_ is most likely something from `HashUtils::`
     return HashUtil::hash_value(key) % capacity_;
   }
 
-  slot_offset_t slot_index(CRef<hash_t> key) const {
+  slot_offset_t slot_index(const hash_t& key) const {
     return key % capacity_;
   }
 

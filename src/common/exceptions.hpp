@@ -26,21 +26,25 @@ enum class ExceptionType {
   /** Method not implemented. */
   NOT_IMPLEMENTED = 11,
 
-  BAD_FILE = 12
+  BAD_FILE = 12,
+
+  NO_COLUMNS_NAMED = 13,
+
+  MORE_THAN_ONE_COLUMN = 14
 };
 
 class Exception : public std::runtime_error {
 public:
   explicit Exception(string message)
   : std::runtime_error(message), type_(ExceptionType::INVALID) {
-    String exception_message = "Message :: " + message + "\n";
+    const string exception_message = "Message :: " + message + "\n";
     std::cerr << exception_message;
   }
 
   Exception(ExceptionType exception_type, string message)
   : std::runtime_error(message), type_(exception_type) {
-    String exception_message =
-    "\nException Type :: " + to_string(type_) + "\nMessage :: " + message + "\n";
+    const string exception_message =
+      "\nException Type :: " + to_string(type_) + "\nMessage :: " + message + "\n";
     std::cerr << exception_message;
   }
 
@@ -88,6 +92,21 @@ private:
 class NotImplementedException : public Exception {
 public:
   NotImplementedException() = delete;
-  explicit NotImplementedException(const std::string &msg)
-  : Exception(ExceptionType::NOT_IMPLEMENTED, msg) {}
+  explicit NotImplementedException(const string &msg)
+    : Exception(ExceptionType::NOT_IMPLEMENTED, msg) {}
 };
+
+class NoColumnsNamedException : public Exception {
+public:
+  NoColumnsNamedException() = delete;
+  explicit NoColumnsNamedException(const string &msg)
+    : Exception(ExceptionType::NO_COLUMNS_NAMED, msg) {}
+};
+
+class MoreThanOneColumnException : public Exception {
+public:
+  MoreThanOneColumnException() = delete;
+  explicit MoreThanOneColumnException(const string &msg)
+    : Exception(ExceptionType::MORE_THAN_ONE_COLUMN, msg) {}
+};
+

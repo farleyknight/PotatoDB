@@ -53,7 +53,7 @@ public:
     return tuple_;
   }
 
-  CRef<Tuple> tuple() const {
+  const Tuple& tuple() const {
     return tuple_;
   }
 

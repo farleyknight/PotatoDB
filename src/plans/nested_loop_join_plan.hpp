@@ -1,47 +1,46 @@
 #pragma once
 
 #include "query/query_comp.hpp"
+#include "plans/schema_plan.hpp"
+#include "plans/maybe_pred_plan.hpp"
 
-class NestedLoopJoinPlan : public BasePlan {
+class NestedLoopJoinPlan : public BasePlan, public SchemaPlan, public MaybePredPlan {
 public:
-  /**********************************************
-   * Constructors & destructor
-   **********************************************/
-
-  NestedLoopJoinPlan(SchemaRef schema_ref,
-                     MovePtr<BasePlan> left_child,
-                     MovePtr<BasePlan> right_child)
-    : BasePlan     (schema_ref),
+  NestedLoopJoinPlan(QuerySchema schema,
+                     ptr<BasePlan>&& left_child,
+                     ptr<BasePlan>&& right_child)
+    : BasePlan     (PlanType::LOOP_JOIN),
+      SchemaPlan   (schema),
       left_child_  (move(left_child)),
       right_child_ (move(right_child)) {}
 
-  NestedLoopJoinPlan(SchemaRef schema_ref,
-                     MovePtr<BasePlan> left_child,
-                     MovePtr<BasePlan> right_child,
-                     MovePtr<QueryComp> pred)
-    : BasePlan     (schema_ref),
-      left_child_  (move(left_child)),
-      right_child_ (move(right_child)),
-      pred_        (move(pred)) {}
+  NestedLoopJoinPlan(QuerySchema schema,
+                     ptr<BasePlan>&& left_child,
+                     ptr<BasePlan>&& right_child,
+                     ptr<QueryComp>&& pred)
+    : BasePlan      (PlanType::LOOP_JOIN),
+      SchemaPlan    (schema),
+      MaybePredPlan (move(pred)),
+      left_child_   (move(left_child)),
+      right_child_  (move(right_child))
+   {}
 
-  bool has_pred() {
-    return pred_ != nullptr;
+  QuerySchema left_schema()  const {
+    return dynamic_cast<SchemaPlan*>(left_child_.get())->schema();
   }
 
-  CRef<QueryComp> pred() {
-    return *pred_;
+  QuerySchema right_schema() const {
+    return dynamic_cast<SchemaPlan*>(right_child_.get())->schema();
   }
 
-  PlanType type()              const { return PlanType::LOOP_JOIN; }
+  ptr<BasePlan>&& left_plan()  { return move(left_child_); }
+  ptr<BasePlan>&& right_plan() { return move(right_child_); }
 
-  SchemaRef left_schema_ref()  const { return left_child_->schema_ref(); }
-  SchemaRef right_schema_ref() const { return right_child_->schema_ref(); }
-
-  MovePtr<BasePlan> left_plan()      { return move(left_child_); }
-  MovePtr<BasePlan> right_plan()     { return move(right_child_); }
+  bool is_query() const {
+    return true;
+  }
 
 private:
-  MutPtr<BasePlan> left_child_;
-  MutPtr<BasePlan> right_child_;
-  MutPtr<QueryComp> pred_;
+  ptr<BasePlan> left_child_;
+  ptr<BasePlan> right_child_;
 };

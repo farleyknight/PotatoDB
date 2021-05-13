@@ -10,13 +10,9 @@ class Txn;
 
 class TableHeap {
 public:
-  TableHeap(table_oid_t table_oid,
-            BuffMgr& buff_mgr,
-            LockMgr& lock_mgr,
-            LogMgr& log_mgr,
-            PageId first_page_id);
-
-  TableHeap(table_oid_t table_oid,
+  TableHeap(file_id_t file_id,
+            table_oid_t table_oid,
+            PageId first_page_id,
             BuffMgr& buff_mgr,
             LockMgr& lock_mgr,
             LogMgr& log_mgr,
@@ -25,9 +21,9 @@ public:
   ~TableHeap() = default;
 
   // No copy
-  TableHeap(CRef<TableHeap>) = delete;
+  TableHeap(const TableHeap&) = delete;
   // No copy assign
-  TableHeap& operator=(CRef<TableHeap>) = delete;
+  TableHeap& operator=(const TableHeap&) = delete;
 
   const PageId first_page_id() const {
     return first_page_id_;
@@ -35,16 +31,16 @@ public:
 
   bool insert_tuple(Tuple& tuple,
                     Txn& txn);
-  bool mark_delete(CRef<RID> rid,
+  bool mark_delete(const RID& rid,
                    Txn& txn);
   bool update_tuple(Tuple& tuple,
-                    CRef<RID> rid,
+                    const RID& rid,
                     Txn& txn);
   bool apply_delete(RID& rid,
                     Txn& txn);
-  void rollback_delete(CRef<RID> rid, Txn& txn);
+  void rollback_delete(const RID& rid, Txn& txn);
 
-  Tuple find_tuple(CRef<RID> rid, Txn& txn) const;
+  ptr<Tuple> find_tuple(const RID& rid, Txn& txn) const;
 
   TableIterator begin(Txn& txn);
   TableIterator end(Txn& txn);
@@ -52,6 +48,7 @@ public:
   BuffMgr& buff_mgr() { return buff_mgr_; }
 
 private:
+  file_id_t file_id_;
   table_oid_t table_oid_;
   PageId first_page_id_;
   LockMgr& lock_mgr_;

@@ -11,8 +11,8 @@
 
 #include "value/value.hpp"
 
-CRef<Ptr<Type>> Type::instance(TypeId type_id) {
-  static MutMap<TypeId, Ptr<Type>> types_;
+const ptr<Type>& Type::instance(TypeId type_id) {
+  static MutMap<TypeId, ptr<Type>> types_;
   if (types_.empty()) {
     types_.emplace(TypeId::BOOLEAN,  make_unique<BooleanType>());
     types_.emplace(TypeId::TINYINT,  make_unique<TinyIntType>());
@@ -26,4 +26,3 @@ CRef<Ptr<Type>> Type::instance(TypeId type_id) {
 
   return types_.at(type_id);
 }
-

@@ -1,16 +1,17 @@
 #pragma once
 
 #include "common/config.hpp"
+#include "catalog/query_schema.hpp"
 
 class IndexMeta {
 public:
-  IndexMeta(CRef<TableSchema> key_schema,
+  IndexMeta(const QuerySchema& key_schema,
             string index_name)
     : key_schema_ (key_schema),
       index_name_ (index_name)
   {}
 
-  CRef<TableSchema> key_schema() const {
+  const QuerySchema& key_schema() const {
     return key_schema_;
   }
 
@@ -19,6 +20,6 @@ public:
   }
 
 private:
-  CRef<TableSchema> key_schema_;
+  const QuerySchema& key_schema_;
   string index_name_;
 };

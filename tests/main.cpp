@@ -2,7 +2,10 @@
 
 #include "buffer_rw_test.hpp"
 
+#include "executor_test.hpp"
+
 #include "parser_test.hpp"
+#include "potatodb_test.hpp"
 
 #include "schema_test.hpp"
 
@@ -12,7 +15,6 @@
 #include "type_instance_tests.hpp"
 
 #include "value_test.hpp"
-
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

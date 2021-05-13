@@ -14,19 +14,20 @@
 
 class ExecEngine {
 public:
-  ExecEngine(CRef<BuffMgr> buff_mgr,
-             CRef<TxnMgr> txn_mgr,
-             CRef<Catalog> catalog)
+  ExecEngine(const BuffMgr& buff_mgr,
+             const TxnMgr& txn_mgr,
+             const Catalog& catalog)
     : buff_mgr_ (buff_mgr),
       txn_mgr_  (txn_mgr),
       catalog_  (catalog) {}
 
-  Ptr<ResultSet> query(MovePtr<BasePlan> plan,
-                       UNUSED CRef<Txn> txn,
+  ptr<ResultSet> query(ptr<BasePlan>&& plan,
+                       UNUSED const Txn& txn,
                        ExecCtx& exec_ctx) const
   {
-    MutVec<Tuple> tuples;
+    vector<Tuple> tuples;
 
+    auto schema = dynamic_cast<SchemaPlan*>(plan.get())->schema();
     auto exec = ExecFactory::create(exec_ctx, move(plan));
 
     exec->init();
@@ -35,15 +36,14 @@ public:
       tuples.push_back(exec->next());
     }
 
-    return make_unique<ResultSet>(plan->schema_ref(),
-                                  move(tuples));
+    return make_unique<ResultSet>(move(tuples), schema);
   }
 
   // NOTE: This version does not collect results, hence the inner
   // loop does not do anything with the Tuple & RID
-  int execute(MovePtr<BasePlan> plan,
-              UNUSED CRef<Txn> txn,
-              ExecCtx& exec_ctx)
+  const string execute(ptr<BasePlan>&& plan,
+                       UNUSED const Txn& txn,
+                       ExecCtx& exec_ctx)
   {
     auto exec = ExecFactory::create(exec_ctx, move(plan));
 
@@ -59,11 +59,11 @@ public:
       return 0;
     }
 
-    return result_count;
+    return exec->message_on_completion(result_count);
   }
 
 private:
-  UNUSED CRef<BuffMgr> buff_mgr_;
-  UNUSED CRef<TxnMgr> txn_mgr_;
-  UNUSED CRef<Catalog> catalog_;
+  UNUSED const BuffMgr& buff_mgr_;
+  UNUSED const TxnMgr& txn_mgr_;
+  UNUSED const Catalog& catalog_;
 };

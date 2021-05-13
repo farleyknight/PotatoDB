@@ -1,7 +1,7 @@
 #pragma once
 
 #include <limits>
- 
+
 #include "common/types.hpp"
 #include "buffer/buffer.hpp"
 #include "buffer/buffer_rw.hpp"
@@ -14,6 +14,8 @@ public:
   BufferRW<EncT> encoder_;
 };
 
+// TODO: Lets get rid of ByteEncoder
+// CastEncoder does everything we need and is more low-level
 using Encodings = testing::Types<CastEncoder, ByteEncoder>;
 
 TYPED_TEST_SUITE(BufferRWTest, Encodings);
@@ -130,14 +132,14 @@ TYPED_TEST(BufferRWTest, DRWMoreDoublesToBuffer) {
 TYPED_TEST(BufferRWTest, BufferToHexString) {
   Buffer buff(sizeof(int32_t));
   const int32_t val = 103303;
-  String hex_string = "87930100";
+  const string hex_string = "87930100";
 
   this->encoder_.write_int32(buff, val);
   EXPECT_EQ(this->encoder_.to_hex_string(buff), hex_string);
 }
 
 TYPED_TEST(BufferRWTest, RWStringsToBuffer) {
-  String val = "hello, world!";
+  string val = "hello, world!";
 
   size_t buffer_size = val.size() + sizeof(Buffer::string_size_t);
   Buffer buff(buffer_size);

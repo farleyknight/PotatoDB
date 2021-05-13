@@ -6,7 +6,7 @@
 
 #include "type_tests_fixture.hpp"
 
-TEST_F(TypeTests, DISABLED_CompareValueTest) {
+TEST_F(TypeTests, CompareValueTest) {
   std::string temp = "32";
   Value val1 = Value::make(temp);
   Value val2 = Value::make(32);
@@ -32,14 +32,14 @@ TEST_F(TypeTests, TypeSingletonTest) {
 }
 
 TEST_F(TypeTests, StringValueTest) {
-  String test_string = "some text";
+  string test_string = "some text";
   int length = test_string.size();
   Value val = Value::make(test_string);
 
   // Size should be the actual length of the string + length of string in int8_t
   EXPECT_EQ(val.size(), length + sizeof(int8_t));
 
-  String new_string = val.as<String>();
+  string new_string = val.as<string>();
   EXPECT_EQ(new_string, test_string);
   EXPECT_FALSE(val.is_null());
 

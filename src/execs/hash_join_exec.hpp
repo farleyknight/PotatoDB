@@ -12,31 +12,32 @@
 class HashJoinExec : public BaseExec {
 public:
   HashJoinExec(ExecCtx& exec_ctx,
-               MovePtr<HashJoinPlan> plan,
-               MovePtr<BaseExec> left,
-               MovePtr<BaseExec> right);
+               ptr<HashJoinPlan>&& plan,
+               ptr<BaseExec>&& left,
+               ptr<BaseExec>&& right);
 
   void init() override;
   bool has_next() override;
   Tuple next() override;
 
 private:
-  hash_t compute_hash(CRef<Tuple> tuple,
-                      CRef<QuerySchema> schema,
+  hash_t compute_hash(const Tuple& tuple,
+                      const QuerySchema& schema,
                       Vec<BaseQuery> nodes);
 
-  bool match_found(CRef<Tuple> left, CRef<Tuple> right);
-  Value make_value_at(size_t offset,
-                      CRef<Tuple> left,
-                      CRef<Tuple> right);
+  bool match_found(const Tuple& left,
+                   const Tuple& right);
+  Value make_value_at(column_oid_t oid,
+                      const Tuple& left,
+                      const Tuple& right);
 
-  CRef<QuerySchema> left_schema();
-  CRef<QuerySchema> right_schema();
-  CRef<QuerySchema> schema();
+  const QuerySchema& left_schema();
+  const QuerySchema& right_schema();
+  const QuerySchema& schema();
 
   vector<Tuple> output_tuples_;
 
-  Ptr<HashJoinPlan> plan_;
-  Ptr<BaseExec> left_, right_;
+  ptr<HashJoinPlan> plan_;
+  ptr<BaseExec> left_, right_;
   VectorBasedHT<hash_t, Tuple> join_ht_ {32};
 };

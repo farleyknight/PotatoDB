@@ -2,6 +2,9 @@
 
 #include "common/config.hpp"
 #include "plans/base_plan.hpp"
+#include "plans/table_plan.hpp"
+#include "plans/schema_plan.hpp"
+#include "plans/has_child_plan.hpp"
 
 /**********************************************
  * UpdateType
@@ -22,45 +25,43 @@ public:
     : type_  (type),
       value_ (value) {}
 
-  UpdateType type()   const { return type_; }
-  CRef<Value> value() const { return value_; }
+  UpdateType type()    const { return type_; }
+  const Value& value() const { return value_; }
 
 private:
   UpdateType type_;
   Value value_;
 };
 
-
 /**********************************************
  * UpdatePlan
  **********************************************/
 
-class UpdatePlan : public BasePlan {
+class UpdatePlan : public BasePlan,
+                   public TablePlan,
+                   public SchemaPlan,
+                   public HasChildPlan
+{
 public:
-  UpdatePlan(SchemaRef schema_ref,
-             MovePtr<BasePlan> child,
-             Move<MutMap<uint32_t, UpdateInfo>> update_attrs)
-    : BasePlan      (schema_ref),
-      table_oid_    (schema_ref.table_oid()),
-      child_        (move(child)),
-      // NOTE: The update attrs vector could be huge!
-      // TODO: Write performance tests where this parameter is huge
-      update_attrs_ (update_attrs) {}
+  UpdatePlan(QuerySchema schema,
+             table_oid_t table_oid,
+             ptr<BasePlan>&& child,
+             map<column_oid_t, UpdateInfo>&& update_attrs)
+    : BasePlan      (PlanType::UPDATE),
+      TablePlan     (table_oid),
+      SchemaPlan    (schema),
+      HasChildPlan  (move(child)),
+      update_attrs_ (move(update_attrs))
+  {}
 
-  /**********************************************
-   * Instance methods
-   **********************************************/
-
-  PlanType type()         const { return PlanType::UPDATE; }
-  table_oid_t table_oid() const { return table_oid_; }
-  MovePtr<BasePlan> child()     { return move(child_); }
-
-  CRef<Map<uint32_t, UpdateInfo>> update_attrs() const {
+  const map<column_oid_t, UpdateInfo>& update_attrs() const {
     return update_attrs_;
   }
 
+  bool is_query() const {
+    return false;
+  }
+
 private:
-  table_oid_t table_oid_;
-  MutPtr<BasePlan> child_;
-  Map<uint32_t, UpdateInfo> update_attrs_;
+  map<column_oid_t, UpdateInfo> update_attrs_;
 };

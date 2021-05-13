@@ -1,12 +1,12 @@
 #include "execs/seq_scan_exec.hpp"
 
 SeqScanExec::SeqScanExec(ExecCtx& exec_ctx,
-                         MovePtr<SeqScanPlan> plan)
+                         ptr<SeqScanPlan>&& plan)
   : BaseExec     (exec_ctx),
     plan_        (move(plan))
 {}
 
-bool SeqScanExec::match_found(CRef<Tuple> tuple) {
+bool SeqScanExec::match_found(const Tuple& tuple) {
   if (plan_->has_pred()) {
     auto result = plan_->pred().
       eval(tuple, schema()).as<bool>();
@@ -17,10 +17,14 @@ bool SeqScanExec::match_found(CRef<Tuple> tuple) {
 }
 
 bool SeqScanExec::at_the_end() {
-  return *table_iter_ == table_heap().end(txn());
+  return table_iter_->stop_iterating();
 }
 
 bool SeqScanExec::has_next()  {
+  if (!table_iter_->has_tuple()) {
+    return false;
+  }
+
   while (!at_the_end()) {
     if (match_found(table_iter_->tuple())) {
       return true;
@@ -32,6 +36,7 @@ bool SeqScanExec::has_next()  {
 
 Tuple SeqScanExec::next() {
   auto tuple = table_iter_->tuple();
+  //  std::cout << "Got tuple " << tuple.to_string(schema()) << std::endl;
   ++(*table_iter_);
   return tuple;
 }
@@ -42,14 +47,8 @@ TableHeap& SeqScanExec::table_heap() {
 
 void SeqScanExec::init() {
   table_iter_ = make_unique<TableIterator>(table_heap().begin(txn()));
-  // TODO: This might fail for empty tables?
-  // Maybe we should check if the table is empty
-  // befor doing a scan?
-  assert(table_iter_->has_tuple());
-  // NOTE: Iter object created in constructor
-  // TODO: Maybe do a reset here?
 }
 
-CRef<QuerySchema> SeqScanExec::schema()  {
-  return find_schema(plan_->schema_ref());
+const QuerySchema& SeqScanExec::schema()  {
+  return plan_->schema();
 }

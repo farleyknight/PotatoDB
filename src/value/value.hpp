@@ -21,12 +21,14 @@ public:
                                 const Buffer& buff,
                                 TypeId type_id);
 
-  const Ptr<Type>& value_type() const;
+  const ptr<Type>& value_type() const;
 
   template<typename target_t>
   target_t as() const {
     return StoreT::template cast_as<target_t>(data_);
   }
+
+  Value cast_as(TypeId type_id) const;
 
   size_t size() const;
   size_t length() const {
@@ -85,18 +87,18 @@ public:
     return Value(TypeId::VARCHAR, DataStoreT(data));
   }
 
-  bool eq(CRef<Value> other) const;
-  bool ne(CRef<Value> other) const;
-  bool lt(CRef<Value> other) const;
-  bool gt(CRef<Value> other) const;
+  bool eq(const Value& other) const;
+  bool ne(const Value& other) const;
+  bool lt(const Value& other) const;
+  bool gt(const Value& other) const;
 
-  bool lte(CRef<Value> other) const;
-  bool gte(CRef<Value> other) const;
+  bool lte(const Value& other) const;
+  bool gte(const Value& other) const;
 
-  Value add(CRef<Value> other) const;
-  Value subtract(CRef<Value> other) const;
-  Value multiply(CRef<Value> other) const;
-  Value divide(CRef<Value> other) const;
+  Value add(const Value& other) const;
+  Value subtract(const Value& other) const;
+  Value multiply(const Value& other) const;
+  Value divide(const Value& other) const;
 
   Value min(const Value& other) const;
   Value max(const Value& other) const;

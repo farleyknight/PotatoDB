@@ -10,10 +10,10 @@
 class PotatoDB;
 class ClientSocket;
 
-using SocketFunc = std::function<void(WPtr<ClientSocket>)>;
-
 class SocketServer {
 public:
+  using SocketFunc = std::function<void(WPtr<ClientSocket>)>;
+
   SocketServer(PotatoDB* instance);
   ~SocketServer();
 
@@ -30,7 +30,7 @@ public:
     accept_func_ = func;
   }
 
-  template <class F>
+  template<class F>
   void on_read(Move<F> func) {
     read_func_ = func;
   }
@@ -46,7 +46,7 @@ private:
   void stale_socket_cleanup();
   void finish_tasks();
 
-  shared_ptr<ClientSocket> make_client_socket(file_desc_t client_fd);
+  sptr<ClientSocket> make_client_socket(file_desc_t client_fd);
 
   int         backlog_     =  5;
   int         port_        = -1;
@@ -66,6 +66,6 @@ private:
   // have a mutex, to ensure only one thread is accessing the vector
   // at a time.
   vector<file_desc_t> stale_fds_;
-  Mutex stale_fd_mutex_;
+  mutex stale_fd_mutex_;
   PotatoDB* instance_;
 };

@@ -2,32 +2,25 @@
 
 #include "common/config.hpp"
 #include "plans/base_plan.hpp"
+#include "plans/table_plan.hpp"
+#include "plans/schema_plan.hpp"
+#include "plans/maybe_pred_plan.hpp"
 
-class SeqScanPlan : public BasePlan {
+class SeqScanPlan : public BasePlan,
+                    public TablePlan,
+                    public SchemaPlan,
+                    public MaybePredPlan
+{
 public:
-  SeqScanPlan(SchemaRef schema_ref)
-    : BasePlan   (schema_ref),
-      table_oid_ (schema_ref.table_oid()) {}
+  SeqScanPlan(QuerySchema schema, table_oid_t table_oid, ptr<QueryComp>&& pred)
+    : BasePlan      (PlanType::TABLE_SCAN),
+      TablePlan     (table_oid),
+      SchemaPlan    (schema),
+      MaybePredPlan (move(pred))
+  {}
 
-  SeqScanPlan(SchemaRef schema_ref,
-              MovePtr<BaseQuery> pred)
-    : BasePlan   (schema_ref),
-      pred_      (move(pred)),
-      table_oid_ (schema_ref.table_oid()) {}
-
-  bool has_pred() {
-    return pred_ != nullptr;
+  bool is_query() const {
+    return true;
   }
 
-  CRef<BaseQuery> pred() {
-    assert(pred_);
-    return *pred_;
-  }
-
-  PlanType type()         const { return PlanType::TABLE_SCAN; }
-  table_oid_t table_oid() const { return table_oid_; }
-
-private:
-  Ptr<BaseQuery> pred_;
-  table_oid_t table_oid_;
 };

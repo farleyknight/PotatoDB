@@ -12,9 +12,9 @@
  **********************************************/
 
 template<class K, class V>
-LinearProbeHT<K, V>::LinearProbeHT(CRef<String> name,
+LinearProbeHT<K, V>::LinearProbeHT(const string& name,
                                    BuffMgr& buff_mgr,
-                                   CRef<CompT> comp,
+                                   const CompT& comp,
                                    size_t num_buckets,
                                    HashFunc<K> hash_fn)
   : name_        (name),
@@ -33,8 +33,8 @@ LinearProbeHT<K, V>::LinearProbeHT(CRef<String> name,
  **********************************************/
 
 template<class K, class V>
-vector<V> LinearProbeHT<K, V>::find_values(CRef<K> key) {
-  MutVec<V> result;
+vector<V> LinearProbeHT<K, V>::find_values(const K& key) {
+  vector<V> result;
 
   table_latch_.rlock();
   auto header_page = fetch_header_page();
@@ -72,8 +72,8 @@ vector<V> LinearProbeHT<K, V>::find_values(CRef<K> key) {
 }
 
 template<class K, class V>
-bool LinearProbeHT<K, V>::insert(CRef<K> key,
-                                 CRef<V> value)
+bool LinearProbeHT<K, V>::insert(const K& key,
+                                 const V& value)
 {
   table_latch_.rlock();
   auto result = find_values(key);
@@ -122,7 +122,7 @@ bool LinearProbeHT<K, V>::insert(CRef<K> key,
 }
 
 template<class K, class V>
-bool LinearProbeHT<K, V>::remove(CRef<K> key) {
+bool LinearProbeHT<K, V>::remove(const K& key) {
   table_latch_.rlock();
   auto header_page = fetch_header_page();
   auto expected_index = slot_index(key);
@@ -235,7 +235,9 @@ void LinearProbeHT<K, V>::append_buckets(HTHeaderPage& header_page,
   for (; total_current_buckets < num_buckets;
        total_current_buckets += block_array_size()) {
 
-    auto maybe_page = buff_mgr_.create_page();
+    // TODO: This should actually be allocating pages from
+    // a file via the FileMgr
+    auto maybe_page = buff_mgr_.fetch_page(PageId::INVALID());
     assert(maybe_page);
     auto page = HTBlockPage<K,V>(maybe_page);
 
@@ -247,7 +249,7 @@ void LinearProbeHT<K, V>::append_buckets(HTHeaderPage& header_page,
 }
 
 template<class K, class V>
-slot_offset_t LinearProbeHT<K, V>::slot_index(CRef<K> key) {
+slot_offset_t LinearProbeHT<K, V>::slot_index(const K& key) {
   return hash_fn_.hash(key) % fetch_header_page().size();
 }
 

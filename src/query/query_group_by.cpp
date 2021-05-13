@@ -4,17 +4,17 @@
 
 QueryGroupBy::QueryGroupBy(TypeId type_id,
                            string column_name)
-  : BaseQuery    (type_id),
+  : BaseQuery    (QueryNodeType::GROUP_BY, type_id),
     column_name_ (column_name) {}
 
 QueryGroupBy::QueryGroupBy(string column_name)
-  : BaseQuery    (TypeId::INTEGER),
+  : BaseQuery    (QueryNodeType::GROUP_BY, TypeId::INTEGER),
     column_name_ (column_name) {}
 
 
-Value QueryGroupBy::eval_agg(CRef<QuerySchema> schema,
-                             CRef<Vec<Value>> group_bys,
-                             UNUSED CRef<Vec<Value>> aggrs)
+Value QueryGroupBy::eval_agg(const QuerySchema& schema,
+                             const Vec<Value>& group_bys,
+                             UNUSED const Vec<Value>& aggrs)
   const
 {
   auto index = schema.column_oid_for(column_name_);

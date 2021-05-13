@@ -57,3 +57,14 @@ builds/
 *.zip
 *.zip
 antlr_generated/
+
+GPATH
+GRTAGS
+GTAGS
+
+
+# Graphviz
+potatodb.dot*
+build.ninja
+.ninja_deps
+.ninja_log

@@ -37,7 +37,7 @@ LockMgr::~LockMgr() {
   }
 }
 
-bool LockMgr::lock_shared(MRef<Txn> txn, CRef<RID> rid) {
+bool LockMgr::lock_shared(Txn& txn, const RID& rid) {
   // Latch the LockMgr. Only one RID can be locked at a time.
   std::unique_lock<std::mutex> guard(latch_);
 
@@ -59,7 +59,7 @@ bool LockMgr::lock_shared(MRef<Txn> txn, CRef<RID> rid) {
   // If we have not seen this RID before, we can add it to the queue
   // and immediately approve the request.
   if (lock_table_.count(rid) == 0) {
-    MRef<LockRequestQueue> queue = lock_table_[rid];
+    LockRequestQueue& queue = lock_table_[rid];
     // If we have not seen this RID before, then the lock is
     // automatically granted.
     queue.oldest_id = txn.id();
@@ -74,7 +74,7 @@ bool LockMgr::lock_shared(MRef<Txn> txn, CRef<RID> rid) {
   // and the new SHARED LOCK request is from a txn that is older, then
   // we must above the txn. In other words, as per the wait-die
   // protocol, we decide to die here.
-  MRef<LockRequestQueue> queue = lock_table_[rid];
+  LockRequestQueue& queue = lock_table_[rid];
   if (queue.upgrading && txn.younger_than(queue.oldest_id)) {
     txn.abort_with_reason(AbortReason::WAIT_OR_DIE);
     txn.~Txn();
@@ -116,8 +116,8 @@ bool LockMgr::lock_shared(MRef<Txn> txn, CRef<RID> rid) {
 }
 
 
-bool LockMgr::lock_exclusive(MRef<Txn> txn, CRef<RID> rid) {
-  std::unique_lock<Mutex> guard(latch_);
+bool LockMgr::lock_exclusive(Txn& txn, const RID& rid) {
+  std::unique_lock<mutex> guard(latch_);
 
   if (!can_obtain_lock(txn)) {
     return false;
@@ -125,7 +125,7 @@ bool LockMgr::lock_exclusive(MRef<Txn> txn, CRef<RID> rid) {
 
   LockRequest request {txn.id(), LockMode::EXCLUSIVE};
   if (lock_table_.count(rid) == 0) {
-    MRef<LockRequestQueue> queue = lock_table_[rid];
+    LockRequestQueue& queue = lock_table_[rid];
 
     queue.oldest_id = txn.id();
     queue.upgrading = true;
@@ -137,7 +137,7 @@ bool LockMgr::lock_exclusive(MRef<Txn> txn, CRef<RID> rid) {
   // EXCLUSIVE LOCK wait-die
   // If the requested txn is older than the oldest one in the
   // waiting list, die (per wait-die protocol)
-  MRef<LockRequestQueue> queue = lock_table_[rid];
+  LockRequestQueue& queue = lock_table_[rid];
   if (txn.younger_than(queue.oldest_id)) {
     txn.abort_with_reason(AbortReason::WAIT_OR_DIE);
     txn.allow_restart();
@@ -166,8 +166,8 @@ bool LockMgr::lock_exclusive(MRef<Txn> txn, CRef<RID> rid) {
 }
 
 
-bool LockMgr::lock_upgrade(Txn& txn, CRef<RID> rid) {
-  std::unique_lock<Mutex> guard(latch_);
+bool LockMgr::lock_upgrade(Txn& txn, const RID& rid) {
+  std::unique_lock<mutex> guard(latch_);
 
   if (!can_obtain_lock(txn)) {
     return false;
@@ -239,7 +239,7 @@ bool LockMgr::lock_upgrade(Txn& txn, CRef<RID> rid) {
   return grant_upgrade_request(request, txn, rid);
 }
 
-bool LockMgr::unlock(Txn& txn, CRef<RID> rid) {
+bool LockMgr::unlock(Txn& txn, const RID& rid) {
   std::unique_lock<std::mutex> guard(latch_);
   if (!can_unlock(txn)) {
     return false;
@@ -266,7 +266,7 @@ bool LockMgr::unlock(Txn& txn, CRef<RID> rid) {
 bool LockMgr::grant_read_request(LockRequest& request,
                                  LockRequestQueue& queue,
                                  Txn& txn,
-                                 CRef<RID> rid)
+                                 const RID& rid)
 {
   request.granted = true;
   // NOTE: We call notify all so other SHARED lock requests
@@ -279,7 +279,7 @@ bool LockMgr::grant_read_request(LockRequest& request,
 
 bool LockMgr::grant_write_request(LockRequest& request,
                                   Txn& txn,
-                                  CRef<RID> rid)
+                                  const RID& rid)
 {
   request.granted = true;
   // NOTE: We DO NOT call notify all because EXCLUSIVE lock requests
@@ -291,7 +291,7 @@ bool LockMgr::grant_write_request(LockRequest& request,
 
 bool LockMgr::grant_upgrade_request(LockRequest& request,
                                     Txn& txn,
-                                    CRef<RID> rid)
+                                    const RID& rid)
 {
   request.granted = true;
   txn.shared_lock_set().erase(rid);
@@ -315,7 +315,7 @@ void LockMgr::run_cycle_detection() {
 bool LockMgr::remove_request(MutList<LockRequest>::iterator it,
                              LockRequestQueue& queue,
                              Txn& txn,
-                             CRef<RID> rid) const
+                             const RID& rid) const
 {
   if (it->is_exclusive()) {
     txn.exclusive_lock_set().erase(rid);

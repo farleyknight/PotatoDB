@@ -23,14 +23,14 @@ public:
 
   int file_desc() const;
   void shutdown();
-  void write(CRef<string> data) const;
+  void write(const string& data) const;
   string read() const;
-  string process_request(string message) const;
+  // string process_request(const string& message) const;
 
   // No copy
-  ClientSocket(CRef<ClientSocket>) = delete;
+  ClientSocket(const ClientSocket&) = delete;
   // No copy assign
-  ClientSocket& operator=(CRef<ClientSocket>) = delete;
+  ClientSocket& operator=(const ClientSocket&) = delete;
 
   Session& session() {
     return session_;

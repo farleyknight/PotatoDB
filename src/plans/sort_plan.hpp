@@ -14,20 +14,18 @@ public:
    * Constructors & destructor
    **********************************************/
 
-  SortPlan(SchemaRef schema_ref,
-           MutPtr<BasePlan> child,
+  SortPlan(ptr<BasePlan> child,
            vector<SortDirection> directions)
-    : BasePlan    (schema_ref),
+    : BasePlan    (PlanType::SORT),
       child_      (move(child)),
       directions_ (directions)
   {
     // assert(schema->column_count() == directions_.size());
   }
 
-  PlanType type()     const { return PlanType::SORT; }
-  MovePtr<BasePlan> child() { return move(child_); }
+  ptr<BasePlan>&& child() { return move(child_); }
 
 private:
-  MutPtr<BasePlan> child_;
-  MutVec<SortDirection> directions_;
+  ptr<BasePlan> child_;
+  vector<SortDirection> directions_;
 };

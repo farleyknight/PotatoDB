@@ -32,10 +32,11 @@
 template <typename KeyT, typename ValueT, typename KeyComp>
 class BPlusTreeLeafPage : public BPlusTreePage {
 public:
-  using MappingT = std::pair<KeyT, ValueT>;
+  using MappingT = pair<KeyT, ValueT>;
 
   static constexpr int PAGE_HEADER_SIZE = 28;
-  static constexpr int LEAF_PAGE_SIZE = (PAGE_SIZE - PAGE_HEADER_SIZE) / sizeof(MappingT);
+  static constexpr int LEAF_PAGE_SIZE =
+    (PAGE_SIZE - PAGE_HEADER_SIZE) / sizeof(MappingT);
 
   // After creating a new leaf page from buffer pool, must call initialize
   // method to set default values
@@ -46,13 +47,13 @@ public:
   PageId next_page_id() const;
   void set_next_page_id(page_id_t next_page_id);
   KeyT key_at(int index) const;
-  int key_index(CRef<KeyT> key, CRef<KeyComp> comparator) const;
-  CRef<MappingT> item(int index);
+  int key_index(const KeyT& key, const KeyComp& comparator) const;
+  const MappingT& item(int index);
 
   // insert and delete methods
-  int insert(CRef<KeyT> key, CRef<ValueT> value, CRef<KeyComp> comparator);
-  ValueT lookup(CRef<KeyT> key, CRef<KeyComp> comparator) const;
-  int remove_and_delete_record(CRef<KeyT> key, CRef<KeyComp> comparator);
+  int insert(const KeyT& key, const ValueT& value, const KeyComp& comparator);
+  ValueT lookup(const KeyT& key, const KeyComp& comparator) const;
+  int remove_and_delete_record(const KeyT& key, const KeyComp& comparator);
 
   // Split and Merge utility methods
   void move_half_to(BPlusTreeLeafPage& recipient);
@@ -61,8 +62,8 @@ public:
   void move_last_to_front_of(BPlusTreeLeafPage& recipient);
 
 private:
-  void copy_n_from(CRef<Vec<MappingT>> items, int size);
-  void copy_last_from(CRef<MappingT> item);
-  void copy_first_from(CRef<MappingT> item);
+  void copy_n_from(const vector<MappingT>& items, int size);
+  void copy_last_from(const MappingT& item);
+  void copy_first_from(const MappingT& item);
   PageId next_page_id_;
 };

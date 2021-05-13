@@ -6,8 +6,8 @@ class LimitExec : public BaseExec {
  public:
 
   LimitExec(ExecCtx& exec_ctx,
-            MovePtr<LimitPlan> plan,
-            MovePtr<BaseExec> child)
+            ptr<LimitPlan>&& plan,
+            ptr<BaseExec>&& child)
     : BaseExec (exec_ctx),
       plan_    (move(plan)),
       child_   (move(child))
@@ -27,7 +27,11 @@ class LimitExec : public BaseExec {
     return Tuple();
   }
 
+  const string message_on_completion(size_t result_count) const override {
+    return "Found " + std::to_string(result_count) + " record(s)";
+  }
+
 private:
-  Ptr<LimitPlan> plan_;
-  Ptr<BaseExec> child_;
+  ptr<LimitPlan> plan_;
+  ptr<BaseExec> child_;
 };

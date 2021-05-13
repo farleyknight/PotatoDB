@@ -6,27 +6,16 @@
 #include "plans/nested_loop_join_plan.hpp"
 
 class NestedLoopJoinExec : public BaseExec {
- public:
-
+public:
   NestedLoopJoinExec(ExecCtx& exec_ctx,
-                     MovePtr<NestedLoopJoinPlan> plan,
-                     MovePtr<BaseExec> left,
-                     MovePtr<BaseExec> right)
+                     ptr<NestedLoopJoinPlan>&& plan,
+                     ptr<BaseExec>&& left,
+                     ptr<BaseExec>&& right)
     : BaseExec (exec_ctx),
       plan_    (move(plan)),
       left_    (move(left)),
       right_   (move(right)) {}
 
-  static Ptr<BaseExec> make(ExecCtx& exec_ctx,
-                            MovePtr<NestedLoopJoinPlan> plan,
-                            MovePtr<BaseExec> left,
-                            MovePtr<BaseExec> right)
-  {
-    return make_unique<NestedLoopJoinExec>(exec_ctx,
-                                           move(plan),
-                                           move(left),
-                                           move(right));
-  }
 
   void init() override {
     left_->init();
@@ -58,18 +47,16 @@ class NestedLoopJoinExec : public BaseExec {
     return Tuple();
   }
 
-  bool join_matches(CRef<Tuple> left, CRef<Tuple> right) {
+  bool join_matches(const Tuple& left,
+                    const Tuple& right) {
     if (!plan_->has_pred()) {
       return true;
     }
 
-    auto pred = plan_->pred();
+    auto &pred = plan_->pred();
 
-    auto &left_schema =
-      exec_ctx_.catalog().find_query_schema(plan_->left_schema_ref());
-
-    auto &right_schema =
-      exec_ctx_.catalog().find_query_schema(plan_->right_schema_ref());
+    auto left_schema = plan_->left_schema();
+    auto right_schema = plan_->right_schema();
 
     Value match
       = pred.eval_join(left,  left_schema,
@@ -77,26 +64,20 @@ class NestedLoopJoinExec : public BaseExec {
     return match.as<bool>();
   }
 
-  Tuple combine_tuples(CRef<Tuple> left, CRef<Tuple> right) {
+  Tuple combine_tuples(const Tuple& left,
+                       const Tuple& right) {
     vector<Value> values;
 
-    auto &schema =
-      exec_ctx_.catalog().find_query_schema(plan_->schema_ref());
+    auto &schema = plan_->schema();
 
     for (auto join : schema.joins()) {
       JoinSide side = join.side();
 
       if (side == JoinSide::LEFT) {
-        auto &left_schema =
-          exec_ctx_.catalog().find_query_schema(plan_->left_schema_ref());
-
-        values.push_back(left.value_by_name(left_schema,
+        values.push_back(left.value_by_name(plan_->left_schema(),
                                             join.name()));
       } else if (side == JoinSide::RIGHT) {
-        auto &right_schema =
-          exec_ctx_.catalog().find_query_schema(plan_->right_schema_ref());
-
-        values.push_back(right.value_by_name(right_schema,
+        values.push_back(right.value_by_name(plan_->right_schema(),
                                              join.name()));
       } else if (side == JoinSide::INVALID) {
         throw Exception("Cannot combine tuples with INVALID_SIDE!");
@@ -106,8 +87,12 @@ class NestedLoopJoinExec : public BaseExec {
     return Tuple(move(values), schema);
   }
 
+  const string message_on_completion(size_t result_count) const override {
+    return "Found " + std::to_string(result_count) + " record(s)";
+  }
+
 private:
-  Ptr<NestedLoopJoinPlan> plan_;
-  Ptr<BaseExec> left_;
-  Ptr<BaseExec> right_;
+  ptr<NestedLoopJoinPlan> plan_;
+  ptr<BaseExec> left_;
+  ptr<BaseExec> right_;
 };

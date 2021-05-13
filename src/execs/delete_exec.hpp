@@ -4,19 +4,13 @@
 
 #include "execs/base_exec.hpp"
 #include "execs/exec_ctx.hpp"
-
 #include "plans/delete_plan.hpp"
 
-/**
-* Delete executes a delete from a table.
-* Deleted tuple info comes up from a child executor.
-*/
 class DeleteExec : public BaseExec {
 public:
-
   DeleteExec(ExecCtx& exec_ctx,
-             MovePtr<DeletePlan> plan,
-             MovePtr<BaseExec> child)
+             ptr<DeletePlan>&& plan,
+             ptr<BaseExec>&& child)
     : BaseExec (exec_ctx),
       plan_    (move(plan)),
       child_   (move(child)) {}
@@ -36,7 +30,11 @@ public:
     return Tuple();
   }
 
+  const string message_on_completion(size_t result_count) const override {
+    return "Deleted " + std::to_string(result_count) + " record(s)";
+  }
+
 private:
-  MutPtr<DeletePlan> plan_;
-  MutPtr<BaseExec> child_;
+  ptr<DeletePlan> plan_;
+  ptr<BaseExec> child_;
 };

@@ -8,9 +8,9 @@ public:
   QueryHaving(TypeId type_id,
               BaseQuery having_clause);
 
-  Value eval_agg(CRef<QuerySchema> schema,
-                 CRef<Vec<Value>> group_bys,
-                 CRef<Vec<Value>> aggs) const;
+  Value eval_agg(const QuerySchema& schema,
+                 const Vec<Value>& group_bys,
+                 const Vec<Value>& aggs) const;
 
 private:
   // NOTE: A HavingExpr could contain more than just comparisons.

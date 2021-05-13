@@ -1,48 +1,37 @@
 #pragma once
 
-#include "catalog/schema_ref.hpp"
-
 class ResultSet {
 public:
   ResultSet()
-    : schema_ (SchemaRef::INVALID())
+    : schema_ (QuerySchema::empty())
   {}
 
-  ResultSet(SchemaRef schema,
-            MoveVec<Tuple> results)
+  ResultSet(vector<Tuple>&& results, QuerySchema schema)
     : schema_  (schema),
       results_ (move(results)) {}
 
   // No copy
-  ResultSet(CRef<ResultSet>) = delete;
+  ResultSet(const ResultSet&) = delete;
   // No copy assign
-  ResultSet& operator=(CRef<ResultSet>) = delete;
+  ResultSet& operator=(const ResultSet&) = delete;
   ~ResultSet() = default;
 
-  static Ptr<ResultSet> empty() {
+  static ptr<ResultSet> empty() {
     return make_unique<ResultSet>();
   }
 
-  /**********************************************
-   * Instance methods
-   **********************************************/
-
   template<typename T>
-  T value(String name, CRef<Tuple> tuple, CRef<ExecCtx> exec_ctx) {
-    auto &schema
-      = exec_ctx.catalog().find_query_schema(schema_);
-    return tuple.value(schema, schema.offset_for(name)).as<T>();
+  T value(const string name, const Tuple& tuple) {
+    return tuple.value(schema_, schema_.index_for(name)).as<T>();
   }
 
   template<typename T>
-  T value_at(String name, size_t index, CRef<ExecCtx> exec_ctx) {
+  T value_at(const string name, size_t index) {
     assert(results_.size() >= index + 1);
-    auto &schema
-      = exec_ctx.catalog().find_query_schema(schema_);
-    return results_[index].value(schema, schema.offset_for(name)).as<T>();
+    return results_[index].value(schema_, schema_.index_for(name)).as<T>();
   }
 
-  CRef<Vec<Tuple>> results() {
+  const vector<Tuple>& results() {
     return results_;
   }
 
@@ -50,12 +39,20 @@ public:
     return results_.size();
   }
 
-  string to_string() {
-    // TODO: Send this back to the client in a structured way
-    return "";
+  const string to_string() {
+    stringstream os;
+
+    for (index_t i = 0; i < results_.size(); ++i) {
+      if (i > 0) {
+        os << ",";
+      }
+      os << results_[i].to_string(schema_);
+    }
+
+    return os.str();
   }
 
 private:
-  SchemaRef schema_;
+  QuerySchema schema_;
   vector<Tuple> results_;
 };

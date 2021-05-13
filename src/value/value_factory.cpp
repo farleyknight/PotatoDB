@@ -21,7 +21,7 @@ Value ValueFactory::from_column(BaseColumn column) {
   }
 }
 
-String ValueFactory::random_string(uint32_t length) {
+const string ValueFactory::random_string(uint32_t length) {
   auto seed = std::chrono::system_clock::now().time_since_epoch().count();
   // mt19937 is a standard mersenne_twister_engine
   std::mt19937 generator(seed);

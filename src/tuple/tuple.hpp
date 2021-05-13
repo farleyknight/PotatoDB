@@ -12,6 +12,10 @@ class Tuple {
 public:
   Tuple() = default;
 
+  Tuple(uint32_t size)
+    : buffer_ (size)
+  {}
+
   // Constructor for table heap tuple
   // NOTE: Has no data
   Tuple(RID rid) : rid_(rid) {}
@@ -34,17 +38,17 @@ public:
   }
 
   Value value(const QuerySchema& schema,
-              uint32_t column_index) const;
+              column_oid_t column_index) const;
 
   Value value_by_name(const QuerySchema& schema,
-                      string name) const;
+                      const column_name_t& name) const;
 
   bool is_null(const QuerySchema& schema,
                uint32_t column_index) const;
 
-  Tuple key_from_tuple(CRef<QuerySchema> schema,
-                       CRef<QuerySchema> key_schema,
-                       CRef<Vec<uint32_t>> key_attrs) const;
+  Tuple key_from_tuple(const QuerySchema& schema,
+                       const QuerySchema& key_schema,
+                       const vector<uint32_t>& key_attrs) const;
 
   const RID rid()               const { return rid_.value(); }
   void set_rid(RID rid)               { rid_.emplace(rid); }
@@ -63,16 +67,16 @@ public:
                     const Buffer& source_buffer,
                     size_t n_bytes)
   {
-    assert(buffer_.size() >= n);
+    //assert(buffer_.size() >= n);
     // TODO: Handle this inside the Buffer
     memcpy(buffer_.ptr() + dest_offset,
            source_buffer.cptr() + source_offset,
            n_bytes);
   }
 
-  const string to_string(CRef<QuerySchema> schema) const;
+  const string to_string(const QuerySchema& schema) const;
 
-  static Tuple random_from(CRef<QuerySchema> schema);
+  static Tuple random_from(const QuerySchema& schema);
 
   Buffer& buffer() {
     return buffer_;

@@ -25,9 +25,9 @@ public:
   {}
 
   // No copy
-  TxnMgr(CRef<TxnMgr>) = delete;
+  TxnMgr(const TxnMgr&) = delete;
   // No copy assign
-  TxnMgr& operator=(CRef<TxnMgr>) = delete;
+  TxnMgr& operator=(const TxnMgr&) = delete;
   ~TxnMgr() = default; // Default delete
 
   Txn& begin();
@@ -35,7 +35,7 @@ public:
   void commit(Txn& txn);
   void abort(Txn& txn);
 
-  CRef<Txn> find(txn_id_t txn_id) {
+  const Txn& find(txn_id_t txn_id) {
     assert(table_.find(txn_id) != table_.end());
     return table_.at(txn_id);
   }

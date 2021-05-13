@@ -3,39 +3,45 @@
 #include "page/slotted_table_page.hpp"
 
 TableIterator::TableIterator(TableHeap& table_heap,
-                             CRef<RID> rid,
+                             const RID& rid,
                              Txn& txn)
   : table_heap_ (table_heap),
     rid_        (rid),
-    tuple_      (table_heap_.find_tuple(rid_, txn)),
     txn_        (txn)
-{}
+{
+  if (rid_.is_valid()) {
+    tuple_ = table_heap_.find_tuple(rid_, txn);
+  }
+}
 
-TableIterator::TableIterator(CRef<TableIterator> other)
+TableIterator::TableIterator(const TableIterator& other)
   : table_heap_ (other.table_heap_),
     rid_        (other.rid()),
-    tuple_      (table_heap_.find_tuple(rid_, other.txn_)),
     txn_        (other.txn_)
-{}
-
+{
+  if (rid_.is_valid()) {
+    tuple_ = table_heap_.find_tuple(rid_, other.txn_);
+  }
+}
 
 TableIterator& TableIterator::operator++() {
-  assert(tuple_.is_valid());
+  assert(tuple_);
 
   auto &buff_mgr = table_heap_.buff_mgr();
   // NOTE: For some reason, the algorithm is stuck at only looking at
   // one page.. Page 9 in this case.
-  auto page_id   = tuple_.page_id();
+  auto page_id   = tuple_->page_id();
+  auto file_id   = page_id.file_id();
   SlottedTablePage curr_page(buff_mgr.fetch_page(page_id));
 
-  auto next_tuple_rid = curr_page.next_tuple_rid(tuple_.rid());
+  auto next_tuple_rid = curr_page.next_tuple_rid(tuple_->rid());
 
   if (!next_tuple_rid.has_value()) {
     // NOTE: WHy is the next_page_id == INVALID_PAGE_ID?
     // If you find yourself asking this, then there might
     // be a better condition to check for than == INVALID_PAGE_ID.
     // Might have to find a way to surface Buffer Pool issues here?
-    while (curr_page.next_page_id() != PageId::INVALID()) {
+    while (curr_page.next_page_id() != PageId::STOP_ITERATING(file_id)) {
       page_id = curr_page.next_page_id();
       auto next_page = SlottedTablePage(buff_mgr.fetch_page(page_id));
 
@@ -49,9 +55,9 @@ TableIterator& TableIterator::operator++() {
   }
 
   if (!next_tuple_rid.has_value()) {
-    // NOTE: Setting RID to have an invalid page ID means
-    // we have exhausted this table iterator
-    rid_.set(PageId::INVALID(), 0);
+    // NOTE: Setting RID to have an STOP_ITERATING
+    // means we have exhausted this table iterator
+    rid_.set(PageId::STOP_ITERATING(file_id), 0);
     return *this;
   }
 
@@ -71,26 +77,35 @@ TableIterator TableIterator::operator++(int) {
   return clone;
 }
 
-bool TableIterator::operator==(CRef<TableIterator> it) const {
-  if (!tuple_.is_valid()) {
+bool TableIterator::operator==(const TableIterator& iter) const {
+  if (tuple_ == nullptr) {
     return false;
   }
 
-  RID first_rid = rid();
-  RID second_rid = it.rid();
+  auto first_rid = rid();
+  auto second_rid = iter.rid();
+
+  // std::cout << "Tuple RID: " << tuple_rid.to_string() << std::endl;
+  // std::cout << "First RID: " << first_rid.to_string() << std::endl;
+  // std::cout << "Second RID: " << second_rid.to_string() << std::endl;
 
   return first_rid.get() == second_rid.get();
 }
 
-bool TableIterator::operator!=(CRef<TableIterator> it) const {
+bool TableIterator::stop_iterating() const {
+  return rid_.stop_iterating();
+}
+
+bool TableIterator::operator!=(const TableIterator& it) const {
   return !(*this == it);
 }
 
 bool TableIterator::has_tuple() const {
-  return tuple_.is_valid();
+  return tuple_ != nullptr;
 }
 
-CRef<Tuple> TableIterator::tuple() const {
-  assert(tuple_.is_valid());
-  return tuple_;
+const Tuple& TableIterator::tuple() const {
+  assert(tuple_);
+  assert(tuple_->size() > 0);
+  return *tuple_;
 }

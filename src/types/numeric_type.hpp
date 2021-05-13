@@ -6,8 +6,6 @@
 
 template<typename numeric_t>
 class NumericType : public Type {
-private:
-  using Type::serialize_to;
 public:
 
   size_t size() const override {
@@ -43,11 +41,28 @@ public:
     } else if (left.is_null() || right.is_null()) {
       return false;
     } else {
+      // NOTE: This could cause slicing! :(
+      // Need to do something more intelligent here
+      // Likely cast both Value objects to be of the same integer size
       return left.as<numeric_t>() == right.as<numeric_t>();
     }
   }
 
+  bool lt(const Value& left, const Value& right) const override {
+    if (left.is_null() && right.is_null()) {
+      return true;
+    } else if (left.is_null() || right.is_null()) {
+      return false;
+    } else {
+      // NOTE: This could cause slicing! :(
+      // Need to do something more intelligent here
+      // Likely cast both Value objects to be of the same integer size
+      return left.as<numeric_t>() < right.as<numeric_t>();
+    }
+  }
+
   void serialize_to(size_t offset, Buffer& buff, Value val) const override {
+    // std::cout << "Serializing value " << val.to_string() << " at offset " << offset << std::endl;
     buff.write_numeric<numeric_t>(offset, val.as<numeric_t>());
   }
 
@@ -55,12 +70,17 @@ public:
     return Value::make(buff.read_numeric<numeric_t>(offset));
   }
 
-  static Value min() {
+  Value min() const override {
     return Value::make(numeric_limits<numeric_t>::min());
   }
 
-  static Value max() {
+  Value max() const override {
     return Value::make(numeric_limits<numeric_t>::max());
+  }
+
+  Value cast_as(UNUSED const Value& value,
+                UNUSED TypeId type_id) const override {
+    throw Exception("Not implemented yet for NumericType");
   }
 };
 

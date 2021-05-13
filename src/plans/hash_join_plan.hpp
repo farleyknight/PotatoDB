@@ -1,15 +1,18 @@
 #pragma once
 
 #include "plans/base_plan.hpp"
+#include "plans/schema_plan.hpp"
+#include "plans/maybe_pred_plan.hpp"
 
-class HashJoinPlan : public BasePlan {
+class HashJoinPlan : public BasePlan, public SchemaPlan, public MaybePredPlan {
 public:
-  HashJoinPlan(SchemaRef schema,
-               MovePtr<BaseQuery> pred,
-               MoveVec<BaseQuery> left_hash_keys,
-               MoveVec<BaseQuery> right_hash_keys)
-    : BasePlan         (schema),
-      pred_            (move(pred)),
+  HashJoinPlan(QuerySchema schema,
+               ptr<QueryComp>&& pred,
+               vector<BaseQuery>&& left_hash_keys,
+               vector<BaseQuery>&& right_hash_keys)
+    : BasePlan         (PlanType::HASH_JOIN),
+      SchemaPlan       (schema),
+      MaybePredPlan    (move(pred)),
       // TODO: Instead of providing a Vec<BaseQuery> maybe provice a key schema?
       // A key schema might need to reference the parent schema?
       left_hash_keys_  (move(left_hash_keys)),
@@ -18,17 +21,10 @@ public:
     assert(left_hash_keys_.size() == right_hash_keys_.size());
   }
 
-  PlanType type() const  { return PlanType::HASH_JOIN; }
-  CRef<BaseQuery> pred() {
-    assert(pred_);
-    return *pred_;
-  }
-
   // NOTE: These arrays are used to create the key schemas.
-  CRef<Vec<BaseQuery>> left_keys()  { return left_hash_keys_; }
-  CRef<Vec<BaseQuery>> right_keys() { return right_hash_keys_; }
+  const vector<BaseQuery>& left_keys()  { return left_hash_keys_; }
+  const vector<BaseQuery>& right_keys() { return right_hash_keys_; }
 
 private:
-  Ptr<BaseQuery> pred_;
-  Vec<BaseQuery> left_hash_keys_, right_hash_keys_;
+  const vector<BaseQuery> left_hash_keys_, right_hash_keys_;
 };
