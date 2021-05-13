@@ -13,7 +13,7 @@ public:
       SchemaPlan  (schema),
       raw_tuples_ (raw_tuples)
   {
-    std::cout << "Raw Tuples " << raw_tuples.to_string() << std::endl;
+    // std::cout << "Raw Tuples " << raw_tuples.to_string() << std::endl;
   }
 
   const RawTuples& raw_tuples() const {

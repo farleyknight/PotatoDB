@@ -7,12 +7,12 @@ client = PotatoDB::Client.new("localhost")
 
 commands = [
   "CREATE TABLE foo_bar ( colA INTEGER, colB INTEGER )",
-  "INSERT INTO foo_bar VALUES (1, 1)",
+  "INSERT INTO foo_bar VALUES (3, 4)",
   "SELECT * FROM foo_bar"
 ]
 
 commands.each do |command|
-  puts "Running command #{command}"
+  puts "Running command '#{command}'"
   response = client.request(command)
-  puts "Response is #{response}"
+  puts "Response is '#{response}'"
 end

@@ -22,7 +22,7 @@ public:
   PageId allocate_page(file_id_t file_id);
 
   file_id_t create_file(fs::path file_path) {
-    std::cout << "Creating file " << file_path << std::endl;
+    // std::cout << "Creating file " << file_path << std::endl;
     file_id_t file_id = files_.size();
     auto handle = make_unique<FileHandle>(file_path);
     files_.emplace_back(move(handle));

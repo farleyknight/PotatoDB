@@ -17,7 +17,7 @@ public:
       vector<Value> raw_tuple;
       for (const auto &value_expr : tuple_expr.list()) {
         auto value = value_expr.to_value();
-        std::cout << "Got value " << value.to_string() << std::endl;
+        // std::cout << "Got value " << value.to_string() << std::endl;
         // TODO! What is the type for this value?
         // That needs to be addressed somewhere..
         raw_tuple.push_back(value);

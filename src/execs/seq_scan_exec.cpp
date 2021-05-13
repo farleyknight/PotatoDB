@@ -36,7 +36,7 @@ bool SeqScanExec::has_next()  {
 
 Tuple SeqScanExec::next() {
   auto tuple = table_iter_->tuple();
-  std::cout << "Got tuple " << tuple.to_string(schema()) << std::endl;
+  //  std::cout << "Got tuple " << tuple.to_string(schema()) << std::endl;
   ++(*table_iter_);
   return tuple;
 }

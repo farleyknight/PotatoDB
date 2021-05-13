@@ -33,12 +33,30 @@ public:
     buff.write_string(offset, val.as<string>());
   }
 
-  size_t size() const override {
-    return 12; // NOTE Find out if this is correct
+  Value deserialize_from(size_t offset, const Buffer& buff) const override {
+    return Value::make(buff.read_string(offset));
   }
 
-  Value cast_as(const Value& value, TypeId type_id) const {
-    // https://github.com/cmu-db/bustub/blob/14922dc6ddddaba311b7bdcba1bea48ce8d38810/src/type/varlen_type.cpp#L180
-    // TODO!!
+  size_t size() const override {
+    return 12; // TODO Find out if this is correct
+  }
+
+  Value cast_as(const Value& value, TypeId type_id) const override {
+    switch(type_id) {
+    case TypeId::INTEGER: {
+      int32_t integer = 0;
+      try {
+        integer = static_cast<int32_t>(std::stoi(value.to_string()));
+      } catch (std::out_of_range &e) {
+        throw Exception(ExceptionType::OUT_OF_RANGE, "Numeric value out of range.");
+      }
+      return Value(type_id, integer);
+    }
+    case TypeId::VARCHAR: {
+      return Value(TypeId::VARCHAR, value.to_string());
+    }
+    default:
+      throw Exception("Not implemented! for this type : " + Type::as_string(type_id));
+    }
   }
 };

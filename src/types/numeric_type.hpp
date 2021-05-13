@@ -62,7 +62,7 @@ public:
   }
 
   void serialize_to(size_t offset, Buffer& buff, Value val) const override {
-    std::cout << "Serializing value " << val.to_string() << " at offset " << offset << std::endl;
+    // std::cout << "Serializing value " << val.to_string() << " at offset " << offset << std::endl;
     buff.write_numeric<numeric_t>(offset, val.as<numeric_t>());
   }
 
@@ -76,6 +76,11 @@ public:
 
   Value max() const override {
     return Value::make(numeric_limits<numeric_t>::max());
+  }
+
+  Value cast_as(UNUSED const Value& value,
+                UNUSED TypeId type_id) const override {
+    throw Exception("Not implemented yet for NumericType");
   }
 };
 

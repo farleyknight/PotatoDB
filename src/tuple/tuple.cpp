@@ -28,20 +28,20 @@ Tuple::Tuple(vector<Value> values, const QuerySchema& schema) {
     const auto &col = schema.by_column_oid(i);
     auto col_offset = schema.offset_for(i);
 
-    std::cout << "FOUND COL " << col.to_string() << std::endl;
+    // std::cout << "FOUND COL " << col.to_string() << std::endl;
 
     if (col.is_inlined()) {
       // TODO: Just realized that serialize_to and write_uint32
       // both use the offset, but in either the 1st or 2nd
       // argument. Fix this inconsistency!
 
-      std::cout << "Writing value " << values[i].to_string() << std::endl;
-      std::cout << "Writing at offset " << col_offset << std::endl;
+      // std::cout << "Writing value " << values[i].to_string() << std::endl;
+      // std::cout << "Writing at offset " << col_offset << std::endl;
 
       // TODO: Need to cast values[i] to column value
       values[i].cast_as(col.type_id()).serialize_to(col_offset, buffer_);
     } else {
-      std::cout << "Not inlined, working with col_offset " << col_offset << std::endl;
+      // std::cout << "Not inlined, working with col_offset " << col_offset << std::endl;
 
       buffer_.write_uint32(col_offset, offset);
       // Serialize varchar value, in place (size+data).
@@ -50,7 +50,7 @@ Tuple::Tuple(vector<Value> values, const QuerySchema& schema) {
     }
   }
 
-  std::cout << "Final result: " << to_string(schema) << std::endl;
+  // std::cout << "Final result: " << to_string(schema) << std::endl;
 }
 
 size_t Tuple::buffer_offset_for(const QuerySchema& schema,

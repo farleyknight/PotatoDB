@@ -106,7 +106,7 @@ void PotatoDB::start_server() {
   server_.on_read([&](WPtr<ClientSocket> socket_ptr) {
     if (auto client = socket_ptr.lock()) {
       auto statement = client->read();
-      std::cout << "Client Socket got query " << statement << std::endl;
+      // std::cout << "Client Socket got query " << statement << std::endl;
 
       try {
         auto result = client->session().run_statement(statement);

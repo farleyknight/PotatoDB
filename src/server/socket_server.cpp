@@ -128,10 +128,10 @@ void SocketServer::read_from_connection(file_desc_t fd) {
   int result = recv(fd, buffer, 1, MSG_PEEK);
 
   if( result <= 0 ) {
-    std::cout << "Stale socket FD : " << fd << std::endl;
+    // std::cout << "Stale socket FD : " << fd << std::endl;
     stale_fds_.push_back(fd);
   } else {
-    std::cout << "Read socket FD : " << fd << std::endl;
+    // std::cout << "Read socket FD : " << fd << std::endl;
     if (read_func_) {
       fire_read_event(fd);
     }
@@ -156,7 +156,7 @@ bool SocketServer::update_socket_set() {
                         nullptr,  // no descriptors with exceptions
                         &timeout);
 
-  std::cout << "FD count: " << fd_count << std::endl;
+  // std::cout << "FD count: " << fd_count << std::endl;
   return (fd_count != -1);
 }
 
@@ -192,12 +192,12 @@ void SocketServer::accept_connections() {
       if (fd == main_socket_) {
         // Main server socket has data.
         // Read from it to connect a new client
-        std::cout << "Reading main socket" << std::endl;
+        // std::cout << "Reading main socket" << std::endl;
         accept_new_connection();
       } else {
         // Known client socket sending request
         // Time to read!
-        std::cout << "Read from client" << std::endl;
+        // std::cout << "Read from client" << std::endl;
         read_from_connection(fd);
       }
     }
@@ -218,7 +218,7 @@ void SocketServer::finish_tasks() {
 void SocketServer::fire_read_event(file_desc_t fd) {
   for (auto &socket : sockets_) {
     if (socket->file_desc() == fd) {
-      std::cout << "Reading from socket FD : " << fd << std::endl;
+      // std::cout << "Reading from socket FD : " << fd << std::endl;
       // TODO: We may need to store the results (futures)
       // and `future.wait()` for them to finish. Otherwise
       // they might not be getting called?
@@ -231,7 +231,7 @@ void SocketServer::stale_socket_cleanup() {
   std::lock_guard<mutex> lock(stale_fd_mutex_);
 
   for (auto fd : stale_fds_) {
-    std::cout << "Clearing FD : " << fd << std::endl;
+    // std::cout << "Clearing FD : " << fd << std::endl;
     FD_CLR(fd, &main_socket_set_);
     close(fd);
   }
@@ -245,7 +245,7 @@ void SocketServer::remove_socket(file_desc_t fd) {
   // std::cout << "Closing socket FD : " << fd << std::endl;
   std::lock_guard<mutex> lock(stale_fd_mutex_);
 
-  auto match_fd = [&](SPtr<ClientSocket> socket) {
+  auto match_fd = [&](sptr<ClientSocket> socket) {
     return socket->file_desc() == fd;
   };
 

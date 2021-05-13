@@ -31,10 +31,8 @@ public:
     throw NotImplementedException("serialize_to not implemented!");
   }
 
-  virtual Value deserialize_from(UNUSED size_t offset,
-                                 UNUSED const Buffer& buff) const {
-    throw NotImplementedException("deserialize_from not implemented!");
-  }
+  // TODO: Rename this to 'read_from'
+  virtual Value deserialize_from(size_t offset, const Buffer& buff) const = 0;
 
   virtual const string to_string(UNUSED const Value& val) const  {
     throw NotImplementedException("to_string not implemented!");

@@ -9,4 +9,8 @@ public:
     return TypeId::DECIMAL;
   }
 
+  Value cast_as(UNUSED const Value& value,
+                UNUSED TypeId type_id) const override {
+    throw Exception("Not implemented yet");
+  }
 };

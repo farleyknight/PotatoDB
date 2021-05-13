@@ -3,9 +3,8 @@
 #include "types/type.hpp"
 
 void Value::serialize_to(size_t offset, Buffer& buff) const {
-  std::cout << "Serializing value " << to_string() << std::endl;
-
-  std::cout << "TYPE ID " << Type::as_string(value_type()->type_id()) << std::endl;
+  // std::cout << "Serializing value " << to_string() << std::endl;
+  // std::cout << "TYPE ID " << Type::as_string(value_type()->type_id()) << std::endl;
   value_type()->serialize_to(offset, buff, *this);
 }
 

@@ -166,12 +166,12 @@ public:
                 c_string, size);
   }
 
-  string read_string(size_t offset) {
+  string read_string(size_t offset) const {
     string_size_t size = as_bytes()[0];
     string new_string(size, 0);
 
     std::memcpy(new_string.data(),
-                ptr(offset) + sizeof(string_size_t),
+                cptr(offset) + sizeof(string_size_t),
                 size);
 
     return new_string;
