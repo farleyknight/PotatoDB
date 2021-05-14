@@ -11,10 +11,6 @@
 
 #include "gtest/gtest.h"
 
-TEST(PotatoDBTest, CreateTableTest) {
-  // TODO: Test that the table file was created
-}
-
 TEST(PotatoDBTest, CreateInsertSelectTest) {
   PotatoDB db;
 
@@ -32,3 +28,35 @@ TEST(PotatoDBTest, CreateInsertSelectTest) {
   EXPECT_EQ(result.set()->value_at<int32_t>("colB", 0), 2);
 }
 
+TEST(PotatoDBTest, CreateTableTest) {
+  // TODO: Test that the table file was created
+  // TODO: Test that the table was added to the system catalog
+}
+
+TEST(PotatoDBTest, SystemCatalogTest) {
+  // TODO: Test that the system catalog exists
+}
+
+TEST(PotatoDBTest, DropTableTest) {
+
+}
+
+TEST(PotatoDBTest, TruncateTableTest) {
+
+}
+
+TEST(PotatoDBTest, DescribeTableTest) {
+
+}
+
+TEST(PotatoDBTest, ShowTablesTest) {
+
+}
+
+TEST(PotatoDBTest, AlterTableDropColumnTest) {
+
+}
+
+TEST(PotatoDBTest, AlterTableAddColumnTest) {
+
+}
