@@ -30,8 +30,9 @@ public:
   PageId allocate_page(file_id_t file_id);
   void deallocate_page(PageId page_id);
 
-  // Close all file handles.
+
   void shutdown() {
+    // TODO Close all file handles, not just the log file
     log_io_.close();
   }
 
@@ -39,11 +40,21 @@ public:
     return db_directory() / file_name;
   }
 
-private:
+  fs::path table_file_for(const string& table_name);
+
+
+  void remove_all_files() {
+    auto iter = fs::directory_iterator(db_directory());
+    for (const auto &entry : iter) {
+      file_mgr_.remove_file(entry.path());
+    }
+  }
+
   void setup_log_file();
   void setup_db_file();
   void setup_db_directory();
 
+private:
   fs::path main_file_name() const {
     return db_directory() / "database.db";
   }

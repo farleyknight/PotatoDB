@@ -13,8 +13,7 @@
 
 TEST(PotatoDBTest, CreateInsertSelectTest) {
   PotatoDB db;
-
-  // TODO: We should delete all existing files here
+  db.reset_installation();
 
   db.run_statement("CREATE TABLE foo_bar ( colA INTEGER, colB INTEGER )");
   db.run_statement("INSERT INTO foo_bar VALUES (1, 2)");
@@ -28,35 +27,71 @@ TEST(PotatoDBTest, CreateInsertSelectTest) {
   EXPECT_EQ(result.set()->value_at<int32_t>("colB", 0), 2);
 }
 
-TEST(PotatoDBTest, CreateTableTest) {
-  // TODO: Test that the table file was created
-  // TODO: Test that the table was added to the system catalog
-}
-
 TEST(PotatoDBTest, SystemCatalogTest) {
+  PotatoDB db;
+  db.reset_installation();
+
+  auto result = db.run_statement("SELECT * FROM system_catalog");
   // TODO: Test that the system catalog exists
+  EXPECT_TRUE(result.set()->size() > 0);
 }
 
-TEST(PotatoDBTest, DropTableTest) {
+TEST(PotatoDBTest, CreateTableTest) {
+  PotatoDB db;
+  db.reset_installation();
 
-}
+  db.run_statement("CREATE TABLE foo_bar ( colA INTEGER, colB INTEGER )");
 
-TEST(PotatoDBTest, TruncateTableTest) {
+  auto foo_bar_file_path = db.table_file_for("foo_bar");
 
-}
+  EXPECT_TRUE(db.file_exists(foo_bar_file_path));
 
-TEST(PotatoDBTest, DescribeTableTest) {
+  auto result = db.run_statement("SELECT * FROM system_catalog WHERE table_name = 'foo_bar'");
 
+  EXPECT_EQ(result.set()->size(), 1);
 }
 
 TEST(PotatoDBTest, ShowTablesTest) {
+  PotatoDB db;
+  db.reset_installation();
 
+  db.run_statement("CREATE TABLE foo_bar ( colA INTEGER, colB INTEGER )");
+
+  auto result = db.run_statement("SHOW TABLES");
+  auto &result_set = result.set();
+
+  EXPECT_EQ(result_set->size(), 2);
+  EXPECT_EQ(result_set->value_at<string>("table_name", 0), "system_catalog");
+  EXPECT_EQ(result_set->value_at<string>("table_name", 1), "foo_bar");
 }
 
-TEST(PotatoDBTest, AlterTableDropColumnTest) {
+TEST(PotatoDBTest, DropTableTest) {
+  PotatoDB db;
+  db.reset_installation();
 
+  db.run_statement("CREATE TABLE foo_bar ( colA INTEGER, colB INTEGER )");
+  db.run_statement("DROP TABLE foo_bar");
+
+  auto result = db.run_statement("SHOW TABLES");
+  auto &result_set = result.set();
+
+  EXPECT_EQ(result_set->size(), 1);
+  EXPECT_EQ(result_set->value_at<string>("table_name", 0), "system_catalog");
+}
+
+TEST(PotatoDBTest, TruncateTableTest) {
+  // TODO!
+}
+
+TEST(PotatoDBTest, DescribeTableTest) {
+  // TODO!
+}
+
+
+TEST(PotatoDBTest, AlterTableDropColumnTest) {
+  // TODO!
 }
 
 TEST(PotatoDBTest, AlterTableAddColumnTest) {
-
+  // TODO!
 }

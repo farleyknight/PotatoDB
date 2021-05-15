@@ -11,9 +11,11 @@
 
 #include "plans/base_plan.hpp"
 #include "plans/raw_tuples_plan.hpp"
+
 #include "exprs/create_table_expr.hpp"
 #include "exprs/select_expr.hpp"
 #include "exprs/insert_expr.hpp"
+#include "exprs/show_tables_expr.hpp"
 
 class PlanBuilder {
 public:
@@ -43,12 +45,12 @@ public:
 
   PlanBuilder& where(ptr<QueryComp>&& comp);
 
-
   ptr<BasePlan> to_plan();
 
   ptr<BasePlan> from_expr(CreateTableExpr* expr);
   ptr<BasePlan> from_expr(SelectExpr* expr);
   ptr<BasePlan> from_expr(InsertExpr* expr);
+  ptr<BasePlan> from_expr(ShowTablesExpr* expr);
 
 private:
   ptr<BasePlan> build_tuples();

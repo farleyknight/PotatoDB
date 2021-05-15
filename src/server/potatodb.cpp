@@ -1,5 +1,6 @@
 #include "server/potatodb.hpp"
 #include "server/client_socket.hpp"
+#include "server/system_catalog.hpp"
 
 #include "parser/sql_parser.hpp"
 #include "plans/plan_factory.hpp"
@@ -17,6 +18,22 @@ PotatoDB::PotatoDB()
     catalog_   (),
     exec_eng_  (buff_mgr_, txn_mgr_, catalog_)
 {}
+
+void PotatoDB::reset_installation() {
+  disk_mgr_.remove_all_files();
+  disk_mgr_.setup_db_directory();
+  disk_mgr_.setup_log_file();
+
+  build_system_catalog();
+}
+
+bool PotatoDB::file_exists(fs::path file_path) const {
+  return file_mgr_.file_exists(file_path);
+}
+
+fs::path PotatoDB::table_file_for(const string& table_name) {
+  return disk_mgr_.table_file_for(table_name);
+}
 
 StatementResult PotatoDB::run_statement(const string& statement) {
   try {
@@ -53,47 +70,16 @@ StatementResult PotatoDB::run_statement(const string& statement) {
   }
 }
 
-const string system_catalog_sql =
-  "CREATE TABLE system_catalog ( "              \
-
-  "id         INTEGER PRIMARY KEY, "            \
-  "type       INTEGER NOT NULL, "               \
-  "name       VARCHAR(32) NOT NULL, "           \
-  "table_name VARCHAR(32) NOT NULL "            \
-
-  ");";
-
-/*
- * system_catalog.types
- *
- * 0 = INVALID
- * 1 = TABLE
- * 2 = COLUMN
- * 3 = INDEX
- *
- */
-
-const string insert_system_catalog_sql =
-  "INSERT INTO system_catalog VALUES"           \
-  "("                                           \
-
-  "1,"                                          \
-  "1,"                                          \
-  "'system_catalog',"                           \
-  "'system_catalog'"                            \
-
-  ");";
-
 void PotatoDB::build_system_catalog() {
-  std::cout << "Begin loading system catalog" << std::endl;
+  // std::cout << "Begin loading system catalog" << std::endl;
   // NOTE: These steps only need to be run if the system_catalog
   // table does not already exist.
   //
   // TODO: Write a conditional here to check for that table.
-  // 
+  //
   // TODO: Wrap this all in a try block and capture any errors
-  run_statement(system_catalog_sql);
-  run_statement(insert_system_catalog_sql);
+  run_statement(SystemCatalog::create_table_sql);
+  run_statement(SystemCatalog::insert_sql);
 }
 
 // TODO: During testing, we sometimes want to delete all database files.
@@ -138,7 +124,7 @@ void PotatoDB::verify_system_files() {
 
 void PotatoDB::startup() {
   state_ = ServerState::STARTING_UP;
- 
+
   build_system_catalog();
   verify_system_files();
 

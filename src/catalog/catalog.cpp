@@ -173,10 +173,10 @@ Catalog::create_table(// TODO: We should be attempting to get an exclusive lock
   table_schemas_.insert(std::make_pair(table_oid, schema));
 
   // TODO: This should be sent to a logger.
-  std::cout << "New table created: " << table_name << std::endl;
+  // std::cout << "New table created: " << table_name << std::endl;
 
   index_oids_.emplace(table_name,
-                      MutMap<index_name_t, index_oid_t>());
+                      map<index_name_t, index_oid_t>());
 
   return table_oid;
 }

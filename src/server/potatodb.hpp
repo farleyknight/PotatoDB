@@ -46,8 +46,9 @@ public:
   }
 
   StatementResult run_statement(const string& statement);
-
+  void reset_installation();
   void verify_system_files();
+  fs::path table_file_for(const string& table_name);
 
   ExecEngine& exec_eng() {
     return exec_eng_;
@@ -60,6 +61,8 @@ public:
   TxnMgr& txn_mgr() {
     return txn_mgr_;
   }
+
+  bool file_exists(fs::path file_path) const;
 
 private:
   int port_ = 7878;

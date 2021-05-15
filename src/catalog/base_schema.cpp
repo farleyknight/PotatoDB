@@ -38,6 +38,22 @@ column_oid_t BaseSchema<ColT>::column_oid_for(const column_name_t& name) const
 }
 
 template<class ColT>
+bool BaseSchema<ColT>::operator==(const BaseSchema& other) const {
+  if (other.columns_.size() != columns_.size()) {
+    return false;
+  }
+
+  for (index_t i = 0; i < columns_.size(); ++i) {
+    if (other.columns_[i] != columns_[i]) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+
+template<class ColT>
 size_t BaseSchema<ColT>::offset_for(column_oid_t oid) const {
   return offsets_.at(oid);
 }
@@ -70,6 +86,11 @@ const vector<column_oid_t>& BaseSchema<ColT>::unlined_columns() const {
 template<class ColT>
 const ColT& BaseSchema<ColT>::by_name(const column_name_t& name) const {
   return columns_.at(column_oid_for(name));
+}
+
+template<class ColT>
+const ColT& BaseSchema<ColT>::operator[](const column_name_t& name) const {
+  return by_name(name);
 }
 
 template<class ColT>

@@ -37,19 +37,10 @@ public:
 
   virtual const string to_string() const = 0;
 
-  bool operator==(const BaseSchema& other) const {
-    if (other.columns_.size() != columns_.size()) {
-      return false;
-    }
+  bool operator==(const BaseSchema& other) const;
 
-    for (index_t i = 0; i < columns_.size(); ++i) {
-      if (other.columns_[i] != columns_[i]) {
-        return false;
-      }
-    }
+  const ColT& operator[](const column_name_t& name) const;
 
-    return true;
-  }
 protected:
   // Are all tuples inlined when stored on the page?
   // If some of them are not inlined, the page layout will differ.

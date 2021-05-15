@@ -101,6 +101,7 @@ set(main_sources
   "src/server/potatodb.cpp"
   "src/server/session.cpp"
   "src/server/socket_server.cpp"
+  "src/server/system_catalog.cpp"
   "src/tuple/tuple.cpp"
   "src/txns/lock_mgr.cpp"
   "src/txns/txn.cpp"

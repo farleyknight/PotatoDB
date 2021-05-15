@@ -13,6 +13,8 @@
 #include "exprs/select_expr.hpp"
 #include "exprs/insert_expr.hpp"
 
+#include "server/system_catalog.hpp"
+
 ptr<BasePlan> PlanBuilder::from_expr(CreateTableExpr* expr) {
   auto table_name = expr->table().name();
   auto column_def_list = expr->column_defs();
@@ -34,6 +36,25 @@ ptr<BasePlan> PlanBuilder::from_expr(SelectExpr* expr) {
                                   move(maybe_pred));
 }
 
+ptr<BasePlan> PlanBuilder::from_expr(ShowTablesExpr* expr) {
+  auto table_name = "system_catalog";
+  auto table_oid = catalog_.table_oid_for(table_name);
+  auto schema = catalog_.query_schema_for(table_name);
+
+  auto type_col = make_unique<QueryColumn>(schema["type"]);
+
+  auto value = Value::make(static_cast<int32_t>(SystemCatalogTypes::TABLE));
+  auto query_const = make_unique<QueryConst>(value);
+
+  auto table_pred = make_unique<QueryComp>(move(type_col),
+                                           CompType::EQ,
+                                           move(query_const));
+
+  return make_unique<SeqScanPlan>(schema,
+                                  table_oid,
+                                  move(table_pred));
+}
+
 ptr<BasePlan> PlanBuilder::from_expr(InsertExpr* expr) {
   auto table_name = expr->table_name();
   auto table_oid = catalog_.table_oid_for(table_name);
@@ -44,8 +65,6 @@ ptr<BasePlan> PlanBuilder::from_expr(InsertExpr* expr) {
   // TODO: For now, we only support INSERT with it's own raw tuples.
   // However, we need to support SQL of the form:
   // > INSERT INTO ... (SELECT ...)
-
-  // std::cout << "Raw Tuples " << expr->tuple_list().to_string() << std::endl;
 
   auto raw_tuples = RawTuples(expr->tuple_list());
   auto child_plan = make_unique<RawTuplesPlan>(schema, raw_tuples);

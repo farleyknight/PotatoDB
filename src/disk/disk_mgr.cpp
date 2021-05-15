@@ -46,7 +46,11 @@ void DiskMgr::setup_log_file() {
 }
 
 file_id_t DiskMgr::create_table_file(const string& table_name) {
-  return file_mgr_.create_file(file_path_for(table_name + ".tbl"));
+  return file_mgr_.create_file(table_file_for(table_name));
+}
+
+fs::path DiskMgr::table_file_for(const string& table_name) {
+  return file_path_for(table_name + ".tbl");
 }
 
 void DiskMgr::setup_db_directory() {
