@@ -45,7 +45,11 @@ Tuple::Tuple(vector<Value> values, const QuerySchema& schema) {
 
       buffer_.write_uint32(col_offset, offset);
       // Serialize varchar value, in place (size+data).
-      values[i].cast_as(col.type_id()).serialize_to(offset, buffer_);
+
+      auto value = values[i].cast_as(col.type_id());
+      // std::cout << "Not inlined, working with value " << value.to_string() << std::endl;
+
+      value.serialize_to(offset, buffer_);
       offset += (values[i].length() + sizeof(uint32_t));
     }
   }

@@ -38,7 +38,7 @@ TEST(PotatoDBTest, CreateInsertSelectStringTest) {
   EXPECT_EQ(result.set()->size(), 1);
 
   EXPECT_EQ(result.set()->value_at<int32_t>("colA", 0), 1);
-  EXPECT_EQ(result.set()->value_at<string>("colB", 0), "hello, world");
+  EXPECT_EQ(result.set()->value_at<string>("colB", 0), "'hello, world'");
 }
 
 
@@ -66,7 +66,7 @@ TEST(PotatoDBTest, CreateTableTest) {
   EXPECT_EQ(result.set()->size(), 1);
 }
 
-TEST(PotatoDBTest, ShowTableTest) {
+TEST(PotatoDBTest, ShowTablesTest) {
   PotatoDB db;
   db.reset_installation();
 
@@ -86,8 +86,8 @@ TEST(PotatoDBTest, ShowFooBarTableTest) {
   auto &result_set = result.set();
 
   EXPECT_EQ(result_set->size(), 2);
-  EXPECT_EQ(result_set->value_at<string>("table_name", 0), "system_catalog");
-  EXPECT_EQ(result_set->value_at<string>("table_name", 1), "foo_bar");
+  EXPECT_EQ(result_set->value_at<string>("table_name", 0), "'system_catalog'");
+  EXPECT_EQ(result_set->value_at<string>("table_name", 1), "'foo_bar'");
 }
 
 TEST(PotatoDBTest, DropTableTest) {
@@ -101,7 +101,7 @@ TEST(PotatoDBTest, DropTableTest) {
   auto &result_set = result.set();
 
   EXPECT_EQ(result_set->size(), 1);
-  EXPECT_EQ(result_set->value_at<string>("table_name", 0), "system_catalog");
+  EXPECT_EQ(result_set->value_at<string>("table_name", 0), "'system_catalog'");
 }
 
 TEST(PotatoDBTest, TruncateTableTest) {

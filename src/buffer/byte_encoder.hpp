@@ -93,7 +93,9 @@ private:
     buff.data_[0] = string_size;
     const char *c_string = s.c_str();
 
-    for (size_t i = 0; i < s.size(); ++i) {
+    std::cout << "Got c_string " << c_string << std::endl;
+
+    for (size_t i = 0; i <= s.size(); ++i) {
       buff.data_[i + sizeof(string_size_t)] = c_string[i];
     }
   }

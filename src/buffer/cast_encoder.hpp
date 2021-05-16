@@ -46,8 +46,10 @@ private:
 
     auto c_string = reinterpret_cast<const unsigned char*>(s.c_str());
 
+    // std::cout << "Got c_string " << c_string << std::endl;
+
     std::memcpy(buff.ptr(), &size, sizeof(string_size_t));
-    std::memcpy(buff.ptr() + sizeof(string_size_t),
+    std::memcpy(buff.ptr(sizeof(string_size_t)),
                 c_string, size);
   }
 

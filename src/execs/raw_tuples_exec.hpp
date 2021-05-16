@@ -29,12 +29,13 @@ public:
   Tuple next() override {
     auto values = iter_.values();
 
-    //for (const auto &value : values) {
-      // std::cout << "Building new tuple with value " << value.to_string() << std::endl;
-    //}
+    // for (const auto &value : values) {
+    //  std::cout << "Building new tuple with value " << value.to_string() << std::endl;
+    // }
 
     auto tuple = Tuple(iter_.values(), plan_->schema());
     // std::cout << "Next Tuple " << tuple.to_string(plan_->schema()) << std::endl;
+
     ++iter_;
     return tuple;
   }

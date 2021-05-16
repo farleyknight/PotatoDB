@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <iostream>
 
 #include "common/types.hpp"
 
@@ -161,17 +162,20 @@ public:
 
     auto c_string = reinterpret_cast<const unsigned char*>(value.c_str());
 
+    // std::cout << "Writing c_string " << c_string << std::endl;
+
     std::memcpy(ptr(offset), &size, sizeof(string_size_t));
-    std::memcpy(ptr(offset) + sizeof(string_size_t),
+    std::memcpy(ptr(offset + sizeof(string_size_t)),
                 c_string, size);
   }
 
-  string read_string(size_t offset) const {
-    string_size_t size = as_bytes()[0];
-    string new_string(size, 0);
+  const string read_string(size_t offset) const {
+    string_size_t size;
+    std::memcpy(&size, cptr(offset), sizeof(string_size_t));
 
+    string new_string(size, 0);
     std::memcpy(new_string.data(),
-                cptr(offset) + sizeof(string_size_t),
+                cptr(offset + sizeof(string_size_t)),
                 size);
 
     return new_string;

@@ -3,6 +3,7 @@
 #include "PotatoSQLBaseVisitor.h"
 
 #include "common/types.hpp"
+
 #include "exprs/show_tables_expr.hpp"
 #include "exprs/insert_expr.hpp"
 #include "exprs/select_expr.hpp"
@@ -88,6 +89,23 @@ public:
     return visitChildren(ctx);
   }
 
+  ValueExpr make_value_expr(ExprContext* expr_ctx) const {
+    if (expr_ctx->literal_value() != nullptr) {
+      auto literal_ctx = expr_ctx->literal_value();
+
+      if (literal_ctx->NUMERIC_LITERAL() != nullptr) {
+        return ValueExpr(ValueType::NUMERIC, literal_ctx->getText());
+      } else if (literal_ctx->STRING_LITERAL() != nullptr) {
+        auto text = literal_ctx->getText();
+        return ValueExpr(ValueType::STRING, text.substr(1, text.size()-2));
+      } else {
+        return ValueExpr(expr_ctx->getText());
+      }
+    } else {
+      return ValueExpr(expr_ctx->getText());
+    }
+  }
+
   Any visitInsert_stmt(InsertStmtContext *ctx) override {
     InsertExpr insert;
     assert(ctx->table_name());
@@ -112,8 +130,7 @@ public:
     for (auto &tuple_ctx : tuple_list_ctx->insert_tuple()) {
       TupleExpr tuple;
       for (auto &expr_ctx : tuple_ctx->expr()) {
-        ValueExpr value(expr_ctx->getText());
-        tuple.push_back(value);
+        tuple.push_back(make_value_expr(expr_ctx));
       }
       tuples.push_back(tuple);
     }

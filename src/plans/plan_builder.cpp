@@ -36,7 +36,7 @@ ptr<BasePlan> PlanBuilder::from_expr(SelectExpr* expr) {
                                   move(maybe_pred));
 }
 
-ptr<BasePlan> PlanBuilder::from_expr(ShowTablesExpr* expr) {
+ptr<BasePlan> PlanBuilder::from_expr(UNUSED ShowTablesExpr* expr) {
   auto table_name = "system_catalog";
   auto table_oid = catalog_.table_oid_for(table_name);
   auto schema = catalog_.query_schema_for(table_name);

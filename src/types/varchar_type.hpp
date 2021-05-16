@@ -30,6 +30,7 @@ public:
 
   // TODO: Rename to `write_to`
   void serialize_to(size_t offset, Buffer& buff, Value val) const override {
+    // std::cout << "Writing string in VarCharType" << std::endl;
     buff.write_string(offset, val.as<string>());
   }
 
@@ -53,7 +54,7 @@ public:
       return Value(type_id, integer);
     }
     case TypeId::VARCHAR: {
-      return Value(TypeId::VARCHAR, value.to_string());
+      return Value(TypeId::VARCHAR, "'" + value.to_string() + "'");
     }
     default:
       throw Exception("Not implemented! for this type : " + Type::as_string(type_id));
