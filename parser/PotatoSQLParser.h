@@ -61,22 +61,22 @@ public:
     RuleRollback_stmt = 32, RuleSavepoint_stmt = 33, RuleSimple_select_stmt = 34, 
     RuleSelect_stmt = 35, RuleSelect_or_values = 36, RuleUpdate_stmt = 37, 
     RuleUpdate_stmt_limited = 38, RuleVacuum_stmt = 39, RuleColumn_def = 40, 
-    RuleType_name = 41, RuleColumn_constraint = 42, RuleConflict_clause = 43, 
-    RuleExpr = 44, RuleForeign_key_clause = 45, RuleRaise_function = 46, 
-    RuleIndexed_column = 47, RuleTable_constraint = 48, RuleWith_clause = 49, 
-    RuleQualified_table_name = 50, RuleOrdering_term = 51, RulePragma_value = 52, 
-    RuleCommon_table_expression = 53, RuleResult_column = 54, RuleTable_or_subquery = 55, 
-    RuleJoin_clause = 56, RuleJoin_operator = 57, RuleJoin_constraint = 58, 
-    RuleColumn_list = 59, RuleSelect_core = 60, RuleCompound_operator = 61, 
-    RuleSigned_number = 62, RuleLiteral_value = 63, RuleUnary_operator = 64, 
-    RuleError_message = 65, RuleModule_argument = 66, RuleColumn_alias = 67, 
-    RuleKeyword = 68, RuleName = 69, RuleFunction_name = 70, RuleDatabase_name = 71, 
-    RuleSchema_name = 72, RuleTable_function_name = 73, RuleTable_name = 74, 
-    RuleTable_or_index_name = 75, RuleNew_table_name = 76, RuleColumn_name = 77, 
-    RuleCollation_name = 78, RuleForeign_table = 79, RuleIndex_name = 80, 
-    RuleTrigger_name = 81, RuleView_name = 82, RuleModule_name = 83, RulePragma_name = 84, 
-    RuleSavepoint_name = 85, RuleTable_alias = 86, RuleTransaction_name = 87, 
-    RuleAny_name = 88
+    RuleType_name = 41, RuleColumn_constraint = 42, RuleNot_null = 43, RulePrimary_key = 44, 
+    RuleAutoincrement = 45, RuleConflict_clause = 46, RuleExpr = 47, RuleForeign_key_clause = 48, 
+    RuleRaise_function = 49, RuleIndexed_column = 50, RuleTable_constraint = 51, 
+    RuleWith_clause = 52, RuleQualified_table_name = 53, RuleOrdering_term = 54, 
+    RulePragma_value = 55, RuleCommon_table_expression = 56, RuleResult_column = 57, 
+    RuleTable_or_subquery = 58, RuleJoin_clause = 59, RuleJoin_operator = 60, 
+    RuleJoin_constraint = 61, RuleColumn_list = 62, RuleSelect_core = 63, 
+    RuleWhere_clause = 64, RuleCompound_operator = 65, RuleSigned_number = 66, 
+    RuleLiteral_value = 67, RuleUnary_operator = 68, RuleError_message = 69, 
+    RuleModule_argument = 70, RuleColumn_alias = 71, RuleKeyword = 72, RuleName = 73, 
+    RuleFunction_name = 74, RuleDatabase_name = 75, RuleSchema_name = 76, 
+    RuleTable_function_name = 77, RuleTable_name = 78, RuleTable_or_index_name = 79, 
+    RuleNew_table_name = 80, RuleColumn_name = 81, RuleCollation_name = 82, 
+    RuleForeign_table = 83, RuleIndex_name = 84, RuleTrigger_name = 85, 
+    RuleView_name = 86, RuleModule_name = 87, RulePragma_name = 88, RuleSavepoint_name = 89, 
+    RuleTable_alias = 90, RuleTransaction_name = 91, RuleAny_name = 92
   };
 
   explicit PotatoSQLParser(antlr4::TokenStream *input);
@@ -132,6 +132,9 @@ public:
   class Column_defContext;
   class Type_nameContext;
   class Column_constraintContext;
+  class Not_nullContext;
+  class Primary_keyContext;
+  class AutoincrementContext;
   class Conflict_clauseContext;
   class ExprContext;
   class Foreign_key_clauseContext;
@@ -150,6 +153,7 @@ public:
   class Join_constraintContext;
   class Column_listContext;
   class Select_coreContext;
+  class Where_clauseContext;
   class Compound_operatorContext;
   class Signed_numberContext;
   class Literal_valueContext;
@@ -1213,10 +1217,9 @@ public:
   public:
     Column_constraintContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    antlr4::tree::TerminalNode *K_PRIMARY();
-    antlr4::tree::TerminalNode *K_KEY();
+    Primary_keyContext *primary_key();
     Conflict_clauseContext *conflict_clause();
-    antlr4::tree::TerminalNode *K_NULL();
+    Not_nullContext *not_null();
     antlr4::tree::TerminalNode *K_UNIQUE();
     antlr4::tree::TerminalNode *K_CHECK();
     antlr4::tree::TerminalNode *OPEN_PAR();
@@ -1230,8 +1233,7 @@ public:
     NameContext *name();
     Signed_numberContext *signed_number();
     Literal_valueContext *literal_value();
-    antlr4::tree::TerminalNode *K_AUTOINCREMENT();
-    antlr4::tree::TerminalNode *K_NOT();
+    AutoincrementContext *autoincrement();
     antlr4::tree::TerminalNode *K_ASC();
     antlr4::tree::TerminalNode *K_DESC();
 
@@ -1243,6 +1245,53 @@ public:
   };
 
   Column_constraintContext* column_constraint();
+
+  class  Not_nullContext : public antlr4::ParserRuleContext {
+  public:
+    Not_nullContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *K_NOT();
+    antlr4::tree::TerminalNode *K_NULL();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  Not_nullContext* not_null();
+
+  class  Primary_keyContext : public antlr4::ParserRuleContext {
+  public:
+    Primary_keyContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *K_PRIMARY();
+    antlr4::tree::TerminalNode *K_KEY();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  Primary_keyContext* primary_key();
+
+  class  AutoincrementContext : public antlr4::ParserRuleContext {
+  public:
+    AutoincrementContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *K_AUTOINCREMENT();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  AutoincrementContext* autoincrement();
 
   class  Conflict_clauseContext : public antlr4::ParserRuleContext {
   public:
@@ -1713,10 +1762,11 @@ public:
     Column_listContext *column_list();
     antlr4::tree::TerminalNode *K_FROM();
     antlr4::tree::TerminalNode *K_WHERE();
-    std::vector<ExprContext *> expr();
-    ExprContext* expr(size_t i);
+    Where_clauseContext *where_clause();
     antlr4::tree::TerminalNode *K_GROUP();
     antlr4::tree::TerminalNode *K_BY();
+    std::vector<ExprContext *> expr();
+    ExprContext* expr(size_t i);
     antlr4::tree::TerminalNode *K_DISTINCT();
     antlr4::tree::TerminalNode *K_ALL();
     std::vector<Table_or_subqueryContext *> table_or_subquery();
@@ -1739,6 +1789,21 @@ public:
   };
 
   Select_coreContext* select_core();
+
+  class  Where_clauseContext : public antlr4::ParserRuleContext {
+  public:
+    Where_clauseContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    ExprContext *expr();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  Where_clauseContext* where_clause();
 
   class  Compound_operatorContext : public antlr4::ParserRuleContext {
   public:

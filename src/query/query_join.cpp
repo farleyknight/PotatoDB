@@ -22,6 +22,6 @@ Value QueryJoin::eval_join(const Tuple&  lt,
   }
 }
 
-size_t QueryJoin::column_index(const QuerySchema& schema) const {
-  return schema.offset_for(column_name_);
+column_index_t QueryJoin::column_index(const QuerySchema& schema) const {
+  return schema.buffer_offset_for(column_name_);
 }

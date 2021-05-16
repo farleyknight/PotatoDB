@@ -9,14 +9,3 @@ const string SystemCatalog::create_table_sql =
   "table_name VARCHAR(32) NOT NULL "            \
 
   ");";
-
-const string SystemCatalog::insert_sql =
-  "INSERT INTO system_catalog VALUES"           \
-  "("                                           \
-
-  "1,"                                          \
-  "1,"                                          \
-  "'system_catalog',"                           \
-  "'system_catalog'"                            \
-
-  ");";

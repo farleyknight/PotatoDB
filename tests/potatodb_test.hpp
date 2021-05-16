@@ -38,16 +38,34 @@ TEST(PotatoDBTest, CreateInsertSelectStringTest) {
   EXPECT_EQ(result.set()->size(), 1);
 
   EXPECT_EQ(result.set()->value_at<int32_t>("colA", 0), 1);
-  EXPECT_EQ(result.set()->value_at<string>("colB", 0), "'hello, world'");
+  EXPECT_EQ(result.set()->value_at<string>("colB", 0), "hello, world");
 }
 
+TEST(PotatoDBTest, CreateInsertSelectAutoIncrementTest) {
+  PotatoDB db;
+  db.reset_installation();
+
+  db.run_statement("CREATE TABLE foo_bar (id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(32))");
+  db.run_statement("INSERT INTO foo_bar (name) VALUES ('hello, world')");
+  db.run_statement("INSERT INTO foo_bar (name) VALUES ('another string')");
+
+  auto result = db.run_statement("SELECT * FROM foo_bar");
+
+  EXPECT_TRUE(result.set() != nullptr);
+  EXPECT_EQ(result.set()->size(), 2);
+
+  EXPECT_EQ(result.set()->value_at<int32_t>("id", 0), 1);
+  EXPECT_EQ(result.set()->value_at<string>("name", 0), "hello, world");
+
+  EXPECT_EQ(result.set()->value_at<int32_t>("id", 1), 2);
+  EXPECT_EQ(result.set()->value_at<string>("name", 1), "another string");
+}
 
 TEST(PotatoDBTest, SystemCatalogTest) {
   PotatoDB db;
   db.reset_installation();
 
   auto result = db.run_statement("SELECT * FROM system_catalog");
-  // TODO: Test that the system catalog exists
   EXPECT_TRUE(result.set()->size() > 0);
 }
 
@@ -61,9 +79,11 @@ TEST(PotatoDBTest, CreateTableTest) {
 
   EXPECT_TRUE(db.file_exists(foo_bar_file_path));
 
-  auto result = db.run_statement("SELECT * FROM system_catalog WHERE table_name = 'foo_bar'");
+  auto result = db.run_statement("SELECT * FROM system_catalog WHERE name = 'foo_bar'");
+  auto &result_set = *result.set().get();
 
-  EXPECT_EQ(result.set()->size(), 1);
+  EXPECT_EQ(result_set.size(), 1);
+  EXPECT_EQ(result_set.value_at<string>("table_name", 0), "foo_bar");
 }
 
 TEST(PotatoDBTest, ShowTablesTest) {
@@ -73,21 +93,23 @@ TEST(PotatoDBTest, ShowTablesTest) {
   auto result = db.run_statement("SHOW TABLES");
   auto &result_set = *result.set().get();
 
-  std::cout << " SHOW TABLES RESULTS : " << result_set.to_string() << std::endl;
+  std::cout << " SHOW TABLES RESULTS : " << result_set.to_payload() << std::endl;
 }
 
-TEST(PotatoDBTest, ShowFooBarTableTest) {
+TEST(PotatoDBTest, ShowTablesFooBarTest) {
   PotatoDB db;
   db.reset_installation();
 
   db.run_statement("CREATE TABLE foo_bar ( colA INTEGER, colB INTEGER )");
 
   auto result = db.run_statement("SHOW TABLES");
-  auto &result_set = result.set();
+  auto &result_set = *result.set().get();
 
-  EXPECT_EQ(result_set->size(), 2);
-  EXPECT_EQ(result_set->value_at<string>("table_name", 0), "'system_catalog'");
-  EXPECT_EQ(result_set->value_at<string>("table_name", 1), "'foo_bar'");
+  std::cout << " SHOW TABLES RESULTS : " << result_set.to_payload() << std::endl;
+
+  EXPECT_EQ(result_set.size(), 2);
+  EXPECT_EQ(result_set.value_at<string>("table_name", 0), "system_catalog");
+  EXPECT_EQ(result_set.value_at<string>("table_name", 1), "foo_bar");
 }
 
 TEST(PotatoDBTest, DropTableTest) {
@@ -101,7 +123,7 @@ TEST(PotatoDBTest, DropTableTest) {
   auto &result_set = result.set();
 
   EXPECT_EQ(result_set->size(), 1);
-  EXPECT_EQ(result_set->value_at<string>("table_name", 0), "'system_catalog'");
+  EXPECT_EQ(result_set->value_at<string>("table_name", 0), "system_catalog");
 }
 
 TEST(PotatoDBTest, TruncateTableTest) {

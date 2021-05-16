@@ -25,7 +25,7 @@ public:
   void read_page(PageId page_id, Page& page);
 
   void write_log(const Buffer& log_data, size_t size);
-  bool read_log(Buffer& log_data, size_t size, offset_t offset);
+  bool read_log(Buffer& log_data, size_t size, buffer_offset_t offset);
 
   PageId allocate_page(file_id_t file_id);
   void deallocate_page(PageId page_id);

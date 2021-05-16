@@ -40,15 +40,18 @@ public:
 
   TableBuilder& primary_key() {
     column_defs_.back().is_primary_key(true);
+    primary_key_ = column_defs_.back().name();
     return *this;
   }
 
   ptr<BasePlan> to_plan() {
     return make_unique<CreateTablePlan>(table_name_,
+                                        primary_key_,
                                         ColumnDefListExpr(column_defs_));
   }
 
 private:
+  string primary_key_;
   table_name_t table_name_;
   vector<ColumnDefExpr> column_defs_;
   UNUSED const Catalog& catalog_;

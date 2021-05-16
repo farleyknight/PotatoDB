@@ -145,6 +145,15 @@ public:
   virtual void enterColumn_constraint(PotatoSQLParser::Column_constraintContext *ctx) = 0;
   virtual void exitColumn_constraint(PotatoSQLParser::Column_constraintContext *ctx) = 0;
 
+  virtual void enterNot_null(PotatoSQLParser::Not_nullContext *ctx) = 0;
+  virtual void exitNot_null(PotatoSQLParser::Not_nullContext *ctx) = 0;
+
+  virtual void enterPrimary_key(PotatoSQLParser::Primary_keyContext *ctx) = 0;
+  virtual void exitPrimary_key(PotatoSQLParser::Primary_keyContext *ctx) = 0;
+
+  virtual void enterAutoincrement(PotatoSQLParser::AutoincrementContext *ctx) = 0;
+  virtual void exitAutoincrement(PotatoSQLParser::AutoincrementContext *ctx) = 0;
+
   virtual void enterConflict_clause(PotatoSQLParser::Conflict_clauseContext *ctx) = 0;
   virtual void exitConflict_clause(PotatoSQLParser::Conflict_clauseContext *ctx) = 0;
 
@@ -198,6 +207,9 @@ public:
 
   virtual void enterSelect_core(PotatoSQLParser::Select_coreContext *ctx) = 0;
   virtual void exitSelect_core(PotatoSQLParser::Select_coreContext *ctx) = 0;
+
+  virtual void enterWhere_clause(PotatoSQLParser::Where_clauseContext *ctx) = 0;
+  virtual void exitWhere_clause(PotatoSQLParser::Where_clauseContext *ctx) = 0;
 
   virtual void enterCompound_operator(PotatoSQLParser::Compound_operatorContext *ctx) = 0;
   virtual void exitCompound_operator(PotatoSQLParser::Compound_operatorContext *ctx) = 0;

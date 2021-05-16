@@ -8,7 +8,7 @@ template<typename numeric_t>
 class NumericType : public Type {
 public:
 
-  size_t size() const override {
+  buffer_offset_t size() const override {
     return sizeof(numeric_t);
   }
 
@@ -61,12 +61,13 @@ public:
     }
   }
 
-  void serialize_to(size_t offset, Buffer& buff, Value val) const override {
-    // std::cout << "Serializing value " << val.to_string() << " at offset " << offset << std::endl;
+  void serialize_to(buffer_offset_t offset, Buffer& buff, Value val) const override {
+    // std::cout << "Serializing value " << val.to_string() <<
+    //  " at offset " << offset << std::endl;
     buff.write_numeric<numeric_t>(offset, val.as<numeric_t>());
   }
 
-  Value deserialize_from(size_t offset, const Buffer& buff) const override {
+  Value deserialize_from(buffer_offset_t offset, const Buffer& buff) const override {
     return Value::make(buff.read_numeric<numeric_t>(offset));
   }
 

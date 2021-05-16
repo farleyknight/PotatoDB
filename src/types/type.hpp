@@ -19,26 +19,26 @@ public:
 
   virtual TypeId type_id() const = 0;
 
-  virtual size_t size() const = 0;
+  virtual buffer_offset_t size() const = 0;
 
   virtual bool is_castable_from(UNUSED TypeId type_id) const {
     throw NotImplementedException("is_castable_from not implemented!");
   }
 
-  virtual void serialize_to(UNUSED size_t offset,
+  virtual void serialize_to(UNUSED buffer_offset_t offset,
                             UNUSED Buffer& buff,
                             UNUSED Value val) const {
     throw NotImplementedException("serialize_to not implemented!");
   }
 
   // TODO: Rename this to 'read_from'
-  virtual Value deserialize_from(size_t offset, const Buffer& buff) const = 0;
+  virtual Value deserialize_from(buffer_offset_t offset, const Buffer& buff) const = 0;
 
   virtual const string to_string(UNUSED const Value& val) const  {
     throw NotImplementedException("to_string not implemented!");
   }
 
-  static size_t size_of(TypeId type_id) {
+  static buffer_offset_t size_of(TypeId type_id) {
     return Type::instance(type_id)->size();
   }
 

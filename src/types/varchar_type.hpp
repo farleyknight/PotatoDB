@@ -29,16 +29,21 @@ public:
   }
 
   // TODO: Rename to `write_to`
-  void serialize_to(size_t offset, Buffer& buff, Value val) const override {
+  void serialize_to(buffer_offset_t offset,
+                    Buffer& buff,
+                    Value val) const override
+  {
     // std::cout << "Writing string in VarCharType" << std::endl;
     buff.write_string(offset, val.as<string>());
   }
 
-  Value deserialize_from(size_t offset, const Buffer& buff) const override {
+  Value deserialize_from(buffer_offset_t offset,
+                         const Buffer& buff) const override
+  {
     return Value::make(buff.read_string(offset));
   }
 
-  size_t size() const override {
+  buffer_offset_t size() const override {
     return 12; // TODO Find out if this is correct
   }
 
@@ -54,7 +59,7 @@ public:
       return Value(type_id, integer);
     }
     case TypeId::VARCHAR: {
-      return Value(TypeId::VARCHAR, "'" + value.to_string() + "'");
+      return value;
     }
     default:
       throw Exception("Not implemented! for this type : " + Type::as_string(type_id));

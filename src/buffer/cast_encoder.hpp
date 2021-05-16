@@ -11,7 +11,6 @@ public:
   friend class BufferRW<CastEncoder>;
 
 private:
-  using string_size_t = Buffer::string_size_t;
 
   CastEncoder() = default;
 

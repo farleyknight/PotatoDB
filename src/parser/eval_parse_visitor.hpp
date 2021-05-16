@@ -7,6 +7,7 @@
 #include "exprs/show_tables_expr.hpp"
 #include "exprs/insert_expr.hpp"
 #include "exprs/select_expr.hpp"
+#include "exprs/where_clause_expr.hpp"
 #include "exprs/create_table_expr.hpp"
 
 using antlrcpp::Any;
@@ -67,10 +68,22 @@ public:
       auto &col_def = def_list.back();
 
       for (auto &constraint : col_def_ctx->column_constraint()) {
-        if (constraint->getText() == "NOTNULL") {
+        // std::cout << "CONSTRAINT " << constraint->getText() << std::endl;
+
+        if (constraint->not_null()) {
           col_def.is_not_null(true);
-        } else if (constraint->getText() == "PRIMARYKEY") {
+        }
+
+        if (constraint->primary_key()) {
           col_def.is_primary_key(true);
+          //std::cout << "----------" << std::endl;
+          //std::cout << "Found primary key " << col_def.name() << std::endl;
+          //std::cout << "----------" << std::endl;
+          create_table.set_primary_key(col_def.name());
+        }
+
+        if (constraint->autoincrement()) {
+          col_def.is_auto_increment(true);
         }
       }
     }
@@ -141,6 +154,49 @@ public:
     return visitChildren(ctx);
   }
 
+  ptr<BaseExpr> make_expr(ExprContext *ctx) {
+    // TODO:
+    // Check for case where the expr is:
+    // 1) Table Column name
+    // 2) Integer Value
+    // 3) String value
+
+    if (ctx->column_name()) {
+      return make_unique<ColumnExpr>(ctx->column_name()->getText());
+    } else if (ctx->literal_value()) {
+      auto value_ctx = ctx->literal_value();
+      if (value_ctx->NUMERIC_LITERAL()) {
+        return make_unique<ValueExpr>(ValueType::NUMERIC, value_ctx->getText());
+      } else if (value_ctx->STRING_LITERAL()) {
+        return make_unique<ValueExpr>(ValueType::STRING, value_ctx->getText());
+      }
+    }
+
+    throw Exception("not all of it implemented yet :/");
+  }
+
+  WhereClauseExpr make_where_clause_expr(WhereClauseContext *ctx) {
+    auto expr = ctx->expr();
+
+    assert(expr->expr()[0]);
+    assert(expr->expr()[1]);
+
+    auto left_expr  = make_expr(expr->expr()[0]);
+    auto right_expr = make_expr(expr->expr()[1]);
+
+    if (expr->EQ()) {
+      return WhereClauseExpr(move(left_expr),
+                             CompType::EQ,
+                             move(right_expr));
+    } else if (expr->NOT_EQ1() || expr->NOT_EQ2()) {
+      return WhereClauseExpr(move(left_expr),
+                             CompType::NE,
+                             move(right_expr));
+    } else {
+      throw Exception("Other types of WHERE clauses are not yet implemented! :/");
+    }
+  }
+
   Any visitSelect_core(SelectCoreContext *ctx) override {
     const auto &col_list_ctx = ctx->column_list();
 
@@ -173,6 +229,11 @@ public:
     SelectExpr select;
     select.set_columns(cols);
     select.set_tables(tables);
+
+    if (ctx->where_clause() != nullptr) {
+      auto where_clause = make_where_expr(ctx->where_clause())
+      select.set_where(where_clause);
+    }
 
     exprs_.emplace_back(make_unique<SelectExpr>(select));
 

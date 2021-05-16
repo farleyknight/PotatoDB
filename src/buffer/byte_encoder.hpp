@@ -83,8 +83,6 @@ private:
     return data.val;
   }
 
-  using string_size_t = Buffer::string_size_t;
-
   void write_string(Buffer& buff, string s) {
     assert(s.size() < std::numeric_limits<string_size_t>::max());
     int8_t string_size = s.size();

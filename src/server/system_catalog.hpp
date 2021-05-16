@@ -13,14 +13,23 @@ enum class SystemCatalogTypes {
 class SystemCatalog {
 public:
   static const string create_table_sql;
-  static const string insert_sql;
 
-  static const string sql_for(const TableSchema& schema) {
-    // TODO: Given a table name, and it's schema, write a function that
-    // will generate the SQL for the system catalog.
-    // 1) One statement for the table itself
-    // 2) One statement for each column in the schema;
+  static const string create_table_sql_for(UNUSED const table_name_t table_name) {
+    return "INSERT INTO system_catalog (type, name, table_name) VALUES" \
+      "("                                                               \
+      "1,"                                                              \
+      "'" + table_name + "',"                                           \
+      "'" + table_name + "'"                                           \
+      ")";
+  }
 
-    return "";
+  static const string create_column_sql_for(UNUSED const table_name_t table_name,
+                                            UNUSED const column_name_t column_name) {
+    return "INSERT INTO system_catalog (type, name, table_name) VALUES" \
+      "("                                                               \
+      "2,"                                                              \
+      "'" + column_name + "',"                                          \
+      "'" + table_name + "'"                                           \
+      ")";
   }
 };

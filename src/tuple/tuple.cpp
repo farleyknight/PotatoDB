@@ -1,8 +1,10 @@
 #include "tuple/tuple.hpp"
+#include "catalog/table_schema.hpp"
 
 // Constructor for creating a new tuple based on input value
 // TODO: It does not look like nulls are supported. Add a null bitmap?
-Tuple::Tuple(vector<Value> values, const QuerySchema& schema) {
+Tuple::Tuple(vector<Value> values, const QuerySchema& schema)
+{
   if (values.size() != schema.column_count()) {
     std::cout << "values.size() == " << values.size() << std::endl;
     std::cout << "schema.column_count() == " << schema.column_count() << std::endl;
@@ -13,54 +15,38 @@ Tuple::Tuple(vector<Value> values, const QuerySchema& schema) {
   // 1. Calculate the size of the tuple.
   uint32_t tuple_length = schema.tuple_length();
   for (auto &i : schema.unlined_columns()) {
-    // (size+data)
-    tuple_length += (values[i].length() + sizeof(uint32_t));
+    tuple_length += (values[i].length() + sizeof(string_size_t));
   }
+
+  // std::cout << "Resizing tuple " << tuple_length << std::endl;
 
   buffer_.resize(tuple_length);
   assert(buffer_.size() == tuple_length);
 
   // 3. Serialize each attribute based on the input value.
-  column_oid_t column_count = schema.column_count();
-  uint32_t offset = schema.tuple_length();
+  column_index_t column_count = schema.column_count();
+  buffer_offset_t offset = schema.tuple_length();
 
-  for (column_oid_t i = 0; i < column_count; i++) {
+  for (column_index_t i = 0; i < column_count; i++) {
     const auto &col = schema.by_column_oid(i);
-    auto col_offset = schema.offset_for(i);
-
-    // std::cout << "FOUND COL " << col.to_string() << std::endl;
+    auto col_offset = schema.buffer_offset_for(i);
 
     if (col.is_inlined()) {
-      // TODO: Just realized that serialize_to and write_uint32
-      // both use the offset, but in either the 1st or 2nd
-      // argument. Fix this inconsistency!
-
-      // std::cout << "Writing value " << values[i].to_string() << std::endl;
-      // std::cout << "Writing at offset " << col_offset << std::endl;
-
-      // TODO: Need to cast values[i] to column value
       values[i].cast_as(col.type_id()).serialize_to(col_offset, buffer_);
     } else {
-      // std::cout << "Not inlined, working with col_offset " << col_offset << std::endl;
-
       buffer_.write_uint32(col_offset, offset);
-      // Serialize varchar value, in place (size+data).
-
       auto value = values[i].cast_as(col.type_id());
-      // std::cout << "Not inlined, working with value " << value.to_string() << std::endl;
-
       value.serialize_to(offset, buffer_);
-      offset += (values[i].length() + sizeof(uint32_t));
+      offset += (values[i].length() + sizeof(buffer_offset_t));
     }
   }
-
-  // std::cout << "Final result: " << to_string(schema) << std::endl;
 }
 
-size_t Tuple::buffer_offset_for(const QuerySchema& schema,
-                                column_oid_t column_oid) const {
+buffer_offset_t Tuple::buffer_offset_for(const QuerySchema& schema,
+                                         column_oid_t column_oid) const
+{
   auto is_inlined = schema.by_column_oid(column_oid).is_inlined();
-  auto offset     = schema.offset_for(column_oid);
+  auto offset     = schema.buffer_offset_for(column_oid);
 
   // For inlined data types, data is stored where it is.
   if (is_inlined) {
@@ -73,11 +59,47 @@ size_t Tuple::buffer_offset_for(const QuerySchema& schema,
   return new_offset;
 }
 
+vector<Value> Tuple::to_values(const QuerySchema& schema) const
+{
+  vector<Value> values;
+  for (column_index_t i = 0; i < schema.column_count(); ++i) {
+    values.push_back(value(schema, i));
+  }
+  return values;
+}
+
+Tuple Tuple::add_defaults(deque<Value>& defaults,
+                          const TableSchema& table_schema,
+                          const QuerySchema& query_schema) const
+{
+  auto values = to_values(query_schema);
+  vector<Value> new_values;
+
+  for (const auto &col : table_schema.all()) {
+    if (query_schema.has_column(col.name())) {
+      // std::cout << "Found col w/ name " << col.name() << std::endl;
+      auto index = query_schema.index_for(col.name());
+      // std::cout << "Adding new value " << values[index].to_string() << std::endl;
+      new_values.push_back(values[index]);
+    } else {
+      // std::cout << "Could not find col w/ name " << col.name() << std::endl;
+      auto value = defaults.front();
+      defaults.pop_front();
+      // std::cout << "Adding new value " << value.to_string() << std::endl;
+      new_values.push_back(value);
+    }
+  }
+
+  auto schema = table_schema.to_query_schema();
+  assert(table_schema.column_count() == schema.column_count());
+  return Tuple(new_values, schema);
+}
+
 const string Tuple::to_string(const QuerySchema& schema) const {
   stringstream os;
 
   os << "(";
-  for (index_t i = 0; i < schema.column_count(); ++i) {
+  for (column_index_t i = 0; i < schema.column_count(); ++i) {
     if (i > 0) {
       os << ", ";
     }
@@ -93,8 +115,38 @@ const string Tuple::to_string(const QuerySchema& schema) const {
   return os.str();
 }
 
+// NOTE: This method is different from ordinary `to_string`
+// In particular, it's formatted to be sent over the network to the client
+// Which means quoting strings, rendering boolean types to 'true'/'false'
+//
+// Likely more to this, but this explains the difference.
+const string Tuple::to_payload(const QuerySchema& schema) const {
+  stringstream os;
+
+  os << "(";
+  for (column_index_t i = 0; i < schema.column_count(); ++i) {
+    if (i > 0) {
+      os << ", ";
+    }
+
+    if (is_null(schema, i)) {
+      os << "NULL";
+    } else {
+      auto curr_value = value(schema, i);
+      if (curr_value.is_varchar()) {
+        os << "'" << value(schema, i).to_string() << "'";
+      } else {
+        os << value(schema, i).to_string();
+      }
+    }
+  }
+  os << ")";
+
+  return os.str();
+}
+
 Value Tuple::value(const QuerySchema& schema,
-                   column_oid_t column_index) const
+                   column_index_t column_index) const
 {
   assert(column_index < schema.column_count());
 
@@ -112,7 +164,7 @@ Value Tuple::value_by_name(const QuerySchema& schema,
 }
 
 bool Tuple::is_null(const QuerySchema& schema,
-                    uint32_t column_index) const
+                    column_index_t column_index) const
 {
   return value(schema, column_index).is_null();
 }

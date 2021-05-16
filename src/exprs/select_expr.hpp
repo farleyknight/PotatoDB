@@ -20,14 +20,16 @@ public:
     table_list_ = tables;
   }
 
+  void set_where(ptr<WhereClauseExpr>&& where_clause) {
+    where_clause_ = move(where_clause);
+  }
+
   const TableListExpr& table_list() {
     return table_list_;
   }
 
-  // TODO: This should return an actual predicate
-  // For now just return an empty unique_ptr
-  ptr<QueryComp> pred() {
-    return ptr<QueryComp>();
+  ptr<WhereClauseExpr> pred() {
+    return where_clause_;
   }
 
   const ColumnListExpr& column_list() {
@@ -42,4 +44,5 @@ public:
 protected:
   TableListExpr table_list_;
   ColumnListExpr column_list_;
+  ptr<WhereClauseExpr> where_clause_;
 };

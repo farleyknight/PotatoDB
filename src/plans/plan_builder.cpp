@@ -18,7 +18,10 @@
 ptr<BasePlan> PlanBuilder::from_expr(CreateTableExpr* expr) {
   auto table_name = expr->table().name();
   auto column_def_list = expr->column_defs();
-  return make_unique<CreateTablePlan>(table_name, column_def_list);
+
+  return make_unique<CreateTablePlan>(table_name,
+                                      expr->primary_key(),
+                                      column_def_list);
 }
 
 ptr<BasePlan> PlanBuilder::from_expr(SelectExpr* expr) {

@@ -54,32 +54,32 @@ bool BaseSchema<ColT>::operator==(const BaseSchema& other) const {
 
 
 template<class ColT>
-size_t BaseSchema<ColT>::offset_for(column_oid_t oid) const {
+buffer_offset_t BaseSchema<ColT>::buffer_offset_for(column_oid_t oid) const {
   return offsets_.at(oid);
 }
 
 template<class ColT>
-size_t BaseSchema<ColT>::offset_for(const column_name_t& name) const {
-  return offset_for(column_oid_for(name));
+buffer_offset_t BaseSchema<ColT>::buffer_offset_for(const column_name_t& name) const {
+  return buffer_offset_for(column_oid_for(name));
 }
 
 template<class ColT>
-size_t BaseSchema<ColT>::index_for(const column_name_t& name) const {
+column_index_t BaseSchema<ColT>::index_for(const column_name_t& name) const {
   return column_oid_for(name);
 }
 
 template<class ColT>
-size_t BaseSchema<ColT>::column_count() const {
+column_index_t BaseSchema<ColT>::column_count() const {
   return columns_.size();
 }
 
 template<class ColT>
-size_t BaseSchema<ColT>::tuple_length() const {
+buffer_offset_t BaseSchema<ColT>::tuple_length() const {
   return tuple_length_;
 }
 
 template<class ColT>
-const vector<column_oid_t>& BaseSchema<ColT>::unlined_columns() const {
+const vector<column_index_t>& BaseSchema<ColT>::unlined_columns() const {
   return unlined_columns_;
 }
 

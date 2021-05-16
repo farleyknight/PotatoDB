@@ -9,7 +9,7 @@
 
 class PlanFactory {
 public:
-  static ptr<BasePlan> create(Catalog& catalog_,
+  static ptr<BasePlan> create(const Catalog& catalog_,
                               ptr<BaseExpr>&& expr)
   {
     switch (expr->expr_type()) {

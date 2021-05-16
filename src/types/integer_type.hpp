@@ -10,17 +10,21 @@ public:
     return TypeId::INTEGER;
   }
 
-  size_t size() const override {
-    return 4;
+  buffer_offset_t size() const override {
+    return sizeof(int32_t);
   }
 
-  void serialize_to(size_t offset, Buffer& buff, Value val) const override {
-    // std::cout << "TypeId::INTEGER => Serializing value " << val.to_string() << " at offset " << offset << std::endl;
+  void serialize_to(buffer_offset_t offset,
+                    Buffer& buff,
+                    Value val) const override
+  {
+    //std::cout << "TypeId::INTEGER => Serializing value " <<
+    //  val.to_string() << " at offset " << offset << std::endl;
     buff.write_int32(offset, val.as<int32_t>());
   }
 
-  Value cast_as(UNUSED const Value& value,
-                UNUSED TypeId type_id) const override {
+  Value cast_as(const Value& value,
+                TypeId type_id) const override {
     switch (type_id) {
     case TypeId::INTEGER: {
       return value;

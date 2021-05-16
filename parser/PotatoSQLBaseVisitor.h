@@ -189,6 +189,18 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitNot_null(PotatoSQLParser::Not_nullContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitPrimary_key(PotatoSQLParser::Primary_keyContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitAutoincrement(PotatoSQLParser::AutoincrementContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitConflict_clause(PotatoSQLParser::Conflict_clauseContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -258,6 +270,10 @@ public:
   }
 
   virtual antlrcpp::Any visitSelect_core(PotatoSQLParser::Select_coreContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitWhere_clause(PotatoSQLParser::Where_clauseContext *ctx) override {
     return visitChildren(ctx);
   }
 

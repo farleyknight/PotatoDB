@@ -12,7 +12,6 @@
 
 static constexpr int32_t INVALID_LENGTH = -1;
 
-// TODO: Rename Column to TableColumn elsewhere in the system
 // TODO: Add `NOT NULL` stuff to this class
 // TODO: Add `PRIMARY KEY` stuff to this class
 // TODO: Add `AUTOINCREMENT` stuff to this class
@@ -40,7 +39,7 @@ public:
                        table_oid_t table_oid,
                        column_oid_t column_oid,
                        TypeId type_id,
-                       uint32_t length)
+                       string_size_t length)
     : name_            (name),
       type_id_         (type_id),
       table_oid_       (table_oid),
@@ -60,15 +59,15 @@ public:
   // Default destructor
   ~TableColumn() = default;
 
-  bool is_inlined()           const { return inlined_; }
-  bool primary_key()          const { return primary_key_; }
-  bool is_nullable()          const { return nullable_; }
-  TypeId type_id()            const { return type_id_; }
-  table_oid_t table_oid()     const { return table_oid_; }
-  column_oid_t oid()          const { return column_oid_; }
-  int32_t fixed_length()      const { return fixed_length_; }
-  int32_t variable_length()   const { return variable_length_; }
-  const column_name_t& name() const { return name_; }
+  bool is_inlined()               const { return inlined_; }
+  bool primary_key()              const { return primary_key_; }
+  bool is_nullable()              const { return nullable_; }
+  TypeId type_id()                const { return type_id_; }
+  table_oid_t table_oid()         const { return table_oid_; }
+  column_oid_t oid()              const { return column_oid_; }
+  int32_t fixed_length()          const { return fixed_length_; }
+  string_size_t variable_length() const { return variable_length_; }
+  const column_name_t& name()     const { return name_; }
 
   const string to_string() const {
     std::ostringstream os;
@@ -96,6 +95,7 @@ public:
       inlined_         == other.inlined_ &&
       nullable_        == other.nullable_ &&
       primary_key_     == other.primary_key_ &&
+      autoincrement_   == other.autoincrement_ &&
       fixed_length_    == other.fixed_length_ &&
       variable_length_ == other.variable_length_;
   }
@@ -109,6 +109,7 @@ public:
       inlined_         != other.inlined_ ||
       nullable_        != other.nullable_ ||
       primary_key_     != other.primary_key_ ||
+      autoincrement_   != other.autoincrement_ ||
       fixed_length_    != other.fixed_length_ ||
       variable_length_ != other.variable_length_;
   }
@@ -129,6 +130,8 @@ private:
   bool nullable_ = false;
   // is the column a primary key?
   bool primary_key_ = false;
+  // is the column an autoincrement?
+  bool autoincrement_ = false;
   uint32_t fixed_length_ = 0;
   uint32_t variable_length_ = 0;
 };

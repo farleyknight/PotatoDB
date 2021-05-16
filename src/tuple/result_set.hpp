@@ -43,14 +43,19 @@ public:
     return results_[i];
   }
 
-  const string to_string() {
+  // NOTE: This method is different from ordinary `to_string`
+  // In particular, it's formatted to be sent over the network to the client
+  // Which means quoting strings, rendering boolean types to 'true'/'false'
+  //
+  // Likely more to this, but this explains the difference.
+  const string to_payload() {
     stringstream os;
 
     for (index_t i = 0; i < results_.size(); ++i) {
       if (i > 0) {
         os << ",\n";
       }
-      os << results_[i].to_string(schema_);
+      os << results_[i].to_payload(schema_);
     }
 
     return os.str();

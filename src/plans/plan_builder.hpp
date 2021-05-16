@@ -19,7 +19,7 @@
 
 class PlanBuilder {
 public:
-  PlanBuilder(Catalog& catalog)
+  PlanBuilder(const Catalog& catalog)
     : catalog_(catalog) {}
 
   // No copy
@@ -106,6 +106,6 @@ private:
   ptr<QueryComp> where_clause_;
   ptr<QueryComp> join_clause_;
 
-  Catalog& catalog_;
+  const Catalog& catalog_;
   RawTuples tuples_;
 };

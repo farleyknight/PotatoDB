@@ -5,7 +5,8 @@ Catalog::Catalog() {}
 TableSchema
 Catalog::make_schema_from(const table_name_t& table_name,
                           table_oid_t table_oid,
-                          const ColumnDefListExpr& column_list)
+                          const string& primary_key,
+                          const ColumnDefListExpr& column_list) const
 {
   vector<TableColumn> columns;
   for (size_t col_index = 0; col_index < column_list.list().size(); ++col_index) {
@@ -25,7 +26,7 @@ Catalog::make_schema_from(const table_name_t& table_name,
     }
   }
 
-  return TableSchema(columns, table_name, table_oid);
+  return TableSchema(columns, table_name, primary_key, table_oid);
 }
 
 QuerySchema
@@ -162,6 +163,7 @@ Catalog::create_table(// TODO: We should be attempting to get an exclusive lock
                       // on the table, and abort the txn if we cannot get it.
                       UNUSED Txn& txn,
                       const table_name_t& table_name,
+                      const string& primary_key,
                       ColumnDefListExpr column_list)
 {
   assert(table_oids_.count(table_name) == 0);
@@ -169,8 +171,12 @@ Catalog::create_table(// TODO: We should be attempting to get an exclusive lock
   table_oid_t table_oid = next_table_oid_++;
   table_oids_[table_name] = table_oid;
 
-  auto schema = make_schema_from(table_name, table_oid, column_list);
-  table_schemas_.insert(std::make_pair(table_oid, schema));
+  auto schema = make_schema_from(table_name,
+                                 table_oid,
+                                 primary_key,
+                                 column_list);
+
+  table_schemas_.insert(make_pair(table_oid, schema));
 
   // TODO: This should be sent to a logger.
   // std::cout << "New table created: " << table_name << std::endl;

@@ -77,7 +77,7 @@ void DiskMgr::read_page(PageId page_id, Page& page) {
 
 bool DiskMgr::read_log(Buffer& log_data,
                        size_t size,
-                       offset_t offset)
+                       buffer_offset_t offset)
 {
   if (offset >= fs::file_size(log_file_name())) {
     return false;

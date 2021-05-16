@@ -18,6 +18,14 @@ public:
     column_defs_ = column_defs;
   }
 
+  void set_primary_key(const string primary_key) {
+    primary_key_ = primary_key;
+  }
+
+  const string primary_key() const {
+    return primary_key_;
+  }
+
   const TableExpr& table() {
     return table_;
   }
@@ -32,6 +40,7 @@ public:
   }
 
 protected:
+  string primary_key_;
   TableExpr table_;
   ColumnDefListExpr column_defs_;
 };

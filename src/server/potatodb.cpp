@@ -35,14 +35,21 @@ fs::path PotatoDB::table_file_for(const string& table_name) {
   return disk_mgr_.table_file_for(table_name);
 }
 
+ptr<BasePlan> PotatoDB::sql_to_plan(const string& statement) const {
+  // TODO: Rename as_exprs to as_stmts
+  auto exprs = SQLParser::as_exprs(statement);
+  // TODO: Allow for multiple statements
+  if (exprs.size() == 0) {
+    std::cout << "No exprs for : " << statement << std::endl;
+  }
+
+  assert(exprs.size() > 0);
+  return PlanFactory::create(catalog_, move(exprs[0]));
+}
+
 StatementResult PotatoDB::run_statement(const string& statement) {
   try {
-    // TODO: Rename as_exprs to as_stmts
-    auto exprs = SQLParser::as_exprs(statement);
-    // TODO: Allow for multiple statements
-    assert(exprs.size() > 0);
-    auto plan = PlanFactory::create(catalog_, move(exprs[0]));
-
+    auto plan = sql_to_plan(statement);
     // Create and run the txn
     auto &txn = txn_mgr_.begin();
     ExecCtx exec_ctx(txn,
@@ -53,15 +60,43 @@ StatementResult PotatoDB::run_statement(const string& statement) {
                      catalog_);
 
     if (plan->is_query()) {
-      auto result_set = exec_eng_.query(move(plan),
-                                        txn,
-                                        exec_ctx);
+      auto result_set = exec_eng_.query(move(plan), txn, exec_ctx);
       txn_mgr_.commit(txn);
       return StatementResult(move(result_set));
+    } else if (plan->type() == PlanType::CREATE_TABLE) {
+      auto create_table_plan = dynamic_cast<CreateTablePlan*>(plan.get());
+      // TODO:
+      // 1) Run the actual CREATE TABLE plan
+      // 2) Run additional SQL for inserting the table into the `system_catalog`
+      // 3) Run additional SQL for inserting each column from the table into
+      //    the `system_catalog`
+
+      // CREATE TABLE
+      auto message = exec_eng_.execute(move(plan), txn, exec_ctx);
+
+      // INSERT INTO system_catalog VALUES (table_name...)
+      auto insert_table_sql
+        = SystemCatalog::create_table_sql_for(create_table_plan->table_name());
+      auto insert_table_plan = sql_to_plan(insert_table_sql);
+      exec_eng_.execute(move(insert_table_plan), txn, exec_ctx);
+
+      for (const auto &col : create_table_plan->column_list().list()) {
+        // INSERT INTO system_catalog VALUES (column_name...)
+        auto insert_column_sql
+          = SystemCatalog::create_column_sql_for(create_table_plan->table_name(),
+                                                 col.name());
+        // TODO: The line above does not include the column type.
+        // Eventually we will want to include that information in the system catalog
+        // so that the tables and their columns can be loaded from the proper table
+        // file.
+        auto insert_column_plan = sql_to_plan(insert_column_sql);
+        exec_eng_.execute(move(insert_column_plan), txn, exec_ctx);
+      }
+
+      txn_mgr_.commit(txn);
+      return StatementResult(message);
     } else {
-      auto message = exec_eng_.execute(move(plan),
-                                       txn,
-                                       exec_ctx);
+      auto message = exec_eng_.execute(move(plan), txn, exec_ctx);
       return StatementResult(message);
     }
   } catch (std::exception& e) {
@@ -78,8 +113,13 @@ void PotatoDB::build_system_catalog() {
   // TODO: Write a conditional here to check for that table.
   //
   // TODO: Wrap this all in a try block and capture any errors
+
   run_statement(SystemCatalog::create_table_sql);
-  run_statement(SystemCatalog::insert_sql);
+
+  run_statement(SystemCatalog::create_column_sql_for("system_catalog", "id"));
+  run_statement(SystemCatalog::create_column_sql_for("system_catalog", "type"));
+  run_statement(SystemCatalog::create_column_sql_for("system_catalog", "name"));
+  run_statement(SystemCatalog::create_column_sql_for("system_catalog", "table_name"));
 }
 
 // TODO: During testing, we sometimes want to delete all database files.
@@ -96,7 +136,7 @@ void PotatoDB::start_server() {
 
       try {
         auto result = client->session().run_statement(statement);
-        client->write(result.to_string());
+        client->write(result.to_payload());
       } catch (std::exception &e) {
         // TODO: Send better error message
         client->write("Got an error! :(");

@@ -3,18 +3,17 @@
 #include <vector>
 #include <iostream>
 
-#include "common/types.hpp"
+#include "common/config.hpp"
 
 class Buffer {
 public:
   using Data = vector<byte_t>;
-  using string_size_t = byte_t;
 
   Buffer() {
     data_.resize(0);
   }
 
-  Buffer(size_t size) {
+  Buffer(buffer_offset_t size) {
     data_.resize(size);
   }
 
@@ -48,11 +47,11 @@ public:
     return reinterpret_cast<const char*>(data_.data());
   }
 
-  byte_t* ptr(size_t offset) {
+  byte_t* ptr(buffer_offset_t offset) {
     return data_.data() + offset;
   }
 
-  const byte_t* cptr(size_t offset) const {
+  const byte_t* cptr(buffer_offset_t offset) const {
     return data_.data() + offset;
   }
 
@@ -75,11 +74,11 @@ public:
     std::fill(data_.begin(), data_.end(), 0);
   }
 
-  size_t size() const {
+  buffer_offset_t size() const {
     return data_.size();
   }
 
-  void resize(size_t new_size) {
+  void resize(buffer_offset_t new_size) {
     data_.resize(new_size);
   }
 
@@ -92,84 +91,88 @@ public:
   }
 
   template<typename numeric_t>
-  void write_numeric(size_t offset, numeric_t n) {
+  void write_numeric(buffer_offset_t offset, numeric_t n) {
     *reinterpret_cast<numeric_t*>(ptr(offset)) = n;
   }
 
   template<typename numeric_t>
-  numeric_t read_numeric(size_t offset) const {
+  numeric_t read_numeric(buffer_offset_t offset) const {
     return *reinterpret_cast<const numeric_t*>(cptr(offset));
   }
 
-  void write_int64(size_t offset, int64_t n) {
+  void write_int64(buffer_offset_t offset, int64_t n) {
     *reinterpret_cast<int64_t*>(ptr(offset)) = n;
   }
 
-  int64_t read_int64(size_t offset) const {
+  int64_t read_int64(buffer_offset_t offset) const {
     return *reinterpret_cast<const int64_t*>(cptr(offset));
   }
 
-  void write_int32(size_t offset, int32_t n) {
+  void write_int32(buffer_offset_t offset, int32_t n) {
     *reinterpret_cast<int32_t*>(ptr(offset)) = n;
   }
 
-  int32_t read_int32(size_t offset) const {
+  int32_t read_int32(buffer_offset_t offset) const {
     return *reinterpret_cast<const int32_t*>(cptr(offset));
   }
 
-  void write_uint32(size_t offset, int32_t n) {
+  void write_uint32(buffer_offset_t offset, int32_t n) {
     *reinterpret_cast<uint32_t*>(ptr(offset)) = n;
   }
 
-  uint32_t read_uint32(size_t offset) const {
+  uint32_t read_uint32(buffer_offset_t offset) const {
     return *reinterpret_cast<const uint32_t*>(cptr(offset));
   }
 
-  void write_bool(size_t offset, bool b) {
+  void write_bool(buffer_offset_t offset, bool b) {
     *reinterpret_cast<bool*>(ptr(offset)) = b;
   }
 
-  bool read_bool(size_t offset) const {
+  bool read_bool(buffer_offset_t offset) const {
     return *reinterpret_cast<const bool*>(cptr(offset));
   }
 
-  void write_int8(size_t offset, int8_t n) {
+  void write_int8(buffer_offset_t offset, int8_t n) {
     *reinterpret_cast<int8_t*>(ptr(offset)) = n;
   }
 
-  int64_t read_int8(size_t offset) const {
+  int64_t read_int8(buffer_offset_t offset) const {
     return *reinterpret_cast<const int8_t*>(cptr(offset));
   }
 
-  void write_float(size_t offset, float f) {
+  void write_float(buffer_offset_t offset, float f) {
     *reinterpret_cast<float*>(ptr(offset)) = f;
   }
 
-  float read_float(size_t offset) const {
+  float read_float(buffer_offset_t offset) const {
     return *reinterpret_cast<const float*>(cptr(offset));
   }
 
-  void write_double(size_t offset, double d) {
+  void write_double(buffer_offset_t offset, double d) {
     *reinterpret_cast<double*>(ptr(offset)) = d;
   }
 
-  double read_double(size_t offset) const {
+  double read_double(buffer_offset_t offset) const {
     return *reinterpret_cast<const double*>(cptr(offset));
   }
 
-  void write_string(size_t offset, const string& value) {
-    string_size_t size = value.size();
+  void write_string(buffer_offset_t offset, const string& value) {
+    string_size_t length = value.size();
 
     auto c_string = reinterpret_cast<const unsigned char*>(value.c_str());
 
     // std::cout << "Writing c_string " << c_string << std::endl;
+    // std::cout << "with length " << length << std::endl;
+    // std::cout << "Buffer size: " << size() << std::endl;
+    // std::cout << "At offset: " << offset << std::endl;
 
-    std::memcpy(ptr(offset), &size, sizeof(string_size_t));
+    std::memcpy(ptr(offset),
+                &length, sizeof(string_size_t));
     std::memcpy(ptr(offset + sizeof(string_size_t)),
-                c_string, size);
+                c_string, length);
   }
 
-  const string read_string(size_t offset) const {
+  const string read_string(buffer_offset_t offset) const {
     string_size_t size;
     std::memcpy(&size, cptr(offset), sizeof(string_size_t));
 

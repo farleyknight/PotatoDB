@@ -19,13 +19,13 @@ public:
     open();
   }
 
-  void write_buffer(offset_t offset, const Buffer& buffer) {
+  void write_buffer(buffer_offset_t offset, const Buffer& buffer) {
     handle_.seekp(offset);
     handle_.write(buffer.char_ptr(), buffer.size());
     handle_.flush();
   }
 
-  void read_buffer(offset_t offset, Buffer& buffer) {
+  void read_buffer(buffer_offset_t offset, Buffer& buffer) {
     handle_.seekp(offset);
     handle_.read(buffer.char_ptr(), buffer.size());
   }
@@ -35,7 +35,7 @@ public:
     handle_ << "";
     handle_.close();
   }
-  
+
   void open() {
     handle_.open(file_path_, fstream::out);
   }

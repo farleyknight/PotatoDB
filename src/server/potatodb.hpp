@@ -32,6 +32,8 @@ public:
     return sessions_.back();
   }
 
+  ptr<BasePlan> sql_to_plan(const string& statement) const;
+
   ptr<ExecCtx> make_exec_ctx(Txn& txn) {
     return make_unique<ExecCtx>(txn,
                                 buff_mgr_,
