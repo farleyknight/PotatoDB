@@ -22,10 +22,25 @@ TEST(PotatoDBTest, CreateInsertSelectTest) {
   EXPECT_TRUE(result.set() != nullptr);
   EXPECT_EQ(result.set()->size(), 1);
 
-  // TODO: Get these lines working
   EXPECT_EQ(result.set()->value_at<int32_t>("colA", 0), 1);
   EXPECT_EQ(result.set()->value_at<int32_t>("colB", 0), 2);
 }
+
+TEST(PotatoDBTest, CreateInsertSelectStringTest) {
+  PotatoDB db;
+  db.reset_installation();
+
+  db.run_statement("CREATE TABLE foo_bar ( colA INTEGER, colB VARCHAR(32) )");
+  db.run_statement("INSERT INTO foo_bar VALUES (1, 'hello, world')");
+  auto result = db.run_statement("SELECT * FROM foo_bar");
+
+  EXPECT_TRUE(result.set() != nullptr);
+  EXPECT_EQ(result.set()->size(), 1);
+
+  EXPECT_EQ(result.set()->value_at<int32_t>("colA", 0), 1);
+  EXPECT_EQ(result.set()->value_at<string>("colB", 0), "hello, world");
+}
+
 
 TEST(PotatoDBTest, SystemCatalogTest) {
   PotatoDB db;
@@ -51,7 +66,17 @@ TEST(PotatoDBTest, CreateTableTest) {
   EXPECT_EQ(result.set()->size(), 1);
 }
 
-TEST(PotatoDBTest, ShowTablesTest) {
+TEST(PotatoDBTest, ShowTableTest) {
+  PotatoDB db;
+  db.reset_installation();
+
+  auto result = db.run_statement("SHOW TABLES");
+  auto &result_set = *result.set().get();
+
+  std::cout << " SHOW TABLES RESULTS : " << result_set.to_string() << std::endl;
+}
+
+TEST(PotatoDBTest, ShowFooBarTableTest) {
   PotatoDB db;
   db.reset_installation();
 

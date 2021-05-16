@@ -39,12 +39,16 @@ public:
     return results_.size();
   }
 
+  const Tuple& operator[](uint32_t i) const {
+    return results_[i];
+  }
+
   const string to_string() {
     stringstream os;
 
     for (index_t i = 0; i < results_.size(); ++i) {
       if (i > 0) {
-        os << ",";
+        os << ",\n";
       }
       os << results_[i].to_string(schema_);
     }
