@@ -32,11 +32,49 @@ ptr<BasePlan> PlanBuilder::from_expr(SelectExpr* expr) {
 
   auto schema = catalog_.query_schema_for(table_name,
                                           expr->column_list());
-  auto maybe_pred = expr->pred();
+
+  // TODO: Convert from WhereClauseExpr to QueryComp here
+  auto maybe_pred = to_query_comp(table_name, expr->pred());
 
   return make_unique<SeqScanPlan>(schema,
                                   table_oid,
                                   move(maybe_pred));
+}
+
+ptr<BaseQuery> PlanBuilder::to_query_node(const table_name_t name,
+                                          ptr<BaseExpr>& expr)
+{
+  if (expr == nullptr) {
+    return ptr<BaseQuery>(nullptr);
+  }
+
+  switch (expr->expr_type()) {
+  case ExprType::COLUMN: {
+    auto column_expr = dynamic_cast<ColumnExpr*>(expr.get());
+    auto query_col = catalog_.query_column_for(name, column_expr->name());
+    return make_unique<QueryColumn>(query_col);
+  }
+  case ExprType::VALUE: {
+    auto value_expr = dynamic_cast<ValueExpr*>(expr.get());
+    return make_unique<QueryConst>(value_expr->to_value());
+  }
+  default:
+    throw Exception("this part not implemented yet :/");
+  }
+}
+
+ptr<QueryComp> PlanBuilder::to_query_comp(const table_name_t name,
+                                          ptr<WhereClauseExpr>& clause)
+{
+  if (clause == nullptr) {
+    return ptr<QueryComp>(nullptr);
+  }
+  auto left_query = to_query_node(name, clause->left_expr());
+  auto right_query = to_query_node(name, clause->right_expr());
+
+  return make_unique<QueryComp>(move(left_query),
+                                clause->comp_type(),
+                                move(right_query));
 }
 
 ptr<BasePlan> PlanBuilder::from_expr(UNUSED ShowTablesExpr* expr) {

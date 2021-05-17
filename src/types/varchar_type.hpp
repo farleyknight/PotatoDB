@@ -28,6 +28,16 @@ public:
     return value.as<string>();
   }
 
+  bool eq(const Value& left, const Value& right) const override {
+    if (left.is_null() && right.is_null()) {
+      return true;
+    }
+    if (left.is_null() || right.is_null()) {
+      return false;
+    }
+    return left.as<string>() == right.as<string>();
+  }
+
   // TODO: Rename to `write_to`
   void serialize_to(buffer_offset_t offset,
                     Buffer& buff,

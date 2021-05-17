@@ -42,10 +42,8 @@ public:
     return Type::instance(type_id)->size();
   }
 
-  virtual bool eq(UNUSED const Value& left,
-                  UNUSED const Value& right) const {
-    throw NotImplementedException("eq not implemented!");
-  }
+  virtual bool eq(const Value& left,
+                  const Value& right) const = 0;
 
   virtual bool ne(UNUSED const Value& left,
                   UNUSED const Value& right) const {

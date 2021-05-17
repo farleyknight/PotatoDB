@@ -79,7 +79,7 @@ TEST(PotatoDBTest, CreateTableTest) {
 
   EXPECT_TRUE(db.file_exists(foo_bar_file_path));
 
-  auto result = db.run_statement("SELECT * FROM system_catalog WHERE name = 'foo_bar'");
+  auto result = db.run_statement("SELECT * FROM system_catalog WHERE name == 'foo_bar'");
   auto &result_set = *result.set().get();
 
   EXPECT_EQ(result_set.size(), 1);
@@ -93,7 +93,8 @@ TEST(PotatoDBTest, ShowTablesTest) {
   auto result = db.run_statement("SHOW TABLES");
   auto &result_set = *result.set().get();
 
-  std::cout << " SHOW TABLES RESULTS : " << result_set.to_payload() << std::endl;
+  EXPECT_EQ(result_set.size(), 1);
+  EXPECT_EQ(result_set.value_at<string>("table_name", 0), "system_catalog");
 }
 
 TEST(PotatoDBTest, ShowTablesFooBarTest) {
@@ -104,8 +105,6 @@ TEST(PotatoDBTest, ShowTablesFooBarTest) {
 
   auto result = db.run_statement("SHOW TABLES");
   auto &result_set = *result.set().get();
-
-  std::cout << " SHOW TABLES RESULTS : " << result_set.to_payload() << std::endl;
 
   EXPECT_EQ(result_set.size(), 2);
   EXPECT_EQ(result_set.value_at<string>("table_name", 0), "system_catalog");
@@ -126,11 +125,20 @@ TEST(PotatoDBTest, DropTableTest) {
   EXPECT_EQ(result_set->value_at<string>("table_name", 0), "system_catalog");
 }
 
-TEST(PotatoDBTest, TruncateTableTest) {
+TEST(PotatoDBTest, DescribeTableTest) {
+  PotatoDB db;
+  db.reset_installation();
+
+
   // TODO!
 }
 
-TEST(PotatoDBTest, DescribeTableTest) {
+
+TEST(PotatoDBTest, TruncateTableTest) {
+  PotatoDB db;
+  db.reset_installation();
+
+
   // TODO!
 }
 

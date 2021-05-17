@@ -21,6 +21,7 @@ using ShowTablesStmtContext  = PotatoSQLParser::Show_tables_stmtContext;
 using InsertStmtContext      = PotatoSQLParser::Insert_stmtContext;
 using SelectCoreContext      = PotatoSQLParser::Select_coreContext;
 using ExprContext            = PotatoSQLParser::ExprContext;
+using WhereClauseContext     = PotatoSQLParser::Where_clauseContext;
 
 class EvalParseVisitor : public PotatoSQLBaseVisitor {
 private:
@@ -168,7 +169,8 @@ public:
       if (value_ctx->NUMERIC_LITERAL()) {
         return make_unique<ValueExpr>(ValueType::NUMERIC, value_ctx->getText());
       } else if (value_ctx->STRING_LITERAL()) {
-        return make_unique<ValueExpr>(ValueType::STRING, value_ctx->getText());
+        auto string_value = value_ctx->getText();
+        return make_unique<ValueExpr>(ValueType::STRING, string_value.substr(1, string_value.size()-2));
       }
     }
 
@@ -184,6 +186,7 @@ public:
     auto left_expr  = make_expr(expr->expr()[0]);
     auto right_expr = make_expr(expr->expr()[1]);
 
+    std::cout << "expr as string " << expr->getText() << std::endl;
     if (expr->EQ()) {
       return WhereClauseExpr(move(left_expr),
                              CompType::EQ,
@@ -193,6 +196,15 @@ public:
                              CompType::NE,
                              move(right_expr));
     } else {
+      // TODO: Some types of exprs should not be allowed!
+      // For example, the assignment expression:
+      // > WHERE (a = 5)
+      // should not show up in a WHERE clause
+      // It should instead be
+      // > WHERE (a == 5)
+      // Find a way to weed them out
+      // Perhaps just throw an error? We have a way to catch it
+      // and send it back to the user.
       throw Exception("Other types of WHERE clauses are not yet implemented! :/");
     }
   }
@@ -231,11 +243,12 @@ public:
     select.set_tables(tables);
 
     if (ctx->where_clause() != nullptr) {
-      auto where_clause = make_where_expr(ctx->where_clause())
-      select.set_where(where_clause);
+      auto where_clause = make_where_clause_expr(ctx->where_clause());
+      auto where_clause_ptr = make_unique<WhereClauseExpr>(move(where_clause));
+      select.set_where(move(where_clause_ptr));
     }
-
-    exprs_.emplace_back(make_unique<SelectExpr>(select));
+    auto select_ptr = make_unique<SelectExpr>(move(select));
+    exprs_.emplace_back(move(select_ptr));
 
     return visitChildren(ctx);
   }

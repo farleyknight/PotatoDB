@@ -3,6 +3,7 @@
 #include "exprs/base_expr.hpp"
 #include "exprs/table_list_expr.hpp"
 #include "exprs/column_list_expr.hpp"
+#include "exprs/where_clause_expr.hpp"
 
 #include "query/query_comp.hpp"
 
@@ -28,7 +29,7 @@ public:
     return table_list_;
   }
 
-  ptr<WhereClauseExpr> pred() {
+  ptr<WhereClauseExpr>& pred() {
     return where_clause_;
   }
 
