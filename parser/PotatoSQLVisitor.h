@@ -32,6 +32,8 @@ public:
 
     virtual antlrcpp::Any visitShow_tables_stmt(PotatoSQLParser::Show_tables_stmtContext *context) = 0;
 
+    virtual antlrcpp::Any visitDescribe_table_stmt(PotatoSQLParser::Describe_table_stmtContext *context) = 0;
+
     virtual antlrcpp::Any visitAnalyze_stmt(PotatoSQLParser::Analyze_stmtContext *context) = 0;
 
     virtual antlrcpp::Any visitAttach_stmt(PotatoSQLParser::Attach_stmtContext *context) = 0;

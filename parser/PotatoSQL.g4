@@ -32,6 +32,7 @@ sql_stmt
                                       | create_virtual_table_stmt
                                       | delete_stmt
                                       | delete_stmt_limited
+                                      | describe_table_stmt 
                                       | detach_stmt
                                       | drop_index_stmt
                                       | drop_table_stmt
@@ -63,9 +64,13 @@ show_tables_stmt
     : K_SHOW K_TABLES
     ;
 
+describe_table_stmt
+    : K_DESCRIBE K_TABLE table_name
+    ;
+
 analyze_stmt
- : K_ANALYZE ( database_name | table_or_index_name | database_name '.' table_or_index_name )?
- ;
+    : K_ANALYZE ( database_name | table_or_index_name | database_name '.' table_or_index_name )?
+    ;
 
 attach_stmt
  : K_ATTACH K_DATABASE? expr K_AS database_name
@@ -770,6 +775,7 @@ K_DEFERRABLE : D E F E R R A B L E;
 K_DEFERRED : D E F E R R E D;
 K_DELETE : D E L E T E;
 K_DESC : D E S C;
+K_DESCRIBE : D E S C R I B E;
 K_DETACH : D E T A C H;
 K_DISTINCT : D I S T I N C T;
 K_DROP : D R O P;

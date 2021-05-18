@@ -9,19 +9,21 @@
 #include "exprs/select_expr.hpp"
 #include "exprs/where_clause_expr.hpp"
 #include "exprs/create_table_expr.hpp"
+#include "exprs/describe_table_expr.hpp"
 
 using antlrcpp::Any;
 using potatosql::PotatoSQLBaseVisitor;
 using potatosql::PotatoSQLParser;
 
 // TODO: Rename these! Not a fan of underscores in class names
-using SelectStmtContext      = PotatoSQLParser::Select_stmtContext;
-using CreateTableStmtContext = PotatoSQLParser::Create_table_stmtContext;
-using ShowTablesStmtContext  = PotatoSQLParser::Show_tables_stmtContext;
-using InsertStmtContext      = PotatoSQLParser::Insert_stmtContext;
-using SelectCoreContext      = PotatoSQLParser::Select_coreContext;
-using ExprContext            = PotatoSQLParser::ExprContext;
-using WhereClauseContext     = PotatoSQLParser::Where_clauseContext;
+using SelectStmtContext         = PotatoSQLParser::Select_stmtContext;
+using CreateTableStmtContext    = PotatoSQLParser::Create_table_stmtContext;
+using ShowTablesStmtContext     = PotatoSQLParser::Show_tables_stmtContext;
+using DescribeTableStmtContext  = PotatoSQLParser::Describe_table_stmtContext;
+using InsertStmtContext         = PotatoSQLParser::Insert_stmtContext;
+using SelectCoreContext         = PotatoSQLParser::Select_coreContext;
+using ExprContext               = PotatoSQLParser::ExprContext;
+using WhereClauseContext        = PotatoSQLParser::Where_clauseContext;
 
 class EvalParseVisitor : public PotatoSQLBaseVisitor {
 private:
@@ -39,6 +41,18 @@ public:
 
   Any visitSelect_stmt(SelectStmtContext *ctx) override {
     // TODO?
+    return visitChildren(ctx);
+  }
+
+  Any visitDescribe_table_stmt(DescribeTableStmtContext *ctx) override {
+    DescribeTableExpr describe_table;
+    assert(ctx->table_name());
+
+    TableExpr table(ctx->table_name()->getText());
+    describe_table.set_table(table);
+
+    exprs_.emplace_back(make_unique<DescribeTableExpr>(describe_table));
+
     return visitChildren(ctx);
   }
 
@@ -156,12 +170,6 @@ public:
   }
 
   ptr<BaseExpr> make_expr(ExprContext *ctx) {
-    // TODO:
-    // Check for case where the expr is:
-    // 1) Table Column name
-    // 2) Integer Value
-    // 3) String value
-
     if (ctx->column_name()) {
       return make_unique<ColumnExpr>(ctx->column_name()->getText());
     } else if (ctx->literal_value()) {

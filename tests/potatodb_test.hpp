@@ -111,6 +111,21 @@ TEST(PotatoDBTest, ShowTablesFooBarTest) {
   EXPECT_EQ(result_set.value_at<string>("table_name", 1), "foo_bar");
 }
 
+TEST(PotatoDBTest, DescribeTableTest) {
+  PotatoDB db;
+  db.reset_installation();
+
+  db.run_statement("CREATE TABLE foo_bar ( colA INTEGER, colB INTEGER )");
+  auto result = db.run_statement("DESCRIBE TABLE foo_bar");
+
+  auto &result_set = *result.set().get();
+
+  EXPECT_EQ(result_set.size(), 2);
+  EXPECT_EQ(result_set.value_at<string>("name", 0), "colA");
+  EXPECT_EQ(result_set.value_at<string>("name", 1), "colB");
+}
+
+
 TEST(PotatoDBTest, DropTableTest) {
   PotatoDB db;
   db.reset_installation();
@@ -123,14 +138,6 @@ TEST(PotatoDBTest, DropTableTest) {
 
   EXPECT_EQ(result_set->size(), 1);
   EXPECT_EQ(result_set->value_at<string>("table_name", 0), "system_catalog");
-}
-
-TEST(PotatoDBTest, DescribeTableTest) {
-  PotatoDB db;
-  db.reset_installation();
-
-
-  // TODO!
 }
 
 

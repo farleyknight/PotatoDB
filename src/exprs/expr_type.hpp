@@ -1,7 +1,8 @@
 #pragma once
 
 enum class ExprType {
-  // Statement fragments/exprs
+  // DQL Statement fragments/exprs
+  // Data Query Language
   COLUMN,
   COLUMN_LIST,
   COLUMN_DEF,
@@ -13,12 +14,17 @@ enum class ExprType {
   TUPLE_LIST,
 
   // DDL statement types
-  SHOW_TABLES,
+  // Data Definition Language
   CREATE_TABLE,
   ALTER_TABLE,
   DROP_TABLE,
 
+  // Catalog statements
+  SHOW_TABLES,
+  DESCRIBE_TABLE,
+
   // DML statement types
+  // Data Manipulation Language
   SELECT,
   WHERE,
   LIMIT,
@@ -27,5 +33,3 @@ enum class ExprType {
   HAVING,
   INSERT
 };
-
-
