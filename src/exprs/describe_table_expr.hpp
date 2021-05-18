@@ -3,7 +3,7 @@
 #include "exprs/base_expr.hpp"
 #include "exprs/table_expr.hpp"
 
-class DescribeTableExpr : BaseExpr {
+class DescribeTableExpr : public BaseExpr {
 public:
   DescribeTableExpr()
     : BaseExpr (ExprType::DESCRIBE_TABLE)

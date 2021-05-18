@@ -5,11 +5,12 @@
 #include "common/types.hpp"
 
 #include "exprs/show_tables_expr.hpp"
+#include "exprs/describe_table_expr.hpp"
 #include "exprs/insert_expr.hpp"
 #include "exprs/select_expr.hpp"
 #include "exprs/where_clause_expr.hpp"
 #include "exprs/create_table_expr.hpp"
-#include "exprs/describe_table_expr.hpp"
+#include "exprs/comp_expr.hpp"
 
 using antlrcpp::Any;
 using potatosql::PotatoSQLBaseVisitor;
@@ -44,6 +45,12 @@ public:
     return visitChildren(ctx);
   }
 
+  Any visitShow_tables_stmt(ShowTablesStmtContext *ctx) override {
+    exprs_.emplace_back(make_unique<ShowTablesExpr>());
+
+    return visitChildren(ctx);
+  }
+
   Any visitDescribe_table_stmt(DescribeTableStmtContext *ctx) override {
     auto describe_table = make_unique<DescribeTableExpr>();
     assert(ctx->table_name());
@@ -51,7 +58,7 @@ public:
     TableExpr table(ctx->table_name()->getText());
     describe_table->set_table(table);
 
-    exprs_.emplace_back(describe_table);
+    exprs_.emplace_back(move(describe_table));
 
     return visitChildren(ctx);
   }
@@ -101,12 +108,6 @@ public:
     create_table.set_column_defs(def_list);
 
     exprs_.emplace_back(make_unique<CreateTableExpr>(create_table));
-
-    return visitChildren(ctx);
-  }
-
-  Any visitShow_tables_stmt(ShowTablesStmtContext *ctx) override {
-    exprs_.emplace_back(make_unique<ShowTablesExpr>());
 
     return visitChildren(ctx);
   }
@@ -174,6 +175,13 @@ public:
         auto string_value = value_ctx->getText();
         return make_unique<ValueExpr>(ValueType::STRING, string_value.substr(1, string_value.size()-2));
       }
+    } else if (ctx->EQ()) {
+      auto left_expr  = make_expr(ctx->expr()[0]);
+      auto right_expr = make_expr(ctx->expr()[1]);
+
+      return make_unique<CompExpr>(move(left_expr),
+                                   CompType::EQ,
+                                   move(right_expr));
     }
 
     throw Exception("not all of it implemented yet :/");
@@ -182,31 +190,35 @@ public:
   WhereClauseExpr make_where_clause_expr(WhereClauseContext *ctx) {
     auto expr = ctx->expr();
 
-    assert(expr->expr()[0]);
-    assert(expr->expr()[1]);
-
-    auto left_expr  = make_expr(expr->expr()[0]);
-    auto right_expr = make_expr(expr->expr()[1]);
-
     std::cout << "expr as string " << expr->getText() << std::endl;
+
+    // NOTE: We may have to support WHERE (a = 5)
+    // I believe MySQL treats this as (a == 5)
     if (expr->EQ()) {
-      return WhereClauseExpr(move(left_expr),
-                             CompType::EQ,
-                             move(right_expr));
+      auto left_expr  = make_expr(expr->expr()[0]);
+      auto right_expr = make_expr(expr->expr()[1]);
+
+      auto comp_expr = CompExpr(move(left_expr),
+                                CompType::EQ,
+                                move(right_expr));
+      return WhereClauseExpr(move(comp_expr));
+
     } else if (expr->NOT_EQ1() || expr->NOT_EQ2()) {
+      auto left_expr  = make_expr(expr->expr()[0]);
+      auto right_expr = make_expr(expr->expr()[1]);
+
+      auto comp_expr = CompExpr(move(left_expr),
+                                CompType::NE,
+                                move(right_expr));
+      return WhereClauseExpr(move(comp_expr));
+    } else if (expr->K_AND()) {
+      auto left_expr  = make_expr(expr->expr()[0]);
+      auto right_expr = make_expr(expr->expr()[1]);
+
       return WhereClauseExpr(move(left_expr),
-                             CompType::NE,
+                             LogicalType::AND,
                              move(right_expr));
     } else {
-      // TODO: Some types of exprs should not be allowed!
-      // For example, the assignment expression:
-      // > WHERE (a = 5)
-      // should not show up in a WHERE clause
-      // It should instead be
-      // > WHERE (a == 5)
-      // Find a way to weed them out
-      // Perhaps just throw an error? We have a way to catch it
-      // and send it back to the user.
       throw Exception("Other types of WHERE clauses are not yet implemented! :/");
     }
   }

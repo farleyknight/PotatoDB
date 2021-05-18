@@ -47,14 +47,6 @@ public:
 
   ptr<BasePlan> to_plan();
 
-  ptr<BasePlan> from_expr(CreateTableExpr* expr);
-  ptr<BasePlan> from_expr(SelectExpr* expr);
-  ptr<BasePlan> from_expr(InsertExpr* expr);
-  ptr<BasePlan> from_expr(ShowTablesExpr* expr);
-
-  ptr<BaseQuery> to_query_node(const table_name_t name, ptr<BaseExpr>& expr);
-  ptr<QueryComp> to_query_comp(const table_name_t name, ptr<WhereClauseExpr>& clause);
-
 private:
   ptr<BasePlan> build_tuples();
   ptr<BasePlan> build_insert(ptr<BasePlan>&& scan_plan);

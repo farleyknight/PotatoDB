@@ -18,7 +18,8 @@ enum class QueryNodeType {
   AGG      = 4,
   JOIN     = 5,
   GROUP_BY = 6,
-  HAVING   = 7
+  HAVING   = 7,
+  WHERE    = 8
 };
 
 class BaseQuery {
