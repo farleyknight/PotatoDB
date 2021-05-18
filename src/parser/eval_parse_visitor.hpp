@@ -45,13 +45,13 @@ public:
   }
 
   Any visitDescribe_table_stmt(DescribeTableStmtContext *ctx) override {
-    DescribeTableExpr describe_table;
+    auto describe_table = make_unique<DescribeTableExpr>();
     assert(ctx->table_name());
 
     TableExpr table(ctx->table_name()->getText());
-    describe_table.set_table(table);
+    describe_table->set_table(table);
 
-    exprs_.emplace_back(make_unique<DescribeTableExpr>(describe_table));
+    exprs_.emplace_back(describe_table);
 
     return visitChildren(ctx);
   }
@@ -83,17 +83,12 @@ public:
       auto &col_def = def_list.back();
 
       for (auto &constraint : col_def_ctx->column_constraint()) {
-        // std::cout << "CONSTRAINT " << constraint->getText() << std::endl;
-
         if (constraint->not_null()) {
           col_def.is_not_null(true);
         }
 
         if (constraint->primary_key()) {
           col_def.is_primary_key(true);
-          //std::cout << "----------" << std::endl;
-          //std::cout << "Found primary key " << col_def.name() << std::endl;
-          //std::cout << "----------" << std::endl;
           create_table.set_primary_key(col_def.name());
         }
 
@@ -111,7 +106,6 @@ public:
   }
 
   Any visitShow_tables_stmt(ShowTablesStmtContext *ctx) override {
-    ShowTablesExpr show_tables;
     exprs_.emplace_back(make_unique<ShowTablesExpr>());
 
     return visitChildren(ctx);

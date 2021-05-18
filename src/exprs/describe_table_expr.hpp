@@ -17,7 +17,10 @@ public:
     return table_;
   }
 
+  const string to_string() const {
+    return "DESCRIBE TABLE " + table_.to_string();
+  }
 
-private:
+protected:
   TableExpr table_;
 };
