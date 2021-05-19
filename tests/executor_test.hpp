@@ -650,7 +650,7 @@ TEST_F(ExecTest, SimpleAggTest) {
   ASSERT_EQ(result_set->size(), 1);
   auto first_tuple = result_set->results()[0];
 
-  auto countA_val = result_set->value<int32_t>("COUNT()countA", first_tuple);
+  auto countA_val = result_set->value<int32_t>("countA", first_tuple);
   auto sumA_val   = result_set->value<int32_t>("sumA",   first_tuple);
   auto minA_val   = result_set->value<int32_t>("minA",   first_tuple);
   auto maxA_val   = result_set->value<int32_t>("maxA",   first_tuple);
