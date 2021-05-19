@@ -1,12 +1,5 @@
 #pragma once
 
-// TODO: The executor engine and the parser should be tested together
-// We should be able to run the PotatoDB instance, have it parse the
-// queries, and then see the results of it.
-//
-// Basically it's an end-to-end test that is one step away from allowing
-// the server to run and perform a query.
-
 #include "server/potatodb.hpp"
 
 #include "gtest/gtest.h"
@@ -139,15 +132,19 @@ TEST(PotatoDBTest, DropTableTest) {
   EXPECT_EQ(result_set->value_at<string>("table_name", 0), "system_catalog");
 }
 
-
 TEST(PotatoDBTest, TruncateTableTest) {
   PotatoDB db;
   db.reset_installation();
 
+  db.run_statement("CREATE TABLE foo_bar ( colA INTEGER, colB INTEGER )");
+  db.run_statement("INSERT INTO foo_bar VALUES (1, 2)");
+  db.run_statement("TRUNCATE TABLE foo_bar");
 
-  // TODO!
+  auto result = db.run_statement("SELECT * FROM foo_bar");
+  auto &result_set = result.set();
+
+  EXPECT_EQ(result_set->size(), 0);
 }
-
 
 TEST(PotatoDBTest, AlterTableDropColumnTest) {
   // TODO!
