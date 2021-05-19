@@ -3,22 +3,28 @@
 #include "PotatoSQLBaseVisitor.h"
 
 #include "common/types.hpp"
+
 #include "exprs/show_tables_expr.hpp"
+#include "exprs/describe_table_expr.hpp"
 #include "exprs/insert_expr.hpp"
 #include "exprs/select_expr.hpp"
+#include "exprs/where_clause_expr.hpp"
 #include "exprs/create_table_expr.hpp"
+#include "exprs/comp_expr.hpp"
 
 using antlrcpp::Any;
 using potatosql::PotatoSQLBaseVisitor;
 using potatosql::PotatoSQLParser;
 
 // TODO: Rename these! Not a fan of underscores in class names
-using SelectStmtContext      = PotatoSQLParser::Select_stmtContext;
-using CreateTableStmtContext = PotatoSQLParser::Create_table_stmtContext;
-using ShowTablesStmtContext  = PotatoSQLParser::Show_tables_stmtContext;
-using InsertStmtContext      = PotatoSQLParser::Insert_stmtContext;
-using SelectCoreContext      = PotatoSQLParser::Select_coreContext;
-using ExprContext            = PotatoSQLParser::ExprContext;
+using SelectStmtContext         = PotatoSQLParser::Select_stmtContext;
+using CreateTableStmtContext    = PotatoSQLParser::Create_table_stmtContext;
+using ShowTablesStmtContext     = PotatoSQLParser::Show_tables_stmtContext;
+using DescribeTableStmtContext  = PotatoSQLParser::Describe_table_stmtContext;
+using InsertStmtContext         = PotatoSQLParser::Insert_stmtContext;
+using SelectCoreContext         = PotatoSQLParser::Select_coreContext;
+using ExprContext               = PotatoSQLParser::ExprContext;
+using WhereClauseContext        = PotatoSQLParser::Where_clauseContext;
 
 class EvalParseVisitor : public PotatoSQLBaseVisitor {
 private:
@@ -36,6 +42,24 @@ public:
 
   Any visitSelect_stmt(SelectStmtContext *ctx) override {
     // TODO?
+    return visitChildren(ctx);
+  }
+
+  Any visitShow_tables_stmt(ShowTablesStmtContext *ctx) override {
+    exprs_.emplace_back(make_unique<ShowTablesExpr>());
+
+    return visitChildren(ctx);
+  }
+
+  Any visitDescribe_table_stmt(DescribeTableStmtContext *ctx) override {
+    auto describe_table = make_unique<DescribeTableExpr>();
+    assert(ctx->table_name());
+
+    TableExpr table(ctx->table_name()->getText());
+    describe_table->set_table(table);
+
+    exprs_.emplace_back(move(describe_table));
+
     return visitChildren(ctx);
   }
 
@@ -66,10 +90,17 @@ public:
       auto &col_def = def_list.back();
 
       for (auto &constraint : col_def_ctx->column_constraint()) {
-        if (constraint->getText() == "NOTNULL") {
+        if (constraint->not_null()) {
           col_def.is_not_null(true);
-        } else if (constraint->getText() == "PRIMARYKEY") {
+        }
+
+        if (constraint->primary_key()) {
           col_def.is_primary_key(true);
+          create_table.set_primary_key(col_def.name());
+        }
+
+        if (constraint->autoincrement()) {
+          col_def.is_auto_increment(true);
         }
       }
     }
@@ -81,11 +112,21 @@ public:
     return visitChildren(ctx);
   }
 
-  Any visitShow_tables_stmt(ShowTablesStmtContext *ctx) override {
-    ShowTablesExpr show_tables;
-    exprs_.emplace_back(make_unique<ShowTablesExpr>());
+  ValueExpr make_value_expr(ExprContext* expr_ctx) const {
+    if (expr_ctx->literal_value() != nullptr) {
+      auto literal_ctx = expr_ctx->literal_value();
 
-    return visitChildren(ctx);
+      if (literal_ctx->NUMERIC_LITERAL() != nullptr) {
+        return ValueExpr(ValueType::NUMERIC, literal_ctx->getText());
+      } else if (literal_ctx->STRING_LITERAL() != nullptr) {
+        auto text = literal_ctx->getText();
+        return ValueExpr(ValueType::STRING, text.substr(1, text.size()-2));
+      } else {
+        return ValueExpr(expr_ctx->getText());
+      }
+    } else {
+      return ValueExpr(expr_ctx->getText());
+    }
   }
 
   Any visitInsert_stmt(InsertStmtContext *ctx) override {
@@ -112,8 +153,7 @@ public:
     for (auto &tuple_ctx : tuple_list_ctx->insert_tuple()) {
       TupleExpr tuple;
       for (auto &expr_ctx : tuple_ctx->expr()) {
-        ValueExpr value(expr_ctx->getText());
-        tuple.push_back(value);
+        tuple.push_back(make_value_expr(expr_ctx));
       }
       tuples.push_back(tuple);
     }
@@ -122,6 +162,65 @@ public:
     exprs_.emplace_back(make_unique<InsertExpr>(insert));
 
     return visitChildren(ctx);
+  }
+
+  ptr<BaseExpr> make_expr(ExprContext *ctx) {
+    if (ctx->column_name()) {
+      return make_unique<ColumnExpr>(ctx->column_name()->getText());
+    } else if (ctx->literal_value()) {
+      auto value_ctx = ctx->literal_value();
+      if (value_ctx->NUMERIC_LITERAL()) {
+        return make_unique<ValueExpr>(ValueType::NUMERIC, value_ctx->getText());
+      } else if (value_ctx->STRING_LITERAL()) {
+        auto string_value = value_ctx->getText();
+        return make_unique<ValueExpr>(ValueType::STRING, string_value.substr(1, string_value.size()-2));
+      }
+    } else if (ctx->EQ()) {
+      auto left_expr  = make_expr(ctx->expr()[0]);
+      auto right_expr = make_expr(ctx->expr()[1]);
+
+      return make_unique<CompExpr>(move(left_expr),
+                                   CompType::EQ,
+                                   move(right_expr));
+    }
+
+    throw Exception("not all of it implemented yet :/");
+  }
+
+  WhereClauseExpr make_where_clause_expr(WhereClauseContext *ctx) {
+    auto expr = ctx->expr();
+
+    std::cout << "expr as string " << expr->getText() << std::endl;
+
+    // NOTE: We may have to support WHERE (a = 5)
+    // I believe MySQL treats this as (a == 5)
+    if (expr->EQ()) {
+      auto left_expr  = make_expr(expr->expr()[0]);
+      auto right_expr = make_expr(expr->expr()[1]);
+
+      auto comp_expr = make_unique<CompExpr>(move(left_expr),
+                                             CompType::EQ,
+                                             move(right_expr));
+      return WhereClauseExpr(move(comp_expr));
+
+    } else if (expr->NOT_EQ1() || expr->NOT_EQ2()) {
+      auto left_expr  = make_expr(expr->expr()[0]);
+      auto right_expr = make_expr(expr->expr()[1]);
+
+      auto comp_expr = make_unique<CompExpr>(move(left_expr),
+                                             CompType::NE,
+                                             move(right_expr));
+      return WhereClauseExpr(move(comp_expr));
+    } else if (expr->K_AND()) {
+      auto left_expr  = make_expr(expr->expr()[0]);
+      auto right_expr = make_expr(expr->expr()[1]);
+
+      return WhereClauseExpr(move(left_expr),
+                             LogicalType::AND,
+                             move(right_expr));
+    } else {
+      throw Exception("Other types of WHERE clauses are not yet implemented! :/");
+    }
   }
 
   Any visitSelect_core(SelectCoreContext *ctx) override {
@@ -157,7 +256,13 @@ public:
     select.set_columns(cols);
     select.set_tables(tables);
 
-    exprs_.emplace_back(make_unique<SelectExpr>(select));
+    if (ctx->where_clause() != nullptr) {
+      auto where_clause = make_where_clause_expr(ctx->where_clause());
+      auto where_clause_ptr = make_unique<WhereClauseExpr>(move(where_clause));
+      select.set_where(move(where_clause_ptr));
+    }
+    auto select_ptr = make_unique<SelectExpr>(move(select));
+    exprs_.emplace_back(move(select_ptr));
 
     return visitChildren(ctx);
   }

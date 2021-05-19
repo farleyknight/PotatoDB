@@ -32,6 +32,7 @@ sql_stmt
                                       | create_virtual_table_stmt
                                       | delete_stmt
                                       | delete_stmt_limited
+                                      | describe_table_stmt 
                                       | detach_stmt
                                       | drop_index_stmt
                                       | drop_table_stmt
@@ -63,9 +64,13 @@ show_tables_stmt
     : K_SHOW K_TABLES
     ;
 
+describe_table_stmt
+    : K_DESCRIBE K_TABLE table_name
+    ;
+
 analyze_stmt
- : K_ANALYZE ( database_name | table_or_index_name | database_name '.' table_or_index_name )?
- ;
+    : K_ANALYZE ( database_name | table_or_index_name | database_name '.' table_or_index_name )?
+    ;
 
 attach_stmt
  : K_ATTACH K_DATABASE? expr K_AS database_name
@@ -272,8 +277,8 @@ type_name
 
 column_constraint
  : ( K_CONSTRAINT name )?
-   ( K_PRIMARY K_KEY ( K_ASC | K_DESC )? conflict_clause K_AUTOINCREMENT?
-   | K_NOT? K_NULL conflict_clause
+   ( primary_key ( K_ASC | K_DESC )? conflict_clause autoincrement?
+   | not_null conflict_clause
    | K_UNIQUE conflict_clause
    | K_CHECK '(' expr ')'
    | K_DEFAULT (signed_number | literal_value | '(' expr ')')
@@ -281,6 +286,16 @@ column_constraint
    | foreign_key_clause
    )
  ;
+
+
+not_null
+    : K_NOT K_NULL;
+
+primary_key
+    : K_PRIMARY K_KEY;
+
+autoincrement
+    : K_AUTOINCREMENT;
 
 conflict_clause
  : ( K_ON K_CONFLICT ( K_ROLLBACK
@@ -306,6 +321,8 @@ conflict_clause
     OR
 */
 
+// main expr
+
 expr
  : literal_value
  | BIND_PARAMETER
@@ -315,8 +332,8 @@ expr
  | expr ( '*' | '/' | '%' ) expr
  | expr ( '+' | '-' ) expr
  | expr ( '<<' | '>>' | '&' | '|' ) expr
- | expr ( '<' | '<=' | '>' | '>=' ) expr
- | expr ( '=' | '==' | '!=' | NOT_EQ2 ) expr
+ | expr ( LT | LT_EQ | GT | GT_EQ ) expr
+ | expr ( ASSIGN | EQ | NOT_EQ1 | NOT_EQ2 ) expr
  | expr K_NOT? K_IN ( '(' ( select_stmt
                           | expr ( ',' expr )*
                           )?
@@ -419,30 +436,36 @@ join_operator
  ;
 
 join_constraint
- : ( K_ON expr
-   | K_USING '(' column_name ( ',' column_name )* ')' )?
- ;
+    : ( K_ON expr
+      | K_USING '(' column_name ( ',' column_name )* ')' )?
+    ;
 
-column_list: result_column ( ',' result_column )*;
+column_list
+    : result_column (',' result_column )*
+    ;
 
 select_core
- : K_SELECT ( K_DISTINCT | K_ALL )? column_list
-   ( K_FROM ( table_or_subquery ( ',' table_or_subquery )* | join_clause ) )?
-   ( K_WHERE expr )?
-   ( K_GROUP K_BY expr ( ',' expr )* ( K_HAVING expr )? )?
- | K_VALUES '(' expr ( ',' expr )* ')' ( ',' '(' expr ( ',' expr )* ')' )*
- ;
+    : K_SELECT ( K_DISTINCT | K_ALL )? column_list
+        ( K_FROM ( table_or_subquery ( ',' table_or_subquery )* | join_clause ) )?
+        ( K_WHERE where_clause )?
+        ( K_GROUP K_BY expr ( ',' expr )* ( K_HAVING expr )? )?
+    | K_VALUES '(' expr ( ',' expr )* ')' ( ',' '(' expr ( ',' expr )* ')' )*
+    ;
+
+where_clause
+    : expr
+    ;
 
 compound_operator
- : K_UNION
- | K_UNION K_ALL
- | K_INTERSECT
- | K_EXCEPT
- ;
+    : K_UNION
+    | K_UNION K_ALL
+    | K_INTERSECT
+    | K_EXCEPT
+    ;
 
 signed_number
- : ( '+' | '-' )? NUMERIC_LITERAL
- ;
+    : ( '+' | '-' )? NUMERIC_LITERAL
+    ;
 
 literal_value
  : NUMERIC_LITERAL
@@ -752,6 +775,7 @@ K_DEFERRABLE : D E F E R R A B L E;
 K_DEFERRED : D E F E R R E D;
 K_DELETE : D E L E T E;
 K_DESC : D E S C;
+K_DESCRIBE : D E S C R I B E;
 K_DETACH : D E T A C H;
 K_DISTINCT : D I S T I N C T;
 K_DROP : D R O P;

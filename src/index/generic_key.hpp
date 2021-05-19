@@ -51,19 +51,19 @@ public:
     data_.write_int64(0, key);
   }
 
-  Value to_value(const QuerySchema& schema, size_t index) const {
+  Value to_value(const QuerySchema& schema, column_index_t index) const {
     size_t offset = 0;
     const auto &col = schema.by_column_oid(index);
     const TypeId column_type = col.type_id();
     const bool is_inlined = col.is_inlined();
     if (is_inlined) {
-      offset = schema.offset_for(index);
+      offset = schema.buffer_offset_for(index);
     } else {
-      auto schema_offset = schema.offset_for(index);
+      auto schema_offset = schema.buffer_offset_for(index);
       auto index_offset =
-        *reinterpret_cast<const int32_t *>(data_.cptr(schema_offset));
+        *reinterpret_cast<const buffer_offset_t *>(data_.cptr(schema_offset));
       offset =
-        *reinterpret_cast<const int32_t *>(data_.cptr(index_offset));
+        *reinterpret_cast<const buffer_offset_t *>(data_.cptr(index_offset));
     }
     return Value::deserialize_from(offset, data_, column_type);
   }

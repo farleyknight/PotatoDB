@@ -24,59 +24,59 @@ public:
     K_COMMIT = 47, K_CONFLICT = 48, K_CONSTRAINT = 49, K_CREATE = 50, K_CROSS = 51, 
     K_CURRENT_DATE = 52, K_CURRENT_TIME = 53, K_CURRENT_TIMESTAMP = 54, 
     K_DATABASE = 55, K_DEFAULT = 56, K_DEFERRABLE = 57, K_DEFERRED = 58, 
-    K_DELETE = 59, K_DESC = 60, K_DETACH = 61, K_DISTINCT = 62, K_DROP = 63, 
-    K_EACH = 64, K_ELSE = 65, K_END = 66, K_ESCAPE = 67, K_EXCEPT = 68, 
-    K_EXCLUSIVE = 69, K_EXISTS = 70, K_EXPLAIN = 71, K_FAIL = 72, K_FOR = 73, 
-    K_FOREIGN = 74, K_FROM = 75, K_FULL = 76, K_GLOB = 77, K_GROUP = 78, 
-    K_HAVING = 79, K_IF = 80, K_IGNORE = 81, K_IMMEDIATE = 82, K_IN = 83, 
-    K_INDEX = 84, K_INDEXED = 85, K_INITIALLY = 86, K_INNER = 87, K_INSERT = 88, 
-    K_INSTEAD = 89, K_INTERSECT = 90, K_INTO = 91, K_IS = 92, K_ISNULL = 93, 
-    K_JOIN = 94, K_KEY = 95, K_LEFT = 96, K_LIKE = 97, K_LIMIT = 98, K_MATCH = 99, 
-    K_NATURAL = 100, K_NO = 101, K_NOT = 102, K_NOTNULL = 103, K_NULL = 104, 
-    K_OF = 105, K_OFFSET = 106, K_ON = 107, K_OR = 108, K_ORDER = 109, K_OUTER = 110, 
-    K_PLAN = 111, K_PRAGMA = 112, K_PRIMARY = 113, K_QUERY = 114, K_RAISE = 115, 
-    K_RECURSIVE = 116, K_REFERENCES = 117, K_REGEXP = 118, K_REINDEX = 119, 
-    K_RELEASE = 120, K_RENAME = 121, K_REPLACE = 122, K_RESTRICT = 123, 
-    K_RIGHT = 124, K_ROLLBACK = 125, K_ROW = 126, K_SAVEPOINT = 127, K_SELECT = 128, 
-    K_SET = 129, K_SHOW = 130, K_TABLE = 131, K_TABLES = 132, K_TEMP = 133, 
-    K_TEMPORARY = 134, K_THEN = 135, K_TO = 136, K_TRANSACTION = 137, K_TRIGGER = 138, 
-    K_UNION = 139, K_UNIQUE = 140, K_UPDATE = 141, K_USING = 142, K_VACUUM = 143, 
-    K_VALUES = 144, K_VIEW = 145, K_VIRTUAL = 146, K_WHEN = 147, K_WHERE = 148, 
-    K_WITH = 149, K_WITHOUT = 150, IDENTIFIER = 151, NUMERIC_LITERAL = 152, 
-    BIND_PARAMETER = 153, STRING_LITERAL = 154, BLOB_LITERAL = 155, SINGLE_LINE_COMMENT = 156, 
-    MULTILINE_COMMENT = 157, SPACES = 158, UNEXPECTED_CHAR = 159
+    K_DELETE = 59, K_DESC = 60, K_DESCRIBE = 61, K_DETACH = 62, K_DISTINCT = 63, 
+    K_DROP = 64, K_EACH = 65, K_ELSE = 66, K_END = 67, K_ESCAPE = 68, K_EXCEPT = 69, 
+    K_EXCLUSIVE = 70, K_EXISTS = 71, K_EXPLAIN = 72, K_FAIL = 73, K_FOR = 74, 
+    K_FOREIGN = 75, K_FROM = 76, K_FULL = 77, K_GLOB = 78, K_GROUP = 79, 
+    K_HAVING = 80, K_IF = 81, K_IGNORE = 82, K_IMMEDIATE = 83, K_IN = 84, 
+    K_INDEX = 85, K_INDEXED = 86, K_INITIALLY = 87, K_INNER = 88, K_INSERT = 89, 
+    K_INSTEAD = 90, K_INTERSECT = 91, K_INTO = 92, K_IS = 93, K_ISNULL = 94, 
+    K_JOIN = 95, K_KEY = 96, K_LEFT = 97, K_LIKE = 98, K_LIMIT = 99, K_MATCH = 100, 
+    K_NATURAL = 101, K_NO = 102, K_NOT = 103, K_NOTNULL = 104, K_NULL = 105, 
+    K_OF = 106, K_OFFSET = 107, K_ON = 108, K_OR = 109, K_ORDER = 110, K_OUTER = 111, 
+    K_PLAN = 112, K_PRAGMA = 113, K_PRIMARY = 114, K_QUERY = 115, K_RAISE = 116, 
+    K_RECURSIVE = 117, K_REFERENCES = 118, K_REGEXP = 119, K_REINDEX = 120, 
+    K_RELEASE = 121, K_RENAME = 122, K_REPLACE = 123, K_RESTRICT = 124, 
+    K_RIGHT = 125, K_ROLLBACK = 126, K_ROW = 127, K_SAVEPOINT = 128, K_SELECT = 129, 
+    K_SET = 130, K_SHOW = 131, K_TABLE = 132, K_TABLES = 133, K_TEMP = 134, 
+    K_TEMPORARY = 135, K_THEN = 136, K_TO = 137, K_TRANSACTION = 138, K_TRIGGER = 139, 
+    K_UNION = 140, K_UNIQUE = 141, K_UPDATE = 142, K_USING = 143, K_VACUUM = 144, 
+    K_VALUES = 145, K_VIEW = 146, K_VIRTUAL = 147, K_WHEN = 148, K_WHERE = 149, 
+    K_WITH = 150, K_WITHOUT = 151, IDENTIFIER = 152, NUMERIC_LITERAL = 153, 
+    BIND_PARAMETER = 154, STRING_LITERAL = 155, BLOB_LITERAL = 156, SINGLE_LINE_COMMENT = 157, 
+    MULTILINE_COMMENT = 158, SPACES = 159, UNEXPECTED_CHAR = 160
   };
 
   enum {
     RuleMain = 0, RuleError = 1, RuleSql_stmt_list = 2, RuleSql_stmt = 3, 
-    RuleAlter_table_stmt = 4, RuleShow_tables_stmt = 5, RuleAnalyze_stmt = 6, 
-    RuleAttach_stmt = 7, RuleBegin_stmt = 8, RuleCommit_stmt = 9, RuleCompound_select_stmt = 10, 
-    RuleCreate_index_stmt = 11, RuleCreate_table_stmt = 12, RuleCreate_trigger_stmt = 13, 
-    RuleCreate_view_stmt = 14, RuleCreate_virtual_table_stmt = 15, RuleDelete_stmt = 16, 
-    RuleDelete_stmt_limited = 17, RuleDetach_stmt = 18, RuleDrop_index_stmt = 19, 
-    RuleDrop_table_stmt = 20, RuleDrop_trigger_stmt = 21, RuleDrop_view_stmt = 22, 
-    RuleFactored_select_stmt = 23, RuleInsert_prefix = 24, RuleInsert_tuple = 25, 
-    RuleInsert_tuples = 26, RuleInsert_columns = 27, RuleInsert_stmt = 28, 
-    RulePragma_stmt = 29, RuleReindex_stmt = 30, RuleRelease_stmt = 31, 
-    RuleRollback_stmt = 32, RuleSavepoint_stmt = 33, RuleSimple_select_stmt = 34, 
-    RuleSelect_stmt = 35, RuleSelect_or_values = 36, RuleUpdate_stmt = 37, 
-    RuleUpdate_stmt_limited = 38, RuleVacuum_stmt = 39, RuleColumn_def = 40, 
-    RuleType_name = 41, RuleColumn_constraint = 42, RuleConflict_clause = 43, 
-    RuleExpr = 44, RuleForeign_key_clause = 45, RuleRaise_function = 46, 
-    RuleIndexed_column = 47, RuleTable_constraint = 48, RuleWith_clause = 49, 
-    RuleQualified_table_name = 50, RuleOrdering_term = 51, RulePragma_value = 52, 
-    RuleCommon_table_expression = 53, RuleResult_column = 54, RuleTable_or_subquery = 55, 
-    RuleJoin_clause = 56, RuleJoin_operator = 57, RuleJoin_constraint = 58, 
-    RuleColumn_list = 59, RuleSelect_core = 60, RuleCompound_operator = 61, 
-    RuleSigned_number = 62, RuleLiteral_value = 63, RuleUnary_operator = 64, 
-    RuleError_message = 65, RuleModule_argument = 66, RuleColumn_alias = 67, 
-    RuleKeyword = 68, RuleName = 69, RuleFunction_name = 70, RuleDatabase_name = 71, 
-    RuleSchema_name = 72, RuleTable_function_name = 73, RuleTable_name = 74, 
-    RuleTable_or_index_name = 75, RuleNew_table_name = 76, RuleColumn_name = 77, 
-    RuleCollation_name = 78, RuleForeign_table = 79, RuleIndex_name = 80, 
-    RuleTrigger_name = 81, RuleView_name = 82, RuleModule_name = 83, RulePragma_name = 84, 
-    RuleSavepoint_name = 85, RuleTable_alias = 86, RuleTransaction_name = 87, 
-    RuleAny_name = 88
+    RuleAlter_table_stmt = 4, RuleShow_tables_stmt = 5, RuleDescribe_table_stmt = 6, 
+    RuleAnalyze_stmt = 7, RuleAttach_stmt = 8, RuleBegin_stmt = 9, RuleCommit_stmt = 10, 
+    RuleCompound_select_stmt = 11, RuleCreate_index_stmt = 12, RuleCreate_table_stmt = 13, 
+    RuleCreate_trigger_stmt = 14, RuleCreate_view_stmt = 15, RuleCreate_virtual_table_stmt = 16, 
+    RuleDelete_stmt = 17, RuleDelete_stmt_limited = 18, RuleDetach_stmt = 19, 
+    RuleDrop_index_stmt = 20, RuleDrop_table_stmt = 21, RuleDrop_trigger_stmt = 22, 
+    RuleDrop_view_stmt = 23, RuleFactored_select_stmt = 24, RuleInsert_prefix = 25, 
+    RuleInsert_tuple = 26, RuleInsert_tuples = 27, RuleInsert_columns = 28, 
+    RuleInsert_stmt = 29, RulePragma_stmt = 30, RuleReindex_stmt = 31, RuleRelease_stmt = 32, 
+    RuleRollback_stmt = 33, RuleSavepoint_stmt = 34, RuleSimple_select_stmt = 35, 
+    RuleSelect_stmt = 36, RuleSelect_or_values = 37, RuleUpdate_stmt = 38, 
+    RuleUpdate_stmt_limited = 39, RuleVacuum_stmt = 40, RuleColumn_def = 41, 
+    RuleType_name = 42, RuleColumn_constraint = 43, RuleNot_null = 44, RulePrimary_key = 45, 
+    RuleAutoincrement = 46, RuleConflict_clause = 47, RuleExpr = 48, RuleForeign_key_clause = 49, 
+    RuleRaise_function = 50, RuleIndexed_column = 51, RuleTable_constraint = 52, 
+    RuleWith_clause = 53, RuleQualified_table_name = 54, RuleOrdering_term = 55, 
+    RulePragma_value = 56, RuleCommon_table_expression = 57, RuleResult_column = 58, 
+    RuleTable_or_subquery = 59, RuleJoin_clause = 60, RuleJoin_operator = 61, 
+    RuleJoin_constraint = 62, RuleColumn_list = 63, RuleSelect_core = 64, 
+    RuleWhere_clause = 65, RuleCompound_operator = 66, RuleSigned_number = 67, 
+    RuleLiteral_value = 68, RuleUnary_operator = 69, RuleError_message = 70, 
+    RuleModule_argument = 71, RuleColumn_alias = 72, RuleKeyword = 73, RuleName = 74, 
+    RuleFunction_name = 75, RuleDatabase_name = 76, RuleSchema_name = 77, 
+    RuleTable_function_name = 78, RuleTable_name = 79, RuleTable_or_index_name = 80, 
+    RuleNew_table_name = 81, RuleColumn_name = 82, RuleCollation_name = 83, 
+    RuleForeign_table = 84, RuleIndex_name = 85, RuleTrigger_name = 86, 
+    RuleView_name = 87, RuleModule_name = 88, RulePragma_name = 89, RuleSavepoint_name = 90, 
+    RuleTable_alias = 91, RuleTransaction_name = 92, RuleAny_name = 93
   };
 
   explicit PotatoSQLParser(antlr4::TokenStream *input);
@@ -95,6 +95,7 @@ public:
   class Sql_stmtContext;
   class Alter_table_stmtContext;
   class Show_tables_stmtContext;
+  class Describe_table_stmtContext;
   class Analyze_stmtContext;
   class Attach_stmtContext;
   class Begin_stmtContext;
@@ -132,6 +133,9 @@ public:
   class Column_defContext;
   class Type_nameContext;
   class Column_constraintContext;
+  class Not_nullContext;
+  class Primary_keyContext;
+  class AutoincrementContext;
   class Conflict_clauseContext;
   class ExprContext;
   class Foreign_key_clauseContext;
@@ -150,6 +154,7 @@ public:
   class Join_constraintContext;
   class Column_listContext;
   class Select_coreContext;
+  class Where_clauseContext;
   class Compound_operatorContext;
   class Signed_numberContext;
   class Literal_valueContext;
@@ -249,6 +254,7 @@ public:
     Create_virtual_table_stmtContext *create_virtual_table_stmt();
     Delete_stmtContext *delete_stmt();
     Delete_stmt_limitedContext *delete_stmt_limited();
+    Describe_table_stmtContext *describe_table_stmt();
     Detach_stmtContext *detach_stmt();
     Drop_index_stmtContext *drop_index_stmt();
     Drop_table_stmtContext *drop_table_stmt();
@@ -320,6 +326,23 @@ public:
   };
 
   Show_tables_stmtContext* show_tables_stmt();
+
+  class  Describe_table_stmtContext : public antlr4::ParserRuleContext {
+  public:
+    Describe_table_stmtContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *K_DESCRIBE();
+    antlr4::tree::TerminalNode *K_TABLE();
+    Table_nameContext *table_name();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  Describe_table_stmtContext* describe_table_stmt();
 
   class  Analyze_stmtContext : public antlr4::ParserRuleContext {
   public:
@@ -1213,10 +1236,9 @@ public:
   public:
     Column_constraintContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    antlr4::tree::TerminalNode *K_PRIMARY();
-    antlr4::tree::TerminalNode *K_KEY();
+    Primary_keyContext *primary_key();
     Conflict_clauseContext *conflict_clause();
-    antlr4::tree::TerminalNode *K_NULL();
+    Not_nullContext *not_null();
     antlr4::tree::TerminalNode *K_UNIQUE();
     antlr4::tree::TerminalNode *K_CHECK();
     antlr4::tree::TerminalNode *OPEN_PAR();
@@ -1230,8 +1252,7 @@ public:
     NameContext *name();
     Signed_numberContext *signed_number();
     Literal_valueContext *literal_value();
-    antlr4::tree::TerminalNode *K_AUTOINCREMENT();
-    antlr4::tree::TerminalNode *K_NOT();
+    AutoincrementContext *autoincrement();
     antlr4::tree::TerminalNode *K_ASC();
     antlr4::tree::TerminalNode *K_DESC();
 
@@ -1243,6 +1264,53 @@ public:
   };
 
   Column_constraintContext* column_constraint();
+
+  class  Not_nullContext : public antlr4::ParserRuleContext {
+  public:
+    Not_nullContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *K_NOT();
+    antlr4::tree::TerminalNode *K_NULL();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  Not_nullContext* not_null();
+
+  class  Primary_keyContext : public antlr4::ParserRuleContext {
+  public:
+    Primary_keyContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *K_PRIMARY();
+    antlr4::tree::TerminalNode *K_KEY();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  Primary_keyContext* primary_key();
+
+  class  AutoincrementContext : public antlr4::ParserRuleContext {
+  public:
+    AutoincrementContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *K_AUTOINCREMENT();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  AutoincrementContext* autoincrement();
 
   class  Conflict_clauseContext : public antlr4::ParserRuleContext {
   public:
@@ -1713,10 +1781,11 @@ public:
     Column_listContext *column_list();
     antlr4::tree::TerminalNode *K_FROM();
     antlr4::tree::TerminalNode *K_WHERE();
-    std::vector<ExprContext *> expr();
-    ExprContext* expr(size_t i);
+    Where_clauseContext *where_clause();
     antlr4::tree::TerminalNode *K_GROUP();
     antlr4::tree::TerminalNode *K_BY();
+    std::vector<ExprContext *> expr();
+    ExprContext* expr(size_t i);
     antlr4::tree::TerminalNode *K_DISTINCT();
     antlr4::tree::TerminalNode *K_ALL();
     std::vector<Table_or_subqueryContext *> table_or_subquery();
@@ -1739,6 +1808,21 @@ public:
   };
 
   Select_coreContext* select_core();
+
+  class  Where_clauseContext : public antlr4::ParserRuleContext {
+  public:
+    Where_clauseContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    ExprContext *expr();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  Where_clauseContext* where_clause();
 
   class  Compound_operatorContext : public antlr4::ParserRuleContext {
   public:

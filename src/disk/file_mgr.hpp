@@ -29,6 +29,14 @@ public:
     return file_id;
   }
 
+  void remove_file(fs::path file_path) const {
+    fs::remove(file_path);
+  }
+
+  bool file_exists(fs::path file_path) const {
+    return fs::exists(file_path);
+  }
+
 private:
   map<file_id_t, block_id_t> next_block_ids_;
   vector<ptr<FileHandle>> files_;

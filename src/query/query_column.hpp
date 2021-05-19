@@ -34,19 +34,19 @@ public:
                        col.name());
   }
 
-  Value eval(UNUSED const Tuple& tuple,
-             UNUSED const QuerySchema& schema) const override;
+  Value eval(const Tuple& tuple,
+             const QuerySchema& schema) const override;
 
-  Value eval_join(UNUSED const Tuple& lt,
-                  UNUSED const QuerySchema& ls,
-                  UNUSED const Tuple& rt,
-                  UNUSED const QuerySchema& rs) const override;
+  Value eval_join(const Tuple& lt,
+                  const QuerySchema& ls,
+                  const Tuple& rt,
+                  const QuerySchema& rs) const override;
 
-  Value eval_agg(UNUSED const QuerySchema& schema,
-                 UNUSED const vector<Value>& group_bys,
-                 UNUSED const vector<Value>& aggs) const override;
+  Value eval_agg(const QuerySchema& schema,
+                 const vector<Value>& group_bys,
+                 const vector<Value>& aggs) const override;
 
-  string name() const {
+  const string name() const {
     return name_;
   }
 
@@ -54,12 +54,11 @@ public:
     return type_id_ != TypeId::VARCHAR;
   }
 
-  offset_t fixed_length() {
-    auto size = Type::size_of(type_id_);
-    return size;
+  size_t fixed_length() {
+    return Type::size_of(type_id_);
   }
 
-  offset_t variable_length() const {
+  size_t variable_length() const {
     return 0; // TODO!
   }
 

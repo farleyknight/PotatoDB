@@ -10,7 +10,8 @@ public:
 
   BufferRW() {}
 
-  void write_string(Buffer& buff, string s) {
+  void write_string(Buffer& buff, const string s) {
+    // std::cout << "Using write_string" << std::endl;
     encoder_.write_string(buff, s);
   }
 

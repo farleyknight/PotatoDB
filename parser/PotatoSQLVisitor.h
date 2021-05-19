@@ -32,6 +32,8 @@ public:
 
     virtual antlrcpp::Any visitShow_tables_stmt(PotatoSQLParser::Show_tables_stmtContext *context) = 0;
 
+    virtual antlrcpp::Any visitDescribe_table_stmt(PotatoSQLParser::Describe_table_stmtContext *context) = 0;
+
     virtual antlrcpp::Any visitAnalyze_stmt(PotatoSQLParser::Analyze_stmtContext *context) = 0;
 
     virtual antlrcpp::Any visitAttach_stmt(PotatoSQLParser::Attach_stmtContext *context) = 0;
@@ -106,6 +108,12 @@ public:
 
     virtual antlrcpp::Any visitColumn_constraint(PotatoSQLParser::Column_constraintContext *context) = 0;
 
+    virtual antlrcpp::Any visitNot_null(PotatoSQLParser::Not_nullContext *context) = 0;
+
+    virtual antlrcpp::Any visitPrimary_key(PotatoSQLParser::Primary_keyContext *context) = 0;
+
+    virtual antlrcpp::Any visitAutoincrement(PotatoSQLParser::AutoincrementContext *context) = 0;
+
     virtual antlrcpp::Any visitConflict_clause(PotatoSQLParser::Conflict_clauseContext *context) = 0;
 
     virtual antlrcpp::Any visitExpr(PotatoSQLParser::ExprContext *context) = 0;
@@ -141,6 +149,8 @@ public:
     virtual antlrcpp::Any visitColumn_list(PotatoSQLParser::Column_listContext *context) = 0;
 
     virtual antlrcpp::Any visitSelect_core(PotatoSQLParser::Select_coreContext *context) = 0;
+
+    virtual antlrcpp::Any visitWhere_clause(PotatoSQLParser::Where_clauseContext *context) = 0;
 
     virtual antlrcpp::Any visitCompound_operator(PotatoSQLParser::Compound_operatorContext *context) = 0;
 

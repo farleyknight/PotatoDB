@@ -83,8 +83,6 @@ private:
     return data.val;
   }
 
-  using string_size_t = Buffer::string_size_t;
-
   void write_string(Buffer& buff, string s) {
     assert(s.size() < std::numeric_limits<string_size_t>::max());
     int8_t string_size = s.size();
@@ -93,7 +91,9 @@ private:
     buff.data_[0] = string_size;
     const char *c_string = s.c_str();
 
-    for (size_t i = 0; i < s.size(); ++i) {
+    std::cout << "Got c_string " << c_string << std::endl;
+
+    for (size_t i = 0; i <= s.size(); ++i) {
       buff.data_[i + sizeof(string_size_t)] = c_string[i];
     }
   }

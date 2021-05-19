@@ -12,7 +12,7 @@ class SeqScanPlan : public BasePlan,
                     public MaybePredPlan
 {
 public:
-  SeqScanPlan(QuerySchema schema, table_oid_t table_oid, ptr<QueryComp>&& pred)
+  SeqScanPlan(QuerySchema schema, table_oid_t table_oid, ptr<QueryWhere>&& pred)
     : BasePlan      (PlanType::TABLE_SCAN),
       TablePlan     (table_oid),
       SchemaPlan    (schema),

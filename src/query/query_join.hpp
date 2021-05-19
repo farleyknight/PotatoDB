@@ -72,7 +72,7 @@ public:
 
     return os.str();
   }
-  size_t column_index(const QuerySchema& schema) const;
+  column_index_t column_index(const QuerySchema& schema) const;
 
   JoinSide side() const  {
     return join_side_;

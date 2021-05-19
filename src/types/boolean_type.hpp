@@ -12,7 +12,7 @@ public:
     return TypeId::BOOLEAN;
   }
 
-  size_t size() const override {
+  buffer_offset_t size() const override {
     return sizeof(bool);
   }
 
@@ -25,12 +25,12 @@ public:
   }
 
   // TODO: Rename to `write_to`
-  void serialize_to(size_t offset, Buffer& buff, Value val) const override {
+  void serialize_to(buffer_offset_t offset, Buffer& buff, Value val) const override {
     buff.write_bool(offset, val.as<bool>());
   }
 
   // TODO: Rename to `read_from`
-  Value deserialize_from(size_t offset, const Buffer& buff) const override {
+  Value deserialize_from(buffer_offset_t offset, const Buffer& buff) const override {
     return Value::make(buff.read_bool(offset));
   }
 
@@ -56,8 +56,13 @@ public:
     }
   }
 
-  Value cast_as(UNUSED const Value& value,
-                UNUSED TypeId type_id) const override {
-    throw Exception("Not implemented yet for BooleanType");
+  Value cast_as(const Value& value,
+                TypeId type_id) const override {
+    switch (type_id) {
+    case TypeId::BOOLEAN:
+      return value;
+    default:
+      throw Exception("Not implemented yet for BooleanType into " + Type::as_string(type_id));
+    }
   }
 };

@@ -1,16 +1,16 @@
-
 #include "value/value.hpp"
 #include "types/type.hpp"
 
-void Value::serialize_to(size_t offset, Buffer& buff) const {
+void Value::serialize_to(buffer_offset_t offset, Buffer& buff) const {
   // std::cout << "Serializing value " << to_string() << std::endl;
   // std::cout << "TYPE ID " << Type::as_string(value_type()->type_id()) << std::endl;
   value_type()->serialize_to(offset, buff, *this);
 }
 
-Value Value::deserialize_from(size_t offset,
+Value Value::deserialize_from(buffer_offset_t offset,
                               const Buffer& buff,
-                              TypeId type_id) {
+                              TypeId type_id)
+{
   return Type::instance(type_id)->deserialize_from(offset, buff);
 }
 
@@ -20,7 +20,7 @@ const ptr<Type>& Value::value_type() const {
 
 size_t Value::size() const {
   if (type_id_ == TypeId::VARCHAR) {
-    return as<string>().size() + sizeof(int8_t);
+    return as<string>().size() + sizeof(string_size_t);
   }
   return value_type()->size();
 }

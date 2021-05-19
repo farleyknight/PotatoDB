@@ -11,14 +11,9 @@
 
 #include "gtest/gtest.h"
 
-TEST(PotatoDBTest, CreateTableTest) {
-  // TODO: Test that the table file was created
-}
-
 TEST(PotatoDBTest, CreateInsertSelectTest) {
   PotatoDB db;
-
-  // TODO: We should delete all existing files here
+  db.reset_installation();
 
   db.run_statement("CREATE TABLE foo_bar ( colA INTEGER, colB INTEGER )");
   db.run_statement("INSERT INTO foo_bar VALUES (1, 2)");
@@ -27,8 +22,137 @@ TEST(PotatoDBTest, CreateInsertSelectTest) {
   EXPECT_TRUE(result.set() != nullptr);
   EXPECT_EQ(result.set()->size(), 1);
 
-  // TODO: Get these lines working
   EXPECT_EQ(result.set()->value_at<int32_t>("colA", 0), 1);
   EXPECT_EQ(result.set()->value_at<int32_t>("colB", 0), 2);
 }
 
+TEST(PotatoDBTest, CreateInsertSelectStringTest) {
+  PotatoDB db;
+  db.reset_installation();
+
+  db.run_statement("CREATE TABLE foo_bar ( colA INTEGER, colB VARCHAR(32) )");
+  db.run_statement("INSERT INTO foo_bar VALUES (1, 'hello, world')");
+  auto result = db.run_statement("SELECT * FROM foo_bar");
+
+  EXPECT_TRUE(result.set() != nullptr);
+  EXPECT_EQ(result.set()->size(), 1);
+
+  EXPECT_EQ(result.set()->value_at<int32_t>("colA", 0), 1);
+  EXPECT_EQ(result.set()->value_at<string>("colB", 0), "hello, world");
+}
+
+TEST(PotatoDBTest, CreateInsertSelectAutoIncrementTest) {
+  PotatoDB db;
+  db.reset_installation();
+
+  db.run_statement("CREATE TABLE foo_bar (id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(32))");
+  db.run_statement("INSERT INTO foo_bar (name) VALUES ('hello, world')");
+  db.run_statement("INSERT INTO foo_bar (name) VALUES ('another string')");
+
+  auto result = db.run_statement("SELECT * FROM foo_bar");
+
+  EXPECT_TRUE(result.set() != nullptr);
+  EXPECT_EQ(result.set()->size(), 2);
+
+  EXPECT_EQ(result.set()->value_at<int32_t>("id", 0), 1);
+  EXPECT_EQ(result.set()->value_at<string>("name", 0), "hello, world");
+
+  EXPECT_EQ(result.set()->value_at<int32_t>("id", 1), 2);
+  EXPECT_EQ(result.set()->value_at<string>("name", 1), "another string");
+}
+
+TEST(PotatoDBTest, SystemCatalogTest) {
+  PotatoDB db;
+  db.reset_installation();
+
+  auto result = db.run_statement("SELECT * FROM system_catalog");
+  EXPECT_TRUE(result.set()->size() > 0);
+}
+
+TEST(PotatoDBTest, CreateTableTest) {
+  PotatoDB db;
+  db.reset_installation();
+
+  db.run_statement("CREATE TABLE foo_bar ( colA INTEGER, colB INTEGER )");
+
+  auto foo_bar_file_path = db.table_file_for("foo_bar");
+
+  EXPECT_TRUE(db.file_exists(foo_bar_file_path));
+
+  auto result = db.run_statement("SELECT * FROM system_catalog WHERE name == 'foo_bar'");
+  auto &result_set = *result.set().get();
+
+  EXPECT_EQ(result_set.size(), 1);
+  EXPECT_EQ(result_set.value_at<string>("table_name", 0), "foo_bar");
+}
+
+TEST(PotatoDBTest, ShowTablesTest) {
+  PotatoDB db;
+  db.reset_installation();
+
+  auto result = db.run_statement("SHOW TABLES");
+  auto &result_set = *result.set().get();
+
+  EXPECT_EQ(result_set.size(), 1);
+  EXPECT_EQ(result_set.value_at<string>("table_name", 0), "system_catalog");
+}
+
+TEST(PotatoDBTest, ShowTablesFooBarTest) {
+  PotatoDB db;
+  db.reset_installation();
+
+  db.run_statement("CREATE TABLE foo_bar ( colA INTEGER, colB INTEGER )");
+
+  auto result = db.run_statement("SHOW TABLES");
+  auto &result_set = *result.set().get();
+
+  EXPECT_EQ(result_set.size(), 2);
+  EXPECT_EQ(result_set.value_at<string>("table_name", 0), "system_catalog");
+  EXPECT_EQ(result_set.value_at<string>("table_name", 1), "foo_bar");
+}
+
+TEST(PotatoDBTest, DescribeTableTest) {
+  PotatoDB db;
+  db.reset_installation();
+
+  db.run_statement("CREATE TABLE foo_bar ( colA INTEGER, colB INTEGER )");
+  auto result = db.run_statement("DESCRIBE TABLE foo_bar");
+
+  auto &result_set = *result.set().get();
+
+  EXPECT_EQ(result_set.size(), 2);
+  EXPECT_EQ(result_set.value_at<string>("name", 0), "colA");
+  EXPECT_EQ(result_set.value_at<string>("name", 1), "colB");
+}
+
+TEST(PotatoDBTest, DropTableTest) {
+  PotatoDB db;
+  db.reset_installation();
+
+  db.run_statement("CREATE TABLE foo_bar ( colA INTEGER, colB INTEGER )");
+  db.run_statement("DROP TABLE foo_bar");
+
+  auto result = db.run_statement("SHOW TABLES");
+  auto &result_set = result.set();
+
+  EXPECT_EQ(result_set->size(), 1);
+  EXPECT_EQ(result_set->value_at<string>("table_name", 0), "system_catalog");
+}
+
+
+TEST(PotatoDBTest, TruncateTableTest) {
+  PotatoDB db;
+  db.reset_installation();
+
+
+  // TODO!
+}
+
+
+TEST(PotatoDBTest, AlterTableDropColumnTest) {
+  // TODO!
+}
+
+TEST(PotatoDBTest, AlterTableAddColumnTest) {
+  // TODO!
+}

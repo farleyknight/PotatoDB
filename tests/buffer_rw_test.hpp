@@ -141,7 +141,7 @@ TYPED_TEST(BufferRWTest, BufferToHexString) {
 TYPED_TEST(BufferRWTest, RWStringsToBuffer) {
   string val = "hello, world!";
 
-  size_t buffer_size = val.size() + sizeof(Buffer::string_size_t);
+  size_t buffer_size = val.size() + sizeof(string_size_t);
   Buffer buff(buffer_size);
 
   this->encoder_.write_string(buff, val);

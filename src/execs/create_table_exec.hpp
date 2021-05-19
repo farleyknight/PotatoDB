@@ -10,13 +10,14 @@ public:
 
   void init() override {
     auto table_name = plan_->table_name();
-
+    auto primary_key = plan_->primary_key();
     // TODO: Do we need to put any latches around the catalog
     // while we are adding a new table?
 
     auto table_oid = exec_ctx_.catalog().
       create_table(exec_ctx_.txn(),
                    table_name,
+                   primary_key,
                    plan_->column_list());
 
     exec_ctx_.table_mgr().

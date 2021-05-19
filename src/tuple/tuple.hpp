@@ -30,15 +30,15 @@ public:
     return rid_.has_value();
   }
 
-  size_t buffer_offset_for(const QuerySchema& schema,
-                           column_oid_t column_index) const;
+  buffer_offset_t buffer_offset_for(const QuerySchema& schema,
+                                    column_oid_t column_index) const;
 
   void copy_from(const Tuple& tuple) {
     buffer_.copy_from(tuple.buffer_);
   }
 
   Value value(const QuerySchema& schema,
-              column_oid_t column_index) const;
+              column_index_t column_index) const;
 
   Value value_by_name(const QuerySchema& schema,
                       const column_name_t& name) const;
@@ -62,6 +62,11 @@ public:
 
   const PageId page_id() const { return rid_->page_id(); }
 
+  vector<Value> to_values(const QuerySchema& schema) const;
+  Tuple add_defaults(deque<Value>& defaults,
+                     const TableSchema& table_schema,
+                     const QuerySchema& query_schema) const;
+
   void copy_n_bytes(size_t source_offset,
                     size_t dest_offset,
                     const Buffer& source_buffer,
@@ -75,6 +80,7 @@ public:
   }
 
   const string to_string(const QuerySchema& schema) const;
+  const string to_payload(const QuerySchema& schema) const;
 
   static Tuple random_from(const QuerySchema& schema);
 

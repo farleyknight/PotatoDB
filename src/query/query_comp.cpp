@@ -24,6 +24,9 @@ Value QueryComp::eval(const Tuple& tuple,
 {
   auto lhs = left_->eval(tuple, schema);
   auto rhs = right_->eval(tuple, schema);
+
+  std::cout << "Comparing values " << lhs.to_string() << " and " << rhs.to_string() << std::endl;
+
   return Value::make(compare(lhs, rhs));
 }
 

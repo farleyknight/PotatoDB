@@ -17,7 +17,7 @@ public:
   NestedLoopJoinPlan(QuerySchema schema,
                      ptr<BasePlan>&& left_child,
                      ptr<BasePlan>&& right_child,
-                     ptr<QueryComp>&& pred)
+                     ptr<QueryWhere>&& pred)
     : BasePlan      (PlanType::LOOP_JOIN),
       SchemaPlan    (schema),
       MaybePredPlan (move(pred)),
@@ -41,6 +41,5 @@ public:
   }
 
 private:
-  ptr<BasePlan> left_child_;
-  ptr<BasePlan> right_child_;
+  ptr<BasePlan> left_child_, right_child_;
 };

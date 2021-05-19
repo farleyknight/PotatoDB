@@ -12,14 +12,22 @@ public:
     return TypeId::INVALID;
   }
 
+  bool eq(UNUSED const Value& left,
+          UNUSED const Value& right) const override
+  {
+    throw Exception("No deserialize_from for InvalidType");
+  }
+
   // TODO: Rename to `write_to`
-  void serialize_to(UNUSED size_t offset,
+  void serialize_to(UNUSED buffer_offset_t offset,
                     UNUSED Buffer& buff,
-                    UNUSED Value val) const override {
+                    UNUSED Value val) const override
+  {
     throw Exception("No serialize_to for InvalidType");
   }
 
-  Value deserialize_from(UNUSED size_t offset, UNUSED const Buffer& buff) const {
+  Value deserialize_from(UNUSED buffer_offset_t offset, UNUSED const Buffer& buff) const override
+  {
     throw Exception("No deserialize_from for InvalidType");
   }
 
@@ -27,7 +35,7 @@ public:
     return false;
   }
 
-  size_t size() const override {
+  buffer_offset_t size() const override {
     throw Exception("No size for InvalidType");
   }
 

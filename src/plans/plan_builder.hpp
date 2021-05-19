@@ -5,19 +5,21 @@
 #include "catalog/catalog.hpp"
 #include "catalog/query_table.hpp"
 
-#include "query/query_comp.hpp"
+#include "query/query_where.hpp"
 #include "query/query_column.hpp"
 #include "query/query_const.hpp"
 
 #include "plans/base_plan.hpp"
 #include "plans/raw_tuples_plan.hpp"
+
 #include "exprs/create_table_expr.hpp"
 #include "exprs/select_expr.hpp"
 #include "exprs/insert_expr.hpp"
+#include "exprs/show_tables_expr.hpp"
 
 class PlanBuilder {
 public:
-  PlanBuilder(Catalog& catalog)
+  PlanBuilder(const Catalog& catalog)
     : catalog_(catalog) {}
 
   // No copy
@@ -43,12 +45,7 @@ public:
 
   PlanBuilder& where(ptr<QueryComp>&& comp);
 
-
   ptr<BasePlan> to_plan();
-
-  ptr<BasePlan> from_expr(CreateTableExpr* expr);
-  ptr<BasePlan> from_expr(SelectExpr* expr);
-  ptr<BasePlan> from_expr(InsertExpr* expr);
 
 private:
   ptr<BasePlan> build_tuples();
@@ -101,9 +98,9 @@ private:
 
   PlanType plan_type_ = PlanType::INVALID;
 
-  ptr<QueryComp> where_clause_;
-  ptr<QueryComp> join_clause_;
+  ptr<QueryWhere> where_clause_;
+  ptr<QueryWhere> join_clause_;
 
-  Catalog& catalog_;
+  const Catalog& catalog_;
   RawTuples tuples_;
 };

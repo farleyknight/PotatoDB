@@ -12,11 +12,11 @@ public:
     : result_set_ (move(result_set))
   {}
 
-  const string to_string() {
+  const string to_payload() {
     if (result_set_ == nullptr) {
       return message_;
     } else {
-      return result_set_->to_string();
+      return result_set_->to_payload();
     }
   }
 

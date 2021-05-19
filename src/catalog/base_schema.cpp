@@ -38,38 +38,59 @@ column_oid_t BaseSchema<ColT>::column_oid_for(const column_name_t& name) const
 }
 
 template<class ColT>
-size_t BaseSchema<ColT>::offset_for(column_oid_t oid) const {
+bool BaseSchema<ColT>::operator==(const BaseSchema& other) const {
+  if (other.columns_.size() != columns_.size()) {
+    return false;
+  }
+
+  for (index_t i = 0; i < columns_.size(); ++i) {
+    if (other.columns_[i] != columns_[i]) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+
+template<class ColT>
+buffer_offset_t BaseSchema<ColT>::buffer_offset_for(column_oid_t oid) const {
   return offsets_.at(oid);
 }
 
 template<class ColT>
-size_t BaseSchema<ColT>::offset_for(const column_name_t& name) const {
-  return offset_for(column_oid_for(name));
+buffer_offset_t BaseSchema<ColT>::buffer_offset_for(const column_name_t& name) const {
+  return buffer_offset_for(column_oid_for(name));
 }
 
 template<class ColT>
-size_t BaseSchema<ColT>::index_for(const column_name_t& name) const {
+column_index_t BaseSchema<ColT>::index_for(const column_name_t& name) const {
   return column_oid_for(name);
 }
 
 template<class ColT>
-size_t BaseSchema<ColT>::column_count() const {
+column_index_t BaseSchema<ColT>::column_count() const {
   return columns_.size();
 }
 
 template<class ColT>
-size_t BaseSchema<ColT>::tuple_length() const {
+buffer_offset_t BaseSchema<ColT>::tuple_length() const {
   return tuple_length_;
 }
 
 template<class ColT>
-const vector<column_oid_t>& BaseSchema<ColT>::unlined_columns() const {
+const vector<column_index_t>& BaseSchema<ColT>::unlined_columns() const {
   return unlined_columns_;
 }
 
 template<class ColT>
 const ColT& BaseSchema<ColT>::by_name(const column_name_t& name) const {
   return columns_.at(column_oid_for(name));
+}
+
+template<class ColT>
+const ColT& BaseSchema<ColT>::operator[](const column_name_t& name) const {
+  return by_name(name);
 }
 
 template<class ColT>

@@ -10,10 +10,15 @@ bool SeqScanExec::match_found(const Tuple& tuple) {
   if (plan_->has_pred()) {
     auto result = plan_->pred().
       eval(tuple, schema()).as<bool>();
-    return result;
-  }
 
-  return true;
+    std::cout << "Match found? Tuple is: " << tuple.to_string(schema()) << std::endl;
+
+    std::cout << "Found match? " << (result ? "true" : "false") << std::endl;
+    return result;
+  } else {
+    std::cout << "NO PRED FOUND! " << std::endl;
+    return true;
+  }
 }
 
 bool SeqScanExec::at_the_end() {
@@ -28,15 +33,16 @@ bool SeqScanExec::has_next()  {
   while (!at_the_end()) {
     if (match_found(table_iter_->tuple())) {
       return true;
+    } else {
+      ++(*table_iter_);
     }
-    ++(*table_iter_);
   }
   return false;
 }
 
 Tuple SeqScanExec::next() {
   auto tuple = table_iter_->tuple();
-  //  std::cout << "Got tuple " << tuple.to_string(schema()) << std::endl;
+  std::cout << "SEQ SCAN EXEC : Got tuple " << tuple.to_string(schema()) << std::endl;
   ++(*table_iter_);
   return tuple;
 }

@@ -24,13 +24,15 @@
 #define UNUSED __attribute__ ((unused))
 
 /************************************************
- * Type defs
+ * Types we will be using w/o the `std::` prefix
  ************************************************/
 
 using std::int32_t;
 using std::uint32_t;
 
 using std::fstream;
+
+using std::deque;
 
 using std::make_optional;
 using std::make_pair;

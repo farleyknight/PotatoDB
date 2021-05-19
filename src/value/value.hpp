@@ -16,8 +16,8 @@ public:
   using DataStoreT = typename ValueBase<>::DataStoreT;
   using StoreT     = typename ValueBase<>::StoreClass;
 
-  void serialize_to(size_t offset, Buffer& buff) const;
-  static Value deserialize_from(size_t offset,
+  void serialize_to(buffer_offset_t offset, Buffer& buff) const;
+  static Value deserialize_from(buffer_offset_t offset,
                                 const Buffer& buff,
                                 TypeId type_id);
 
@@ -33,6 +33,10 @@ public:
   size_t size() const;
   size_t length() const {
     return size();
+  }
+
+  bool is_varchar() const {
+    return type_id_ == TypeId::VARCHAR;
   }
 
   bool is_null() const;

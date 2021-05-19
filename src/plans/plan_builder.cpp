@@ -13,47 +13,7 @@
 #include "exprs/select_expr.hpp"
 #include "exprs/insert_expr.hpp"
 
-ptr<BasePlan> PlanBuilder::from_expr(CreateTableExpr* expr) {
-  auto table_name = expr->table().name();
-  auto column_def_list = expr->column_defs();
-  return make_unique<CreateTablePlan>(table_name, column_def_list);
-}
-
-ptr<BasePlan> PlanBuilder::from_expr(SelectExpr* expr) {
-  // TODO: A SELECT statement can have multiple tables!
-  // Need to support this at some point.
-  auto table_name = expr->table_list().front().name();
-  auto table_oid = catalog_.table_oid_for(table_name);
-
-  auto schema = catalog_.query_schema_for(table_name,
-                                          expr->column_list());
-  auto maybe_pred = expr->pred();
-
-  return make_unique<SeqScanPlan>(schema,
-                                  table_oid,
-                                  move(maybe_pred));
-}
-
-ptr<BasePlan> PlanBuilder::from_expr(InsertExpr* expr) {
-  auto table_name = expr->table_name();
-  auto table_oid = catalog_.table_oid_for(table_name);
-
-  auto schema = catalog_.query_schema_for(table_name,
-                                          expr->column_list());
-  assert(schema.column_count() > 0);
-  // TODO: For now, we only support INSERT with it's own raw tuples.
-  // However, we need to support SQL of the form:
-  // > INSERT INTO ... (SELECT ...)
-
-  // std::cout << "Raw Tuples " << expr->tuple_list().to_string() << std::endl;
-
-  auto raw_tuples = RawTuples(expr->tuple_list());
-  auto child_plan = make_unique<RawTuplesPlan>(schema, raw_tuples);
-
-  return make_unique<InsertPlan>(schema,
-                                 table_oid,
-                                 move(child_plan));
-}
+#include "server/system_catalog.hpp"
 
 PlanBuilder& PlanBuilder::select(vector<QueryColumn> columns) {
   if (plan_type_ == PlanType::INVALID) {
@@ -98,10 +58,11 @@ PlanBuilder& PlanBuilder::on(QueryColumn left,
   auto left_col = QueryJoin::make_left(left);
   auto right_col = QueryJoin::make_right(right);
 
-  join_clause_ = make_unique<QueryComp>(move(left_col),
-                                        CompType::EQ,
-                                        move(right_col));
+  auto comp = make_unique<QueryComp>(move(left_col),
+                                     CompType::EQ,
+                                     move(right_col));
 
+  join_clause_ = make_unique<QueryWhere>(move(comp));
   return *this;
 }
 
@@ -128,8 +89,8 @@ PlanBuilder& PlanBuilder::delete_from(QueryTable from_table) {
   return *this;
 }
 
-PlanBuilder& PlanBuilder::where(ptr<QueryComp>&& clause) {
-  where_clause_ = move(clause);
+PlanBuilder& PlanBuilder::where(ptr<QueryComp>&& comp) {
+  where_clause_ = make_unique<QueryWhere>(move(comp));
   return *this;
 }
 
