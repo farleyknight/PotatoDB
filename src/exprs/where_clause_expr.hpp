@@ -2,6 +2,7 @@
 
 #include "exprs/base_expr.hpp"
 #include "query/comp_type.hpp"
+#include "query/query_where.hpp"
 
 class WhereClauseExpr : public BaseExpr {
 public:

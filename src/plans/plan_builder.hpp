@@ -5,7 +5,7 @@
 #include "catalog/catalog.hpp"
 #include "catalog/query_table.hpp"
 
-#include "query/query_comp.hpp"
+#include "query/query_where.hpp"
 #include "query/query_column.hpp"
 #include "query/query_const.hpp"
 
@@ -98,8 +98,8 @@ private:
 
   PlanType plan_type_ = PlanType::INVALID;
 
-  ptr<QueryComp> where_clause_;
-  ptr<QueryComp> join_clause_;
+  ptr<QueryWhere> where_clause_;
+  ptr<QueryWhere> join_clause_;
 
   const Catalog& catalog_;
   RawTuples tuples_;

@@ -1,11 +1,6 @@
 #pragma once
 
-// TODO: Fix this!
-// Needs to return QueryWhere, which can take either:
-// Single comparison:
-// > WHERE a = 5
-// Or takes multiple comparisons, connected by logical combinators
-// > WHERE a = 5 AND foo = "bar"
+#include "query/base_query.hpp"
 
 enum class LogicalType {
   NONE = 0,
@@ -24,8 +19,8 @@ public:
   QueryWhere(ptr<BaseQuery>&& left, LogicalType combine, ptr<BaseQuery>&& right)
     : BaseQuery (QueryNodeType::WHERE, TypeId::BOOLEAN),
       left_     (move(left)),
-      combine_  (combine),
-      right_    (move(right))
+      right_    (move(right)),
+      combine_  (combine)
   {}
 
   Value eval(const Tuple& tuple,
@@ -37,7 +32,7 @@ public:
       return Value::make(combine(lhs, rhs));
     } else {
       // TODO: Check for NONE/NOT type
-      return lhs
+      return lhs;
     }
   }
 

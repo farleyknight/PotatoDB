@@ -71,24 +71,31 @@ StatementResult PotatoDB::run_statement(const string& statement) {
       // 3) Run additional SQL for inserting each column from the table into
       //    the `system_catalog`
 
+      auto table_name  = create_table_plan->table_name();
+      auto column_list = create_table_plan->column_list().list();
+
       // CREATE TABLE
       auto message = exec_eng_.execute(move(plan), txn, exec_ctx);
 
       // INSERT INTO system_catalog VALUES (table_name...)
       auto insert_table_sql
-        = SystemCatalog::create_table_sql_for(create_table_plan->table_name());
+        = SystemCatalog::create_table_sql_for(table_name);
       auto insert_table_plan = sql_to_plan(insert_table_sql);
       exec_eng_.execute(move(insert_table_plan), txn, exec_ctx);
 
-      for (const auto &col : create_table_plan->column_list().list()) {
+      std::cout << "Looping through columns to insert" << std::endl;
+      for (const auto &col : column_list) {
         // INSERT INTO system_catalog VALUES (column_name...)
         auto insert_column_sql
-          = SystemCatalog::create_column_sql_for(create_table_plan->table_name(),
+          = SystemCatalog::create_column_sql_for(table_name,
                                                  col.name());
         // TODO: The line above does not include the column type.
         // Eventually we will want to include that information in the system catalog
         // so that the tables and their columns can be loaded from the proper table
         // file.
+
+        std::cout << "Running INSERT INTO for column " << insert_column_sql << std::endl;
+
         auto insert_column_plan = sql_to_plan(insert_column_sql);
         exec_eng_.execute(move(insert_column_plan), txn, exec_ctx);
       }

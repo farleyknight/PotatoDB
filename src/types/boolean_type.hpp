@@ -56,8 +56,13 @@ public:
     }
   }
 
-  Value cast_as(UNUSED const Value& value,
-                UNUSED TypeId type_id) const override {
-    throw Exception("Not implemented yet for BooleanType");
+  Value cast_as(const Value& value,
+                TypeId type_id) const override {
+    switch (type_id) {
+    case TypeId::BOOLEAN:
+      return value;
+    default:
+      throw Exception("Not implemented yet for BooleanType into " + Type::as_string(type_id));
+    }
   }
 };

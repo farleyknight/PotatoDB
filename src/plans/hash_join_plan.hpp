@@ -4,10 +4,13 @@
 #include "plans/schema_plan.hpp"
 #include "plans/maybe_pred_plan.hpp"
 
-class HashJoinPlan : public BasePlan, public SchemaPlan, public MaybePredPlan {
+class HashJoinPlan : public BasePlan,
+                     public SchemaPlan,
+                     public MaybePredPlan
+{
 public:
   HashJoinPlan(QuerySchema schema,
-               ptr<QueryComp>&& pred,
+               ptr<QueryWhere>&& pred,
                vector<BaseQuery>&& left_hash_keys,
                vector<BaseQuery>&& right_hash_keys)
     : BasePlan         (PlanType::HASH_JOIN),

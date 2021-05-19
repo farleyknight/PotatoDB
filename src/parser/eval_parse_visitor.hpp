@@ -198,18 +198,18 @@ public:
       auto left_expr  = make_expr(expr->expr()[0]);
       auto right_expr = make_expr(expr->expr()[1]);
 
-      auto comp_expr = CompExpr(move(left_expr),
-                                CompType::EQ,
-                                move(right_expr));
+      auto comp_expr = make_unique<CompExpr>(move(left_expr),
+                                             CompType::EQ,
+                                             move(right_expr));
       return WhereClauseExpr(move(comp_expr));
 
     } else if (expr->NOT_EQ1() || expr->NOT_EQ2()) {
       auto left_expr  = make_expr(expr->expr()[0]);
       auto right_expr = make_expr(expr->expr()[1]);
 
-      auto comp_expr = CompExpr(move(left_expr),
-                                CompType::NE,
-                                move(right_expr));
+      auto comp_expr = make_unique<CompExpr>(move(left_expr),
+                                             CompType::NE,
+                                             move(right_expr));
       return WhereClauseExpr(move(comp_expr));
     } else if (expr->K_AND()) {
       auto left_expr  = make_expr(expr->expr()[0]);

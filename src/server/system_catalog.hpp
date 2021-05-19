@@ -19,17 +19,17 @@ public:
       "("                                                               \
       "1,"                                                              \
       "'" + table_name + "',"                                           \
-      "'" + table_name + "'"                                           \
+      "'" + table_name + "'"                                            \
       ")";
   }
 
   static const string create_column_sql_for(UNUSED const table_name_t table_name,
                                             UNUSED const column_name_t column_name) {
-    return "INSERT INTO system_catalog (type, name, table_name) VALUES" \
-      "("                                                               \
-      "2,"                                                              \
-      "'" + column_name + "',"                                          \
-      "'" + table_name + "'"                                           \
+    return "INSERT INTO system_catalog (type, name, table_name) VALUES " \
+      "("                                                                \
+      "2,"                                                               \
+      "'" + column_name + "',"                                           \
+      "'" + table_name + "'"                                             \
       ")";
   }
 };

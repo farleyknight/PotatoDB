@@ -1,12 +1,12 @@
 #pragma once
 
-#include "query/query_comp.hpp"
+#include "query/query_where.hpp"
 
 class MaybePredPlan {
 public:
   MaybePredPlan() {}
 
-  MaybePredPlan(ptr<QueryComp>&& pred)
+  MaybePredPlan(ptr<QueryWhere>&& pred)
     : pred_ (move(pred))
   {}
 
@@ -14,11 +14,11 @@ public:
     return pred_ != nullptr;
   }
 
-  const QueryComp& pred() {
+  const QueryWhere& pred() {
     assert(pred_);
     return *pred_;
   }
 
 private:
-  ptr<QueryComp> pred_;
+  ptr<QueryWhere> pred_;
 };

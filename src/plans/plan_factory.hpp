@@ -21,15 +21,15 @@ public:
     }
     case ExprType::INSERT: {
       auto insert_expr = dynamic_cast<InsertExpr*>(expr.get());
-      return PlanBuilder(catalog_).from_expr(insert_expr);
+      return from_expr(catalog_, insert_expr);
     }
     case ExprType::SHOW_TABLES: {
       auto show_tables_expr = dynamic_cast<ShowTablesExpr*>(expr.get());
-      return PlanBuilder(catalog_).from_expr(show_tables_expr);
+      return from_expr(catalog_, show_tables_expr);
     }
     case ExprType::DESCRIBE_TABLE: {
-      auto show_tables_expr = dynamic_cast<ShowTablesExpr*>(expr.get());
-      return PlanBuilder(catalog_).from_expr(show_tables_expr);
+      auto describe_table_expr = dynamic_cast<DescribeTableExpr*>(expr.get());
+      return from_expr(catalog_, describe_table_expr);
     }
     default:
       throw NotImplementedException("Not finished :(");
@@ -45,25 +45,26 @@ public:
                                         column_def_list);
   }
 
-  static ptr<BasePlan> PlanBuilder::from_expr(const Catalog& catalog, SelectExpr* expr) {
+  static ptr<BasePlan> from_expr(const Catalog& catalog, SelectExpr* expr) {
     // TODO: A SELECT statement can have multiple tables!
     // Need to support this at some point.
     auto table_name = expr->table_list().front().name();
-    auto table_oid = catalog_.table_oid_for(table_name);
+    auto table_oid = catalog.table_oid_for(table_name);
 
-    auto schema = catalog_.query_schema_for(table_name,
-                                            expr->column_list());
+    auto schema = catalog.query_schema_for(table_name,
+                                           expr->column_list());
 
     // TODO: Convert from WhereClauseExpr to QueryComp here
-    auto maybe_pred = to_query_comp(table_name, expr->pred());
+    auto maybe_pred = to_query_where(catalog, table_name, expr->pred());
 
     return make_unique<SeqScanPlan>(schema,
                                     table_oid,
                                     move(maybe_pred));
   }
 
-  static ptr<BaseQuery> PlanBuilder::to_query_node(const table_name_t name,
-                                                   ptr<BaseExpr>& expr)
+  static ptr<BaseQuery> to_query_node(const Catalog& catalog,
+                                      const table_name_t name,
+                                      const ptr<BaseExpr>& expr)
   {
     if (expr == nullptr) {
       return ptr<BaseQuery>(nullptr);
@@ -72,15 +73,24 @@ public:
     switch (expr->expr_type()) {
     case ExprType::COLUMN: {
       auto column_expr = dynamic_cast<ColumnExpr*>(expr.get());
-      auto query_col = catalog_.query_column_for(name, column_expr->name());
+      auto query_col = catalog.query_column_for(name, column_expr->name());
       return make_unique<QueryColumn>(query_col);
     }
     case ExprType::VALUE: {
       auto value_expr = dynamic_cast<ValueExpr*>(expr.get());
       return make_unique<QueryConst>(value_expr->to_value());
     }
+    case ExprType::COMPARE: {
+      // TODO! Turn CompExpr to QueryComp
+      auto comp_expr = dynamic_cast<CompExpr*>(expr.get());
+      auto left_node  = to_query_node(catalog, name, comp_expr->left_expr());
+      auto right_node = to_query_node(catalog, name, comp_expr->right_expr());
+      return make_unique<QueryComp>(move(left_node),
+                                    comp_expr->comp_type(),
+                                    move(right_node));
+    }
     default:
-      throw Exception("this part not implemented yet :/");
+      throw Exception("this part not implemented yet :/ Expr to_string = " + expr->to_string());
     }
   }
 
@@ -90,45 +100,80 @@ public:
   // > WHERE a = 5
   // Or takes multiple comparisons, connected by logical combinators
   // > WHERE a = 5 AND foo = "bar"
-  static ptr<QueryWhere> to_query_where(const table_name_t name,
+  static ptr<QueryWhere> to_query_where(const Catalog& catalog,
+                                        const table_name_t name,
                                         ptr<WhereClauseExpr>& clause)
   {
     if (clause == nullptr) {
       return ptr<QueryWhere>(nullptr);
     }
-    auto left_query = to_query_node(name, clause->left_expr());
-    auto right_query = to_query_node(name, clause->right_expr());
+    auto left_query = to_query_node(catalog, name, clause->left_expr());
+    auto right_query = to_query_node(catalog, name, clause->right_expr());
 
     return make_unique<QueryWhere>(move(left_query),
-                                   clause->comp_type(),
+                                   clause->logical_type(),
                                    move(right_query));
   }
 
-  static ptr<BasePlan> from_expr(UNUSED ShowTablesExpr* expr) {
+  static ptr<BasePlan> from_expr(const Catalog& catalog, UNUSED ShowTablesExpr* expr) {
     auto table_name = "system_catalog";
-    auto table_oid = catalog_.table_oid_for(table_name);
-    auto schema = catalog_.query_schema_for(table_name);
+    auto table_oid = catalog.table_oid_for(table_name);
+    auto schema = catalog.query_schema_for(table_name);
 
     auto type_col = make_unique<QueryColumn>(schema["type"]);
 
     auto value = Value::make(static_cast<int32_t>(SystemCatalogTypes::TABLE));
     auto query_const = make_unique<QueryConst>(value);
 
-    auto table_pred = make_unique<QueryComp>(move(type_col),
+    auto table_comp = make_unique<QueryComp>(move(type_col),
                                              CompType::EQ,
                                              move(query_const));
+
+    auto table_pred = make_unique<QueryWhere>(move(table_comp));
 
     return make_unique<SeqScanPlan>(schema,
                                     table_oid,
                                     move(table_pred));
   }
 
-  static ptr<BasePlan> PlanBuilder::from_expr(InsertExpr* expr) {
-    auto table_name = expr->table_name();
-    auto table_oid = catalog_.table_oid_for(table_name);
+  static ptr<BasePlan> from_expr(const Catalog& catalog, DescribeTableExpr* expr) {
+    auto system_table_name = "system_catalog";
+    auto table_oid = catalog.table_oid_for(system_table_name);
+    auto schema = catalog.query_schema_for(system_table_name);
 
-    auto schema = catalog_.query_schema_for(table_name,
-                                            expr->column_list());
+    auto type_col = make_unique<QueryColumn>(schema["type"]);
+
+    auto column_value = Value::make(static_cast<int32_t>(SystemCatalogTypes::COLUMN));
+    auto column_const = make_unique<QueryConst>(column_value);
+
+    auto column_comp = make_unique<QueryComp>(move(type_col),
+                                              CompType::EQ,
+                                              move(column_const));
+
+    auto table_value = Value::make(expr->table().name());
+    auto table_name = make_unique<QueryConst>(table_value);
+
+    auto name_col = make_unique<QueryColumn>(schema["table_name"]);
+
+    auto table_comp = make_unique<QueryComp>(move(name_col),
+                                             CompType::EQ,
+                                             move(table_name));
+
+    auto table_pred = make_unique<QueryWhere>(move(column_comp),
+                                              LogicalType::AND,
+                                              move(table_comp));
+
+    return make_unique<SeqScanPlan>(schema,
+                                    table_oid,
+                                    move(table_pred));
+  }
+
+  static ptr<BasePlan> from_expr(const Catalog& catalog, InsertExpr* expr) {
+    auto table_name = expr->table_name();
+    auto table_oid = catalog.table_oid_for(table_name);
+
+    auto schema = catalog.query_schema_for(table_name,
+                                           expr->column_list());
     assert(schema.column_count() > 0);
     // TODO: For now, we only support INSERT with it's own raw tuples.
     // However, we need to support SQL of the form:

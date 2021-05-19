@@ -125,7 +125,6 @@ TEST(PotatoDBTest, DescribeTableTest) {
   EXPECT_EQ(result_set.value_at<string>("name", 1), "colB");
 }
 
-
 TEST(PotatoDBTest, DropTableTest) {
   PotatoDB db;
   db.reset_installation();

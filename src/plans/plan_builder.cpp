@@ -58,10 +58,11 @@ PlanBuilder& PlanBuilder::on(QueryColumn left,
   auto left_col = QueryJoin::make_left(left);
   auto right_col = QueryJoin::make_right(right);
 
-  join_clause_ = make_unique<QueryComp>(move(left_col),
-                                        CompType::EQ,
-                                        move(right_col));
+  auto comp = make_unique<QueryComp>(move(left_col),
+                                     CompType::EQ,
+                                     move(right_col));
 
+  join_clause_ = make_unique<QueryWhere>(move(comp));
   return *this;
 }
 
@@ -88,8 +89,8 @@ PlanBuilder& PlanBuilder::delete_from(QueryTable from_table) {
   return *this;
 }
 
-PlanBuilder& PlanBuilder::where(ptr<QueryComp>&& clause) {
-  where_clause_ = move(clause);
+PlanBuilder& PlanBuilder::where(ptr<QueryComp>&& comp) {
+  where_clause_ = make_unique<QueryWhere>(move(comp));
   return *this;
 }
 
