@@ -1,9 +1,5 @@
 #include "execs/agg_exec.hpp"
 
-/**********************************************
- * TODO: Document me
- **********************************************/
-
 void AggExec::init() {
   child_->init();
   table_.generate();
@@ -49,10 +45,6 @@ bool AggExec::match_found() {
   return result;
 }
 
-/**********************************************
- * TODO: Document me
- **********************************************/
-
 Tuple AggExec::next() {
   // create tuple according to output schema
   auto key = table_iter_.key();
@@ -76,10 +68,6 @@ AggKey AggExec::make_key(const Tuple& tuple) {
   }
   return AggKey(keys);
 }
-
-/**********************************************
- * TODO: Document me
- **********************************************/
 
 AggValue AggExec::make_val(const Tuple& tuple) {
   vector<Value> values;

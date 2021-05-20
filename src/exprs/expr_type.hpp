@@ -27,6 +27,7 @@ enum class ExprType {
   // Data Manipulation Language
   SELECT,
   WHERE, COMPARE,
+  AGG,
   LIMIT,
   ORDER_BY,
   GROUP_BY,

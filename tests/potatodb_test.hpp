@@ -55,19 +55,31 @@ TEST(PotatoDBTest, CreateInsertSelectAutoIncrementTest) {
 }
 
 TEST(PotatoDBTest, AggegrationTest) {
-  // SELECT COUNT(colA), SUM(colA), MIN(colA), MAX(colA) from test_1;
+  PotatoDB db;
+  db.reset_installation();
 
-  // TODO! Clean up these lines below..
-  // They are taken from the executor tests
+  db.run_statement("CREATE TABLE foo_bar ( colA INTEGER )");
 
-  // Should count all tuples
-  ASSERT_EQ(countA_val, TEST1_SIZE);
-  // Should sum from 0 to TEST1_SIZE
-  ASSERT_EQ(sumA_val, TEST1_SIZE * (TEST1_SIZE - 1) / 2);
-  // Minimum should be 0
-  ASSERT_EQ(minA_val, 0);
-  // Maximum should be TEST1_SIZE - 1
-  ASSERT_EQ(maxA_val, TEST1_SIZE - 1);
+  const int size = 10;
+
+  for (int i = 0; i < size; ++i) {
+    db.run_statement("INSERT INTO foo_bar VALUES (" + std::to_string(i) + ")");
+  }
+
+  auto result = db.run_statement("SELECT COUNT(colA), SUM(colA), MIN(colA), MAX(colA) FROM foo_bar");
+
+  EXPECT_TRUE(result.set() != nullptr);
+  EXPECT_EQ(result.set()->size(), 1);
+
+  auto countA = result.set()->value_at<int32_t>("COUNT(colA)", 0);
+  auto sumA   = result.set()->value_at<int32_t>("SUM(colA)", 0);
+  auto minA   = result.set()->value_at<int32_t>("MIN(colA)", 0);
+  auto maxA   = result.set()->value_at<int32_t>("MAX(colA)", 0);
+
+  EXPECT_EQ(countA, size);
+  EXPECT_EQ(sumA,   (size*(size-1)) / 2);
+  EXPECT_EQ(minA,   0);
+  EXPECT_EQ(maxA,   size-1);
 }
 
 TEST(PotatoDBTest, SystemCatalogTest) {
