@@ -55,6 +55,7 @@ set(server_sources
   "server/main.cpp")
 
 set(parser_sources
+  "src/parser/eval_parse_visitor.cpp"
   "parser/PotatoSQLLexer.cpp"
   "parser/PotatoSQLParser.cpp")
 
@@ -88,7 +89,6 @@ set(main_sources
   "src/page/table_iterator.cpp"
   "src/plans/agg_plan.cpp"
   "src/plans/plan_builder.cpp"
-  "src/parser/eval_parse_visitor.cpp"
   "src/query/query_agg.cpp"
   "src/query/query_group_by.cpp"
   "src/query/query_having.cpp"

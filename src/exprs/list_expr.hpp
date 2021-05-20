@@ -12,10 +12,6 @@ public:
     list_.push_back(expr);
   }
 
-  void emplace_back(T&& expr) {
-    list_.emplace_back(move(expr));
-  }
-
   const vector<T>& list() const {
     return list_;
   }

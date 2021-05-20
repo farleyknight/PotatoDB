@@ -20,24 +20,24 @@ public:
    **********************************************/
 
   AggPlan(ptr<BasePlan>&&   child,
-          MoveVec<QueryAgg> aggs);
+          vector<QueryAgg>&& aggs);
 
   /**********************************************
    * HavingExpr is optional
    **********************************************/
 
-  AggPlan(ptr<BasePlan>&&       child,
-          MoveVec<QueryAgg>     aggs,
-          MoveVec<QueryGroupBy> group_bys);
+  AggPlan(ptr<BasePlan>&&        child,
+          vector<QueryAgg>&&     aggs,
+          vector<QueryGroupBy>&& group_bys);
 
   /**********************************************
    * All child exprs required
    **********************************************/
 
-  AggPlan(ptr<BasePlan>&&       child,
-          MoveVec<QueryAgg>     aggs,
-          MoveVec<QueryGroupBy> group_bys,
-          ptr<QueryHaving>&&    having);
+  AggPlan(ptr<BasePlan>&&        child,
+          vector<QueryAgg>&&     aggs,
+          vector<QueryGroupBy>&& group_bys,
+          ptr<QueryHaving>&&     having);
 
   void build_agg_types();
 

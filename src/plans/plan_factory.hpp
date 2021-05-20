@@ -45,7 +45,14 @@ public:
                                         column_def_list);
   }
 
-  static ptr<BasePlan> from_expr(const Catalog& catalog, SelectExpr* expr) {
+  static ptr<BasePlan> make_agg_plan(const Catalog& catalog, SelectExpr* expr) {
+    // TODO!
+    // AggExpr will have ColumnExpr inside it
+    // Convert AggExpr to QueryAgg and ColumnExpr to QueryColumn
+    // Check the function_name to determine which AggType it is.
+  }
+
+  static ptr<BasePlan> make_seq_scan_plan(const Catalog& catalog, SelectExpr* expr) {
     // TODO: A SELECT statement can have multiple tables!
     // Need to support this at some point.
     auto table_name = expr->table_list().front().name();
@@ -54,12 +61,19 @@ public:
     auto schema = catalog.query_schema_for(table_name,
                                            expr->column_list());
 
-    // TODO: Convert from WhereClauseExpr to QueryComp here
     auto maybe_pred = to_query_where(catalog, table_name, expr->pred());
 
     return make_unique<SeqScanPlan>(schema,
                                     table_oid,
                                     move(maybe_pred));
+  }
+
+  static ptr<BasePlan> from_expr(const Catalog& catalog, SelectExpr* expr) {
+    if (expr->aggs().size() > 0) {
+      return make_agg_plan(catalog, expr);
+    } else {
+      return make_seq_scan_plan(catalog, expr);
+    }
   }
 
   static ptr<BaseQuery> to_query_node(const Catalog& catalog,
@@ -81,7 +95,6 @@ public:
       return make_unique<QueryConst>(value_expr->to_value());
     }
     case ExprType::COMPARE: {
-      // TODO! Turn CompExpr to QueryComp
       auto comp_expr = dynamic_cast<CompExpr*>(expr.get());
       auto left_node  = to_query_node(catalog, name, comp_expr->left_expr());
       auto right_node = to_query_node(catalog, name, comp_expr->right_expr());

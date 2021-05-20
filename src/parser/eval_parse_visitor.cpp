@@ -1,7 +1,7 @@
 
 #include "parser/eval_parse_visitor.hpp"
 
-Any EvalParseVisitor::visitDescribe_table_stmt(DescribeTableStmtContext *ctx) override {
+Any EvalParseVisitor::visitDescribe_table_stmt(DescribeTableStmtContext *ctx) {
   auto describe_table = make_unique<DescribeTableExpr>();
   assert(ctx->table_name());
 
@@ -13,20 +13,7 @@ Any EvalParseVisitor::visitDescribe_table_stmt(DescribeTableStmtContext *ctx) ov
   return visitChildren(ctx);
 }
 
-Any EvalParseVisitor::visitDescribe_table_stmt(DescribeTableStmtContext *ctx) override {
-  auto describe_table = make_unique<DescribeTableExpr>();
-  assert(ctx->table_name());
-
-  TableExpr table(ctx->table_name()->getText());
-  describe_table->set_table(table);
-
-  exprs_.emplace_back(move(describe_table));
-
-  return visitChildren(ctx);
-}
-
-
-Any EvalParseVisitor::visitCreate_table_stmt(CreateTableStmtContext *ctx) override {
+Any EvalParseVisitor::visitCreate_table_stmt(CreateTableStmtContext *ctx) {
   CreateTableExpr create_table;
   assert(ctx->table_name());
 
@@ -92,7 +79,7 @@ ValueExpr EvalParseVisitor::make_value_expr(ExprContext* expr_ctx) const {
   }
 }
 
-Any EvalParseVisitor::visitInsert_stmt(InsertStmtContext *ctx) override {
+Any EvalParseVisitor::visitInsert_stmt(InsertStmtContext *ctx) {
   InsertExpr insert;
   assert(ctx->table_name());
 
@@ -104,7 +91,7 @@ Any EvalParseVisitor::visitInsert_stmt(InsertStmtContext *ctx) override {
 
     ColumnListExpr cols;
     for (auto &col_ctx : cols_ctx->column_name()) {
-      cols.emplace_back(move(ColumnExpr(col_ctx->getText())));
+      cols.push_back(ColumnExpr(col_ctx->getText()));
     }
     insert.set_columns(cols);
   }
@@ -195,12 +182,15 @@ ColumnExpr EvalParseVisitor::make_col_expr(ExprContext* ctx) {
   }
 }
 
-Any EvalParseVisitor::visitSelect_core(SelectCoreContext *ctx) override {
+Any EvalParseVisitor::visitSelect_core(SelectCoreContext *ctx) {
   const auto &col_list_ctx = ctx->column_list();
 
   ColumnListExpr cols;
+  AggListExpr aggs;
   for (auto &col_ctx : col_list_ctx->result_column()) {
-    if (col_ctx->table_name() == nullptr) {
+    if (col_ctx->getText() == "*") {
+      cols.push_back(ColumnExpr("*"));
+    } else if (col_ctx->table_name() == nullptr && col_ctx->column_name() == nullptr) {
       assert(col_ctx->expr());
       auto expr = col_ctx->expr();
 
@@ -209,9 +199,7 @@ Any EvalParseVisitor::visitSelect_core(SelectCoreContext *ctx) override {
         auto col_expr = make_col_expr(expr->expr()[0]);
         auto func_name = expr->function_name()->getText();
         if (func_name == "COUNT" || func_name == "SUM" || func_name == "MIN" || func_name == "MAX") {
-          auto agg_expr = make_unique<AggExpr>(func_name);
-          col_expr.set_agg(move(agg_expr));
-          cols.emplace_back(move(col_expr));
+          aggs.push_back(AggExpr(func_name, col_expr));
         } else {
           throw Exception("Other types of functions are not yet implemented! :/");
         }
@@ -242,6 +230,7 @@ Any EvalParseVisitor::visitSelect_core(SelectCoreContext *ctx) override {
 
   SelectExpr select;
   select.set_columns(cols);
+  select.set_aggs(aggs);
   select.set_tables(tables);
 
   if (ctx->where_clause() != nullptr) {

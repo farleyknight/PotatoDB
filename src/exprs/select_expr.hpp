@@ -4,6 +4,7 @@
 #include "exprs/table_list_expr.hpp"
 #include "exprs/column_list_expr.hpp"
 #include "exprs/where_clause_expr.hpp"
+#include "exprs/agg_list_expr.hpp"
 
 #include "query/query_comp.hpp"
 
@@ -19,6 +20,10 @@ public:
 
   void set_tables(TableListExpr tables) {
     table_list_ = tables;
+  }
+
+  void set_aggs(AggListExpr aggs) {
+    agg_list_ = aggs;
   }
 
   void set_where(ptr<WhereClauseExpr>&& where_clause) {
@@ -45,5 +50,6 @@ public:
 protected:
   TableListExpr table_list_;
   ColumnListExpr column_list_;
+  AggListExpr agg_list_;
   ptr<WhereClauseExpr> where_clause_;
 };

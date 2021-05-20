@@ -1,7 +1,6 @@
 #pragma once
 
 #include "exprs/base_expr.hpp"
-#include "exprs/agg_expr.hpp"
 
 class ColumnExpr : public BaseExpr {
 public:
@@ -15,11 +14,6 @@ public:
       name_    (name),
       table_   (table)
   {}
-
-  // No copy
-  ColumnExpr(const ColumnExpr&) = delete;
-  // No copy assign
-  ColumnExpr& operator=(const ColumnExpr&) = delete;
 
   const string& name() const {
     return name_;
@@ -45,17 +39,7 @@ public:
       return name_;
     }
   }
-
-  void set_agg(ptr<AggExpr> agg) {
-    agg_ = move(agg);
-  }
-
-  const ptr<AggExpr>& agg() {
-    return agg_;
-  }
-
 protected:
   column_name_t name_;
   table_name_t  table_;
-  ptr<AggExpr> agg_;
 };
