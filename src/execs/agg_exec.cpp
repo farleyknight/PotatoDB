@@ -2,6 +2,9 @@
 
 void AggExec::init() {
   child_->init();
+
+  assert(plan_ != nullptr);
+  table_.init(plan_);
   table_.generate();
 
   Tuple tuple;

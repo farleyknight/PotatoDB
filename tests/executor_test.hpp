@@ -369,7 +369,7 @@ TEST_F(ExecTest, DISABLED_SimpleRawInsertWithIndexTest) {
   auto colB = empty_table2["colB"];
   auto key_schema = QuerySchema({colA});
 
-  auto &txn = txn_mgr().begin();
+  // auto &txn = txn_mgr().begin();
 
   /*
    *

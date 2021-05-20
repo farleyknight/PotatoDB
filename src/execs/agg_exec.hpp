@@ -18,8 +18,8 @@ public:
     : BaseExec    (exec_ctx),
       plan_       (move(plan)),
       child_      (move(child)),
-      table_      (*plan),
-      table_iter_ (table_.begin()) {}
+      table_iter_ (table_.begin())
+  {}
 
   const BaseExec& child() {
     return *child_;
@@ -37,7 +37,7 @@ public:
   AggValue make_val(const Tuple& tuple);
 
   const QuerySchema& schema() const {
-    return dynamic_cast<SchemaPlan*>(plan_->child().get())->schema();
+    return dynamic_cast<SchemaPlan*>(plan_.get())->schema();
   }
 
   const string message_on_completion(size_t result_count) const override {

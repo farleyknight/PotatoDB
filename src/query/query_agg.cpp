@@ -3,22 +3,25 @@
 #include "query/query_agg.hpp"
 #include "query/query_group_by.hpp"
 
-QueryAgg::QueryAgg(BaseQuery node, AggType agg_type)
-  : BaseQuery (QueryNodeType::AGG, node.type_id()),
-    node_     (node),
-    agg_type_ (agg_type) {}
+QueryAgg::QueryAgg(QueryColumn col, AggType agg_type)
+  : BaseQuery (QueryNodeType::AGG, col.type_id()),
+    col_      (col),
+    agg_type_ (agg_type)
+{}
 
 Value QueryAgg::eval_agg(const QuerySchema& schema,
                          UNUSED const vector<Value>& group_bys,
                          const vector<Value>& aggregates) const
 {
-  auto index = schema.column_oid_for(node_.name());
+  auto index = schema.index_for(col_.name());
   return aggregates[index];
 }
 
-Value QueryAgg::eval(UNUSED const Tuple& tuple,
-                     UNUSED const QuerySchema& schema) const {
-  throw NotImplementedException("eval not implemented");
+Value QueryAgg::eval(const Tuple& tuple,
+                     const QuerySchema& schema) const
+{
+  std::cout << "Got column " << col_.to_string() << std::endl;
+  return col_.eval(tuple, schema);
 }
 
 Value QueryAgg::eval_join(UNUSED const Tuple& lt,
@@ -30,5 +33,6 @@ Value QueryAgg::eval_join(UNUSED const Tuple& lt,
 }
 
 const string QueryAgg::to_string() const {
-  throw NotImplementedException("to_string not implemented for QueryAgg");
+  // TODO! Needs to be fleshed out a bit more
+  return "Query Agg for : " + col_.name();
 }

@@ -34,6 +34,10 @@ public:
     return table_list_;
   }
 
+  const AggListExpr& agg_list() {
+    return agg_list_;
+  }
+
   ptr<WhereClauseExpr>& pred() {
     return where_clause_;
   }

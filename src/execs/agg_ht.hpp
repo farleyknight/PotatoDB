@@ -3,30 +3,23 @@
 #include "common/config.hpp"
 #include "plans/agg_plan.hpp"
 
-/**
- * A simplified hash table that has all the necessary functionality for aggregations.
- */
 class AggHT {
 public:
-  /**********************************************
-   * Constructors & destructor
-   **********************************************/
+  AggHT()
+  {}
 
-  AggHT(const AggPlan& plan) {
-    for (const auto &node : plan.aggs()) {
+  void init(const ptr<AggPlan>& plan) {
+    assert(plan != nullptr);
+    for (const auto &node : plan->aggs()) {
       nodes_.emplace_back(node);
     }
 
-    for (const auto &type : plan.agg_types()) {
+    for (const auto &type : plan->agg_types()) {
       types_.emplace_back(type);
     }
 
     assert(nodes_.size() == types_.size());
   }
-
-  /**********************************************
-   * Instance methods
-   **********************************************/
 
   AggValue generate() {
     vector<Value> values;
@@ -132,7 +125,7 @@ public:
   Iterator end()   const { return Iterator {table_.cend()}; }
 
 private:
-  MutMap<AggKey, AggValue> table_ {};
+  map<AggKey, AggValue> table_ {};
   vector<BaseQuery> nodes_;
   vector<AggType> types_;
 };

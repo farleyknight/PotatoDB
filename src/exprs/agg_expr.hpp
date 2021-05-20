@@ -2,6 +2,7 @@
 
 #include "exprs/base_expr.hpp"
 #include "exprs/column_expr.hpp"
+#include "query/agg_type.hpp"
 
 class AggExpr : public BaseExpr {
 public:
@@ -17,6 +18,24 @@ public:
 
   const string& function_name() const {
     return func_name_;
+  }
+
+  const ColumnExpr& column_expr() const {
+    return col_expr_;
+  }
+
+  AggType agg_type() const {
+    if (func_name_ == "COUNT") {
+      return AggType::COUNT;
+    } else if (func_name_ == "SUM") {
+      return AggType::SUM;
+    } else if (func_name_ == "MIN") {
+      return AggType::MIN;
+    } else if (func_name_ == "MAX") {
+      return AggType::MAX;
+    } else {
+      throw Exception("Function name not recognized! : " + func_name_);
+    }
   }
 
 protected:
