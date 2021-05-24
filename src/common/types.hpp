@@ -12,6 +12,7 @@
 
 #include <string>
 
+#include <map>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -58,6 +59,9 @@ using std::unique_ptr;
 
 template<typename K, typename V>
 using map         = std::unordered_map<K, V>;
+
+template<typename K, typename V>
+using ordered_map = std::map<K, V>;
 
 namespace fs = std::filesystem;
 

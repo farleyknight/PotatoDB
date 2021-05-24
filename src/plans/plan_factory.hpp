@@ -45,7 +45,7 @@ public:
                                         column_def_list);
   }
 
-  static ptr<BasePlan> from_expr(const Catalog& catalog, SelectExpr* expr) {
+  static ptr<BasePlan> make_seq_scan_plan(const Catalog& catalog, SelectExpr* expr) {
     // TODO: A SELECT statement can have multiple tables!
     // Need to support this at some point.
     auto table_name = expr->table_list().front().name();
@@ -54,12 +54,46 @@ public:
     auto schema = catalog.query_schema_for(table_name,
                                            expr->column_list());
 
-    // TODO: Convert from WhereClauseExpr to QueryComp here
     auto maybe_pred = to_query_where(catalog, table_name, expr->pred());
 
     return make_unique<SeqScanPlan>(schema,
                                     table_oid,
                                     move(maybe_pred));
+  }
+
+  static ptr<BasePlan> from_expr(const Catalog& catalog, SelectExpr* expr) {
+    if (expr->agg_list().list().size() > 0) {
+      return make_agg_plan(catalog, expr);
+    } else {
+      return make_seq_scan_plan(catalog, expr);
+    }
+  }
+
+  static ptr<BasePlan> make_agg_plan(const Catalog& catalog, SelectExpr* expr) {
+    // TODO!
+    // AggExpr will have ColumnExpr inside it
+    // Convert AggExpr to QueryAgg and ColumnExpr to QueryColumn
+    // Check the function_name to determine which AggType it is.
+    auto table_name = expr->table_list().front().name();
+    vector<QueryAgg> agg_nodes;
+    for (const auto& agg : expr->agg_list().list()) {
+      auto col_name = agg.column_expr().name();
+      auto query_col = catalog.query_column_for(table_name, col_name);
+      auto query_agg = QueryAgg(query_col, agg.agg_type());
+      agg_nodes.push_back(query_agg);
+    }
+
+    auto scan_plan = make_seq_scan_plan(catalog, expr);
+    auto schema = dynamic_cast<SchemaPlan*>(scan_plan.get())->schema();
+
+    vector<QueryColumn> agg_cols;
+    for (const auto& agg_node : agg_nodes) {
+      agg_cols.push_back(agg_node.to_query_column());
+    }
+
+    return make_unique<AggPlan>(QuerySchema(agg_cols),
+                                move(scan_plan),
+                                agg_nodes);
   }
 
   static ptr<BaseQuery> to_query_node(const Catalog& catalog,
@@ -76,12 +110,17 @@ public:
       auto query_col = catalog.query_column_for(name, column_expr->name());
       return make_unique<QueryColumn>(query_col);
     }
+    case ExprType::AGG: {
+      auto agg_expr = dynamic_cast<AggExpr*>(expr.get());
+      auto col_name = agg_expr->column_expr().name();
+      auto query_col = catalog.query_column_for(name, col_name);
+      return make_unique<QueryAgg>(query_col, agg_expr->agg_type());
+    }
     case ExprType::VALUE: {
       auto value_expr = dynamic_cast<ValueExpr*>(expr.get());
       return make_unique<QueryConst>(value_expr->to_value());
     }
     case ExprType::COMPARE: {
-      // TODO! Turn CompExpr to QueryComp
       auto comp_expr = dynamic_cast<CompExpr*>(expr.get());
       auto left_node  = to_query_node(catalog, name, comp_expr->left_expr());
       auto right_node = to_query_node(catalog, name, comp_expr->right_expr());

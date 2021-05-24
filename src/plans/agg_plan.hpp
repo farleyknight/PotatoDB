@@ -12,32 +12,39 @@
 #include "plans/agg_key.hpp"
 #include "plans/base_plan.hpp"
 #include "plans/has_child_plan.hpp"
+#include "plans/schema_plan.hpp"
 
-class AggPlan : public BasePlan, public HasChildPlan {
+class AggPlan : public BasePlan,
+                public HasChildPlan,
+                public SchemaPlan
+{
 public:
   /**********************************************
    * GroupByExpr and HavingExpr are both optional
    **********************************************/
 
-  AggPlan(ptr<BasePlan>&&   child,
-          MoveVec<QueryAgg> aggs);
+  AggPlan(QuerySchema      schema,
+          ptr<BasePlan>&&  child,
+          vector<QueryAgg> aggs);
 
   /**********************************************
    * HavingExpr is optional
    **********************************************/
 
-  AggPlan(ptr<BasePlan>&&       child,
-          MoveVec<QueryAgg>     aggs,
-          MoveVec<QueryGroupBy> group_bys);
+  AggPlan(QuerySchema          schema,
+          ptr<BasePlan>&&      child,
+          vector<QueryAgg>     aggs,
+          vector<QueryGroupBy> group_bys);
 
   /**********************************************
-   * All child exprs required
+   * All child nodes required
    **********************************************/
 
-  AggPlan(ptr<BasePlan>&&       child,
-          MoveVec<QueryAgg>     aggs,
-          MoveVec<QueryGroupBy> group_bys,
-          ptr<QueryHaving>&&    having);
+  AggPlan(QuerySchema          schema,
+          ptr<BasePlan>&&      child,
+          vector<QueryAgg>     aggs,
+          vector<QueryGroupBy> group_bys,
+          ptr<QueryHaving>&&   having);
 
   void build_agg_types();
 
@@ -54,20 +61,24 @@ public:
     return group_bys_.at(idx);
   }
 
-  const Vec<QueryGroupBy>& group_bys() const {
+  const vector<QueryGroupBy>& group_bys() const {
     return group_bys_;
   }
 
-  const QueryAgg& agg_at(size_t idx) const {
+  const QueryAgg& agg_at(index_t idx) const {
     return aggs_.at(idx);
   }
 
-  const Vec<QueryAgg>& aggs() const {
+  const vector<QueryAgg>& aggs() const {
     return aggs_;
   }
 
-  const Vec<AggType>& agg_types() const {
+  const vector<AggType>& agg_types() const {
     return agg_types_;
+  }
+
+  bool is_query() const {
+    return true;
   }
 
 private:

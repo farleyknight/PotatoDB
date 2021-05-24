@@ -20,14 +20,14 @@ public:
     return "Found " + std::to_string(result_count) + " record(s)";
   }
 
+  const QuerySchema& schema();
+
 private:
   bool match_found(const Tuple& tuple);
   bool at_the_end();
-  const QuerySchema& schema();
   TableHeap& table_heap();
 
   ptr<SeqScanPlan> plan_;
 
-  UNUSED table_oid_t table_oid_;
   ptr<TableIterator> table_iter_;
 };

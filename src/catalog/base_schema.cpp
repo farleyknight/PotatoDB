@@ -30,6 +30,7 @@ bool BaseSchema<ColT>::has_column(const column_name_t& name) const {
 template<class ColT>
 column_oid_t BaseSchema<ColT>::column_oid_for(const column_name_t& name) const
 {
+  assert(column_oids_.size() > 0);
   if (column_oids_.count(name) == 0) {
     std::cout << "Could not find column with name " << name << std::endl;
   }
@@ -51,7 +52,6 @@ bool BaseSchema<ColT>::operator==(const BaseSchema& other) const {
 
   return true;
 }
-
 
 template<class ColT>
 buffer_offset_t BaseSchema<ColT>::buffer_offset_for(column_oid_t oid) const {

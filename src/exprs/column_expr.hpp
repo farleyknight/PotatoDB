@@ -31,10 +31,14 @@ public:
     return table_;
   }
 
-  virtual const string to_string() const override {
-    return name_;
+  const string to_string() const {
+    // TODO: Handle AggExpr case
+    if (table_.size() > 0) {
+      return table_ + "." + name_;
+    } else {
+      return name_;
+    }
   }
-
 protected:
   column_name_t name_;
   table_name_t  table_;

@@ -55,6 +55,7 @@ set(server_sources
   "server/main.cpp")
 
 set(parser_sources
+  "src/parser/eval_parse_visitor.cpp"
   "parser/PotatoSQLLexer.cpp"
   "parser/PotatoSQLParser.cpp")
 

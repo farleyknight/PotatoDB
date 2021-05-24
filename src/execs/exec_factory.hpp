@@ -33,6 +33,7 @@ public:
 
   template <class T>
   static ptr<T> cast(ptr<BasePlan>& plan) {
+    assert(plan != nullptr);
     return unique_ptr<T>(static_cast<T*>(plan.release()));
   }
 
@@ -92,7 +93,6 @@ public:
                                     move(limit_plan),
                                     move(child_exec));
     }
-
     case PlanType::SORT: {
       auto sort_plan = cast<SortPlan>(plan);
       auto child_exec = ExecFactory::create(exec_ctx,
@@ -101,7 +101,6 @@ public:
                                    move(sort_plan),
                                    move(child_exec));
     }
-
     case PlanType::AGG: {
       auto agg_plan = cast<AggPlan>(plan);
       auto child_exec = ExecFactory::create(exec_ctx,

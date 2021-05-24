@@ -2,18 +2,11 @@
 
 #include "query/base_query.hpp"
 #include "catalog/query_schema.hpp"
-
-enum class AggType {
-  // INVALID = 0, TODO: Do I need this?
-  COUNT = 1,
-  SUM = 2,
-  MIN = 3,
-  MAX = 4
-};
+#include "query/agg_type.hpp"
 
 class QueryAgg : public BaseQuery {
 public:
-  QueryAgg(BaseQuery node, AggType agg_type);
+  QueryAgg(QueryColumn node, AggType agg_type);
 
   // Allow copy
   QueryAgg(const QueryAgg&) = default;
@@ -38,12 +31,14 @@ public:
   }
 
   TypeId type_id() const {
-    return node_.type_id();
+    return col_.type_id();
   }
 
   const string to_string() const;
+  const QueryColumn to_query_column() const;
+  const string agg_type_string() const;
 
 private:
-  BaseQuery node_;
+  QueryColumn col_;
   AggType agg_type_;
 };

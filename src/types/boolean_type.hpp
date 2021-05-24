@@ -16,6 +16,39 @@ public:
     return sizeof(bool);
   }
 
+  Value add(const Value& left,
+            const Value& right) const override
+  {
+    bool lhs = left.as<bool>(), rhs = right.as<bool>();
+    if (lhs || rhs) {
+      return Value::make(true);
+    } else {
+      return Value::make(false);
+    }
+  }
+
+  Value min(const Value& left,
+            const Value& right) const override
+  {
+    bool lhs = left.as<bool>(), rhs = right.as<bool>();
+    if (lhs && rhs) {
+      return Value::make(true);
+    } else {
+      return Value::make(false);
+    }
+  }
+
+  Value max(const Value& left,
+            const Value& right) const override
+  {
+    bool lhs = left.as<bool>(), rhs = right.as<bool>();
+    if (lhs || rhs) {
+      return Value::make(true);
+    } else {
+      return Value::make(false);
+    }
+  }
+
   Value min() const override {
     return Value::make(false);
   }

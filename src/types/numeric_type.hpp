@@ -7,7 +7,6 @@
 template<typename numeric_t>
 class NumericType : public Type {
 public:
-
   buffer_offset_t size() const override {
     return sizeof(numeric_t);
   }
@@ -59,6 +58,30 @@ public:
       // Likely cast both Value objects to be of the same integer size
       return left.as<numeric_t>() < right.as<numeric_t>();
     }
+  }
+
+  Value add(const Value& left,
+            const Value& right) const override
+  {
+    // TODO: Check for nulls!
+    numeric_t lhs = left.as<numeric_t>(), rhs = right.as<numeric_t>();
+    return Value::make(lhs + rhs);
+  }
+
+  Value min(const Value& left,
+            const Value& right) const override
+  {
+    // TODO: Check for nulls!
+    numeric_t lhs = left.as<numeric_t>(), rhs = right.as<numeric_t>();
+    return Value::make(std::min(lhs, rhs));
+  }
+
+  Value max(const Value& left,
+            const Value& right) const override
+  {
+    // TODO: Check for nulls!
+    numeric_t lhs = left.as<numeric_t>(), rhs = right.as<numeric_t>();
+    return Value::make(std::max(lhs, rhs));
   }
 
   void serialize_to(buffer_offset_t offset, Buffer& buff, Value val) const override {

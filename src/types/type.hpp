@@ -114,10 +114,8 @@ public:
     }
   }
 
-  Value add(UNUSED const Value& left,
-            UNUSED const Value& right) const {
-    throw NotImplementedException("add not implemented!");
-  }
+  virtual Value add(const Value& left,
+                    const Value& right) const = 0;
 
   Value subtract(UNUSED const Value& left,
                  UNUSED const Value& right) const {
@@ -140,14 +138,9 @@ public:
   }
 
   virtual Value min(UNUSED const Value& left,
-                    UNUSED const Value& right) const {
-    throw NotImplementedException("min not implemented!");
-  }
-
+                    UNUSED const Value& right) const = 0;
   virtual Value max(UNUSED const Value& left,
-                    UNUSED const Value& right) const {
-    throw NotImplementedException("max not implemented!");
-  }
+                    UNUSED const Value& right) const = 0;
 
   Value sqrt(UNUSED const Value& val) const {
     throw NotImplementedException("max not implemented!");

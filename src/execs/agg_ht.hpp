@@ -3,30 +3,24 @@
 #include "common/config.hpp"
 #include "plans/agg_plan.hpp"
 
-/**
- * A simplified hash table that has all the necessary functionality for aggregations.
- */
 class AggHT {
 public:
-  /**********************************************
-   * Constructors & destructor
-   **********************************************/
+  AggHT() {}
 
-  AggHT(const AggPlan& plan) {
-    for (const auto &node : plan.aggs()) {
+  using InternalMap = map<AggKey, AggValue>;
+
+  void init(const ptr<AggPlan>& plan) {
+    assert(plan != nullptr);
+    for (const auto &node : plan->aggs()) {
       nodes_.emplace_back(node);
     }
 
-    for (const auto &type : plan.agg_types()) {
+    for (const auto &type : plan->agg_types()) {
       types_.emplace_back(type);
     }
 
     assert(nodes_.size() == types_.size());
   }
-
-  /**********************************************
-   * Instance methods
-   **********************************************/
 
   AggValue generate() {
     vector<Value> values;
@@ -57,19 +51,15 @@ public:
     for (size_t i = 0; i < nodes_.size(); ++i) {
       switch (types_[i]) {
         case AggType::COUNT:
-          // Count increases by one.
           result.aggs_[i] = result.aggs_[i].add(Value(TypeId::INTEGER, 1));
           break;
         case AggType::SUM:
-          // Sum increases by addition.
           result.aggs_[i] = result.aggs_[i].add(input.aggs_[i]);
           break;
         case AggType::MIN:
-          // Min is just the min.
           result.aggs_[i] = result.aggs_[i].min(input.aggs_[i]);
           break;
         case AggType::MAX:
-          // Max is just the max.
           result.aggs_[i] = result.aggs_[i].max(input.aggs_[i]);
           break;
       }
@@ -83,22 +73,10 @@ public:
     combine(table_.at(key), val);
   }
 
-  /**********************************************
-   * Iterator class
-   **********************************************/
   class Iterator {
   public:
-    /**********************************************
-     * Constructors & destructor
-     **********************************************/
-
-    /** Creates an iterator for the aggregate map. */
-    explicit Iterator(Map<AggKey, AggValue>::const_iterator iter)
+    explicit Iterator(InternalMap::iterator iter)
       : iter_(iter) {}
-
-    /**********************************************
-     * Instance methods
-     **********************************************/
 
     const AggKey& key() {
       return iter_->first;
@@ -108,31 +86,33 @@ public:
       return iter_->second;
     }
 
-    Iterator &operator++() {
+    Iterator& operator++() {
       ++iter_;
       return *this;
     }
 
-    bool operator==(const Iterator& other) const {
+    Iterator operator++(int) {
+      auto tmp = *this;
+      ++(*this);
+      return tmp;
+    }
+
+    bool operator==(Iterator& other) const {
       return iter_ == other.iter_;
     }
-    bool operator!=(const Iterator& other) const {
+    bool operator!=(Iterator& other) const {
       return iter_ != other.iter_;
     }
 
   private:
-    Map<AggKey, AggValue>::const_iterator iter_;
+    InternalMap::iterator iter_;
   };
 
-  /**********************************************
-   * Iterator methods
-   **********************************************/
-
-  Iterator begin() const { return Iterator {table_.cbegin()}; }
-  Iterator end()   const { return Iterator {table_.cend()}; }
+  Iterator begin() { return Iterator {table_.begin()}; }
+  Iterator end()   { return Iterator {table_.end()}; }
 
 private:
-  MutMap<AggKey, AggValue> table_ {};
+  InternalMap table_ {};
   vector<BaseQuery> nodes_;
   vector<AggType> types_;
 };

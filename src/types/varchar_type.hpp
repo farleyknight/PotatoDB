@@ -57,6 +57,27 @@ public:
     return 12; // TODO Find out if this is correct
   }
 
+  Value add(UNUSED const Value& left,
+            UNUSED const Value& right) const override
+  {
+    // TODO: Add a TypeMismatchException to the list of possible exceptions
+    throw Exception("Type mismatch! The operation `add` is available for VARCHAR!");
+  }
+
+  Value min(UNUSED const Value& left,
+            UNUSED const Value& right) const override
+  {
+    // TODO: Add a TypeMismatchException to the list of possible exceptions
+    throw Exception("Type mismatch! The operation `min` is available for VARCHAR!");
+  }
+
+  Value max(UNUSED const Value& left,
+            UNUSED const Value& right) const override
+  {
+    // TODO: Add a TypeMismatchException to the list of possible exceptions
+    throw Exception("Type mismatch! The operation `max` is available for VARCHAR!");
+  }
+
   Value cast_as(const Value& value, TypeId type_id) const override {
     switch(type_id) {
     case TypeId::INTEGER: {

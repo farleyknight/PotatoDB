@@ -47,6 +47,24 @@ public:
     throw Exception("No max for InvalidType");
   }
 
+  Value add(UNUSED const Value& left,
+            UNUSED const Value& right) const override
+  {
+    throw Exception("No add for InvalidType");
+  }
+
+  Value min(UNUSED const Value& left,
+            UNUSED const Value& right) const override
+  {
+    throw Exception("No min for InvalidType");
+  }
+
+  Value max(UNUSED const Value& left,
+            UNUSED const Value& right) const override
+  {
+    throw Exception("No max for InvalidType");
+  }
+
   Value cast_as(UNUSED const Value& value, UNUSED TypeId type_id) const override {
     throw Exception("No cast_as for InvalidType");
   }
