@@ -40,8 +40,13 @@ TEST_F(TypeTests, DISABLED_DecimalType) {
   // TODO: DecimalType test
 }
 
-TEST_F(TypeTests, DISABLED_TimestampType) {
-  // TODO: TimestampType test
+TEST_F(TypeTests, TimestampType) {
+
+  // TODO!
+  // 1) Support for NOW()
+  // 2) Support for comparing timestamps
+  // 3) ???
+
 }
 
 TEST_F(TypeTests, DISABLED_VarCharType) {
