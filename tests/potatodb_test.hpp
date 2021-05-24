@@ -71,6 +71,8 @@ TEST(PotatoDBTest, AggegrationTest) {
   EXPECT_TRUE(result.set() != nullptr);
   EXPECT_EQ(result.set()->size(), 1);
 
+  EXPECT_EQ(result.set()->schema().all().size(), 4);
+
   auto countA = result.set()->value_at<int32_t>("COUNT(colA)", 0);
   auto sumA   = result.set()->value_at<int32_t>("SUM(colA)", 0);
   auto minA   = result.set()->value_at<int32_t>("MIN(colA)", 0);

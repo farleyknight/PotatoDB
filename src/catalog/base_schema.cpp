@@ -53,7 +53,6 @@ bool BaseSchema<ColT>::operator==(const BaseSchema& other) const {
   return true;
 }
 
-
 template<class ColT>
 buffer_offset_t BaseSchema<ColT>::buffer_offset_for(column_oid_t oid) const {
   return offsets_.at(oid);

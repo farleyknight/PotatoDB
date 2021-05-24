@@ -41,10 +41,6 @@ AggPlan::AggPlan(QuerySchema schema,
 
 void AggPlan::build_agg_types() {
   assert(aggs_.size() > 0);
-  for (const auto &agg : aggs_) {
-    std::cout << "AggPlan constructor : " << agg.to_string() << std::endl;
-  }
-
   for (auto &agg : aggs_) {
     agg_types_.emplace_back(agg.agg_type());
   }

@@ -20,7 +20,6 @@ Value QueryAgg::eval_agg(const QuerySchema& schema,
 Value QueryAgg::eval(const Tuple& tuple,
                      const QuerySchema& schema) const
 {
-  std::cout << "Got column " << col_.to_string() << std::endl;
   return col_.eval(tuple, schema);
 }
 
@@ -34,5 +33,24 @@ Value QueryAgg::eval_join(UNUSED const Tuple& lt,
 
 const string QueryAgg::to_string() const {
   // TODO! Needs to be fleshed out a bit more
-  return "Query Agg for : " + col_.name();
+  auto name = agg_type_string() + "(" + col_.name() + ")";
+  return "Query Agg : " + name;
+}
+
+const string QueryAgg::agg_type_string() const {
+  switch (agg_type_) {
+  case AggType::COUNT: return "COUNT";
+  case AggType::SUM:   return "SUM";
+  case AggType::MIN:   return "MIN";
+  case AggType::MAX:   return "MAX";
+  }
+}
+
+const QueryColumn QueryAgg::to_query_column() const {
+  auto name = agg_type_string() + "(" + col_.name() + ")";
+
+  return QueryColumn(col_.type_id(),
+                     col_.table_oid(),
+                     col_.column_oid(),
+                     name);
 }

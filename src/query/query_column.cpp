@@ -12,14 +12,15 @@ Value QueryColumn::eval_join(UNUSED const Tuple& lt,
                              UNUSED const Tuple& rt,
                              UNUSED const QuerySchema& rs) const
 {
-  throw NotImplementedException("eval_agg not implemented!");
+  throw NotImplementedException("eval_join not implemented!");
 }
 
-Value QueryColumn::eval_agg(UNUSED const QuerySchema& schema,
+Value QueryColumn::eval_agg(const QuerySchema& schema,
                             UNUSED const vector<Value>& group_bys,
-                            UNUSED const vector<Value>& aggs) const
+                            const vector<Value>& aggregates) const
 {
-  throw NotImplementedException("eval_agg not implemented!");
+  auto index = schema.index_for(name_);
+  return aggregates[index];
 }
 
 ptr<QueryComp> QueryColumn::lt(Value constant) {

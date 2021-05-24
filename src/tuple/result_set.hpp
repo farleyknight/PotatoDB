@@ -43,6 +43,10 @@ public:
     return results_[i];
   }
 
+  const QuerySchema& schema() const {
+    return schema_;
+  }
+
   // NOTE: This method is different from ordinary `to_string`
   // In particular, it's formatted to be sent over the network to the client
   // Which means quoting strings, rendering boolean types to 'true'/'false'

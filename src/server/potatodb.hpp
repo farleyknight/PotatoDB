@@ -48,6 +48,10 @@ public:
   }
 
   StatementResult run_statement(const string& statement);
+  StatementResult run_create_table(ptr<BasePlan>&& plan,
+                                   Txn& txn,
+                                   ExecCtx& exec_ctx);
+
   void reset_installation();
   void verify_system_files();
   fs::path table_file_for(const string& table_name);

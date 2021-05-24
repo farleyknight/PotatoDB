@@ -35,6 +35,8 @@ public:
   }
 
   const string to_string() const;
+  const QueryColumn to_query_column() const;
+  const string agg_type_string() const;
 
 private:
   QueryColumn col_;

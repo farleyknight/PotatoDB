@@ -63,7 +63,6 @@ public:
 
   static ptr<BasePlan> from_expr(const Catalog& catalog, SelectExpr* expr) {
     if (expr->agg_list().list().size() > 0) {
-      std::cout << "Making agg plan!" << std::endl;
       return make_agg_plan(catalog, expr);
     } else {
       return make_seq_scan_plan(catalog, expr);
@@ -81,23 +80,20 @@ public:
       auto col_name = agg.column_expr().name();
       auto query_col = catalog.query_column_for(table_name, col_name);
       auto query_agg = QueryAgg(query_col, agg.agg_type());
-      std::cout << "Adding agg : " << query_agg.to_string() << std::endl;
       agg_nodes.push_back(query_agg);
-    }
-
-    assert(agg_nodes.size() > 0);
-    for (const auto &agg : agg_nodes) {
-      std::cout << "Agg : " << agg.to_string() << std::endl;
     }
 
     auto scan_plan = make_seq_scan_plan(catalog, expr);
     auto schema = dynamic_cast<SchemaPlan*>(scan_plan.get())->schema();
 
-    auto agg_plan = AggPlan(schema,
-                            move(scan_plan),
-                            move(agg_nodes));
+    vector<QueryColumn> agg_cols;
+    for (const auto& agg_node : agg_nodes) {
+      agg_cols.push_back(agg_node.to_query_column());
+    }
 
-    return make_unique<AggPlan>(move(agg_plan));
+    return make_unique<AggPlan>(QuerySchema(agg_cols),
+                                move(scan_plan),
+                                agg_nodes);
   }
 
   static ptr<BaseQuery> to_query_node(const Catalog& catalog,

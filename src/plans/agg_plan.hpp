@@ -65,15 +65,11 @@ public:
     return group_bys_;
   }
 
-  const QueryAgg& agg_at(size_t idx) const {
+  const QueryAgg& agg_at(index_t idx) const {
     return aggs_.at(idx);
   }
 
   const vector<QueryAgg>& aggs() const {
-    assert(aggs_.size() > 0);
-    for (const auto &agg : aggs_) {
-      std::cout << "Agg : " << agg.to_string() << std::endl;
-    }
     return aggs_;
   }
 
