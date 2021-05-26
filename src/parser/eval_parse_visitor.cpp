@@ -144,7 +144,7 @@ ptr<BaseExpr> EvalParseVisitor::make_expr(ExprContext *ctx) {
     auto right_expr = make_expr(ctx->expr()[1]);
 
     return make_unique<CompExpr>(move(left_expr),
-                                 CompType::EQ,
+                                 CompareType::EQ,
                                  move(right_expr));
   } 
 
@@ -163,7 +163,7 @@ WhereClauseExpr EvalParseVisitor::make_where_clause_expr(WhereClauseContext *ctx
     auto right_expr = make_expr(expr->expr()[1]);
 
     auto comp_expr = make_unique<CompExpr>(move(left_expr),
-                                           CompType::EQ,
+                                           CompareType::EQ,
                                            move(right_expr));
     return WhereClauseExpr(move(comp_expr));
 
@@ -172,7 +172,7 @@ WhereClauseExpr EvalParseVisitor::make_where_clause_expr(WhereClauseContext *ctx
     auto right_expr = make_expr(expr->expr()[1]);
 
     auto comp_expr = make_unique<CompExpr>(move(left_expr),
-                                           CompType::NE,
+                                           CompareType::NE,
                                            move(right_expr));
     return WhereClauseExpr(move(comp_expr));
   } else if (expr->K_AND()) {
@@ -210,25 +210,50 @@ Any EvalParseVisitor::visitCompound_select_stmt(CompoundSelectStmtContext *ctx) 
 
   CompoundSelectExpr stmt_expr;
 
-  // TODO:
-  // * Compounds have a left_select & right_select
-  // * If only the left_select exists, then the comp_type == CompoundType::NONE
-  // * If only the left_select & right_select exists, then the comp_type MUST BE one of:
-  //   - CompoundType::UNION
-  //   - CompoundType::UNION_ALL
-  //   - CompoundType::INTERSECTION
-  //   - CompoundType::EXCEPT
+  assert(ctx->select_core().size() > 0);
+
+  auto left_select = make_select_expr(ctx->select_core()[0]);
+  stmt_expr.set_left(move(left_select));
+
+  if (ctx->select_core().size() == 2) {
+    // TODO:
+    // * Compounds have a left_select & right_select
+    // * If only the left_select exists, then the type == CompoundType::NONE
+    // * If only the left_select & right_select exists, then the type MUST BE one of:
+    //   - CompoundType::UNION
+    //   - CompoundType::UNION_ALL
+    //   - CompoundType::INTERSECTION
+    //   - CompoundType::EXCEPT
+
+    throw Exception("FIXME");
+  }
+
+  if (ctx->ordering_term()) {
+    auto ordering_ctx = ctx->ordering_term();
+    auto col_name = ordering_ctx->expr()->getText();
+    OrderByExpr order_by(ColumnExpr(col_name));
+
+    if (ordering_ctx->K_ASC()) {
+      order_by.set_direction("asc");
+    } else if (ordering_ctx->K_DESC()) {
+      order_by.set_direction("desc");
+    } else {
+      order_by.set_direction("asc"); // NOTE: DEFAULT!
+    }
+
+    stmt_expr.set_order_by(order_by);
+  }
 
   // TODO:
-  // Add ORDER BY
-  //
-  // TODO:
   // Add LIMIT .. OFFSET ..
+
+  auto compound_ptr = make_unique<CompoundSelectExpr>(move(stmt_expr));
+  exprs_.emplace_back(move(compound_ptr));
 
   return visitChildren(ctx);
 }
 
-Any EvalParseVisitor::visitSelect_core(SelectCoreContext *ctx) {
+ptr<SelectExpr> EvalParseVisitor::make_select_expr(SelectCoreContext *ctx) {
   const auto &col_list_ctx = ctx->column_list();
 
   ColumnListExpr cols;
@@ -242,7 +267,8 @@ Any EvalParseVisitor::visitSelect_core(SelectCoreContext *ctx) {
 
       if (expr->function_name()) {
         auto func_name = expr->function_name()->getText();
-        if (func_name == "COUNT" || func_name == "SUM" || func_name == "MIN" || func_name == "MAX") {
+        if (func_name == "COUNT" || func_name == "SUM" ||
+            func_name == "MIN" || func_name == "MAX") {
           auto col_expr = make_col_expr(expr->function_args());
           aggs.push_back(AggExpr(func_name, col_expr));
         } else {
@@ -283,8 +309,11 @@ Any EvalParseVisitor::visitSelect_core(SelectCoreContext *ctx) {
     auto where_clause_ptr = make_unique<WhereClauseExpr>(move(where_clause));
     select.set_where(move(where_clause_ptr));
   }
-  auto select_ptr = make_unique<SelectExpr>(move(select));
-  exprs_.emplace_back(move(select_ptr));
 
+  return make_unique<SelectExpr>(move(select));
+}
+
+Any EvalParseVisitor::visitSelect_core(SelectCoreContext *ctx) {
+  exprs_.emplace_back(make_select_expr(ctx));
   return visitChildren(ctx);
 }

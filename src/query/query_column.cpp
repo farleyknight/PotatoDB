@@ -38,12 +38,12 @@ Value QueryColumn::eval_agg(const QuerySchema& schema,
 ptr<QueryComp> QueryColumn::lt(Value constant) {
   auto self = make_unique<QueryColumn>(*this);
   auto value = make_unique<QueryConst>(constant);
-  return make_unique<QueryComp>(move(self), CompType::LT, move(value));
+  return make_unique<QueryComp>(move(self), CompareType::LT, move(value));
 }
 
 ptr<QueryComp> QueryColumn::gt(Value constant) {
   auto self = make_unique<QueryColumn>(*this);
   auto value = make_unique<QueryConst>(constant);
-  return make_unique<QueryComp>(move(self), CompType::GT, move(value));
+  return make_unique<QueryComp>(move(self), CompareType::GT, move(value));
 }
 

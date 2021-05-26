@@ -59,7 +59,9 @@ public:
 
   ValueExpr make_value_expr(ExprContext* expr_ctx) const;
 
+  ptr<SelectExpr> make_select_expr(SelectCoreContext *ctx);
   ptr<BaseExpr> make_expr(ExprContext *ctx);
+
   WhereClauseExpr make_where_clause_expr(WhereClauseContext *ctx);
   ColumnExpr make_col_expr(FunctionArgsContext* ctx);
 

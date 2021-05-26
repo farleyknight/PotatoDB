@@ -4,6 +4,10 @@
 
 class ColumnExpr : public BaseExpr {
 public:
+  ColumnExpr()
+    : BaseExpr (ExprType::COLUMN)
+  {}
+
   ColumnExpr(const column_name_t name)
     : BaseExpr (ExprType::COLUMN),
       name_    (name)

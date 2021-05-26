@@ -14,7 +14,7 @@ public:
   {}
 
   const string to_string() const {
-    // TODO: Properly handle when CompType is NOT equals
+    // TODO: Properly handle when CompareType is NOT equals
     return left_->to_string() + " == " + right_->to_string();
   }
 

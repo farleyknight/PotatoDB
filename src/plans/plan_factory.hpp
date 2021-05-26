@@ -19,6 +19,10 @@ public:
       auto select_expr = dynamic_cast<SelectExpr*>(expr.get());
       return from_expr(catalog_, select_expr);
     }
+    case ExprType::COMPOUND_SELECT: {
+      auto compound_expr = dynamic_cast<CompoundSelectExpr*>(expr.get());
+      return from_expr(catalog_, compound_expr);
+    }
     case ExprType::INSERT: {
       auto insert_expr = dynamic_cast<InsertExpr*>(expr.get());
       return from_expr(catalog_, insert_expr);
@@ -61,6 +65,23 @@ public:
     return make_unique<SeqScanPlan>(schema,
                                     table_oid,
                                     move(maybe_pred));
+  }
+
+
+  static ptr<BasePlan> from_expr(const Catalog& catalog, CompoundSelectExpr* expr) {
+    // TODO!
+    // Handle ORDER BY mostly
+    // Wrap the seq_scan_plan in an SortPlan
+    //
+    // TODO LATER
+    // * Add support for UNION, INTERSECTION
+    // * Use right_select appropriately
+
+    auto left_scan_plan = make_seq_scan_plan(catalog,
+                                             move(expr->left_select()));
+
+    return make_unique<SortPlan>(order_by,
+                                 move(left_scan_plan));
   }
 
   static ptr<BasePlan> from_expr(const Catalog& catalog, SelectExpr* expr) {
@@ -143,7 +164,7 @@ public:
       auto left_node  = to_query_node(catalog, name, comp_expr->left_expr());
       auto right_node = to_query_node(catalog, name, comp_expr->right_expr());
       return make_unique<QueryComp>(move(left_node),
-                                    comp_expr->comp_type(),
+                                    comp_expr->compare_type(),
                                     move(right_node));
     }
     default:
@@ -183,7 +204,7 @@ public:
     auto query_const = make_unique<QueryConst>(value);
 
     auto table_comp = make_unique<QueryComp>(move(type_col),
-                                             CompType::EQ,
+                                             CompareType::EQ,
                                              move(query_const));
 
     auto table_pred = make_unique<QueryWhere>(move(table_comp));
@@ -204,7 +225,7 @@ public:
     auto column_const = make_unique<QueryConst>(column_value);
 
     auto column_comp = make_unique<QueryComp>(move(type_col),
-                                              CompType::EQ,
+                                              CompareType::EQ,
                                               move(column_const));
 
     auto table_value = Value::make(expr->table().name());
@@ -213,7 +234,7 @@ public:
     auto name_col = make_unique<QueryColumn>(schema["table_name"]);
 
     auto table_comp = make_unique<QueryComp>(move(name_col),
-                                             CompType::EQ,
+                                             CompareType::EQ,
                                              move(table_name));
 
     auto table_pred = make_unique<QueryWhere>(move(column_comp),

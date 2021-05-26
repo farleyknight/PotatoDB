@@ -59,7 +59,7 @@ PlanBuilder& PlanBuilder::on(QueryColumn left,
   auto right_col = QueryJoin::make_right(right);
 
   auto comp = make_unique<QueryComp>(move(left_col),
-                                     CompType::EQ,
+                                     CompareType::EQ,
                                      move(right_col));
 
   join_clause_ = make_unique<QueryWhere>(move(comp));

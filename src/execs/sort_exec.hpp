@@ -1,13 +1,10 @@
 #pragma once
 
+#include "execs/base_exec.hpp"
+#include "execs/sort_ht.hpp"
+
 class SortExec : public BaseExec {
  public:
-  /**
-   * Creates a new sort executor.
-   * @param exec_ctx the executor context
-   * @param plan the sort plan to be executed
-   * @param child the child executor that produces tuple
-   */
   SortExec(ExecCtx& exec_ctx,
            ptr<SortPlan>&& plan,
            ptr<BaseExec>&& child)
@@ -29,6 +26,22 @@ class SortExec : public BaseExec {
 
     // TODO: Load everything into memory and sort it!
     // Make sure you use external merge-sort here..
+    // TODO: Look at AggExec for an example
+
+    table_.init(plan_);
+    table_.generate();
+
+    while (child_->has_next()){
+      auto tuple = child_->next();
+      auto sort_key = make_key(tuple);
+      // NOTE: Multiple tuples might generate the same sort_key
+      // Because of this, we are not sorting tuples but instead
+      // sorting buckets of tuples, and the sort_key identifies
+      // the buckets.
+      table_.insert_into_bucket(sort_key, tuple);
+    }
+    table_.merge_sort();
+    table_iter_ = table_.begin();
   }
 
   bool has_next() override {
@@ -48,4 +61,6 @@ class SortExec : public BaseExec {
 private:
   ptr<SortPlan> plan_;
   ptr<BaseExec> child_;
+  SortHT table_;
+  SortHT::Iterator table_iter_;
 };
