@@ -162,6 +162,9 @@ public:
   virtual void enterConflict_clause(PotatoSQLParser::Conflict_clauseContext * /*ctx*/) override { }
   virtual void exitConflict_clause(PotatoSQLParser::Conflict_clauseContext * /*ctx*/) override { }
 
+  virtual void enterFunction_args(PotatoSQLParser::Function_argsContext * /*ctx*/) override { }
+  virtual void exitFunction_args(PotatoSQLParser::Function_argsContext * /*ctx*/) override { }
+
   virtual void enterExpr(PotatoSQLParser::ExprContext * /*ctx*/) override { }
   virtual void exitExpr(PotatoSQLParser::ExprContext * /*ctx*/) override { }
 

@@ -95,9 +95,9 @@ const string join_with_commas(const vector<string> values) {
   return ss.str();
 }
 
-void create_todo_table(PotatoDB& db, const int size) {
+void create_todo_table(PotatoDB& db, const index_t size) {
   const vector<string> columns = {
-    "id PRIMARY KEY AUTO INCREMENT",
+    "id INTEGER PRIMARY KEY AUTOINCREMENT",
     "name VARCHAR(32)",
     "done BOOLEAN",
     "created_at TIMESTAMP",
@@ -140,17 +140,19 @@ TEST(PotatoDBTest, SortingTest) {
   create_todo_table(db, size);
 
   auto asc_result = db.run_statement("SELECT * FROM todos ORDER BY created_at ASC");
-  EXPECT_TRUE(result.set() != nullptr);
-  EXPECT_EQ(result.set()->size(), 10);
+  EXPECT_TRUE(asc_result.set() != nullptr);
+  EXPECT_EQ(asc_result.set()->size(), 10);
   for (index_t i = 0; i < size; ++i) {
-    EXPECT_EQ(result.set()->value_at<int32_t>("name", i), "Task #" + std::to_string(i));
+    auto name = asc_result.set()->value_at<string>("name", i);
+    EXPECT_EQ(name, "Task #" + std::to_string(i));
   }
 
   auto desc_result = db.run_statement("SELECT * FROM todos ORDER BY created_at DESC");
-  EXPECT_TRUE(result.set() != nullptr);
-  EXPECT_EQ(result.set()->size(), 10);
+  EXPECT_TRUE(desc_result.set() != nullptr);
+  EXPECT_EQ(desc_result.set()->size(), 10);
   for (index_t i = 0; i < size; ++i) {
-    EXPECT_EQ(result.set()->value_at<int32_t>("name", i), "Task #" + std::to_string(size - 1 - i));
+    auto name = desc_result.set()->value_at<string>("name", i);
+    EXPECT_EQ(name, "Task #" + std::to_string(size - 1 - i));
   }
 }
 
@@ -165,7 +167,7 @@ TEST(PotatoDBTest, UpdateWhereTest) {
   auto result = db.run_statement("SELECT * FROM todos");
   EXPECT_TRUE(result.set() != nullptr);
   EXPECT_EQ(result.set()->size(), size);
-  for (index i = 0; i < size; ++i) {
+  for (index_t i = 0; i < size; ++i) {
     auto done = result.set()->value_at<bool>("done", i);
     if (i == 3) {
       EXPECT_EQ(done, true);
@@ -187,7 +189,7 @@ TEST(PotatoDBTest, DeleteWhereTest) {
   EXPECT_TRUE(result.set() != nullptr);
   EXPECT_EQ(result.set()->size(), size-1);
   int expected_id = 0;
-  for (index i = 0; i < size-1; ++i) {
+  for (index_t i = 0; i < size-1; ++i) {
     if (i == 3) {
       ++expected_id;
     }

@@ -10,10 +10,24 @@ class QuerySchema;
 
 class QueryColumn : public BaseQuery {
 public:
-  QueryColumn(TypeId type_id,
-              table_oid_t table_oid,
-              column_oid_t column_oid,
-              column_name_t name)
+  QueryColumn(TypeId type_id, column_name_t name)
+    : BaseQuery   (QueryNodeType::COLUMN, type_id),
+      table_oid_  (INVALID_TABLE_OID),
+      column_oid_ (INVALID_COLUMN_OID),
+      name_       (name)
+  {}
+
+  QueryColumn(column_name_t name)
+    : BaseQuery   (QueryNodeType::COLUMN, TypeId::INVALID),
+      table_oid_  (INVALID_TABLE_OID),
+      column_oid_ (INVALID_COLUMN_OID),
+      name_       (name)
+  {}
+
+  explicit QueryColumn(TypeId type_id,
+                       table_oid_t table_oid,
+                       column_oid_t column_oid,
+                       column_name_t name)
     : BaseQuery   (QueryNodeType::COLUMN, type_id),
       table_oid_  (table_oid),
       column_oid_ (column_oid),
@@ -26,6 +40,22 @@ public:
   QueryColumn& operator=(const QueryColumn&) = default;
   // Default destructor
   ~QueryColumn() = default;
+
+  static QueryColumn splat() {
+    return QueryColumn("*");
+  }
+
+  static QueryColumn count_splat() {
+    return QueryColumn(TypeId::INTEGER, "COUNT(*)");
+  }
+
+  bool is_splat() const {
+    return (name_ == "*");
+  }
+
+  bool is_count_splat() const {
+    return (name_ == "COUNT(*)");
+  }
 
   static QueryColumn from(TableColumn col) {
     return QueryColumn(col.type_id(),
@@ -89,7 +119,7 @@ public:
   }
 
 private:
-  table_oid_t table_oid_;
-  column_oid_t column_oid_;
+  table_oid_t table_oid_   = INVALID_TABLE_OID;
+  column_oid_t column_oid_ = INVALID_COLUMN_OID;
   column_name_t name_;
 };

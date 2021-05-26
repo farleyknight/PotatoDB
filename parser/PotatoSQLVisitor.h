@@ -116,6 +116,8 @@ public:
 
     virtual antlrcpp::Any visitConflict_clause(PotatoSQLParser::Conflict_clauseContext *context) = 0;
 
+    virtual antlrcpp::Any visitFunction_args(PotatoSQLParser::Function_argsContext *context) = 0;
+
     virtual antlrcpp::Any visitExpr(PotatoSQLParser::ExprContext *context) = 0;
 
     virtual antlrcpp::Any visitForeign_key_clause(PotatoSQLParser::Foreign_key_clauseContext *context) = 0;

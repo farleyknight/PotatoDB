@@ -47,8 +47,11 @@ const string QueryAgg::agg_type_string() const {
 }
 
 const QueryColumn QueryAgg::to_query_column() const {
-  auto name = agg_type_string() + "(" + col_.name() + ")";
+  if (col_.is_splat() && agg_type_ == AggType::COUNT) {
+    return QueryColumn::count_splat();
+  }
 
+  auto name = agg_type_string() + "(" + col_.name() + ")";
   return QueryColumn(col_.type_id(),
                      col_.table_oid(),
                      col_.column_oid(),

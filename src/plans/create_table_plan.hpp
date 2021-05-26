@@ -12,7 +12,11 @@ public:
       primary_key_ (primary_key),
       table_name_  (table_name),
       column_list_ (column_list)
-  {}
+  {
+    if (table_name == "todos") {
+      assert(primary_key != "");
+    }
+  }
 
   const string& table_name() {
     return table_name_;

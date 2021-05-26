@@ -323,6 +323,10 @@ conflict_clause
 
 // main expr
 
+function_args
+    : ( K_DISTINCT? expr ( ',' expr )* | '*' )?
+    ;
+
 expr
  : literal_value
  | BIND_PARAMETER
@@ -341,7 +345,7 @@ expr
                     | ( database_name '.' )? table_name )
  | expr K_AND expr
  | expr K_OR expr
- | function_name '(' ( K_DISTINCT? expr ( ',' expr )* | '*' )? ')'
+ | function_name '(' function_args ')'
  | '(' expr ')'
  | K_CAST '(' expr K_AS type_name ')'
  | expr K_COLLATE collation_name

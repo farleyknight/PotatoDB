@@ -109,8 +109,12 @@ public:
       return TypeId::INTEGER;
     } else if (name == "VARCHAR") {
       return TypeId::VARCHAR;
+    } else if (name == "BOOLEAN") {
+      return TypeId::BOOLEAN;
+    } else if (name == "TIMESTAMP") {
+      return TypeId::TIMESTAMP;
     } else {
-      return TypeId::INVALID;
+      throw Exception("Type not handled! " + name);
     }
   }
 

@@ -15,7 +15,6 @@
 #include "index/base_index.hpp"
 #include "index/index_meta.hpp"
 
-class SchemaRef;
 class SchemaManager;
 
 class Catalog {

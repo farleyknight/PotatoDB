@@ -160,6 +160,9 @@ public:
   virtual void enterConflict_clause(PotatoSQLParser::Conflict_clauseContext *ctx) = 0;
   virtual void exitConflict_clause(PotatoSQLParser::Conflict_clauseContext *ctx) = 0;
 
+  virtual void enterFunction_args(PotatoSQLParser::Function_argsContext *ctx) = 0;
+  virtual void exitFunction_args(PotatoSQLParser::Function_argsContext *ctx) = 0;
+
   virtual void enterExpr(PotatoSQLParser::ExprContext *ctx) = 0;
   virtual void exitExpr(PotatoSQLParser::ExprContext *ctx) = 0;
 

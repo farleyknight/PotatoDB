@@ -9,7 +9,7 @@ struct VariantValue {
                                int32_t,
                                int64_t,
                                double,
-                               uint64_t,
+                               timestamp_t,
                                char *,
                                std::string
                                >;

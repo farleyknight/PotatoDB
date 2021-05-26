@@ -80,14 +80,33 @@ public:
 
   Value cast_as(const Value& value, TypeId type_id) const override {
     switch(type_id) {
+    case TypeId::BOOLEAN: {
+      auto string_value = value.to_string();
+      if (string_value == "true" || string_value == "1") {
+        return Value::make(true);
+      } else if (string_value == "false" || string_value == "0") {
+        return Value::make(false);
+      } else {
+        throw Exception(ExceptionType::OUT_OF_RANGE, "BOOLEAN value out of range.");
+      }
+    }
     case TypeId::INTEGER: {
       int32_t integer = 0;
       try {
         integer = static_cast<int32_t>(std::stoi(value.to_string()));
       } catch (std::out_of_range &e) {
-        throw Exception(ExceptionType::OUT_OF_RANGE, "Numeric value out of range.");
+        throw Exception(ExceptionType::OUT_OF_RANGE, "INTEGER value out of range.");
       }
       return Value(type_id, integer);
+    }
+    case TypeId::TIMESTAMP: {
+      int64_t timestamp = 0;
+      try {
+        timestamp = static_cast<int64_t>(std::stoi(value.to_string()));
+      } catch (std::out_of_range &e) {
+        throw Exception(ExceptionType::OUT_OF_RANGE, "TIMESTAMP value out of range.");
+      }
+      return Value(type_id, timestamp);
     }
     case TypeId::VARCHAR: {
       return value;

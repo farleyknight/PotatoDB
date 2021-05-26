@@ -62,21 +62,22 @@ public:
     RuleSelect_stmt = 36, RuleSelect_or_values = 37, RuleUpdate_stmt = 38, 
     RuleUpdate_stmt_limited = 39, RuleVacuum_stmt = 40, RuleColumn_def = 41, 
     RuleType_name = 42, RuleColumn_constraint = 43, RuleNot_null = 44, RulePrimary_key = 45, 
-    RuleAutoincrement = 46, RuleConflict_clause = 47, RuleExpr = 48, RuleForeign_key_clause = 49, 
-    RuleRaise_function = 50, RuleIndexed_column = 51, RuleTable_constraint = 52, 
-    RuleWith_clause = 53, RuleQualified_table_name = 54, RuleOrdering_term = 55, 
-    RulePragma_value = 56, RuleCommon_table_expression = 57, RuleResult_column = 58, 
-    RuleTable_or_subquery = 59, RuleJoin_clause = 60, RuleJoin_operator = 61, 
-    RuleJoin_constraint = 62, RuleColumn_list = 63, RuleSelect_core = 64, 
-    RuleWhere_clause = 65, RuleCompound_operator = 66, RuleSigned_number = 67, 
-    RuleLiteral_value = 68, RuleUnary_operator = 69, RuleError_message = 70, 
-    RuleModule_argument = 71, RuleColumn_alias = 72, RuleKeyword = 73, RuleName = 74, 
-    RuleFunction_name = 75, RuleDatabase_name = 76, RuleSchema_name = 77, 
-    RuleTable_function_name = 78, RuleTable_name = 79, RuleTable_or_index_name = 80, 
-    RuleNew_table_name = 81, RuleColumn_name = 82, RuleCollation_name = 83, 
-    RuleForeign_table = 84, RuleIndex_name = 85, RuleTrigger_name = 86, 
-    RuleView_name = 87, RuleModule_name = 88, RulePragma_name = 89, RuleSavepoint_name = 90, 
-    RuleTable_alias = 91, RuleTransaction_name = 92, RuleAny_name = 93
+    RuleAutoincrement = 46, RuleConflict_clause = 47, RuleFunction_args = 48, 
+    RuleExpr = 49, RuleForeign_key_clause = 50, RuleRaise_function = 51, 
+    RuleIndexed_column = 52, RuleTable_constraint = 53, RuleWith_clause = 54, 
+    RuleQualified_table_name = 55, RuleOrdering_term = 56, RulePragma_value = 57, 
+    RuleCommon_table_expression = 58, RuleResult_column = 59, RuleTable_or_subquery = 60, 
+    RuleJoin_clause = 61, RuleJoin_operator = 62, RuleJoin_constraint = 63, 
+    RuleColumn_list = 64, RuleSelect_core = 65, RuleWhere_clause = 66, RuleCompound_operator = 67, 
+    RuleSigned_number = 68, RuleLiteral_value = 69, RuleUnary_operator = 70, 
+    RuleError_message = 71, RuleModule_argument = 72, RuleColumn_alias = 73, 
+    RuleKeyword = 74, RuleName = 75, RuleFunction_name = 76, RuleDatabase_name = 77, 
+    RuleSchema_name = 78, RuleTable_function_name = 79, RuleTable_name = 80, 
+    RuleTable_or_index_name = 81, RuleNew_table_name = 82, RuleColumn_name = 83, 
+    RuleCollation_name = 84, RuleForeign_table = 85, RuleIndex_name = 86, 
+    RuleTrigger_name = 87, RuleView_name = 88, RuleModule_name = 89, RulePragma_name = 90, 
+    RuleSavepoint_name = 91, RuleTable_alias = 92, RuleTransaction_name = 93, 
+    RuleAny_name = 94
   };
 
   explicit PotatoSQLParser(antlr4::TokenStream *input);
@@ -137,6 +138,7 @@ public:
   class Primary_keyContext;
   class AutoincrementContext;
   class Conflict_clauseContext;
+  class Function_argsContext;
   class ExprContext;
   class Foreign_key_clauseContext;
   class Raise_functionContext;
@@ -1333,6 +1335,26 @@ public:
 
   Conflict_clauseContext* conflict_clause();
 
+  class  Function_argsContext : public antlr4::ParserRuleContext {
+  public:
+    Function_argsContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    std::vector<ExprContext *> expr();
+    ExprContext* expr(size_t i);
+    antlr4::tree::TerminalNode *STAR();
+    antlr4::tree::TerminalNode *K_DISTINCT();
+    std::vector<antlr4::tree::TerminalNode *> COMMA();
+    antlr4::tree::TerminalNode* COMMA(size_t i);
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  Function_argsContext* function_args();
+
   class  ExprContext : public antlr4::ParserRuleContext {
   public:
     ExprContext(antlr4::ParserRuleContext *parent, size_t invokingState);
@@ -1347,11 +1369,8 @@ public:
     ExprContext* expr(size_t i);
     Function_nameContext *function_name();
     antlr4::tree::TerminalNode *OPEN_PAR();
+    Function_argsContext *function_args();
     antlr4::tree::TerminalNode *CLOSE_PAR();
-    antlr4::tree::TerminalNode *STAR();
-    antlr4::tree::TerminalNode *K_DISTINCT();
-    std::vector<antlr4::tree::TerminalNode *> COMMA();
-    antlr4::tree::TerminalNode* COMMA(size_t i);
     antlr4::tree::TerminalNode *K_CAST();
     antlr4::tree::TerminalNode *K_AS();
     Type_nameContext *type_name();
@@ -1367,6 +1386,7 @@ public:
     antlr4::tree::TerminalNode *K_ELSE();
     Raise_functionContext *raise_function();
     antlr4::tree::TerminalNode *PIPE2();
+    antlr4::tree::TerminalNode *STAR();
     antlr4::tree::TerminalNode *DIV();
     antlr4::tree::TerminalNode *MOD();
     antlr4::tree::TerminalNode *PLUS();
@@ -1389,6 +1409,8 @@ public:
     antlr4::tree::TerminalNode *K_BETWEEN();
     antlr4::tree::TerminalNode *K_IN();
     Database_nameContext *database_name();
+    std::vector<antlr4::tree::TerminalNode *> COMMA();
+    antlr4::tree::TerminalNode* COMMA(size_t i);
     antlr4::tree::TerminalNode *K_COLLATE();
     Collation_nameContext *collation_name();
     antlr4::tree::TerminalNode *K_LIKE();

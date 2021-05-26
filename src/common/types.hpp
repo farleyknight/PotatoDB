@@ -31,6 +31,8 @@
 using std::int32_t;
 using std::uint32_t;
 
+using timestamp_t = std::uint64_t;
+
 using std::fstream;
 
 using std::deque;

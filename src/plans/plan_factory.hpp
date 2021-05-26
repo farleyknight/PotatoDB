@@ -40,6 +40,8 @@ public:
     auto table_name = expr->table().name();
     auto column_def_list = expr->column_defs();
 
+    std::cout << "Using primary key " << expr->primary_key() << std::endl;
+
     return make_unique<CreateTablePlan>(table_name,
                                         expr->primary_key(),
                                         column_def_list);
@@ -78,9 +80,25 @@ public:
     vector<QueryAgg> agg_nodes;
     for (const auto& agg : expr->agg_list().list()) {
       auto col_name = agg.column_expr().name();
-      auto query_col = catalog.query_column_for(table_name, col_name);
-      auto query_agg = QueryAgg(query_col, agg.agg_type());
-      agg_nodes.push_back(query_agg);
+
+      // TODO! We don't always need to be pulling the QueryColumn!
+      //
+      // If it's a column splat ("*") then we don't actually need to.
+      // We can maybe find a way to represent a "thunk" in QueryColumn
+      //
+      // Perhaps QueryColumnName is a good substitute for QueryColumn
+      // when things MUST be implied by the query context
+      // Perhaps QueryColumName + QueryContext = QueryColumn?
+      //
+      // Maybe QueryContext is just the table_name_t plus the Catalog,
+      // for looking up further metadata.
+      if (col_name == "*") {
+        auto query_col = QueryColumn::splat();
+        agg_nodes.push_back(QueryAgg(query_col, agg.agg_type()));
+      } else {
+        auto query_col = catalog.query_column_for(table_name, col_name);
+        agg_nodes.push_back(QueryAgg(query_col, agg.agg_type()));
+      }
     }
 
     auto scan_plan = make_seq_scan_plan(catalog, expr);

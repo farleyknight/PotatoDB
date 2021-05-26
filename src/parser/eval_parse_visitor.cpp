@@ -17,7 +17,8 @@ Any EvalParseVisitor::visitCreate_table_stmt(CreateTableStmtContext *ctx) {
   CreateTableExpr create_table;
   assert(ctx->table_name());
 
-  TableExpr table(ctx->table_name()->getText());
+  auto table_name = ctx->table_name()->getText();
+  TableExpr table(table_name);
   create_table.set_table(table);
 
   ColumnDefListExpr def_list;
@@ -40,11 +41,15 @@ Any EvalParseVisitor::visitCreate_table_stmt(CreateTableStmtContext *ctx) {
     auto &col_def = def_list.back();
 
     for (auto &constraint : col_def_ctx->column_constraint()) {
+      std::cout << table_name << " :: " << col_def.name() << std::endl;
+      std::cout << "CONSTRAINT CONSTRAINT " << constraint->getText() << std::endl;
+
       if (constraint->not_null()) {
         col_def.is_not_null(true);
       }
 
       if (constraint->primary_key()) {
+        std::cout << "SETTING PRIMARY KEY " << col_def.name() << std::endl;
         col_def.is_primary_key(true);
         create_table.set_primary_key(col_def.name());
       }
@@ -53,6 +58,10 @@ Any EvalParseVisitor::visitCreate_table_stmt(CreateTableStmtContext *ctx) {
         col_def.is_auto_increment(true);
       }
     }
+  }
+
+  if (table_name == "todos") {
+    assert(create_table.primary_key() != "");
   }
 
   create_table.set_column_defs(def_list);
@@ -74,6 +83,11 @@ ValueExpr EvalParseVisitor::make_value_expr(ExprContext* expr_ctx) const {
     } else {
       return ValueExpr(expr_ctx->getText());
     }
+  } else if (expr_ctx->function_name() != nullptr) {
+    using namespace std::chrono;
+    auto now = system_clock::now();
+    uint64_t secs = time_point_cast<seconds>(now).time_since_epoch().count();
+    return ValueExpr(secs);
   } else {
     return ValueExpr(expr_ctx->getText());
   }
@@ -173,13 +187,18 @@ WhereClauseExpr EvalParseVisitor::make_where_clause_expr(WhereClauseContext *ctx
   }
 }
 
-ColumnExpr EvalParseVisitor::make_col_expr(ExprContext* ctx) {
-  if (ctx->table_name()) {
-    return ColumnExpr(ctx->table_name()->getText(),
-                      ctx->column_name()->getText());
-  } else {
-    return ColumnExpr(ctx->column_name()->getText());
+ColumnExpr EvalParseVisitor::make_col_expr(FunctionArgsContext* ctx) {
+  if (ctx->expr().size() == 0 && ctx->getText() == "*") {
+    return ColumnExpr("*");
   }
+
+  auto expr = ctx->expr()[0];
+  if (expr->table_name()) {
+    return ColumnExpr(expr->table_name()->getText(),
+                      expr->column_name()->getText());
+  }
+
+  return ColumnExpr(expr->column_name()->getText());
 }
 
 Any EvalParseVisitor::visitSelect_core(SelectCoreContext *ctx) {
@@ -195,10 +214,9 @@ Any EvalParseVisitor::visitSelect_core(SelectCoreContext *ctx) {
       auto expr = col_ctx->expr();
 
       if (expr->function_name()) {
-        // NOTE: Only supporting functions that take one argument for now
-        auto col_expr = make_col_expr(expr->expr()[0]);
         auto func_name = expr->function_name()->getText();
         if (func_name == "COUNT" || func_name == "SUM" || func_name == "MIN" || func_name == "MAX") {
+          auto col_expr = make_col_expr(expr->function_args());
           aggs.push_back(AggExpr(func_name, col_expr));
         } else {
           throw Exception("Other types of functions are not yet implemented! :/");

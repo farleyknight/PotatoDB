@@ -4,6 +4,25 @@
 template<class ColT>
 BaseSchema<ColT>::BaseSchema(vector<ColT> cols) {
   size_t offset = 0;
+
+  // // TODO: This whole entire block can probably be moved into the constructor for QuerySchema?
+  // if (cols.size() == 1 && cols[0].is_count_splat()) {
+  //   // TODO
+  //   // In the case of a "SELECT COUNT(*)" query, we may not need to
+  //   // materialize the tuple at all!
+  //   //
+  //   // If that's the case, we don't need extra columns here either.
+  //   // Likely we can populate `columns_` with just one element
+  //   // (the splat) and leave everything else empty.
+  //   //
+  //   // This likely has down-stream effects, so we may need to
+  //   // correct those as we go along.
+
+  //   columns_.push_back(cols[0]);
+  //   tuple_length_ = Type::size_of(TypeId::INTEGER);
+  //   return;
+  // }
+
   for (index_t oid = 0; oid < cols.size(); ++oid) {
     auto &col = cols[oid];
 

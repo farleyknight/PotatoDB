@@ -24,6 +24,7 @@ using ShowTablesStmtContext     = PotatoSQLParser::Show_tables_stmtContext;
 using DescribeTableStmtContext  = PotatoSQLParser::Describe_table_stmtContext;
 using InsertStmtContext         = PotatoSQLParser::Insert_stmtContext;
 using SelectCoreContext         = PotatoSQLParser::Select_coreContext;
+using FunctionArgsContext       = PotatoSQLParser::Function_argsContext;
 using ExprContext               = PotatoSQLParser::ExprContext;
 using WhereClauseContext        = PotatoSQLParser::Where_clauseContext;
 
@@ -61,7 +62,7 @@ public:
 
   ptr<BaseExpr> make_expr(ExprContext *ctx);
   WhereClauseExpr make_where_clause_expr(WhereClauseContext *ctx);
-  ColumnExpr make_col_expr(ExprContext* ctx);
+  ColumnExpr make_col_expr(FunctionArgsContext* ctx);
 
   Any visitExpr(ExprContext *ctx) override {
     return visitChildren(ctx);

@@ -69,6 +69,14 @@ public:
   string_size_t variable_length() const { return variable_length_; }
   const column_name_t& name()     const { return name_; }
 
+  bool is_splat() const {
+    return false;
+  }
+
+  bool is_count_splat() const {
+    return false;
+  }
+
   const string to_string() const {
     std::ostringstream os;
 
