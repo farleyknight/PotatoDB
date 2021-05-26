@@ -5,7 +5,7 @@
 class CompExpr : public BaseExpr {
 public:
   CompExpr(ptr<BaseExpr>&& left,
-           CompType comp,
+           CompareType comp,
            ptr<BaseExpr>&& right)
     : BaseExpr (ExprType::COMPARE),
       left_    (move(left)),
@@ -26,11 +26,11 @@ public:
     return right_;
   }
 
-  CompType comp_type() const {
+  CompareType compare_type() const {
     return comp_;
   }
 
 protected:
   ptr<BaseExpr> left_, right_;
-  CompType comp_;
+  CompareType comp_;
 };

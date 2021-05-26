@@ -8,6 +8,7 @@
 #include "exprs/describe_table_expr.hpp"
 #include "exprs/insert_expr.hpp"
 #include "exprs/select_expr.hpp"
+#include "exprs/compound_select_expr.hpp"
 #include "exprs/where_clause_expr.hpp"
 #include "exprs/create_table_expr.hpp"
 #include "exprs/comp_expr.hpp"
@@ -27,12 +28,9 @@ using SelectCoreContext         = PotatoSQLParser::Select_coreContext;
 using FunctionArgsContext       = PotatoSQLParser::Function_argsContext;
 using ExprContext               = PotatoSQLParser::ExprContext;
 using WhereClauseContext        = PotatoSQLParser::Where_clauseContext;
+using CompoundSelectStmtContext = PotatoSQLParser::Compound_select_stmtContext;
 
 class EvalParseVisitor : public PotatoSQLBaseVisitor {
-private:
-  vector<string> results_;
-  vector<ptr<BaseExpr>> exprs_;
-
 public:
   vector<string>&& results() {
     return move(results_);
@@ -57,6 +55,7 @@ public:
   Any visitCreate_table_stmt(CreateTableStmtContext *ctx) override;
   Any visitInsert_stmt(InsertStmtContext *ctx) override;
   Any visitSelect_core(SelectCoreContext *ctx) override;
+  Any visitCompound_select_stmt(CompoundSelectStmtContext *ctx) override;
 
   ValueExpr make_value_expr(ExprContext* expr_ctx) const;
 
@@ -67,4 +66,8 @@ public:
   Any visitExpr(ExprContext *ctx) override {
     return visitChildren(ctx);
   }
+
+private:
+  vector<string> results_;
+  vector<ptr<BaseExpr>> exprs_;
 };

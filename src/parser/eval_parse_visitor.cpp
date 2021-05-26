@@ -201,6 +201,33 @@ ColumnExpr EvalParseVisitor::make_col_expr(FunctionArgsContext* ctx) {
   return ColumnExpr(expr->column_name()->getText());
 }
 
+Any EvalParseVisitor::visitCompound_select_stmt(CompoundSelectStmtContext *ctx) {
+  // TODO:
+  //
+  // `select_core` DOES NOT capture the ORDER BY part of a query
+  //
+  // It looks like `compount_select_stmt` DOES capture it
+
+  CompoundSelectExpr stmt_expr;
+
+  // TODO:
+  // * Compounds have a left_select & right_select
+  // * If only the left_select exists, then the comp_type == CompoundType::NONE
+  // * If only the left_select & right_select exists, then the comp_type MUST BE one of:
+  //   - CompoundType::UNION
+  //   - CompoundType::UNION_ALL
+  //   - CompoundType::INTERSECTION
+  //   - CompoundType::EXCEPT
+
+  // TODO:
+  // Add ORDER BY
+  //
+  // TODO:
+  // Add LIMIT .. OFFSET ..
+
+  return visitChildren(ctx);
+}
+
 Any EvalParseVisitor::visitSelect_core(SelectCoreContext *ctx) {
   const auto &col_list_ctx = ctx->column_list();
 
