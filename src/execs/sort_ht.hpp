@@ -55,11 +55,6 @@ public:
         ++table_iter_;
         index_ = 0;
       }
-
-      if (table_iter_->second.size() == 0) {
-        std::cout << "TODOTODOTODOTODOTODOTODOTO SHOULD BE AT END!" << std::endl;
-      }
-      // assert(table_iter_->second.size() > 0);
       return *this;
     }
 
@@ -95,13 +90,6 @@ public:
         ++table_iter_;
         index_ = table_iter_->second.size() - 1;
       }
-
-      if (table_iter_->second.size() == 0) {
-        std::cout << "TODOTODOTODOTODOTODOTODOTO SHOULD BE AT END!" << std::endl;
-      }
-
-      //assert(index_ >= 0);
-      //assert(table_iter_->second.size() > 0);
       return *this;
     }
 

@@ -41,15 +41,11 @@ Any EvalParseVisitor::visitCreate_table_stmt(CreateTableStmtContext *ctx) {
     auto &col_def = def_list.back();
 
     for (auto &constraint : col_def_ctx->column_constraint()) {
-      std::cout << table_name << " :: " << col_def.name() << std::endl;
-      std::cout << "CONSTRAINT CONSTRAINT " << constraint->getText() << std::endl;
-
       if (constraint->not_null()) {
         col_def.is_not_null(true);
       }
 
       if (constraint->primary_key()) {
-        std::cout << "SETTING PRIMARY KEY " << col_def.name() << std::endl;
         col_def.is_primary_key(true);
         create_table.set_primary_key(col_def.name());
       }
@@ -58,10 +54,6 @@ Any EvalParseVisitor::visitCreate_table_stmt(CreateTableStmtContext *ctx) {
         col_def.is_auto_increment(true);
       }
     }
-  }
-
-  if (table_name == "todos") {
-    assert(create_table.primary_key() != "");
   }
 
   create_table.set_column_defs(def_list);
@@ -220,22 +212,13 @@ OrderByExpr EvalParseVisitor::make_order_by(OrderingTermContext *ctx) {
 
 
 Any EvalParseVisitor::visitFactored_select_stmt(FactoredSelectStmtContext *ctx) {
-  std::cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%" << std::endl;
-  std::cout << "Got factored select stmt : " << ctx->getText() << std::endl;
-
   auto select_expr = make_select_expr(ctx->select_core()[0]);
 
   if (ctx->ordering_term().size() > 0) {
     // NOTE: Only using first column for now
-    std::cout << "()()()()()()() ORDERING TERM " << ctx->ordering_term()[0]->getText() << std::endl;
-
     auto order_by = make_order_by(ctx->ordering_term()[0]);
     select_expr->set_order_by(order_by);
-  } else {
-    std::cout << "()()()()()()() NO ORDERING TERM!" << std::endl;
   }
-  std::cout << "SELECT expr " << select_expr->to_string() << std::endl;
-
   exprs_.emplace_back(move(select_expr));
 
   return visitChildren(ctx);
@@ -246,7 +229,6 @@ Any EvalParseVisitor::visitSimple_select_stmt(SimpleSelectStmtContext *ctx) {
   std::cout << "Got simple select stmt : " << ctx->getText() << std::endl;
   return visitChildren(ctx);
 }
-
 
 Any EvalParseVisitor::visitCompound_select_stmt(CompoundSelectStmtContext *ctx) {
   // TODO:
@@ -295,10 +277,14 @@ EvalParseVisitor::make_select_list(vector<ResultColumnContext*> ctxs)
 {
   ColumnListExpr cols;
   AggListExpr aggs;
+  bool found_splat = false;
 
   for (auto &col_ctx : ctxs) {
     if (col_ctx->getText() == "*") {
-      cols.push_back(ColumnExpr("*"));
+      if (!found_splat) {
+        cols.push_back(ColumnExpr("*"));
+        found_splat = true;
+      }
     } else if (col_ctx->table_name() == nullptr && col_ctx->column_name() == nullptr) {
       assert(col_ctx->expr());
       auto expr = col_ctx->expr();
@@ -313,9 +299,11 @@ EvalParseVisitor::make_select_list(vector<ResultColumnContext*> ctxs)
           throw Exception("Other types of functions are not yet implemented! :/");
         }
       } else {
-        cols.push_back(ColumnExpr(col_ctx->getText()));
+        if (!found_splat) {
+          cols.push_back(ColumnExpr(col_ctx->getText()));
+        }
       }
-    } else {
+    } else if (!found_splat) {
       if (col_ctx->column_name() == nullptr) {
         cols.push_back(ColumnExpr("*",
                                   col_ctx->table_name()->getText()));
@@ -348,9 +336,4 @@ ptr<SelectExpr> EvalParseVisitor::make_select_expr(SelectCoreContext *ctx) {
   }
 
   return make_unique<SelectExpr>(move(select));
-}
-
-Any EvalParseVisitor::visitSelect_core(SelectCoreContext *ctx) {
-  exprs_.emplace_back(make_select_expr(ctx));
-  return visitChildren(ctx);
 }

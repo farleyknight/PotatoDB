@@ -8,12 +8,6 @@ Catalog::make_schema_from(const table_name_t& table_name,
                           const string& primary_key,
                           const ColumnDefListExpr& column_list) const
 {
-  std::cout << "make_schema_from has TABLE NAME " << table_name << std::endl;
-  std::cout << "make_schema_from has PRIMARY KEY " << primary_key << std::endl;
-  if (table_name == "todos") {
-    assert(primary_key != "");
-  }
-
   vector<TableColumn> columns;
   for (size_t col_index = 0; col_index < column_list.list().size(); ++col_index) {
     const auto &column = column_list.list()[col_index];

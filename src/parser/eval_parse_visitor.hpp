@@ -98,7 +98,6 @@ public:
   Any visitDescribe_table_stmt(DescribeTableStmtContext *ctx) override;
   Any visitCreate_table_stmt(CreateTableStmtContext *ctx) override;
   Any visitInsert_stmt(InsertStmtContext *ctx) override;
-  Any visitSelect_core(SelectCoreContext *ctx) override;
   Any visitCompound_select_stmt(CompoundSelectStmtContext *ctx) override;
   Any visitFactored_select_stmt(FactoredSelectStmtContext *ctx) override;
   Any visitSimple_select_stmt(SimpleSelectStmtContext *ctx) override;

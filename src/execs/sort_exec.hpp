@@ -66,12 +66,10 @@ public:
   Tuple next() override {
     if (sort_asc()) {
       auto tuple = table_iter_.tuple();
-      std::cout << "0000000000000 sort_dir() = " << sort_dir() << std::endl;
       ++table_iter_;
       return tuple;
     } else {
       auto tuple = table_riter_.tuple();
-      std::cout << "0000000000000 sort_dir() = " << sort_dir() << std::endl;
       ++table_riter_;
       return tuple;
     }
