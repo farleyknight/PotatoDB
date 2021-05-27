@@ -8,6 +8,10 @@ public:
     : BaseExpr (ExprType::ORDER_BY)
   {}
 
+  bool is_valid() const {
+    return direction_ != "";
+  }
+
   void set_column(ColumnExpr col) {
     col_ = col;
   }

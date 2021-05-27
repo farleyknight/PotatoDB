@@ -15,6 +15,14 @@ public:
     table_[key].push_back(tuple);
   }
 
+  size_t size() const {
+    return table_.size();
+  }
+
+  const Table& table() const {
+    return table_;
+  }
+
   void merge_sort(UNUSED const string direction) {
     // TODO!
   }
@@ -22,76 +30,103 @@ public:
   class Iterator {
   public:
     explicit Iterator(Table::iterator table_iter,
-                      Bucket::iterator bucket_iter)
+                      int32_t index)
       : table_iter_  (table_iter),
-        bucket_iter_ (bucket_iter)
+        index_       (index)
     {}
 
     Tuple tuple() const {
-      return *bucket_iter_;
+      int32_t size = table_iter_->second.size();
+      assert(index_ < size);
+      assert(index_ >= 0);
+      return table_iter_->second[index_];
     }
 
     bool operator==(const Iterator& other) const {
       return
         table_iter_ == other.table_iter_ &&
-        bucket_iter_ == other.bucket_iter_;
-    }
-
-    bool operator!=(const Iterator& other) const {
-      return
-        table_iter_ != other.table_iter_ ||
-        bucket_iter_ != other.bucket_iter_;
-    }
-
-    Iterator& operator--() {
-      if (bucket_iter_ != table_iter_->second.begin()) {
-        --bucket_iter_;
-      } else {
-        --table_iter_;
-        bucket_iter_ = table_iter_->second.end();
-      }
-      return *this;
-    }
-
-    Iterator operator--(int) {
-      auto tmp = *this;
-      --(*this);
-      return tmp;
+        index_      == other.index_;
     }
 
     Iterator& operator++() {
-      if (bucket_iter_ != table_iter_->second.end()) {
-        ++bucket_iter_;
-      } else {
+      ++index_;
+      int32_t size = table_iter_->second.size();
+      if (index_ == size) {
         ++table_iter_;
-        bucket_iter_ = table_iter_->second.begin();
+        index_ = 0;
       }
-      return *this;
-    }
 
-    Iterator operator++(int) {
-      auto tmp = *this;
-      ++(*this);
-      return tmp;
+      if (table_iter_->second.size() == 0) {
+        std::cout << "TODOTODOTODOTODOTODOTODOTO SHOULD BE AT END!" << std::endl;
+      }
+      // assert(table_iter_->second.size() > 0);
+      return *this;
     }
 
   private:
     Table::iterator table_iter_;
-    Bucket::iterator bucket_iter_;
+    int32_t index_;
   };
 
+  class RIterator {
+  public:
+    explicit RIterator(Table::reverse_iterator table_iter,
+                      int32_t index)
+      : table_iter_  (table_iter),
+        index_       (index)
+    {}
+
+    Tuple tuple() const {
+      int32_t size = table_iter_->second.size();
+      assert(index_ < size);
+      assert(index_ >= 0);
+      return table_iter_->second[index_];
+    }
+
+    bool operator==(const RIterator& other) const {
+      return
+        table_iter_ == other.table_iter_ &&
+        index_      == other.index_;
+    }
+
+    RIterator& operator++() {
+      --index_;
+      if (index_ < 0) {
+        ++table_iter_;
+        index_ = table_iter_->second.size() - 1;
+      }
+
+      if (table_iter_->second.size() == 0) {
+        std::cout << "TODOTODOTODOTODOTODOTODOTO SHOULD BE AT END!" << std::endl;
+      }
+
+      //assert(index_ >= 0);
+      //assert(table_iter_->second.size() > 0);
+      return *this;
+    }
+
+  private:
+    Table::reverse_iterator table_iter_;
+    int32_t index_;
+  };
+
+
   Iterator begin() {
-    return Iterator(
-      table_.begin(),
-      table_.begin()->second.begin()
-    );
+    return Iterator(table_.begin(), 0);
   }
 
   Iterator end() {
-    return Iterator(
-      table_.end(),
-      table_.end()->second.end()
-    );
+    return Iterator(table_.end(),
+                    table_.end()->second.size());
+  }
+
+  RIterator rbegin() {
+    return RIterator(table_.rbegin(),
+                     table_.rbegin()->second.size()-1);
+  }
+
+  RIterator rend() {
+    return RIterator(table_.rend(), -1);
   }
 
 private:

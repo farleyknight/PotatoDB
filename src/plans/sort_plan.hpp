@@ -9,11 +9,15 @@ enum class SortDirection {
   DESC    = 2
 };
 
-class SortPlan : public BasePlan {
+class SortPlan : public BasePlan,
+                 public SchemaPlan
+{
 public:
-  SortPlan(OrderByExpr order_by,
+  SortPlan(QuerySchema schema,
+           OrderByExpr order_by,
            ptr<BasePlan>&& child)
     : BasePlan    (PlanType::SORT),
+      SchemaPlan  (schema),
       child_      (move(child)),
       order_by_   (order_by)
   {}

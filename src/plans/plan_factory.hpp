@@ -83,15 +83,36 @@ public:
 
     std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << std::endl;
     std::cout << "Got ORDER BY expr : " << order_by.to_string() << std::endl;
-    return make_unique<SortPlan>(order_by, move(left_scan_plan));
+
+    auto schema = dynamic_cast<SchemaPlan*>(left_scan_plan.get())->schema();
+    return make_unique<SortPlan>(schema,
+                                 order_by,
+                                 move(left_scan_plan));
   }
 
   static ptr<BasePlan> from_expr(const Catalog& catalog, SelectExpr* expr) {
+    std::cout << "Is ORDER BY valid? " << (expr->order_by().is_valid() ? "true" : "false") << std::endl;
     if (expr->agg_list().list().size() > 0) {
       return make_agg_plan(catalog, expr);
+    } else if (expr->order_by().is_valid()) {
+      std::cout << "______ making sort plan _____" << std::endl;
+      return make_sort_plan(catalog, expr);
     } else {
       return make_seq_scan_plan(catalog, expr);
     }
+  }
+
+  static ptr<BasePlan> make_sort_plan(const Catalog& catalog, SelectExpr* expr) {
+    auto scan_plan = make_seq_scan_plan(catalog, expr);
+    auto order_by = expr->order_by();
+
+    std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << std::endl;
+    std::cout << "Got ORDER BY expr : " << order_by.to_string() << std::endl;
+
+    auto schema = dynamic_cast<SchemaPlan*>(scan_plan.get())->schema();
+    return make_unique<SortPlan>(schema,
+                                 order_by,
+                                 move(scan_plan));
   }
 
   static ptr<BasePlan> make_agg_plan(const Catalog& catalog, SelectExpr* expr) {

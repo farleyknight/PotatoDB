@@ -222,6 +222,22 @@ OrderByExpr EvalParseVisitor::make_order_by(OrderingTermContext *ctx) {
 Any EvalParseVisitor::visitFactored_select_stmt(FactoredSelectStmtContext *ctx) {
   std::cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%" << std::endl;
   std::cout << "Got factored select stmt : " << ctx->getText() << std::endl;
+
+  auto select_expr = make_select_expr(ctx->select_core()[0]);
+
+  if (ctx->ordering_term().size() > 0) {
+    // NOTE: Only using first column for now
+    std::cout << "()()()()()()() ORDERING TERM " << ctx->ordering_term()[0]->getText() << std::endl;
+
+    auto order_by = make_order_by(ctx->ordering_term()[0]);
+    select_expr->set_order_by(order_by);
+  } else {
+    std::cout << "()()()()()()() NO ORDERING TERM!" << std::endl;
+  }
+  std::cout << "SELECT expr " << select_expr->to_string() << std::endl;
+
+  exprs_.emplace_back(move(select_expr));
+
   return visitChildren(ctx);
 }
 

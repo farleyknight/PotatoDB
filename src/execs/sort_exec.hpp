@@ -4,14 +4,15 @@
 #include "execs/sort_ht.hpp"
 
 class SortExec : public BaseExec {
- public:
+public:
   SortExec(ExecCtx& exec_ctx,
            ptr<SortPlan>&& plan,
            ptr<BaseExec>&& child)
-    : BaseExec    (exec_ctx),
-      plan_       (move(plan)),
-      child_      (move(child)),
-      table_iter_ (table_.begin())
+    : BaseExec     (exec_ctx),
+      plan_        (move(plan)),
+      child_       (move(child)),
+      table_iter_  (table_.begin()),
+      table_riter_ (table_.rbegin())
   {}
 
   void init() override {
@@ -32,7 +33,7 @@ class SortExec : public BaseExec {
     if (sort_asc()) {
       table_iter_ = table_.begin();
     } else if (sort_desc()) {
-      table_iter_ = table_.end();
+      table_riter_ = table_.rbegin();
     }
   }
 
@@ -49,37 +50,31 @@ class SortExec : public BaseExec {
   }
 
   bool at_the_end() {
-    auto end = table_.end();
-    return table_iter_ == end;
-  }
-
-  bool at_the_beginning() {
-    auto begin = table_.begin();
-    return table_iter_ == begin;
+    if (sort_asc()) {
+      auto end = table_.end();
+      return table_iter_ == end;
+    } else {
+      auto end = table_.rend();
+      return table_riter_ == end;
+    }
   }
 
   bool has_next() override {
-    if (sort_asc()) {
-      while (!at_the_end()) {
-        return true;
-      }
-    } else if (sort_desc()) {
-      while (!at_the_beginning()) {
-        return true;
-      }
-    }
-    return false;
+    return !at_the_end();
   }
 
   Tuple next() override {
-    auto tuple = table_iter_.tuple();
-    std::cout << "0000000000000 sort_dir() = " << sort_dir() << std::endl;
     if (sort_asc()) {
+      auto tuple = table_iter_.tuple();
+      std::cout << "0000000000000 sort_dir() = " << sort_dir() << std::endl;
       ++table_iter_;
-    } else if (sort_desc()){
-      --table_iter_;
+      return tuple;
+    } else {
+      auto tuple = table_riter_.tuple();
+      std::cout << "0000000000000 sort_dir() = " << sort_dir() << std::endl;
+      ++table_riter_;
+      return tuple;
     }
-    return tuple;
   }
 
   SortKey make_key(const Tuple& tuple) {
@@ -102,4 +97,5 @@ private:
   ptr<BaseExec> child_;
   SortHT table_;
   SortHT::Iterator table_iter_;
+  SortHT::RIterator table_riter_;
 };

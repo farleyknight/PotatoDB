@@ -49,9 +49,16 @@ public:
     return column_list_;
   }
 
-  virtual const string to_string() const override {
-    return "SELECT " + column_list_.to_string() +
-      "FROM " + table_list_.to_string();
+  const string to_string() const override {
+    auto as_string =
+      " SELECT " + column_list_.to_string() +
+      " FROM " + table_list_.to_string();
+
+    if (order_by_.is_valid()) {
+      as_string += " ORDER BY " + order_by_.to_string();
+    }
+
+    return as_string;
   }
 
 protected:
