@@ -29,6 +29,11 @@ using FunctionArgsContext       = PotatoSQLParser::Function_argsContext;
 using ExprContext               = PotatoSQLParser::ExprContext;
 using WhereClauseContext        = PotatoSQLParser::Where_clauseContext;
 using CompoundSelectStmtContext = PotatoSQLParser::Compound_select_stmtContext;
+using OrderingTermContext       = PotatoSQLParser::Ordering_termContext;
+using ResultColumnContext       = PotatoSQLParser::Result_columnContext;
+using TableOrSubqueryContext    = PotatoSQLParser::Table_or_subqueryContext;
+using FactoredSelectStmtContext = PotatoSQLParser::Factored_select_stmtContext;
+using SimpleSelectStmtContext   = PotatoSQLParser::Simple_select_stmtContext;
 
 class EvalParseVisitor : public PotatoSQLBaseVisitor {
 public:
@@ -40,8 +45,47 @@ public:
     return move(exprs_);
   }
 
+  std::tuple<ColumnListExpr, AggListExpr>
+  make_select_list(vector<ResultColumnContext*> ctxs);
+
+  OrderByExpr make_order_by(OrderingTermContext *ctx);
+
+  TableListExpr make_table_list(vector<TableOrSubqueryContext*> table_list_ctxs) {
+    TableListExpr tables;
+    for (auto &table_ctx : table_list_ctxs) {
+      if (table_ctx->table_name() != nullptr) {
+        auto table_name = table_ctx->table_name()->getText();
+        auto table = TableExpr(table_name);
+        tables.push_back(table);
+      }
+    }
+    return tables;
+  }
+
   Any visitSelect_stmt(SelectStmtContext *ctx) override {
-    // TODO?
+    // TODO! This is another place where need to do an ORDER BY
+    SelectExpr select_expr;
+
+    // TODO: Support select_or_values().size() > 0!
+    assert(ctx->select_or_values().size() > 0);
+    auto select_or_values = ctx->select_or_values()[0];
+
+    auto tables = make_table_list(select_or_values->table_or_subquery());
+
+    auto [cols, aggs] = make_select_list(select_or_values->result_column());
+
+    select_expr.set_columns(cols);
+    select_expr.set_aggs(aggs);
+    select_expr.set_tables(tables);
+
+    if (ctx->ordering_term().size() > 0) {
+      // NOTE: Only using first column for now
+      auto order_by = make_order_by(ctx->ordering_term()[0]);
+      select_expr.set_order_by(order_by);
+    }
+
+    exprs_.emplace_back(make_unique<SelectExpr>(move(select_expr)));
+
     return visitChildren(ctx);
   }
 
@@ -56,6 +100,8 @@ public:
   Any visitInsert_stmt(InsertStmtContext *ctx) override;
   Any visitSelect_core(SelectCoreContext *ctx) override;
   Any visitCompound_select_stmt(CompoundSelectStmtContext *ctx) override;
+  Any visitFactored_select_stmt(FactoredSelectStmtContext *ctx) override;
+  Any visitSimple_select_stmt(SimpleSelectStmtContext *ctx) override;
 
   ValueExpr make_value_expr(ExprContext* expr_ctx) const;
 

@@ -139,7 +139,7 @@ TEST(PotatoDBTest, SortingTest) {
   const int size = 10;
   create_todo_table(db, size);
 
-  auto asc_result = db.run_statement("SELECT * FROM todos ORDER BY created_at ASC");
+  auto asc_result = db.run_statement("SELECT * FROM todos ORDER BY id ASC");
   EXPECT_TRUE(asc_result.set() != nullptr);
   EXPECT_EQ(asc_result.set()->size(), 10);
   for (index_t i = 0; i < size; ++i) {
@@ -147,7 +147,7 @@ TEST(PotatoDBTest, SortingTest) {
     EXPECT_EQ(name, "Task #" + std::to_string(i));
   }
 
-  auto desc_result = db.run_statement("SELECT * FROM todos ORDER BY created_at DESC");
+  auto desc_result = db.run_statement("SELECT * FROM todos ORDER BY id DESC");
   EXPECT_TRUE(desc_result.set() != nullptr);
   EXPECT_EQ(desc_result.set()->size(), 10);
   for (index_t i = 0; i < size; ++i) {

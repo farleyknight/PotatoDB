@@ -18,10 +18,16 @@ public:
       order_by_   (order_by)
   {}
 
-  ptr<BasePlan>&& child() { return move(child_); }
+  ptr<BasePlan>&& child() {
+    return move(child_);
+  }
 
   bool is_query() const {
     return true;
+  }
+
+  const OrderByExpr order_by() const {
+    return order_by_;
   }
 
 private:

@@ -16,6 +16,14 @@ public:
     direction_ = direction;
   }
 
+  const ColumnExpr& column() const {
+    return col_;
+  }
+
+  const string& direction() const {
+    return direction_;
+  }
+
   const string to_string() const {
     return col_.name() + " " + direction_;
   }

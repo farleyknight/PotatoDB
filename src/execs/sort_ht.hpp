@@ -2,39 +2,70 @@
 
 #include "common/config.hpp"
 #include "plans/sort_plan.hpp"
+#include "plans/sort_key.hpp"
 
 class SortHT {
 public:
   SortHT() {}
 
-  using InternalTable = ordered_map<SortKey, vector<Tuple>>;
+  using Bucket = vector<Tuple>;
+  using Table  = ordered_map<SortKey, Bucket>;
 
   void insert_into_bucket(SortKey key, Tuple tuple) {
     table_[key].push_back(tuple);
   }
 
-  // TODO: Should iterate over InternalTable and iterate over each
-  // `vector<Tuple>`. Likely this 2nd part is just going to be an
-  // ordinary `index_t`
+  void merge_sort(UNUSED const string direction) {
+    // TODO!
+  }
+
   class Iterator {
   public:
-    explicit Iterator(InternalTable::iterator iter, index_t index)
-      : iter_ (iter),
-        index_ (index)
+    explicit Iterator(Table::iterator table_iter,
+                      Bucket::iterator bucket_iter)
+      : table_iter_  (table_iter),
+        bucket_iter_ (bucket_iter)
     {}
 
-    bool operator==(Iterator& other) const {
-      return iter_ == other.iter_ && index_ == other.index_;
+    Tuple tuple() const {
+      return *bucket_iter_;
     }
 
-    bool operator!=(Iterator& other) const {
-      return iter_ != other.iter_ || index_ != other.index_;
+    bool operator==(const Iterator& other) const {
+      return
+        table_iter_ == other.table_iter_ &&
+        bucket_iter_ == other.bucket_iter_;
+    }
+
+    bool operator!=(const Iterator& other) const {
+      return
+        table_iter_ != other.table_iter_ ||
+        bucket_iter_ != other.bucket_iter_;
+    }
+
+    Iterator& operator--() {
+      if (bucket_iter_ != table_iter_->second.begin()) {
+        --bucket_iter_;
+      } else {
+        --table_iter_;
+        bucket_iter_ = table_iter_->second.end();
+      }
+      return *this;
+    }
+
+    Iterator operator--(int) {
+      auto tmp = *this;
+      --(*this);
+      return tmp;
     }
 
     Iterator& operator++() {
-      // TODO: We only increment `iter_` after index has reached the end
-      // of vector.
-      ++iter_;
+      if (bucket_iter_ != table_iter_->second.end()) {
+        ++bucket_iter_;
+      } else {
+        ++table_iter_;
+        bucket_iter_ = table_iter_->second.begin();
+      }
       return *this;
     }
 
@@ -45,18 +76,24 @@ public:
     }
 
   private:
-    InternalTable::iterator iter_;
-    index_t index_;
+    Table::iterator table_iter_;
+    Bucket::iterator bucket_iter_;
   };
 
   Iterator begin() {
-    return Iterator {table_.begin(), 0};
+    return Iterator(
+      table_.begin(),
+      table_.begin()->second.begin()
+    );
   }
 
-  Iterator end()   {
-    return Iterator {table_.end(), -1};
+  Iterator end() {
+    return Iterator(
+      table_.end(),
+      table_.end()->second.end()
+    );
   }
 
 private:
-  InternalTable table_ {};
+  Table table_ {};
 };

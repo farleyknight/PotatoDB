@@ -7,7 +7,7 @@ class AggHT {
 public:
   AggHT() {}
 
-  using InternalTable = map<AggKey, AggValue>;
+  using Table = map<AggKey, AggValue>;
 
   void init(const ptr<AggPlan>& plan) {
     assert(plan != nullptr);
@@ -75,7 +75,7 @@ public:
 
   class Iterator {
   public:
-    explicit Iterator(InternalTable::iterator iter)
+    explicit Iterator(Table::iterator iter)
       : iter_(iter) {}
 
     const AggKey& key() {
@@ -106,14 +106,14 @@ public:
     }
 
   private:
-    InternalTable::iterator iter_;
+    Table::iterator iter_;
   };
 
   Iterator begin() { return Iterator {table_.begin()}; }
   Iterator end()   { return Iterator {table_.end()}; }
 
 private:
-  InternalTable table_ {};
+  Table table_ {};
   vector<BaseQuery> nodes_;
   vector<AggType> types_;
 };

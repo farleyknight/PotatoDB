@@ -146,7 +146,7 @@ ptr<BaseExpr> EvalParseVisitor::make_expr(ExprContext *ctx) {
     return make_unique<CompExpr>(move(left_expr),
                                  CompareType::EQ,
                                  move(right_expr));
-  } 
+  }
 
   throw Exception("not all of it implemented yet :/");
 }
@@ -201,6 +201,37 @@ ColumnExpr EvalParseVisitor::make_col_expr(FunctionArgsContext* ctx) {
   return ColumnExpr(expr->column_name()->getText());
 }
 
+OrderByExpr EvalParseVisitor::make_order_by(OrderingTermContext *ctx) {
+  // TODO: Allow multiple ordering terms
+  auto col_name = ctx->expr()->getText();
+  OrderByExpr order_by;
+  order_by.set_column(ColumnExpr(col_name));
+
+  if (ctx->K_ASC()) {
+    order_by.set_direction("asc");
+  } else if (ctx->K_DESC()) {
+    order_by.set_direction("desc");
+  } else {
+    order_by.set_direction("asc"); // NOTE: DEFAULT!
+  }
+
+  return order_by;
+}
+
+
+Any EvalParseVisitor::visitFactored_select_stmt(FactoredSelectStmtContext *ctx) {
+  std::cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%" << std::endl;
+  std::cout << "Got factored select stmt : " << ctx->getText() << std::endl;
+  return visitChildren(ctx);
+}
+
+Any EvalParseVisitor::visitSimple_select_stmt(SimpleSelectStmtContext *ctx) {
+  std::cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%" << std::endl;
+  std::cout << "Got simple select stmt : " << ctx->getText() << std::endl;
+  return visitChildren(ctx);
+}
+
+
 Any EvalParseVisitor::visitCompound_select_stmt(CompoundSelectStmtContext *ctx) {
   // TODO:
   //
@@ -228,19 +259,9 @@ Any EvalParseVisitor::visitCompound_select_stmt(CompoundSelectStmtContext *ctx) 
     throw Exception("FIXME");
   }
 
-  if (ctx->ordering_term()) {
-    auto ordering_ctx = ctx->ordering_term();
-    auto col_name = ordering_ctx->expr()->getText();
-    OrderByExpr order_by(ColumnExpr(col_name));
-
-    if (ordering_ctx->K_ASC()) {
-      order_by.set_direction("asc");
-    } else if (ordering_ctx->K_DESC()) {
-      order_by.set_direction("desc");
-    } else {
-      order_by.set_direction("asc"); // NOTE: DEFAULT!
-    }
-
+  if (ctx->ordering_term().size() > 0) {
+    // NOTE: Only using first column for now
+    auto order_by = make_order_by(ctx->ordering_term()[0]);
     stmt_expr.set_order_by(order_by);
   }
 
@@ -253,12 +274,13 @@ Any EvalParseVisitor::visitCompound_select_stmt(CompoundSelectStmtContext *ctx) 
   return visitChildren(ctx);
 }
 
-ptr<SelectExpr> EvalParseVisitor::make_select_expr(SelectCoreContext *ctx) {
-  const auto &col_list_ctx = ctx->column_list();
-
+std::tuple<ColumnListExpr, AggListExpr>
+EvalParseVisitor::make_select_list(vector<ResultColumnContext*> ctxs)
+{
   ColumnListExpr cols;
   AggListExpr aggs;
-  for (auto &col_ctx : col_list_ctx->result_column()) {
+
+  for (auto &col_ctx : ctxs) {
     if (col_ctx->getText() == "*") {
       cols.push_back(ColumnExpr("*"));
     } else if (col_ctx->table_name() == nullptr && col_ctx->column_name() == nullptr) {
@@ -288,16 +310,15 @@ ptr<SelectExpr> EvalParseVisitor::make_select_expr(SelectCoreContext *ctx) {
     }
   }
 
-  const auto &table_list_ctxs = ctx->table_or_subquery();
+  return std::make_tuple(cols, aggs);
+}
 
-  TableListExpr tables;
-  for (auto &table_ctx : table_list_ctxs) {
-    if (table_ctx->table_name() != nullptr) {
-      auto table_name = table_ctx->table_name()->getText();
-      auto table = TableExpr(table_name);
-      tables.push_back(table);
-    }
-  }
+ptr<SelectExpr> EvalParseVisitor::make_select_expr(SelectCoreContext *ctx) {
+  const auto &col_list_ctx = ctx->column_list();
+
+  auto [cols, aggs] = make_select_list(col_list_ctx->result_column());
+
+  auto tables = make_table_list(ctx->table_or_subquery());
 
   SelectExpr select;
   select.set_columns(cols);

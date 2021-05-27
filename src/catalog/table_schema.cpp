@@ -38,7 +38,7 @@ TableSchema::missing_columns(const QuerySchema& query_schema) const {
   vector<TableColumn> missing;
   for (const auto &col : columns_) {
     if (!query_schema.has_column(col.name())) {
-      std::cout << "Missing column: " << col.name() << std::endl;
+      // std::cout << "Missing column: " << col.name() << std::endl;
       missing.push_back(col);
     }
   }
@@ -48,16 +48,16 @@ TableSchema::missing_columns(const QuerySchema& query_schema) const {
 
 deque<Value>
 TableSchema::defaults(const vector<TableColumn>& cols) {
-  std::cout << "***********" << std::endl;
-  std::cout << "primary key: " << primary_key_ << std::endl;
-  std::cout << "***********" << std::endl;
+  // std::cout << "***********" << std::endl;
+  // std::cout << "primary key: " << primary_key_ << std::endl;
+  // std::cout << "***********" << std::endl;
 
   deque<Value> values;
   for (const auto& col : cols) {
     // TODO: The only kind of DEFAULT we handle is PRIMARY KEY AUTOINCREMENT
     // In the future, we should handle all DEFAULTs here..
     if (col.name() == primary_key_) {
-      std::cout << "AUTO INCREMENT value " << autoincrement_ << std::endl;
+      // std::cout << "AUTO INCREMENT value " << autoincrement_ << std::endl;
       auto value = Value::make(static_cast<int32_t>(autoincrement_));
       ++autoincrement_;
       values.push_back(value);

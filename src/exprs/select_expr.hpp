@@ -4,11 +4,14 @@
 #include "exprs/table_list_expr.hpp"
 #include "exprs/column_list_expr.hpp"
 #include "exprs/where_clause_expr.hpp"
+#include "exprs/has_order_by_expr.hpp"
 #include "exprs/agg_list_expr.hpp"
 
 #include "query/query_comp.hpp"
 
-class SelectExpr : public BaseExpr {
+class SelectExpr : public BaseExpr,
+                   public HasOrderByExpr
+{
 public:
   SelectExpr()
     : BaseExpr (ExprType::SELECT)

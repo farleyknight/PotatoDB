@@ -77,11 +77,13 @@ public:
     // * Add support for UNION, INTERSECTION
     // * Use right_select appropriately
 
-    auto left_scan_plan = make_seq_scan_plan(catalog,
-                                             move(expr->left_select()));
+    auto left_select_ptr = expr->left_select().get();
+    auto left_scan_plan = make_seq_scan_plan(catalog, left_select_ptr);
+    auto order_by = expr->order_by();
 
-    return make_unique<SortPlan>(order_by,
-                                 move(left_scan_plan));
+    std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << std::endl;
+    std::cout << "Got ORDER BY expr : " << order_by.to_string() << std::endl;
+    return make_unique<SortPlan>(order_by, move(left_scan_plan));
   }
 
   static ptr<BasePlan> from_expr(const Catalog& catalog, SelectExpr* expr) {

@@ -36,6 +36,9 @@ fs::path PotatoDB::table_file_for(const string& table_name) {
 }
 
 ptr<BasePlan> PotatoDB::sql_to_plan(const string& statement) const {
+  std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
+  std::cout << statement << std::endl;
+
   // TODO: Rename as_exprs to as_stmts
   auto exprs = SQLParser::as_exprs(statement);
   // TODO: Allow for multiple statements
@@ -116,7 +119,7 @@ StatementResult PotatoDB::run_create_table(ptr<BasePlan>&& plan,
   }
 
   txn_mgr_.commit(txn);
-  return StatementResult(message);  
+  return StatementResult(message);
 }
 
 void PotatoDB::build_system_catalog() {

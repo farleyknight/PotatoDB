@@ -8,28 +8,14 @@ class SortExec : public BaseExec {
   SortExec(ExecCtx& exec_ctx,
            ptr<SortPlan>&& plan,
            ptr<BaseExec>&& child)
-    : BaseExec (exec_ctx),
-      plan_    (move(plan)),
-      child_   (move(child)) {}
-
-  static ptr<BaseExec> make(ExecCtx& exec_ctx,
-                            ptr<SortPlan>&& plan,
-                            ptr<BaseExec>&& child)
-  {
-    return make_unique<SortExec>(exec_ctx,
-                                 move(plan),
-                                 move(child));
-  }
+    : BaseExec    (exec_ctx),
+      plan_       (move(plan)),
+      child_      (move(child)),
+      table_iter_ (table_.begin())
+  {}
 
   void init() override {
     child_->init();
-
-    // TODO: Load everything into memory and sort it!
-    // Make sure you use external merge-sort here..
-    // TODO: Look at AggExec for an example
-
-    table_.init(plan_);
-    table_.generate();
 
     while (child_->has_next()){
       auto tuple = child_->next();
@@ -40,22 +26,75 @@ class SortExec : public BaseExec {
       // the buckets.
       table_.insert_into_bucket(sort_key, tuple);
     }
-    table_.merge_sort();
-    table_iter_ = table_.begin();
+
+    table_.merge_sort(sort_dir());
+
+    if (sort_asc()) {
+      table_iter_ = table_.begin();
+    } else if (sort_desc()) {
+      table_iter_ = table_.end();
+    }
+  }
+
+  const string sort_dir() const {
+    return plan_->order_by().direction();
+  }
+
+  bool sort_asc() const {
+    return "asc" == sort_dir();
+  }
+
+  bool sort_desc() const {
+    return "desc" == sort_dir();
+  }
+
+  bool at_the_end() {
+    auto end = table_.end();
+    return table_iter_ == end;
+  }
+
+  bool at_the_beginning() {
+    auto begin = table_.begin();
+    return table_iter_ == begin;
   }
 
   bool has_next() override {
-    // TODO
+    if (sort_asc()) {
+      while (!at_the_end()) {
+        return true;
+      }
+    } else if (sort_desc()) {
+      while (!at_the_beginning()) {
+        return true;
+      }
+    }
     return false;
   }
 
   Tuple next() override {
-    // TODO
-    return Tuple();
+    auto tuple = table_iter_.tuple();
+    std::cout << "0000000000000 sort_dir() = " << sort_dir() << std::endl;
+    if (sort_asc()) {
+      ++table_iter_;
+    } else if (sort_desc()){
+      --table_iter_;
+    }
+    return tuple;
+  }
+
+  SortKey make_key(const Tuple& tuple) {
+    auto col = plan_->order_by().column();
+    auto value = tuple.value_by_name(child_schema(), col.name());
+    return SortKey(value);
   }
 
   const string message_on_completion(size_t result_count) const override {
-    return "Found " + std::to_string(result_count) + " record(s)";
+    return "Sorted " + std::to_string(result_count) + " record(s)";
+  }
+
+  const QuerySchema& child_schema() const {
+    auto child_exec = dynamic_cast<SeqScanExec*>(child_.get());
+    return child_exec->schema();
   }
 
 private:
