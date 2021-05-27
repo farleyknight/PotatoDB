@@ -67,21 +67,26 @@ ValueExpr EvalParseVisitor::make_value_expr(ExprContext* expr_ctx) const {
   if (expr_ctx->literal_value() != nullptr) {
     auto literal_ctx = expr_ctx->literal_value();
 
-    if (literal_ctx->NUMERIC_LITERAL() != nullptr) {
-      return ValueExpr(ValueType::NUMERIC, literal_ctx->getText());
-    } else if (literal_ctx->STRING_LITERAL() != nullptr) {
+    if (literal_ctx->K_TRUE()) {
+      return ValueExpr(true);
+    } else if (literal_ctx->K_FALSE()) {
+      return ValueExpr(false);
+    } else if (literal_ctx->NUMERIC_LITERAL()) {
+      int32_t number = std::stoi(literal_ctx->getText());
+      return ValueExpr(number);
+    } else if (literal_ctx->STRING_LITERAL()) {
       auto text = literal_ctx->getText();
       return ValueExpr(ValueType::STRING, text.substr(1, text.size()-2));
     } else {
-      return ValueExpr(expr_ctx->getText());
+      throw Exception("No known type for expression! " + expr_ctx->getText());
     }
   } else if (expr_ctx->function_name() != nullptr) {
     using namespace std::chrono;
     auto now = system_clock::now();
-    uint64_t secs = time_point_cast<seconds>(now).time_since_epoch().count();
+    timestamp_t secs = time_point_cast<seconds>(now).time_since_epoch().count();
     return ValueExpr(secs);
   } else {
-    return ValueExpr(expr_ctx->getText());
+    throw Exception("No known type for expression! " + expr_ctx->getText());
   }
 }
 
@@ -124,13 +129,8 @@ ptr<BaseExpr> EvalParseVisitor::make_expr(ExprContext *ctx) {
   if (ctx->column_name()) {
     return make_unique<ColumnExpr>(ctx->column_name()->getText());
   } else if (ctx->literal_value()) {
-    auto value_ctx = ctx->literal_value();
-    if (value_ctx->NUMERIC_LITERAL()) {
-      return make_unique<ValueExpr>(ValueType::NUMERIC, value_ctx->getText());
-    } else if (value_ctx->STRING_LITERAL()) {
-      auto string_value = value_ctx->getText();
-      return make_unique<ValueExpr>(ValueType::STRING, string_value.substr(1, string_value.size()-2));
-    }
+    auto value_expr = make_value_expr(ctx);
+    return make_unique<ValueExpr>(value_expr);
   } else if (ctx->EQ()) {
     auto left_expr  = make_expr(ctx->expr()[0]);
     auto right_expr = make_expr(ctx->expr()[1]);
@@ -143,21 +143,49 @@ ptr<BaseExpr> EvalParseVisitor::make_expr(ExprContext *ctx) {
   throw Exception("not all of it implemented yet :/");
 }
 
-WhereClauseExpr EvalParseVisitor::make_where_clause_expr(WhereClauseContext *ctx) {
+Any EvalParseVisitor::visitSelect_stmt(SelectStmtContext *ctx) {
+  SelectExpr select_expr;
+
+  assert(ctx->select_or_values().size() > 0);
+
+  // TODO: Support select_or_values().size() > 1!
+  auto select_or_values = ctx->select_or_values()[0];
+
+  auto tables = make_table_list(select_or_values->table_or_subquery());
+
+  auto [cols, aggs] = make_select_list(select_or_values->result_column());
+
+  select_expr.set_columns(cols);
+  select_expr.set_aggs(aggs);
+  select_expr.set_tables(tables);
+
+  if (ctx->ordering_term().size() > 0) {
+    // NOTE: Only using first column for now
+    auto order_by = make_order_by(ctx->ordering_term()[0]);
+    select_expr.set_order_by(order_by);
+  }
+
+  exprs_.emplace_back(make_unique<SelectExpr>(move(select_expr)));
+
+  return visitChildren(ctx);
+}
+
+ptr<WhereClauseExpr>
+EvalParseVisitor::make_where_clause_expr(WhereClauseContext *ctx) {
   auto expr = ctx->expr();
 
   std::cout << "expr as string " << expr->getText() << std::endl;
 
   // NOTE: We may have to support WHERE (a = 5)
   // I believe MySQL treats this as (a == 5)
-  if (expr->EQ()) {
+  if (expr->EQ() || expr->ASSIGN()) {
     auto left_expr  = make_expr(expr->expr()[0]);
     auto right_expr = make_expr(expr->expr()[1]);
 
     auto comp_expr = make_unique<CompExpr>(move(left_expr),
                                            CompareType::EQ,
                                            move(right_expr));
-    return WhereClauseExpr(move(comp_expr));
+    return make_unique<WhereClauseExpr>(move(comp_expr));
 
   } else if (expr->NOT_EQ1() || expr->NOT_EQ2()) {
     auto left_expr  = make_expr(expr->expr()[0]);
@@ -166,14 +194,14 @@ WhereClauseExpr EvalParseVisitor::make_where_clause_expr(WhereClauseContext *ctx
     auto comp_expr = make_unique<CompExpr>(move(left_expr),
                                            CompareType::NE,
                                            move(right_expr));
-    return WhereClauseExpr(move(comp_expr));
+    return make_unique<WhereClauseExpr>(move(comp_expr));
   } else if (expr->K_AND()) {
     auto left_expr  = make_expr(expr->expr()[0]);
     auto right_expr = make_expr(expr->expr()[1]);
 
-    return WhereClauseExpr(move(left_expr),
-                           LogicalType::AND,
-                           move(right_expr));
+    return make_unique<WhereClauseExpr>(move(left_expr),
+                                        LogicalType::AND,
+                                        move(right_expr));
   } else {
     throw Exception("Other types of WHERE clauses are not yet implemented! :/");
   }

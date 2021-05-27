@@ -33,5 +33,7 @@ enum class ExprType {
   ORDER_BY,
   GROUP_BY,
   HAVING,
-  INSERT
+  INSERT,
+  UPDATE,
+  DELETE_FROM
 };

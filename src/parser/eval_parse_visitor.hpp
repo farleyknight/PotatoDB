@@ -11,6 +11,8 @@
 #include "exprs/compound_select_expr.hpp"
 #include "exprs/where_clause_expr.hpp"
 #include "exprs/create_table_expr.hpp"
+#include "exprs/update_expr.hpp"
+#include "exprs/delete_from_expr.hpp"
 #include "exprs/comp_expr.hpp"
 #include "exprs/agg_expr.hpp"
 
@@ -34,6 +36,8 @@ using ResultColumnContext       = PotatoSQLParser::Result_columnContext;
 using TableOrSubqueryContext    = PotatoSQLParser::Table_or_subqueryContext;
 using FactoredSelectStmtContext = PotatoSQLParser::Factored_select_stmtContext;
 using SimpleSelectStmtContext   = PotatoSQLParser::Simple_select_stmtContext;
+using UpdateStmtContext         = PotatoSQLParser::Update_stmtContext;
+using DeleteStmtContext         = PotatoSQLParser::Delete_stmtContext;
 
 class EvalParseVisitor : public PotatoSQLBaseVisitor {
 public:
@@ -62,32 +66,49 @@ public:
     return tables;
   }
 
-  Any visitSelect_stmt(SelectStmtContext *ctx) override {
-    // TODO! This is another place where need to do an ORDER BY
-    SelectExpr select_expr;
+  Any visitUpdate_stmt(UpdateStmtContext *ctx) override {
+    assert(ctx->qualified_table_name());
 
-    // TODO: Support select_or_values().size() > 0!
-    assert(ctx->select_or_values().size() > 0);
-    auto select_or_values = ctx->select_or_values()[0];
+    UpdateExpr update_expr;
 
-    auto tables = make_table_list(select_or_values->table_or_subquery());
+    TableExpr table_expr(ctx->qualified_table_name()->getText());
+    update_expr.set_table(table_expr);
 
-    auto [cols, aggs] = make_select_list(select_or_values->result_column());
-
-    select_expr.set_columns(cols);
-    select_expr.set_aggs(aggs);
-    select_expr.set_tables(tables);
-
-    if (ctx->ordering_term().size() > 0) {
-      // NOTE: Only using first column for now
-      auto order_by = make_order_by(ctx->ordering_term()[0]);
-      select_expr.set_order_by(order_by);
+    for (index_t i = 0; i < ctx->column_name().size(); ++i) {
+      auto column_name = ctx->column_name()[i]->getText();
+      auto expr        = make_expr(ctx->expr()[i]);
+      update_expr.set_pair(column_name, move(expr));
     }
 
-    exprs_.emplace_back(make_unique<SelectExpr>(move(select_expr)));
+    if (ctx->where_clause()) {
+      auto where_clause = make_where_clause_expr(ctx->where_clause());
+      update_expr.set_where(move(where_clause));
+    }
+
+    exprs_.emplace_back(make_unique<UpdateExpr>(move(update_expr)));
 
     return visitChildren(ctx);
   }
+
+  Any visitDelete_stmt(DeleteStmtContext *ctx) override {
+    assert(ctx->qualified_table_name());
+
+    DeleteFromExpr delete_from_expr;
+
+    TableExpr table_expr(ctx->qualified_table_name()->getText());
+    delete_from_expr.set_table(table_expr);
+
+    if (ctx->where_clause()) {
+      auto where_clause = make_where_clause_expr(ctx->where_clause());
+      delete_from_expr.set_where(move(where_clause));
+    }
+
+    exprs_.emplace_back(make_unique<DeleteFromExpr>(move(delete_from_expr)));
+
+    return visitChildren(ctx);
+  }
+
+  Any visitSelect_stmt(SelectStmtContext *ctx) override;
 
   Any visitShow_tables_stmt(ShowTablesStmtContext *ctx) override {
     exprs_.emplace_back(make_unique<ShowTablesExpr>());
@@ -107,7 +128,7 @@ public:
   ptr<SelectExpr> make_select_expr(SelectCoreContext *ctx);
   ptr<BaseExpr> make_expr(ExprContext *ctx);
 
-  WhereClauseExpr make_where_clause_expr(WhereClauseContext *ctx);
+  ptr<WhereClauseExpr> make_where_clause_expr(WhereClauseContext *ctx);
   ColumnExpr make_col_expr(FunctionArgsContext* ctx);
 
   Any visitExpr(ExprContext *ctx) override {

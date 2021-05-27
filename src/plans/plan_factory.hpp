@@ -35,6 +35,14 @@ public:
       auto describe_table_expr = dynamic_cast<DescribeTableExpr*>(expr.get());
       return from_expr(catalog_, describe_table_expr);
     }
+    case ExprType::UPDATE: {
+      auto update_expr = dynamic_cast<UpdateExpr*>(expr.get());
+      return from_expr(catalog_, update_expr);
+    }
+    case ExprType::DELETE_FROM: {
+      auto delete_from_expr = dynamic_cast<DeleteFromExpr*>(expr.get());
+      return from_expr(catalog_, delete_from_expr);
+    }
     default:
       throw NotImplementedException("Not finished :(");
     }
@@ -47,6 +55,46 @@ public:
     return make_unique<CreateTablePlan>(table_name,
                                         expr->primary_key(),
                                         column_def_list);
+  }
+
+  static ptr<BasePlan> from_expr(const Catalog& catalog, UpdateExpr* expr) {
+    auto table_name = expr->table().name();
+    auto table_oid = catalog.table_oid_for(table_name);
+    auto maybe_pred = to_query_where(catalog, table_name, expr->pred());
+
+    auto schema = catalog.query_schema_for(table_name);
+
+    auto scan_plan = make_unique<SeqScanPlan>(schema,
+                                              table_oid,
+                                              move(maybe_pred));
+
+    map<column_oid_t, ptr<BaseQuery>> update_values;
+    for (const auto &[name, expr] : expr->update_values()) {
+      auto oid = catalog.query_column_for(table_name, name).column_oid();
+      update_values[oid] = to_query_node(catalog, table_name, expr);
+    }
+
+    return make_unique<UpdatePlan>(schema,
+                                   table_oid,
+                                   move(scan_plan),
+                                   move(update_values));
+  }
+
+  static ptr<BasePlan> from_expr(const Catalog& catalog, DeleteFromExpr* expr) {
+    auto table_name = expr->table().name();
+    auto table_oid = catalog.table_oid_for(table_name);
+    auto maybe_pred = to_query_where(catalog, table_name, expr->pred());
+
+    auto schema = catalog.query_schema_for(table_name);
+
+
+    auto scan_plan = make_unique<SeqScanPlan>(schema,
+                                              table_oid,
+                                              move(maybe_pred));
+
+    return make_unique<DeletePlan>(schema,
+                                   table_oid,
+                                   move(scan_plan));
   }
 
   static ptr<BasePlan> make_seq_scan_plan(const Catalog& catalog, SelectExpr* expr) {
@@ -67,10 +115,6 @@ public:
 
 
   static ptr<BasePlan> from_expr(const Catalog& catalog, CompoundSelectExpr* expr) {
-    // TODO!
-    // Handle ORDER BY mostly
-    // Wrap the seq_scan_plan in an SortPlan
-    //
     // TODO LATER
     // * Add support for UNION, INTERSECTION
     // * Use right_select appropriately

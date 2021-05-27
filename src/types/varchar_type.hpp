@@ -82,11 +82,13 @@ public:
     switch(type_id) {
     case TypeId::BOOLEAN: {
       auto string_value = value.to_string();
+      std::cout << "BOOLEAN value as string: " << string_value << std::endl;
       if (string_value == "true" || string_value == "1") {
         return Value::make(true);
       } else if (string_value == "false" || string_value == "0") {
         return Value::make(false);
       } else {
+        assert(false);
         throw Exception(ExceptionType::OUT_OF_RANGE, "BOOLEAN value out of range.");
       }
     }

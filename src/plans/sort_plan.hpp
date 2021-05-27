@@ -30,7 +30,7 @@ public:
     return true;
   }
 
-  const OrderByExpr order_by() const {
+  const OrderByExpr& order_by() const {
     return order_by_;
   }
 
