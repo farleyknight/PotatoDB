@@ -26,11 +26,14 @@ enum class ExprType {
   // DML statement types
   // Data Manipulation Language
   SELECT,
+  COMPOUND_SELECT,
   WHERE, COMPARE,
   AGG, AGG_LIST,
   LIMIT,
   ORDER_BY,
   GROUP_BY,
   HAVING,
-  INSERT
+  INSERT,
+  UPDATE,
+  DELETE_FROM
 };

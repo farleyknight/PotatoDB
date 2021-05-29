@@ -2,12 +2,12 @@
 
 #include "common/config.hpp"
 #include "query/base_query.hpp"
-#include "query/comp_type.hpp"
+#include "query/compare_type.hpp"
 
 class QueryComp : public BaseQuery {
 public:
   QueryComp(ptr<BaseQuery>&& left,
-            CompType type,
+            CompareType type,
             ptr<BaseQuery>&& right)
     : BaseQuery (QueryNodeType::COMP, TypeId::BOOLEAN),
       left_     (move(left)),
@@ -31,17 +31,17 @@ private:
                const Value& rhs) const
   {
     switch (type_) {
-    case CompType::EQ:
+    case CompareType::EQ:
       return lhs.eq(rhs);
-    case CompType::NE:
+    case CompareType::NE:
       return lhs.ne(rhs);
-    case CompType::LT:
+    case CompareType::LT:
       return lhs.lt(rhs);
-    case CompType::LTE:
+    case CompareType::LTE:
       return lhs.lte(rhs);
-    case CompType::GT:
+    case CompareType::GT:
       return lhs.gt(rhs);
-    case CompType::GTE:
+    case CompareType::GTE:
       return lhs.gte(rhs);
     default:
       throw NotImplementedException("Unsupported comparison type.");
@@ -49,6 +49,6 @@ private:
   }
 
   ptr<BaseQuery> left_;
-  CompType type_;
+  CompareType type_;
   ptr<BaseQuery> right_;
 };

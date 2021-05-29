@@ -12,9 +12,8 @@ TEST(ParserTest, SimpleSelectTest) {
   EXPECT_EQ(table_list.list()[0].to_string(), "foobar");
 
   const auto &col_list = expr->column_list();
-  EXPECT_EQ(col_list.list().size(), 2);
+  EXPECT_EQ(col_list.list().size(), 1);
   EXPECT_EQ(col_list.list()[0].to_string(), "*");
-  EXPECT_EQ(col_list.list()[1].to_string(), "*");
 }
 
 TEST(ParserTest, DISABLED_SelectTableColumNameTest) {

@@ -26,25 +26,25 @@ public:
     K_DATABASE = 55, K_DEFAULT = 56, K_DEFERRABLE = 57, K_DEFERRED = 58, 
     K_DELETE = 59, K_DESC = 60, K_DESCRIBE = 61, K_DETACH = 62, K_DISTINCT = 63, 
     K_DROP = 64, K_EACH = 65, K_ELSE = 66, K_END = 67, K_ESCAPE = 68, K_EXCEPT = 69, 
-    K_EXCLUSIVE = 70, K_EXISTS = 71, K_EXPLAIN = 72, K_FAIL = 73, K_FOR = 74, 
-    K_FOREIGN = 75, K_FROM = 76, K_FULL = 77, K_GLOB = 78, K_GROUP = 79, 
-    K_HAVING = 80, K_IF = 81, K_IGNORE = 82, K_IMMEDIATE = 83, K_IN = 84, 
-    K_INDEX = 85, K_INDEXED = 86, K_INITIALLY = 87, K_INNER = 88, K_INSERT = 89, 
-    K_INSTEAD = 90, K_INTERSECT = 91, K_INTO = 92, K_IS = 93, K_ISNULL = 94, 
-    K_JOIN = 95, K_KEY = 96, K_LEFT = 97, K_LIKE = 98, K_LIMIT = 99, K_MATCH = 100, 
-    K_NATURAL = 101, K_NO = 102, K_NOT = 103, K_NOTNULL = 104, K_NULL = 105, 
-    K_OF = 106, K_OFFSET = 107, K_ON = 108, K_OR = 109, K_ORDER = 110, K_OUTER = 111, 
-    K_PLAN = 112, K_PRAGMA = 113, K_PRIMARY = 114, K_QUERY = 115, K_RAISE = 116, 
-    K_RECURSIVE = 117, K_REFERENCES = 118, K_REGEXP = 119, K_REINDEX = 120, 
-    K_RELEASE = 121, K_RENAME = 122, K_REPLACE = 123, K_RESTRICT = 124, 
-    K_RIGHT = 125, K_ROLLBACK = 126, K_ROW = 127, K_SAVEPOINT = 128, K_SELECT = 129, 
-    K_SET = 130, K_SHOW = 131, K_TABLE = 132, K_TABLES = 133, K_TEMP = 134, 
-    K_TEMPORARY = 135, K_THEN = 136, K_TO = 137, K_TRANSACTION = 138, K_TRIGGER = 139, 
-    K_UNION = 140, K_UNIQUE = 141, K_UPDATE = 142, K_USING = 143, K_VACUUM = 144, 
-    K_VALUES = 145, K_VIEW = 146, K_VIRTUAL = 147, K_WHEN = 148, K_WHERE = 149, 
-    K_WITH = 150, K_WITHOUT = 151, IDENTIFIER = 152, NUMERIC_LITERAL = 153, 
-    BIND_PARAMETER = 154, STRING_LITERAL = 155, BLOB_LITERAL = 156, SINGLE_LINE_COMMENT = 157, 
-    MULTILINE_COMMENT = 158, SPACES = 159, UNEXPECTED_CHAR = 160
+    K_EXCLUSIVE = 70, K_EXISTS = 71, K_EXPLAIN = 72, K_FAIL = 73, K_FALSE = 74, 
+    K_FOR = 75, K_FOREIGN = 76, K_FROM = 77, K_FULL = 78, K_GLOB = 79, K_GROUP = 80, 
+    K_HAVING = 81, K_IF = 82, K_IGNORE = 83, K_IMMEDIATE = 84, K_IN = 85, 
+    K_INDEX = 86, K_INDEXED = 87, K_INITIALLY = 88, K_INNER = 89, K_INSERT = 90, 
+    K_INSTEAD = 91, K_INTERSECT = 92, K_INTO = 93, K_IS = 94, K_ISNULL = 95, 
+    K_JOIN = 96, K_KEY = 97, K_LEFT = 98, K_LIKE = 99, K_LIMIT = 100, K_MATCH = 101, 
+    K_NATURAL = 102, K_NO = 103, K_NOT = 104, K_NOTNULL = 105, K_NULL = 106, 
+    K_OF = 107, K_OFFSET = 108, K_ON = 109, K_OR = 110, K_ORDER = 111, K_OUTER = 112, 
+    K_PLAN = 113, K_PRAGMA = 114, K_PRIMARY = 115, K_QUERY = 116, K_RAISE = 117, 
+    K_RECURSIVE = 118, K_REFERENCES = 119, K_REGEXP = 120, K_REINDEX = 121, 
+    K_RELEASE = 122, K_RENAME = 123, K_REPLACE = 124, K_RESTRICT = 125, 
+    K_RIGHT = 126, K_ROLLBACK = 127, K_ROW = 128, K_SAVEPOINT = 129, K_SELECT = 130, 
+    K_SET = 131, K_SHOW = 132, K_TABLE = 133, K_TABLES = 134, K_TEMP = 135, 
+    K_TEMPORARY = 136, K_THEN = 137, K_TO = 138, K_TRANSACTION = 139, K_TRIGGER = 140, 
+    K_TRUE = 141, K_UNION = 142, K_UNIQUE = 143, K_UPDATE = 144, K_USING = 145, 
+    K_VACUUM = 146, K_VALUES = 147, K_VIEW = 148, K_VIRTUAL = 149, K_WHEN = 150, 
+    K_WHERE = 151, K_WITH = 152, K_WITHOUT = 153, IDENTIFIER = 154, NUMERIC_LITERAL = 155, 
+    BIND_PARAMETER = 156, STRING_LITERAL = 157, BLOB_LITERAL = 158, SINGLE_LINE_COMMENT = 159, 
+    MULTILINE_COMMENT = 160, SPACES = 161, UNEXPECTED_CHAR = 162
   };
 
   enum {
@@ -62,21 +62,22 @@ public:
     RuleSelect_stmt = 36, RuleSelect_or_values = 37, RuleUpdate_stmt = 38, 
     RuleUpdate_stmt_limited = 39, RuleVacuum_stmt = 40, RuleColumn_def = 41, 
     RuleType_name = 42, RuleColumn_constraint = 43, RuleNot_null = 44, RulePrimary_key = 45, 
-    RuleAutoincrement = 46, RuleConflict_clause = 47, RuleExpr = 48, RuleForeign_key_clause = 49, 
-    RuleRaise_function = 50, RuleIndexed_column = 51, RuleTable_constraint = 52, 
-    RuleWith_clause = 53, RuleQualified_table_name = 54, RuleOrdering_term = 55, 
-    RulePragma_value = 56, RuleCommon_table_expression = 57, RuleResult_column = 58, 
-    RuleTable_or_subquery = 59, RuleJoin_clause = 60, RuleJoin_operator = 61, 
-    RuleJoin_constraint = 62, RuleColumn_list = 63, RuleSelect_core = 64, 
-    RuleWhere_clause = 65, RuleCompound_operator = 66, RuleSigned_number = 67, 
-    RuleLiteral_value = 68, RuleUnary_operator = 69, RuleError_message = 70, 
-    RuleModule_argument = 71, RuleColumn_alias = 72, RuleKeyword = 73, RuleName = 74, 
-    RuleFunction_name = 75, RuleDatabase_name = 76, RuleSchema_name = 77, 
-    RuleTable_function_name = 78, RuleTable_name = 79, RuleTable_or_index_name = 80, 
-    RuleNew_table_name = 81, RuleColumn_name = 82, RuleCollation_name = 83, 
-    RuleForeign_table = 84, RuleIndex_name = 85, RuleTrigger_name = 86, 
-    RuleView_name = 87, RuleModule_name = 88, RulePragma_name = 89, RuleSavepoint_name = 90, 
-    RuleTable_alias = 91, RuleTransaction_name = 92, RuleAny_name = 93
+    RuleAutoincrement = 46, RuleConflict_clause = 47, RuleFunction_args = 48, 
+    RuleExpr = 49, RuleForeign_key_clause = 50, RuleRaise_function = 51, 
+    RuleIndexed_column = 52, RuleTable_constraint = 53, RuleWith_clause = 54, 
+    RuleQualified_table_name = 55, RuleOrdering_term = 56, RulePragma_value = 57, 
+    RuleCommon_table_expression = 58, RuleResult_column = 59, RuleTable_or_subquery = 60, 
+    RuleJoin_clause = 61, RuleJoin_operator = 62, RuleJoin_constraint = 63, 
+    RuleColumn_list = 64, RuleSelect_core = 65, RuleWhere_clause = 66, RuleCompound_operator = 67, 
+    RuleSigned_number = 68, RuleLiteral_value = 69, RuleUnary_operator = 70, 
+    RuleError_message = 71, RuleModule_argument = 72, RuleColumn_alias = 73, 
+    RuleKeyword = 74, RuleName = 75, RuleFunction_name = 76, RuleDatabase_name = 77, 
+    RuleSchema_name = 78, RuleTable_function_name = 79, RuleTable_name = 80, 
+    RuleTable_or_index_name = 81, RuleNew_table_name = 82, RuleColumn_name = 83, 
+    RuleCollation_name = 84, RuleForeign_table = 85, RuleIndex_name = 86, 
+    RuleTrigger_name = 87, RuleView_name = 88, RuleModule_name = 89, RulePragma_name = 90, 
+    RuleSavepoint_name = 91, RuleTable_alias = 92, RuleTransaction_name = 93, 
+    RuleAny_name = 94
   };
 
   explicit PotatoSQLParser(antlr4::TokenStream *input);
@@ -137,6 +138,7 @@ public:
   class Primary_keyContext;
   class AutoincrementContext;
   class Conflict_clauseContext;
+  class Function_argsContext;
   class ExprContext;
   class Foreign_key_clauseContext;
   class Raise_functionContext;
@@ -646,7 +648,7 @@ public:
     Qualified_table_nameContext *qualified_table_name();
     With_clauseContext *with_clause();
     antlr4::tree::TerminalNode *K_WHERE();
-    ExprContext *expr();
+    Where_clauseContext *where_clause();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -1129,6 +1131,7 @@ public:
     std::vector<antlr4::tree::TerminalNode *> COMMA();
     antlr4::tree::TerminalNode* COMMA(size_t i);
     antlr4::tree::TerminalNode *K_WHERE();
+    Where_clauseContext *where_clause();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -1162,6 +1165,7 @@ public:
     std::vector<antlr4::tree::TerminalNode *> COMMA();
     antlr4::tree::TerminalNode* COMMA(size_t i);
     antlr4::tree::TerminalNode *K_WHERE();
+    Where_clauseContext *where_clause();
     antlr4::tree::TerminalNode *K_LIMIT();
     antlr4::tree::TerminalNode *K_ORDER();
     antlr4::tree::TerminalNode *K_BY();
@@ -1333,6 +1337,26 @@ public:
 
   Conflict_clauseContext* conflict_clause();
 
+  class  Function_argsContext : public antlr4::ParserRuleContext {
+  public:
+    Function_argsContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    std::vector<ExprContext *> expr();
+    ExprContext* expr(size_t i);
+    antlr4::tree::TerminalNode *STAR();
+    antlr4::tree::TerminalNode *K_DISTINCT();
+    std::vector<antlr4::tree::TerminalNode *> COMMA();
+    antlr4::tree::TerminalNode* COMMA(size_t i);
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  Function_argsContext* function_args();
+
   class  ExprContext : public antlr4::ParserRuleContext {
   public:
     ExprContext(antlr4::ParserRuleContext *parent, size_t invokingState);
@@ -1347,11 +1371,8 @@ public:
     ExprContext* expr(size_t i);
     Function_nameContext *function_name();
     antlr4::tree::TerminalNode *OPEN_PAR();
+    Function_argsContext *function_args();
     antlr4::tree::TerminalNode *CLOSE_PAR();
-    antlr4::tree::TerminalNode *STAR();
-    antlr4::tree::TerminalNode *K_DISTINCT();
-    std::vector<antlr4::tree::TerminalNode *> COMMA();
-    antlr4::tree::TerminalNode* COMMA(size_t i);
     antlr4::tree::TerminalNode *K_CAST();
     antlr4::tree::TerminalNode *K_AS();
     Type_nameContext *type_name();
@@ -1367,6 +1388,7 @@ public:
     antlr4::tree::TerminalNode *K_ELSE();
     Raise_functionContext *raise_function();
     antlr4::tree::TerminalNode *PIPE2();
+    antlr4::tree::TerminalNode *STAR();
     antlr4::tree::TerminalNode *DIV();
     antlr4::tree::TerminalNode *MOD();
     antlr4::tree::TerminalNode *PLUS();
@@ -1389,6 +1411,8 @@ public:
     antlr4::tree::TerminalNode *K_BETWEEN();
     antlr4::tree::TerminalNode *K_IN();
     Database_nameContext *database_name();
+    std::vector<antlr4::tree::TerminalNode *> COMMA();
+    antlr4::tree::TerminalNode* COMMA(size_t i);
     antlr4::tree::TerminalNode *K_COLLATE();
     Collation_nameContext *collation_name();
     antlr4::tree::TerminalNode *K_LIKE();
@@ -1865,7 +1889,8 @@ public:
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *NUMERIC_LITERAL();
     antlr4::tree::TerminalNode *STRING_LITERAL();
-    antlr4::tree::TerminalNode *BLOB_LITERAL();
+    antlr4::tree::TerminalNode *K_TRUE();
+    antlr4::tree::TerminalNode *K_FALSE();
     antlr4::tree::TerminalNode *K_NULL();
     antlr4::tree::TerminalNode *K_CURRENT_TIME();
     antlr4::tree::TerminalNode *K_CURRENT_DATE();
@@ -1997,6 +2022,7 @@ public:
     antlr4::tree::TerminalNode *K_EXISTS();
     antlr4::tree::TerminalNode *K_EXPLAIN();
     antlr4::tree::TerminalNode *K_FAIL();
+    antlr4::tree::TerminalNode *K_FALSE();
     antlr4::tree::TerminalNode *K_FOR();
     antlr4::tree::TerminalNode *K_FOREIGN();
     antlr4::tree::TerminalNode *K_FROM();
@@ -2061,6 +2087,7 @@ public:
     antlr4::tree::TerminalNode *K_TO();
     antlr4::tree::TerminalNode *K_TRANSACTION();
     antlr4::tree::TerminalNode *K_TRIGGER();
+    antlr4::tree::TerminalNode *K_TRUE();
     antlr4::tree::TerminalNode *K_UNION();
     antlr4::tree::TerminalNode *K_UNIQUE();
     antlr4::tree::TerminalNode *K_UPDATE();

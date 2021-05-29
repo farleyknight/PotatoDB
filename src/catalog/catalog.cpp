@@ -158,6 +158,10 @@ Catalog::query_column_for(const vector<table_name_t>& table_names,
 }
 
 
+bool Catalog::has_table_named(const table_name_t& table_name) const {
+  return table_oids_.count(table_name) > 0;
+}
+
 table_oid_t
 Catalog::create_table(// TODO: We should be attempting to get an exclusive lock
                       // on the table, and abort the txn if we cannot get it.

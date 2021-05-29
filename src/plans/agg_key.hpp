@@ -10,7 +10,7 @@ public:
   AggKey(vector<Value> group_bys)
     : group_bys_ (group_bys) {}
 
-  const Vec<Value>& group_bys() const {
+  const vector<Value>& group_bys() const {
     return group_bys_;
   }
 
@@ -31,7 +31,7 @@ public:
   AggValue(vector<Value> aggs)
     : aggs_ (aggs) {}
 
-  const Vec<Value>& aggs() {
+  const vector<Value>& aggs() {
     return aggs_;
   }
 
@@ -41,12 +41,12 @@ public:
 
 template <>
 struct std::hash<AggKey> {
-  std::size_t operator()(const AggKey& key) const {
-    size_t curr_hash = 0;
-    for (const auto &key : key.group_bys()) {
-      if (!key.is_null()) {
+  hash_t operator()(const AggKey& key) const {
+    hash_t curr_hash = 0;
+    for (const auto &value : key.group_bys()) {
+      if (!value.is_null()) {
         curr_hash = HashUtil::combine_hashes(curr_hash,
-                                             HashUtil::hash_value(key));
+                                             HashUtil::hash_value(value));
       }
     }
     return curr_hash;

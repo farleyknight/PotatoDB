@@ -209,6 +209,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitFunction_args(PotatoSQLParser::Function_argsContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitExpr(PotatoSQLParser::ExprContext *ctx) override {
     return visitChildren(ctx);
   }

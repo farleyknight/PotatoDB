@@ -1,6 +1,6 @@
 #pragma once
 
-enum class CompType {
+enum class CompareType {
   EQ  = 1, // equal
   NE  = 2, // not equal
   LT  = 3, // less than (<)

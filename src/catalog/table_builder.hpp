@@ -46,6 +46,7 @@ public:
 
   ptr<BasePlan> to_plan() {
     return make_unique<CreateTablePlan>(table_name_,
+                                        true,
                                         primary_key_,
                                         ColumnDefListExpr(column_defs_));
   }

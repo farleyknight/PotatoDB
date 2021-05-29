@@ -29,6 +29,8 @@ void TxnMgr::commit(Txn& txn) {
     auto &item = write_set.back();
 
     if (item.is_delete()) {
+      std::cout << "APPLY DELETE " << item.rid().to_string() << std::endl;
+
       auto &table_heap = table_mgr_.table_heap_for(item.table_oid());
       // Note that this also releases the lock when
       // holding the page latch.

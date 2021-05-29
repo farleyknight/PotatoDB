@@ -15,7 +15,6 @@
 #include "index/base_index.hpp"
 #include "index/index_meta.hpp"
 
-class SchemaRef;
 class SchemaManager;
 
 class Catalog {
@@ -47,6 +46,9 @@ public:
   TableSchema& table_schema_for(table_oid_t table_oid) {
     return table_schemas_.at(table_oid);
   }
+
+  bool
+  has_table_named(const table_name_t& table_name) const;
 
   bool
   table_has_column_named(const table_name_t& table_name,

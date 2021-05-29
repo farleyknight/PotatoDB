@@ -16,18 +16,24 @@ public:
       child_   (move(child)) {}
 
   void init() override {
-    // TODO
     child_->init();
   }
 
   bool has_next() override {
-    // TODO
-    return false;
+    return child_->has_next();
   }
 
   Tuple next() override {
-    // TODO
-    return Tuple();
+    auto tuple = child_->next();
+    auto rid   = tuple.rid();
+
+    table_heap().mark_delete(rid, exec_ctx_.txn());
+
+    return tuple;
+  }
+
+  TableHeap& table_heap() {
+    return exec_ctx_.table_mgr().table_heap_for(plan_->table_oid());
   }
 
   const string message_on_completion(size_t result_count) const override {

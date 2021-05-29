@@ -258,6 +258,7 @@ public:
     // If the tuple is deleted, abort the txn.
     if (is_deleted(tuple_size)) {
       std::cout << "This tuple is deleted! " << slot_id << std::endl;
+      // assert(false);
       return unique_ptr<Tuple>(nullptr);
     }
 

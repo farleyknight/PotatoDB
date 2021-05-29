@@ -40,24 +40,15 @@ TableHeap& UpdateExec::table_heap() {
 }
 
 Tuple UpdateExec::updated_tuple(const Tuple& old_tuple) {
-  auto update_attrs = plan_->update_attrs();
+  auto &update_values = plan_->update_values();
   uint32_t col_count = schema().column_count();
   vector<Value> values;
   for (uint32_t index = 0; index < col_count; index++) {
-    if (update_attrs.find(index) == update_attrs.end()) {
+    if (update_values.find(index) == update_values.end()) {
       values.emplace_back(old_tuple.value(schema(), index));
     } else {
-      UpdateInfo info = update_attrs.at(index);
-      Value val = old_tuple.value(schema(), index);
-      switch (info.type()) {
-      case UpdateType::ADD:
-        values.emplace_back(val.add(info.value()));
-        break;
-
-      case UpdateType::SET:
-        values.emplace_back(info.value());
-        break;
-      }
+      Value new_value = update_values.at(index)->eval(old_tuple, schema());
+      values.emplace_back(new_value);
     }
   }
 

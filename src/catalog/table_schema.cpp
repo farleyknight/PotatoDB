@@ -48,9 +48,9 @@ TableSchema::missing_columns(const QuerySchema& query_schema) const {
 
 deque<Value>
 TableSchema::defaults(const vector<TableColumn>& cols) {
-  //std::cout << "***********" << std::endl;
-  //std::cout << "primary key: " << primary_key_ << std::endl;
-  //std::cout << "***********" << std::endl;
+  // std::cout << "***********" << std::endl;
+  // std::cout << "primary key: " << primary_key_ << std::endl;
+  // std::cout << "***********" << std::endl;
 
   deque<Value> values;
   for (const auto& col : cols) {

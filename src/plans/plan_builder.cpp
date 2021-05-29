@@ -59,7 +59,7 @@ PlanBuilder& PlanBuilder::on(QueryColumn left,
   auto right_col = QueryJoin::make_right(right);
 
   auto comp = make_unique<QueryComp>(move(left_col),
-                                     CompType::EQ,
+                                     CompareType::EQ,
                                      move(right_col));
 
   join_clause_ = make_unique<QueryWhere>(move(comp));
@@ -127,17 +127,18 @@ PlanBuilder& PlanBuilder::set(QueryColumn column, Value value) {
 }
 
 ptr<BasePlan> PlanBuilder::build_update(ptr<BasePlan>&& scan_plan) {
-  MutMap<column_oid_t, UpdateInfo> update_attrs;
+  map<column_oid_t, ptr<BaseQuery>> update_values;
 
   for (index_t i = 0; i < update_columns_.size(); ++i) {
-    update_attrs.emplace(update_columns_[i].column_oid(),
-                         UpdateInfo(UpdateType::SET, update_values_[i]));
+    auto value = make_unique<QueryConst>(update_values_[i]);
+    update_values.emplace(update_columns_[i].column_oid(),
+                          move(value));
   }
 
   return make_unique<UpdatePlan>(update_table_schema(),
                                  update_table_->table_oid(),
                                  move(scan_plan),
-                                 move(update_attrs));
+                                 move(update_values));
 }
 
 ptr<BasePlan> PlanBuilder::build_insert(ptr<BasePlan>&& scan_plan) {
@@ -147,7 +148,8 @@ ptr<BasePlan> PlanBuilder::build_insert(ptr<BasePlan>&& scan_plan) {
 }
 
 ptr<BasePlan> PlanBuilder::build_delete(ptr<BasePlan>&& scan_plan) {
-  return make_unique<DeletePlan>(from_table_->table_oid(),
+  return make_unique<DeletePlan>(from_table_schema(),
+                                 from_table_->table_oid(),
                                  move(scan_plan));
 }
 

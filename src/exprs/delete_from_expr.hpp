@@ -1,12 +1,14 @@
 #pragma once
 
 #include "exprs/base_expr.hpp"
-#include "exprs/table_expr.hpp"
+#include "exprs/has_where_clause_expr.hpp"
 
-class DescribeTableExpr : public BaseExpr {
+class DeleteFromExpr : public BaseExpr,
+                       public HasWhereClauseExpr
+{
 public:
-  DescribeTableExpr()
-    : BaseExpr (ExprType::DESCRIBE_TABLE)
+  DeleteFromExpr()
+    : BaseExpr (ExprType::DELETE_FROM)
   {}
 
   void set_table(TableExpr table) {
@@ -18,9 +20,9 @@ public:
   }
 
   const string to_string() const {
-    return "DESCRIBE TABLE " + table_.to_string();
+    return "TODO";
   }
 
-protected:
+private:
   TableExpr table_;
 };

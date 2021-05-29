@@ -14,14 +14,15 @@
 const ptr<Type>& Type::instance(TypeId type_id) {
   static MutMap<TypeId, ptr<Type>> types_;
   if (types_.empty()) {
-    types_.emplace(TypeId::BOOLEAN,  make_unique<BooleanType>());
-    types_.emplace(TypeId::TINYINT,  make_unique<TinyIntType>());
-    types_.emplace(TypeId::SMALLINT, make_unique<SmallIntType>());
-    types_.emplace(TypeId::INTEGER,  make_unique<IntegerType>());
-    types_.emplace(TypeId::BIGINT,   make_unique<BigIntType>());
-    types_.emplace(TypeId::DECIMAL,  make_unique<DecimalType>());
-    types_.emplace(TypeId::VARCHAR,  make_unique<VarCharType>());
-    types_.emplace(TypeId::INVALID,  make_unique<InvalidType>());
+    types_.emplace(TypeId::BOOLEAN,    make_unique<BooleanType>());
+    types_.emplace(TypeId::TINYINT,    make_unique<TinyIntType>());
+    types_.emplace(TypeId::SMALLINT,   make_unique<SmallIntType>());
+    types_.emplace(TypeId::INTEGER,    make_unique<IntegerType>());
+    types_.emplace(TypeId::BIGINT,     make_unique<BigIntType>());
+    types_.emplace(TypeId::DECIMAL,    make_unique<DecimalType>());
+    types_.emplace(TypeId::VARCHAR,    make_unique<VarCharType>());
+    types_.emplace(TypeId::TIMESTAMP,  make_unique<TimestampType>());
+    types_.emplace(TypeId::INVALID,    make_unique<InvalidType>());
   }
 
   return types_.at(type_id);

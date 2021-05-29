@@ -18,13 +18,12 @@ public:
                     Buffer& buff,
                     Value val) const override
   {
-    //std::cout << "TypeId::INTEGER => Serializing value " <<
-    //  val.to_string() << " at offset " << offset << std::endl;
     buff.write_int32(offset, val.as<int32_t>());
   }
 
   Value cast_as(const Value& value,
-                TypeId type_id) const override {
+                TypeId type_id) const override
+  {
     switch (type_id) {
     case TypeId::INTEGER: {
       return value;

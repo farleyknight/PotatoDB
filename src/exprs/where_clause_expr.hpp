@@ -1,7 +1,6 @@
 #pragma once
 
 #include "exprs/base_expr.hpp"
-#include "query/comp_type.hpp"
 #include "query/query_where.hpp"
 
 class WhereClauseExpr : public BaseExpr {
@@ -12,24 +11,24 @@ public:
   {}
 
   WhereClauseExpr(ptr<BaseExpr>&& left_expr,
-                  LogicalType combine,
+                  LogicalType type,
                   ptr<BaseExpr>&& right_expr)
     : BaseExpr    (ExprType::WHERE),
-      combine_    (combine),
+      type_       (type),
       left_expr_  (move(left_expr)),
       right_expr_ (move(right_expr))
   {}
 
-  ptr<BaseExpr>& left_expr() {
+  const ptr<BaseExpr>& left_expr() const {
     return left_expr_;
   }
 
-  ptr<BaseExpr>& right_expr() {
+  const ptr<BaseExpr>& right_expr() const {
     return right_expr_;
   }
 
-  LogicalType logical_type() {
-    return combine_;
+  LogicalType logical_type() const {
+    return type_;
   }
 
   const string to_string() const {
@@ -37,6 +36,6 @@ public:
   }
 
 private:
-  LogicalType combine_ = LogicalType::NONE;
+  LogicalType type_ = LogicalType::NONE;
   ptr<BaseExpr> left_expr_, right_expr_;
 };

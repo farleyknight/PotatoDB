@@ -80,7 +80,7 @@ public:
   }
 
   template <class T,
-            std::enable_if_t<std::is_same<T, uint64_t>::value, bool> = false>
+            std::enable_if_t<std::is_same<T, timestamp_t>::value, bool> = false>
   static Value make(T data) {
     return Value(TypeId::TIMESTAMP, DataStoreT(data));
   }
@@ -89,6 +89,16 @@ public:
             std::enable_if_t<std::is_same<T, std::string>::value, bool> = false>
   static Value make(T data) {
     return Value(TypeId::VARCHAR, DataStoreT(data));
+  }
+
+  // TODO! Need to differentiate between COUNT(*) and *
+  // COUNT(*) has should have `type_id == TypeId::INTEGER`
+  static Value count_splat() {
+    return Value(TypeId::INTEGER, DataStoreT("COUNT(*)"));
+  }
+
+  static Value splat() {
+    return Value(TypeId::INVALID, DataStoreT("*"));
   }
 
   bool eq(const Value& other) const;

@@ -26,11 +26,11 @@ public:
     return primary_key_;
   }
 
-  const TableExpr& table() {
+  const TableExpr& table() const {
     return table_;
   }
 
-  const ColumnDefListExpr& column_defs() {
+  const ColumnDefListExpr& column_defs() const {
     return column_defs_;
   }
 
@@ -39,8 +39,17 @@ public:
       column_defs_.to_string() + ")";
   }
 
+  void set_if_not_exists(bool flag) {
+    if_not_exists_ = flag;
+  }
+
+  bool if_not_exists() const {
+    return if_not_exists_;
+  }
+
 protected:
   string primary_key_;
   TableExpr table_;
   ColumnDefListExpr column_defs_;
+  bool if_not_exists_ = false;
 };

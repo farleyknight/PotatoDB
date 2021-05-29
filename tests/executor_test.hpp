@@ -726,7 +726,7 @@ TEST_F(ExecTest, SimpleGroupByAggTest) {
   auto const100 = ConstExpr::make<int>(100);
 
   auto having_clause = CompExpr::make(move(having_countA),
-                                      CompType::GT,
+                                      ComparisonType::GT,
                                       move(const100));
 
   auto having = HavingExpr::make(TypeId::BOOLEAN,

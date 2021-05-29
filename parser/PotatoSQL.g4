@@ -127,7 +127,7 @@ create_virtual_table_stmt
 
 delete_stmt
  : with_clause? K_DELETE K_FROM qualified_table_name 
-   ( K_WHERE expr )?
+   ( K_WHERE where_clause )?
  ;
 
 delete_stmt_limited
@@ -247,7 +247,7 @@ update_stmt
                          | K_OR K_REPLACE
                          | K_OR K_FAIL
                          | K_OR K_IGNORE )? qualified_table_name
-   K_SET column_name '=' expr ( ',' column_name '=' expr )* ( K_WHERE expr )?
+   K_SET column_name '=' expr ( ',' column_name '=' expr )* ( K_WHERE where_clause )?
  ;
 
 update_stmt_limited
@@ -256,7 +256,7 @@ update_stmt_limited
                          | K_OR K_REPLACE
                          | K_OR K_FAIL
                          | K_OR K_IGNORE )? qualified_table_name
-   K_SET column_name '=' expr ( ',' column_name '=' expr )* ( K_WHERE expr )?
+   K_SET column_name '=' expr ( ',' column_name '=' expr )* ( K_WHERE where_clause )?
    ( ( K_ORDER K_BY ordering_term ( ',' ordering_term )* )?
      K_LIMIT expr ( ( K_OFFSET | ',' ) expr )?
    )?
@@ -323,6 +323,10 @@ conflict_clause
 
 // main expr
 
+function_args
+    : ( K_DISTINCT? expr ( ',' expr )* | '*' )?
+    ;
+
 expr
  : literal_value
  | BIND_PARAMETER
@@ -341,7 +345,7 @@ expr
                     | ( database_name '.' )? table_name )
  | expr K_AND expr
  | expr K_OR expr
- | function_name '(' ( K_DISTINCT? expr ( ',' expr )* | '*' )? ')'
+ | function_name '(' function_args ')'
  | '(' expr ')'
  | K_CAST '(' expr K_AS type_name ')'
  | expr K_COLLATE collation_name
@@ -468,15 +472,15 @@ signed_number
     ;
 
 literal_value
- : NUMERIC_LITERAL
- | STRING_LITERAL
- | BLOB_LITERAL
-
- | K_NULL
- | K_CURRENT_TIME
- | K_CURRENT_DATE
- | K_CURRENT_TIMESTAMP
- ;
+    : NUMERIC_LITERAL
+    | STRING_LITERAL
+    | K_TRUE
+    | K_FALSE
+    | K_NULL
+    | K_CURRENT_TIME
+    | K_CURRENT_DATE
+    | K_CURRENT_TIMESTAMP
+    ;
 
 unary_operator
  : '-'
@@ -548,6 +552,7 @@ keyword
  | K_EXISTS
  | K_EXPLAIN
  | K_FAIL
+ | K_FALSE
  | K_FOR
  | K_FOREIGN
  | K_FROM
@@ -612,6 +617,7 @@ keyword
  | K_TO
  | K_TRANSACTION
  | K_TRIGGER
+ | K_TRUE
  | K_UNION
  | K_UNIQUE
  | K_UPDATE
@@ -788,6 +794,7 @@ K_EXCLUSIVE : E X C L U S I V E;
 K_EXISTS : E X I S T S;
 K_EXPLAIN : E X P L A I N;
 K_FAIL : F A I L;
+K_FALSE : F A L S E;
 K_FOR : F O R;
 K_FOREIGN : F O R E I G N;
 K_FROM : F R O M;
@@ -854,6 +861,7 @@ K_THEN : T H E N;
 K_TO : T O;
 K_TRANSACTION : T R A N S A C T I O N;
 K_TRIGGER : T R I G G E R;
+K_TRUE : T R U E;
 K_UNION : U N I O N;
 K_UNIQUE : U N I Q U E;
 K_UPDATE : U P D A T E;

@@ -19,6 +19,20 @@ TEST(PotatoDBTest, CreateInsertSelectTest) {
   EXPECT_EQ(result.set()->value_at<int32_t>("colB", 0), 2);
 }
 
+TEST(PotatoDBTest, SelectEmptyTableTest) {
+  PotatoDB db;
+  db.reset_installation();
+
+  db.run_statement("CREATE TABLE foo_bar ( colA INTEGER, colB INTEGER )");
+
+  auto result = db.run_statement("SELECT * FROM foo_bar");
+
+  EXPECT_TRUE(result.set() != nullptr);
+  EXPECT_EQ(result.set()->size(), 0);
+
+  EXPECT_EQ(result.to_payload(), "");
+}
+
 TEST(PotatoDBTest, CreateInsertSelectStringTest) {
   PotatoDB db;
   db.reset_installation();
@@ -60,9 +74,9 @@ TEST(PotatoDBTest, AggegrationTest) {
 
   db.run_statement("CREATE TABLE foo_bar ( colA INTEGER )");
 
-  const int size = 10;
+  const index_t size = 10;
 
-  for (int i = 0; i < size; ++i) {
+  for (index_t i = 0; i < size; ++i) {
     db.run_statement("INSERT INTO foo_bar VALUES (" + std::to_string(i) + ")");
   }
 
@@ -107,6 +121,32 @@ TEST(PotatoDBTest, CreateTableTest) {
 
   EXPECT_EQ(result_set.size(), 1);
   EXPECT_EQ(result_set.value_at<string>("table_name", 0), "foo_bar");
+}
+
+TEST(PotatoDBTest, CreateTableTwiceTest) {
+  PotatoDB db;
+  db.reset_installation();
+
+  db.run_statement("CREATE TABLE foo_bar ( colA INTEGER, colB INTEGER )");
+
+  auto result = db.run_statement("CREATE TABLE foo_bar ( colA INTEGER, colB INTEGER )");
+
+  EXPECT_TRUE(result.set() == nullptr);
+  EXPECT_EQ(result.to_payload(), "Full-blown ERROR!"); // NOTE SHOULD FAIL
+}
+
+TEST(PotatoDBTest, CreateTableIfNotExistsTest) {
+  PotatoDB db;
+  db.reset_installation();
+
+  db.run_statement("CREATE TABLE foo_bar ( colA INTEGER, colB INTEGER )");
+
+  auto result = db.run_statement("CREATE TABLE IF NOT EXISTS foo_bar ( colA INTEGER, colB INTEGER )");
+
+  EXPECT_TRUE(result.set() == nullptr);
+  // NOTE SHOULD NOT FAIL,
+  // WARNING INSTEAD
+  EXPECT_EQ(result.to_payload(), "Just a WARNING");
 }
 
 TEST(PotatoDBTest, ShowTablesTest) {
