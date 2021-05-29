@@ -6,6 +6,7 @@
 
 #include "parser_test.hpp"
 #include "potatodb_test.hpp"
+#include "potatodb_todos_test.hpp"
 
 #include "schema_test.hpp"
 

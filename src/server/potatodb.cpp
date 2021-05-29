@@ -36,8 +36,8 @@ fs::path PotatoDB::table_file_for(const string& table_name) {
 }
 
 ptr<BasePlan> PotatoDB::sql_to_plan(const string& statement) const {
-  // std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
-  // std::cout << statement << std::endl;
+  std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
+  std::cout << statement << std::endl;
 
   // TODO: Rename as_exprs to as_stmts
   auto exprs = SQLParser::as_exprs(statement);
@@ -65,6 +65,7 @@ StatementResult PotatoDB::run_statement(const string& statement) {
     if (plan->is_query()) {
       auto result_set = exec_eng_.query(move(plan), txn, exec_ctx);
       txn_mgr_.commit(txn);
+      std::cout << "Returning result set " << std::endl;
       return StatementResult(move(result_set));
     } else if (plan->type() == PlanType::CREATE_TABLE) {
       // CREATE TABLE
@@ -76,6 +77,8 @@ StatementResult PotatoDB::run_statement(const string& statement) {
       return StatementResult(message);
     }
   } catch (std::exception& e) {
+    std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXX" << std::endl;
+    std::cout << "ERROR MESSAGE" << std::endl;
     std::cout << e.what() << std::endl;
     return StatementResult(e.what());
   }
@@ -152,6 +155,7 @@ void PotatoDB::start_server() {
 
       try {
         auto result = client->session().run_statement(statement);
+        std::cout << "Sending Payload " << result.to_payload() << std::endl;
         client->write(result.to_payload());
       } catch (std::exception &e) {
         // TODO: Send better error message
