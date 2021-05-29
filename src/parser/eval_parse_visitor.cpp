@@ -83,8 +83,8 @@ ValueExpr EvalParseVisitor::make_value_expr(ExprContext* expr_ctx) const {
   } else if (expr_ctx->function_name() != nullptr) {
     using namespace std::chrono;
     auto now = system_clock::now();
-    timestamp_t secs = time_point_cast<seconds>(now).time_since_epoch().count();
-    return ValueExpr(secs);
+    timestamp_t ms = time_point_cast<milliseconds>(now).time_since_epoch().count();
+    return ValueExpr(ms);
   } else {
     throw Exception("No known type for expression! " + expr_ctx->getText());
   }

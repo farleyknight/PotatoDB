@@ -37,13 +37,13 @@ public:
       timestamp_data_ (timestamp)
   {}
 
-  virtual const string to_string() const override {
-    if (value_type_ == ValueType::STRING) {
-      return string_data_;
-    } else if (value_type_ == ValueType::TIMESTAMP) {
-      return std::to_string(timestamp_data_);
-    } else {
-      return string_data_; // TODO: Specialize more here
+  const string to_string() const override {
+    // TODO: Use the ValueType enum to properly convert this into a value
+    switch (value_type_) {
+    case ValueType::STRING:    return string_data_;
+    case ValueType::TIMESTAMP: return std::to_string(timestamp_data_);
+    case ValueType::BOOLEAN:   return std::to_string(flag_);
+    case ValueType::INTEGER:   return std::to_string(number_);
     }
   }
 

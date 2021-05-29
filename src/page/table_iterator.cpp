@@ -24,23 +24,28 @@ TableIterator::TableIterator(const TableIterator& other)
   }
 }
 
+// TODO: This whole thing is begging for a good refactor.
 TableIterator& TableIterator::operator++() {
   assert(tuple_);
 
   auto &buff_mgr = table_heap_.buff_mgr();
-  // NOTE: For some reason, the algorithm is stuck at only looking at
-  // one page.. Page 9 in this case.
   auto page_id   = tuple_->page_id();
   auto file_id   = page_id.file_id();
   SlottedTablePage curr_page(buff_mgr.fetch_page(page_id));
 
   auto next_tuple_rid = curr_page.next_tuple_rid(tuple_->rid());
 
+  if (next_tuple_rid.has_value()) {
+    auto rid = next_tuple_rid.value();
+    tuple_ = table_heap_.find_tuple(rid, txn_);
+    while (tuple_ == nullptr) {
+      next_tuple_rid = curr_page.next_tuple_rid(next_tuple_rid.value());
+      rid = next_tuple_rid.value();
+      tuple_ = table_heap_.find_tuple(rid, txn_);
+    }
+  }
+
   if (!next_tuple_rid.has_value()) {
-    // NOTE: WHy is the next_page_id == INVALID_PAGE_ID?
-    // If you find yourself asking this, then there might
-    // be a better condition to check for than == INVALID_PAGE_ID.
-    // Might have to find a way to surface Buffer Pool issues here?
     while (curr_page.next_page_id() != PageId::STOP_ITERATING(file_id)) {
       page_id = curr_page.next_page_id();
       auto next_page = SlottedTablePage(buff_mgr.fetch_page(page_id));
@@ -61,7 +66,7 @@ TableIterator& TableIterator::operator++() {
     return *this;
   }
 
-  auto &rid = next_tuple_rid.value();
+  auto rid = next_tuple_rid.value();
 
   if (*this != table_heap_.end(txn_)) {
     tuple_ = table_heap_.find_tuple(rid, txn_);

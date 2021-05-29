@@ -166,10 +166,12 @@ TEST(PotatoDBTest, UpdateWhereTest) {
 
   auto result = db.run_statement("SELECT * FROM todos");
   EXPECT_TRUE(result.set() != nullptr);
+
   EXPECT_EQ(result.set()->size(), size);
   for (index_t i = 0; i < size; ++i) {
+    auto id   = result.set()->value_at<int32_t>("id", i);
     auto done = result.set()->value_at<bool>("done", i);
-    if (i == 3) {
+    if (id == 3) {
       EXPECT_EQ(done, true);
     } else {
       EXPECT_EQ(done, false);
@@ -187,10 +189,11 @@ TEST(PotatoDBTest, DeleteWhereTest) {
 
   auto result = db.run_statement("SELECT * FROM todos");
   EXPECT_TRUE(result.set() != nullptr);
+
   EXPECT_EQ(result.set()->size(), size-1);
-  int expected_id = 0;
+  int expected_id = 1;
   for (index_t i = 0; i < size-1; ++i) {
-    if (i == 3) {
+    if (expected_id == 3) {
       ++expected_id;
     }
 
@@ -199,8 +202,6 @@ TEST(PotatoDBTest, DeleteWhereTest) {
     ++expected_id;
   }
 }
-
-
 
 TEST(PotatoDBTest, SystemCatalogTest) {
   PotatoDB db;

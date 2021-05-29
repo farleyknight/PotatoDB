@@ -87,7 +87,6 @@ public:
 
     auto schema = catalog.query_schema_for(table_name);
 
-
     auto scan_plan = make_unique<SeqScanPlan>(schema,
                                               table_oid,
                                               move(maybe_pred));
