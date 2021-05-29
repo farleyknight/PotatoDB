@@ -11,7 +11,7 @@ class TodosTable
   end
 
   def create_table
-    table_schema = "CREATE TABLE IF NOT EXISTS todos ( id INTEGER PRIMARY KEY AUTOINCREMENT, title VARCHAR(32), done BOOLEAN, created_at TIMESTAMP, updated_at TIMESTAMP )"
+    table_schema = "CREATE TABLE IF NOT EXISTS todos ( id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(32), done BOOLEAN, created_at TIMESTAMP, updated_at TIMESTAMP )"
 
     puts "SQL is: #{table_schema}"
     response = @client.request(table_schema)
@@ -29,13 +29,12 @@ class TodosTable
     puts "Response is #{response}"
 
     if response == "No entries to send"
-      return "No todos yet! Go ahead and make one!"
+      "No todos yet! Go ahead and make one!"
     else
       # TODO!
       # Parse `response` here
-      return response
+      response
     end
-
   end
 
   def insert_todo(name)
@@ -85,7 +84,20 @@ $todos = TodosTable.new(client)
 $todos.create_table
 
 get '/' do
-  # NEXT: Create form for making a new todo
-  $todos.list_of_todos
+  erb ""
 end
 
+post '/' do
+  $todos.insert_todo(params[:name])
+  erb "<div>Adding new TODO <%= escape_html(params[:name]) %></div>"
+end
+
+__END__
+@@ layout
+<html>
+  <%= yield %>
+  <form method='POST'>
+    <input name='name'>
+  </form>
+  <%= $todos.list_of_todos %>
+</html>
