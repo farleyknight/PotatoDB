@@ -1,4 +1,3 @@
-
 require './potatodb_client'
 
 puts PotatoDB.version

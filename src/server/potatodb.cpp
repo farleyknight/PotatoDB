@@ -67,7 +67,10 @@ StatementResult PotatoDB::run_statement(const string& statement) {
       txn_mgr_.commit(txn);
       return StatementResult(move(result_set));
     } else if (plan->type() == PlanType::CREATE_TABLE) {
-      return run_create_table(move(plan), txn, exec_ctx);
+      // CREATE TABLE
+      auto create_table_plan = dynamic_cast<CreateTablePlan*>(plan.get());
+      auto message = exec_eng_.execute(move(plan), txn, exec_ctx);
+      return run_create_table(create_table_plan, message, txn, exec_ctx);
     } else {
       auto message = exec_eng_.execute(move(plan), txn, exec_ctx);
       return StatementResult(message);
@@ -80,12 +83,11 @@ StatementResult PotatoDB::run_statement(const string& statement) {
 
 
 // TODO: Move this logic into the SystemCatalog class, likely as a static method
-StatementResult PotatoDB::run_create_table(ptr<BasePlan>&& plan,
+StatementResult PotatoDB::run_create_table(CreateTablePlan* create_table_plan,
+                                           const string& message,
                                            Txn& txn,
                                            ExecCtx& exec_ctx)
 {
-  auto create_table_plan = dynamic_cast<CreateTablePlan*>(plan.get());
-
   // TODO:
   // 1) Run the actual CREATE TABLE plan
   // 2) Run additional SQL for inserting the table into the `system_catalog`
@@ -94,9 +96,6 @@ StatementResult PotatoDB::run_create_table(ptr<BasePlan>&& plan,
 
   auto table_name  = create_table_plan->table_name();
   auto column_list = create_table_plan->column_list().list();
-
-  // CREATE TABLE
-  auto message = exec_eng_.execute(move(plan), txn, exec_ctx);
 
   // INSERT INTO system_catalog VALUES (table_name...)
   auto insert_table_sql

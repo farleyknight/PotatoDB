@@ -51,8 +51,10 @@ public:
   static ptr<BasePlan> from_expr(CreateTableExpr* expr) {
     auto table_name = expr->table().name();
     auto column_def_list = expr->column_defs();
+    auto if_not_exists = expr->if_not_exists();
 
     return make_unique<CreateTablePlan>(table_name,
+                                        if_not_exists,
                                         expr->primary_key(),
                                         column_def_list);
   }
@@ -60,7 +62,7 @@ public:
   static ptr<BasePlan> from_expr(const Catalog& catalog, UpdateExpr* expr) {
     auto table_name = expr->table().name();
     auto table_oid = catalog.table_oid_for(table_name);
-    auto maybe_pred = to_query_where(catalog, table_name, expr->pred());
+    auto maybe_pred = to_query_where(catalog, table_name, expr->pred().get());
 
     auto schema = catalog.query_schema_for(table_name);
 
@@ -83,7 +85,7 @@ public:
   static ptr<BasePlan> from_expr(const Catalog& catalog, DeleteFromExpr* expr) {
     auto table_name = expr->table().name();
     auto table_oid = catalog.table_oid_for(table_name);
-    auto maybe_pred = to_query_where(catalog, table_name, expr->pred());
+    auto maybe_pred = to_query_where(catalog, table_name, expr->pred().get());
 
     auto schema = catalog.query_schema_for(table_name);
 
@@ -105,7 +107,7 @@ public:
     auto schema = catalog.query_schema_for(table_name,
                                            expr->column_list());
 
-    auto maybe_pred = to_query_where(catalog, table_name, expr->pred());
+    auto maybe_pred = to_query_where(catalog, table_name, expr->pred().get());
 
     return make_unique<SeqScanPlan>(schema,
                                     table_oid,
@@ -223,24 +225,23 @@ public:
                                     comp_expr->compare_type(),
                                     move(right_node));
     }
+    case ExprType::WHERE: {
+      auto where_expr = dynamic_cast<WhereClauseExpr*>(expr.get());
+      return to_query_where(catalog, name, where_expr);
+    }
     default:
       throw Exception("this part not implemented yet :/ Expr to_string = " + expr->to_string());
     }
   }
 
-  // TODO: Fix this!
-  // Needs to return QueryWhere, which can take either:
-  // Single comparison:
-  // > WHERE a = 5
-  // Or takes multiple comparisons, connected by logical combinators
-  // > WHERE a = 5 AND foo = "bar"
   static ptr<QueryWhere> to_query_where(const Catalog& catalog,
                                         const table_name_t name,
-                                        ptr<WhereClauseExpr>& clause)
+                                        WhereClauseExpr* clause)
   {
     if (clause == nullptr) {
       return ptr<QueryWhere>(nullptr);
     }
+
     auto left_query = to_query_node(catalog, name, clause->left_expr());
     auto right_query = to_query_node(catalog, name, clause->right_expr());
 

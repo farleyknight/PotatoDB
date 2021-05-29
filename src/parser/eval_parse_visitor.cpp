@@ -56,6 +56,12 @@ Any EvalParseVisitor::visitCreate_table_stmt(CreateTableStmtContext *ctx) {
     }
   }
 
+  if (ctx->K_EXISTS()) {
+    create_table.set_if_not_exists(true);
+  } else {
+    create_table.set_if_not_exists(false);
+  }
+
   create_table.set_column_defs(def_list);
 
   exprs_.emplace_back(make_unique<CreateTableExpr>(create_table));

@@ -228,6 +228,32 @@ TEST(PotatoDBTest, CreateTableTest) {
   EXPECT_EQ(result_set.value_at<string>("table_name", 0), "foo_bar");
 }
 
+TEST(PotatoDBTest, CreateTableTwiceTest) {
+  PotatoDB db;
+  db.reset_installation();
+
+  db.run_statement("CREATE TABLE foo_bar ( colA INTEGER, colB INTEGER )");
+
+  auto result = db.run_statement("CREATE TABLE foo_bar ( colA INTEGER, colB INTEGER )");
+
+  EXPECT_TRUE(result.set() == nullptr);
+  EXPECT_EQ(result.to_payload(), ""); // NOTE SHOULD FAIL
+}
+
+
+TEST(PotatoDBTest, CreateTableIfNotExistsTest) {
+  PotatoDB db;
+  db.reset_installation();
+
+  db.run_statement("CREATE TABLE foo_bar ( colA INTEGER, colB INTEGER )");
+
+  auto result = db.run_statement("CREATE TABLE IF NOT EXISTS foo_bar ( colA INTEGER, colB INTEGER )");
+
+  EXPECT_TRUE(result.set() == nullptr);
+  EXPECT_EQ(result.to_payload(), ""); // NOTE SHOULD NOT FAIL,
+                                      // WARNING INSTEAD
+}
+
 TEST(PotatoDBTest, ShowTablesTest) {
   PotatoDB db;
   db.reset_installation();

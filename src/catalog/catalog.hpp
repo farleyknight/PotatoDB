@@ -48,6 +48,9 @@ public:
   }
 
   bool
+  has_table_named(const table_name_t& table_name) const;
+
+  bool
   table_has_column_named(const table_name_t& table_name,
                          const column_name_t& column_name) const;
 

@@ -48,7 +48,8 @@ public:
   }
 
   StatementResult run_statement(const string& statement);
-  StatementResult run_create_table(ptr<BasePlan>&& plan,
+  StatementResult run_create_table(CreateTablePlan* create_table_plan,
+                                   const string& message,
                                    Txn& txn,
                                    ExecCtx& exec_ctx);
 
