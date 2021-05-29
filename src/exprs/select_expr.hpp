@@ -30,15 +30,15 @@ public:
     agg_list_ = aggs;
   }
 
-  const TableListExpr& table_list() {
+  const TableListExpr& table_list() const {
     return table_list_;
   }
 
-  const AggListExpr& agg_list() {
+  const AggListExpr& agg_list() const {
     return agg_list_;
   }
 
-  const ColumnListExpr& column_list() {
+  const ColumnListExpr& column_list() const {
     return column_list_;
   }
 

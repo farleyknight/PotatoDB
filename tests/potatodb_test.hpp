@@ -237,9 +237,8 @@ TEST(PotatoDBTest, CreateTableTwiceTest) {
   auto result = db.run_statement("CREATE TABLE foo_bar ( colA INTEGER, colB INTEGER )");
 
   EXPECT_TRUE(result.set() == nullptr);
-  EXPECT_EQ(result.to_payload(), ""); // NOTE SHOULD FAIL
+  EXPECT_EQ(result.to_payload(), "Full-blown ERROR!"); // NOTE SHOULD FAIL
 }
-
 
 TEST(PotatoDBTest, CreateTableIfNotExistsTest) {
   PotatoDB db;
@@ -250,8 +249,9 @@ TEST(PotatoDBTest, CreateTableIfNotExistsTest) {
   auto result = db.run_statement("CREATE TABLE IF NOT EXISTS foo_bar ( colA INTEGER, colB INTEGER )");
 
   EXPECT_TRUE(result.set() == nullptr);
-  EXPECT_EQ(result.to_payload(), ""); // NOTE SHOULD NOT FAIL,
-                                      // WARNING INSTEAD
+  // NOTE SHOULD NOT FAIL,
+  // WARNING INSTEAD
+  EXPECT_EQ(result.to_payload(), "Just a WARNING");
 }
 
 TEST(PotatoDBTest, ShowTablesTest) {

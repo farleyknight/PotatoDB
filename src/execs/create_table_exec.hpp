@@ -9,8 +9,17 @@ public:
   {}
 
   void init() override {
+    assert(plan_ != nullptr);
+
     auto table_name = plan_->table_name();
     auto primary_key = plan_->primary_key();
+
+    assert(table_name.size() > 0);
+
+    // TODO: Do we need to put any latches around the catalog
+    // while we are adding a new table?
+
+    // std::cout << "CREATING TABLE with NAME = " << table_name << std::endl;
 
     if (exec_ctx_.catalog().has_table_named(table_name)) {
       if (plan_->if_not_exists()) {
@@ -20,8 +29,6 @@ public:
       }
     }
 
-    // TODO: Do we need to put any latches around the catalog
-    // while we are adding a new table?
 
     auto table_oid = exec_ctx_.catalog().
       create_table(exec_ctx_.txn(),

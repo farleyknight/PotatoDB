@@ -8,7 +8,7 @@ public:
     where_clause_ = move(where_clause);
   }
 
-  ptr<WhereClauseExpr>& pred() {
+  const ptr<WhereClauseExpr>& pred() const {
     return where_clause_;
   }
 

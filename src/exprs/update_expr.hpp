@@ -25,7 +25,7 @@ public:
     update_values_[name] = move(value);
   }
 
-  const UpdateValues& update_values() {
+  const UpdateValues& update_values() const {
     return update_values_;
   }
 

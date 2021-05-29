@@ -19,15 +19,15 @@ public:
       right_expr_ (move(right_expr))
   {}
 
-  ptr<BaseExpr>& left_expr() {
+  const ptr<BaseExpr>& left_expr() const {
     return left_expr_;
   }
 
-  ptr<BaseExpr>& right_expr() {
+  const ptr<BaseExpr>& right_expr() const {
     return right_expr_;
   }
 
-  LogicalType logical_type() {
+  LogicalType logical_type() const {
     return type_;
   }
 

@@ -13,56 +13,58 @@ public:
     switch (expr->expr_type()) {
     case ExprType::CREATE_TABLE: {
       auto create_table_expr = dynamic_cast<CreateTableExpr*>(expr.get());
-      return from_expr(create_table_expr);
+      return from_expr(*create_table_expr);
     }
     case ExprType::SELECT: {
       auto select_expr = dynamic_cast<SelectExpr*>(expr.get());
-      return from_expr(catalog_, select_expr);
+      return from_expr(catalog_, *select_expr);
     }
     case ExprType::COMPOUND_SELECT: {
       auto compound_expr = dynamic_cast<CompoundSelectExpr*>(expr.get());
-      return from_expr(catalog_, compound_expr);
+      return from_expr(catalog_, *compound_expr);
     }
     case ExprType::INSERT: {
       auto insert_expr = dynamic_cast<InsertExpr*>(expr.get());
-      return from_expr(catalog_, insert_expr);
+      return from_expr(catalog_, *insert_expr);
     }
     case ExprType::SHOW_TABLES: {
       auto show_tables_expr = dynamic_cast<ShowTablesExpr*>(expr.get());
-      return from_expr(catalog_, show_tables_expr);
+      return from_expr(catalog_, *show_tables_expr);
     }
     case ExprType::DESCRIBE_TABLE: {
       auto describe_table_expr = dynamic_cast<DescribeTableExpr*>(expr.get());
-      return from_expr(catalog_, describe_table_expr);
+      return from_expr(catalog_, *describe_table_expr);
     }
     case ExprType::UPDATE: {
       auto update_expr = dynamic_cast<UpdateExpr*>(expr.get());
-      return from_expr(catalog_, update_expr);
+      return from_expr(catalog_, *update_expr);
     }
     case ExprType::DELETE_FROM: {
       auto delete_from_expr = dynamic_cast<DeleteFromExpr*>(expr.get());
-      return from_expr(catalog_, delete_from_expr);
+      return from_expr(catalog_, *delete_from_expr);
     }
     default:
       throw NotImplementedException("Not finished :(");
     }
   }
 
-  static ptr<BasePlan> from_expr(CreateTableExpr* expr) {
-    auto table_name = expr->table().name();
-    auto column_def_list = expr->column_defs();
-    auto if_not_exists = expr->if_not_exists();
+  static ptr<BasePlan> from_expr(const CreateTableExpr& expr) {
+    auto table_name = expr.table().name();
+    auto column_def_list = expr.column_defs();
+    auto if_not_exists = expr.if_not_exists();
+
+    // std::cout << "PLAN FACTORY CREATING TABLE " << table_name << std::endl;
 
     return make_unique<CreateTablePlan>(table_name,
                                         if_not_exists,
-                                        expr->primary_key(),
+                                        expr.primary_key(),
                                         column_def_list);
   }
 
-  static ptr<BasePlan> from_expr(const Catalog& catalog, UpdateExpr* expr) {
-    auto table_name = expr->table().name();
+  static ptr<BasePlan> from_expr(const Catalog& catalog, const UpdateExpr& expr) {
+    auto table_name = expr.table().name();
     auto table_oid = catalog.table_oid_for(table_name);
-    auto maybe_pred = to_query_where(catalog, table_name, expr->pred().get());
+    auto maybe_pred = to_query_where(catalog, table_name, expr.pred().get());
 
     auto schema = catalog.query_schema_for(table_name);
 
@@ -71,7 +73,7 @@ public:
                                               move(maybe_pred));
 
     map<column_oid_t, ptr<BaseQuery>> update_values;
-    for (const auto &[name, expr] : expr->update_values()) {
+    for (const auto &[name, expr] : expr.update_values()) {
       auto oid = catalog.query_column_for(table_name, name).column_oid();
       update_values[oid] = to_query_node(catalog, table_name, expr);
     }
@@ -82,10 +84,10 @@ public:
                                    move(update_values));
   }
 
-  static ptr<BasePlan> from_expr(const Catalog& catalog, DeleteFromExpr* expr) {
-    auto table_name = expr->table().name();
+  static ptr<BasePlan> from_expr(const Catalog& catalog, const DeleteFromExpr& expr) {
+    auto table_name = expr.table().name();
     auto table_oid = catalog.table_oid_for(table_name);
-    auto maybe_pred = to_query_where(catalog, table_name, expr->pred().get());
+    auto maybe_pred = to_query_where(catalog, table_name, expr.pred().get());
 
     auto schema = catalog.query_schema_for(table_name);
 
@@ -98,16 +100,16 @@ public:
                                    move(scan_plan));
   }
 
-  static ptr<BasePlan> make_seq_scan_plan(const Catalog& catalog, SelectExpr* expr) {
+  static ptr<BasePlan> make_seq_scan_plan(const Catalog& catalog, const SelectExpr& expr) {
     // TODO: A SELECT statement can have multiple tables!
     // Need to support this at some point.
-    auto table_name = expr->table_list().front().name();
+    auto table_name = expr.table_list().front().name();
     auto table_oid = catalog.table_oid_for(table_name);
 
     auto schema = catalog.query_schema_for(table_name,
-                                           expr->column_list());
+                                           expr.column_list());
 
-    auto maybe_pred = to_query_where(catalog, table_name, expr->pred().get());
+    auto maybe_pred = to_query_where(catalog, table_name, expr.pred().get());
 
     return make_unique<SeqScanPlan>(schema,
                                     table_oid,
@@ -115,14 +117,14 @@ public:
   }
 
 
-  static ptr<BasePlan> from_expr(const Catalog& catalog, CompoundSelectExpr* expr) {
+  static ptr<BasePlan> from_expr(const Catalog& catalog, const CompoundSelectExpr& expr) {
     // TODO LATER
     // * Add support for UNION, INTERSECTION
     // * Use right_select appropriately
 
-    auto left_select_ptr = expr->left_select().get();
-    auto left_scan_plan = make_seq_scan_plan(catalog, left_select_ptr);
-    auto order_by = expr->order_by();
+    auto left_select_ptr = expr.left_select().get();
+    auto left_scan_plan = make_seq_scan_plan(catalog, *left_select_ptr);
+    auto order_by = expr.order_by();
 
     auto schema = dynamic_cast<SchemaPlan*>(left_scan_plan.get())->schema();
     return make_unique<SortPlan>(schema,
@@ -130,19 +132,19 @@ public:
                                  move(left_scan_plan));
   }
 
-  static ptr<BasePlan> from_expr(const Catalog& catalog, SelectExpr* expr) {
-    if (expr->agg_list().list().size() > 0) {
+  static ptr<BasePlan> from_expr(const Catalog& catalog, const SelectExpr& expr) {
+    if (expr.agg_list().list().size() > 0) {
       return make_agg_plan(catalog, expr);
-    } else if (expr->order_by().is_valid()) {
+    } else if (expr.order_by().is_valid()) {
       return make_sort_plan(catalog, expr);
     } else {
       return make_seq_scan_plan(catalog, expr);
     }
   }
 
-  static ptr<BasePlan> make_sort_plan(const Catalog& catalog, SelectExpr* expr) {
+  static ptr<BasePlan> make_sort_plan(const Catalog& catalog, const SelectExpr& expr) {
     auto scan_plan = make_seq_scan_plan(catalog, expr);
-    auto order_by = expr->order_by();
+    auto order_by = expr.order_by();
 
     auto schema = dynamic_cast<SchemaPlan*>(scan_plan.get())->schema();
     return make_unique<SortPlan>(schema,
@@ -150,14 +152,14 @@ public:
                                  move(scan_plan));
   }
 
-  static ptr<BasePlan> make_agg_plan(const Catalog& catalog, SelectExpr* expr) {
+  static ptr<BasePlan> make_agg_plan(const Catalog& catalog, const SelectExpr& expr) {
     // TODO!
     // AggExpr will have ColumnExpr inside it
     // Convert AggExpr to QueryAgg and ColumnExpr to QueryColumn
     // Check the function_name to determine which AggType it is.
-    auto table_name = expr->table_list().front().name();
+    auto table_name = expr.table_list().front().name();
     vector<QueryAgg> agg_nodes;
-    for (const auto& agg : expr->agg_list().list()) {
+    for (const auto& agg : expr.agg_list().list()) {
       auto col_name = agg.column_expr().name();
 
       // TODO! We don't always need to be pulling the QueryColumn!
@@ -236,7 +238,7 @@ public:
 
   static ptr<QueryWhere> to_query_where(const Catalog& catalog,
                                         const table_name_t name,
-                                        WhereClauseExpr* clause)
+                                        const WhereClauseExpr* clause)
   {
     if (clause == nullptr) {
       return ptr<QueryWhere>(nullptr);
@@ -250,7 +252,9 @@ public:
                                    move(right_query));
   }
 
-  static ptr<BasePlan> from_expr(const Catalog& catalog, UNUSED ShowTablesExpr* expr) {
+  static ptr<BasePlan> from_expr(const Catalog& catalog,
+                                 UNUSED const ShowTablesExpr& expr)
+  {
     auto table_name = "system_catalog";
     auto table_oid = catalog.table_oid_for(table_name);
     auto schema = catalog.query_schema_for(table_name);
@@ -271,7 +275,7 @@ public:
                                     move(table_pred));
   }
 
-  static ptr<BasePlan> from_expr(const Catalog& catalog, DescribeTableExpr* expr) {
+  static ptr<BasePlan> from_expr(const Catalog& catalog, const DescribeTableExpr& expr) {
     auto system_table_name = "system_catalog";
     auto table_oid = catalog.table_oid_for(system_table_name);
     auto schema = catalog.query_schema_for(system_table_name);
@@ -285,7 +289,7 @@ public:
                                               CompareType::EQ,
                                               move(column_const));
 
-    auto table_value = Value::make(expr->table().name());
+    auto table_value = Value::make(expr.table().name());
     auto table_name = make_unique<QueryConst>(table_value);
 
     auto name_col = make_unique<QueryColumn>(schema["table_name"]);
@@ -303,18 +307,18 @@ public:
                                     move(table_pred));
   }
 
-  static ptr<BasePlan> from_expr(const Catalog& catalog, InsertExpr* expr) {
-    auto table_name = expr->table_name();
+  static ptr<BasePlan> from_expr(const Catalog& catalog, const InsertExpr& expr) {
+    auto table_name = expr.table_name();
     auto table_oid = catalog.table_oid_for(table_name);
 
     auto schema = catalog.query_schema_for(table_name,
-                                           expr->column_list());
+                                           expr.column_list());
     assert(schema.column_count() > 0);
     // TODO: For now, we only support INSERT with it's own raw tuples.
     // However, we need to support SQL of the form:
     // > INSERT INTO ... (SELECT ...)
 
-    auto raw_tuples = RawTuples(expr->tuple_list());
+    auto raw_tuples = RawTuples(expr.tuple_list());
     auto child_plan = make_unique<RawTuplesPlan>(schema, raw_tuples);
 
     return make_unique<InsertPlan>(schema,

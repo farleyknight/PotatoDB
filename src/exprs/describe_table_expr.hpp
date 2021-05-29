@@ -13,7 +13,7 @@ public:
     table_ = table;
   }
 
-  const TableExpr& table() {
+  const TableExpr& table() const {
     return table_;
   }
 

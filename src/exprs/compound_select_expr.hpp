@@ -28,12 +28,12 @@ public:
     right_ = move(right);
   }
 
-  const ptr<SelectExpr>& left_select() {
-    return move(left_);
+  const ptr<SelectExpr>& left_select() const {
+    return left_;
   }
 
-  const ptr<SelectExpr>& right_select() {
-    return move(left_);
+  const ptr<SelectExpr>& right_select() const {
+    return right_;
   }
 
   const string to_string() const {

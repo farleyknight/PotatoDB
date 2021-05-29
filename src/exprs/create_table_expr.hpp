@@ -26,11 +26,11 @@ public:
     return primary_key_;
   }
 
-  const TableExpr& table() {
+  const TableExpr& table() const {
     return table_;
   }
 
-  const ColumnDefListExpr& column_defs() {
+  const ColumnDefListExpr& column_defs() const {
     return column_defs_;
   }
 

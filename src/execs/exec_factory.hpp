@@ -30,11 +30,17 @@
 
 class ExecFactory {
 public:
-
   template <class T>
-  static ptr<T> cast(ptr<BasePlan>& plan) {
+  static ptr<T> cast(ptr<BasePlan>&& plan) {
     assert(plan != nullptr);
-    return unique_ptr<T>(static_cast<T*>(plan.release()));
+
+    auto tmp = dynamic_cast<T*>(plan.get());
+    unique_ptr<T> derived;
+
+    plan.release();
+    derived.reset(tmp);
+
+    return derived;
   }
 
   static ptr<BaseExec> create(ExecCtx& exec_ctx,
@@ -42,24 +48,24 @@ public:
   {
     switch (plan->type()) {
     case PlanType::TABLE_SCAN: {
-      auto scan_plan = cast<SeqScanPlan>(plan);
+      auto scan_plan = cast<SeqScanPlan>(move(plan));
       return make_unique<SeqScanExec>(exec_ctx,
                                       move(scan_plan));
     }
 
     case PlanType::CREATE_TABLE: {
-      auto create_plan = cast<CreateTablePlan>(plan);
+      auto create_plan = cast<CreateTablePlan>(move(plan));
       return make_unique<CreateTableExec>(exec_ctx, move(create_plan));
     }
 
     case PlanType::RAW_TUPLES: {
-      auto tuples_plan = cast<RawTuplesPlan>(plan);
+      auto tuples_plan = cast<RawTuplesPlan>(move(plan));
       return make_unique<RawTuplesExec>(exec_ctx,
                                         move(tuples_plan));
     }
 
     case PlanType::INSERT: {
-      auto insert_plan = cast<InsertPlan>(plan);
+      auto insert_plan = cast<InsertPlan>(move(plan));
       auto child_exec = ExecFactory::create(exec_ctx,
                                             move(insert_plan->child()));
       return make_unique<InsertExec>(exec_ctx,
@@ -68,7 +74,7 @@ public:
     }
 
     case PlanType::UPDATE: {
-      auto update_plan = cast<UpdatePlan>(plan);
+      auto update_plan = cast<UpdatePlan>(move(plan));
       auto child_exec = ExecFactory::create(exec_ctx,
                                             move(update_plan->child()));
       return make_unique<UpdateExec>(exec_ctx,
@@ -77,7 +83,7 @@ public:
     }
 
     case PlanType::DELETE: {
-      auto delete_plan = cast<DeletePlan>(plan);
+      auto delete_plan = cast<DeletePlan>(move(plan));
       auto child_exec = ExecFactory::create(exec_ctx,
                                             move(delete_plan->child()));
       return make_unique<DeleteExec>(exec_ctx,
@@ -86,7 +92,7 @@ public:
     }
 
     case PlanType::LIMIT: {
-      auto limit_plan = cast<LimitPlan>(plan);
+      auto limit_plan = cast<LimitPlan>(move(plan));
       auto child_exec = ExecFactory::create(exec_ctx,
                                             move(limit_plan->child()));
       return make_unique<LimitExec>(exec_ctx,
@@ -94,7 +100,7 @@ public:
                                     move(child_exec));
     }
     case PlanType::SORT: {
-      auto sort_plan = cast<SortPlan>(plan);
+      auto sort_plan = cast<SortPlan>(move(plan));
       auto child_exec = ExecFactory::create(exec_ctx,
                                             move(sort_plan->child()));
       return make_unique<SortExec>(exec_ctx,
@@ -102,7 +108,7 @@ public:
                                    move(child_exec));
     }
     case PlanType::AGG: {
-      auto agg_plan = cast<AggPlan>(plan);
+      auto agg_plan = cast<AggPlan>(move(plan));
       auto child_exec = ExecFactory::create(exec_ctx,
                                             move(agg_plan->child()));
       return make_unique<AggExec>(exec_ctx,
@@ -111,7 +117,7 @@ public:
     }
 
     case PlanType::LOOP_JOIN: {
-      auto nlj_plan = cast<NestedLoopJoinPlan>(plan);
+      auto nlj_plan = cast<NestedLoopJoinPlan>(move(plan));
 
       auto left = ExecFactory::create(exec_ctx,
                                       move(nlj_plan->left_plan()));
