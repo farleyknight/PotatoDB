@@ -40,6 +40,15 @@ void TxnMgr::commit(Txn& txn) {
   }
   write_set.clear();
 
+  if (ENABLE_LOGGING) {
+    //, you need to make sure your log records are permanently stored on disk file before release the
+    // locks. But instead of forcing flush, you need to wait for LOG_TIMEOUT or other operations to
+    // implicitly trigger the flush operations. write log and update transaction's prev_lsn here
+    LogRecord log{txn->GetTransactionId(), txn->GetPrevLSN(), LogRecordType::COMMIT};
+    txn->SetPrevLSN(log_manager_->AppendLogRecord(log));
+    log_manager_->Flush(false);
+  }
+
   // Do the commit
   txn.commit();
 
@@ -72,6 +81,14 @@ void TxnMgr::abort(Txn& txn) {
     write_set.pop_back();
   }
   write_set.clear();
+
+  if (ENABLE_LOGGING) {
+    // write log and update transaction's prev_lsn here
+    LogRecord log{txn->GetTransactionId(), txn->GetPrevLSN(), LogRecordType::ABORT};
+    txn->SetPrevLSN(log_manager_->AppendLogRecord(log));
+    log_manager_->Flush(false);
+  }
+
 
   MutSet<RID> lock_set;
   for (auto item : txn.shared_lock_set()) {

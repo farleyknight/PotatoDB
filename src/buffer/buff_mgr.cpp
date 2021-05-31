@@ -151,6 +151,8 @@ void BuffMgr::pin_page(Page& page, frame_id_t frame_id) {
 }
 
 bool BuffMgr::flush_page(Page& page) {
+  // TODO: Need to add hook into LogMgr to actually flush the page
+  // https://github.com/xiaohuanlin/private-bustub/blob/189c621343e30fc51011edfc29809ed91c5fbd55/src/buffer/buffer_pool_manager.cpp#L108
   if (page.is_dirty()) {
     disk_mgr_.write_page(page.page_id(), page);
     page.set_dirty(false);

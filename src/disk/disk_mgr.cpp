@@ -104,9 +104,9 @@ bool DiskMgr::read_log(Buffer& log_data,
 
 // TODO: Move this method to another class that is more appropriate
 // for direct file access. Maybe FileMgr?
-void DiskMgr::write_log(const Buffer& log_data, size_t size) {
+void DiskMgr::write_log(const Buffer& log_data) {
   // no effect on num_flushes_ if log buffer is empty
-  if (size == 0) {
+  if (log_data.size() == 0) {
     return;
   }
 

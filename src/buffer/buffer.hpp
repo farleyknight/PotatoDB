@@ -82,6 +82,10 @@ public:
     return data_.size();
   }
 
+  void truncate() {
+    data_.resize(0);
+  }
+
   void resize(buffer_offset_t new_size) {
     data_.resize(new_size);
   }

@@ -23,11 +23,6 @@ public:
 
   ~LogMgr() {
     stop_flush_thread();
-    // TODO: Replace these two with our Buffer class
-    delete[] log_buffer_;
-    delete[] flush_buffer_;
-    log_buffer_ = nullptr;
-    flush_buffer_ = nullptr;
   }
 
   bool logging_enabled() const;
@@ -49,10 +44,6 @@ public:
     persistent_lsn_ = lsn;
   }
 
-  inline char *log_buffer() {
-    return log_buffer_;
-  }
-
 private:
   Atomic<lsn_t> next_lsn_ {0};
   Atomic<lsn_t> persistent_lsn_ {INVALID_LSN};
@@ -68,6 +59,8 @@ private:
   std::future<void> flush_future_;
 
   Atomic<bool> running_flush_thread_ {false};
+  Atomic<bool> enable_logging_       {false};
+  Atomic<bool> flush_requested_      {false};
 
   UNUSED const DiskMgr& disk_mgr_;
 };
