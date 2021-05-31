@@ -74,6 +74,10 @@ public:
     std::fill(data_.begin(), data_.end(), 0);
   }
 
+  void swap(Buffer& other) {
+    data_.swap(other.data_);
+  }
+
   buffer_offset_t size() const {
     return data_.size();
   }

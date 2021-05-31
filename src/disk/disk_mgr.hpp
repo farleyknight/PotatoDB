@@ -51,7 +51,6 @@ public:
   }
 
   void setup_log_file();
-  void setup_db_file();
   void setup_db_directory();
 
 private:

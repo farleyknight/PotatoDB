@@ -75,6 +75,8 @@ void DiskMgr::read_page(PageId page_id, Page& page) {
   file_mgr_.read_buffer(page_id, page.buffer());
 }
 
+// TODO: Move this method to another class that is more appropriate
+// for direct file access. Maybe FileMgr?
 bool DiskMgr::read_log(Buffer& log_data,
                        size_t size,
                        buffer_offset_t offset)
@@ -100,6 +102,8 @@ bool DiskMgr::read_log(Buffer& log_data,
   return true;
 }
 
+// TODO: Move this method to another class that is more appropriate
+// for direct file access. Maybe FileMgr?
 void DiskMgr::write_log(const Buffer& log_data, size_t size) {
   // no effect on num_flushes_ if log buffer is empty
   if (size == 0) {
