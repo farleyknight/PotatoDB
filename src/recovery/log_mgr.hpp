@@ -18,49 +18,66 @@
 
 class LogMgr {
 public:
-
-  LogMgr(const DiskMgr& disk_mgr);
+  LogMgr(DiskMgr& disk_mgr);
 
   ~LogMgr() {
     stop_flush_thread();
   }
 
-  bool logging_enabled() const;
+  bool is_logging_enabled() const {
+    return is_logging_enabled_;
+  }
+
+  void disable_logging() {
+    is_logging_enabled_ = false;
+  }
 
   void run_flush_thread();
   void stop_flush_thread();
-
-  lsn_t emplace(Move<LogRecord> log_record);
 
   lsn_t next_lsn() {
     return next_lsn_;
   }
 
-  lsn_t persistent_lsn() {
-    return persistent_lsn_;
+  lsn_t persisted_lsn() {
+    return persisted_lsn_;
   }
 
-  inline void set_persistent_lsn(lsn_t lsn) {
-    persistent_lsn_ = lsn;
+  void set_persisted_lsn(lsn_t lsn) {
+    persisted_lsn_ = lsn;
   }
+
+  void sync_flush(bool force);
+
+  lsn_t append(LogRecord& log_record);
 
 private:
-  Atomic<lsn_t> next_lsn_ {0};
-  Atomic<lsn_t> persistent_lsn_ {INVALID_LSN};
+  void write_header(const LogRecord& log_record);
+  void write_insert_record(const LogRecord& log_record);
+  void write_delete_record(const LogRecord& log_record);
+  void write_update_record(const LogRecord& log_record);
+  void write_new_page(const LogRecord& log_record);
+
+  atomic<lsn_t> next_lsn_ {0};
+  // TODO: Rename this to "persisted_lsn"
+  // The term "peristent" is a little confusing
+  atomic<lsn_t> persisted_lsn_ {INVALID_LSN};
 
   // TODO: Replace with Buffer class
   Buffer log_buffer_, flush_buffer_;
 
-  std::mutex latch_;
+  buffer_offset_t log_buffer_offset_ = 0;
+
+  mutex latch_;
 
   std::condition_variable flush_cv_;
   std::condition_variable append_cv_;
 
   std::future<void> flush_future_;
 
-  Atomic<bool> running_flush_thread_ {false};
-  Atomic<bool> enable_logging_       {false};
-  Atomic<bool> flush_requested_      {false};
+  atomic<bool> running_flush_thread_ {false},
+    is_logging_enabled_   {false},
+    flush_requested_      {false};
 
-  UNUSED const DiskMgr& disk_mgr_;
+  DiskMgr& disk_mgr_;
 };

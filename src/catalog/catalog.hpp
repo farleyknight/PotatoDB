@@ -91,12 +91,12 @@ public:
 
 private:
   map<table_name_t, table_oid_t> table_oids_;
-  Atomic<table_oid_t> next_table_oid_ = 0;
+  atomic<table_oid_t> next_table_oid_ = 0;
   map<table_oid_t, TableSchema> table_schemas_;
 
   // MutMap<column_name_t, vector<table_oid_t>> column_name_to_table_oids_;
 
   map<table_name_t,
       map<index_name_t, index_oid_t>> index_oids_;
-  Atomic<index_oid_t> next_index_oid_ = 0;
+  atomic<index_oid_t> next_index_oid_ = 0;
 };

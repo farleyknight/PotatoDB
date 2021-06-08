@@ -24,8 +24,8 @@ public:
   void write_page(PageId page_id, const Page& page);
   void read_page(PageId page_id, Page& page);
 
-  void write_log(const Buffer& log_data, size_t size);
-  bool read_log(Buffer& log_data, size_t size, buffer_offset_t offset);
+  void write_log(const Buffer& log_data);
+  bool read_log(Buffer& log_data, buffer_offset_t offset);
 
   PageId allocate_page(file_id_t file_id);
   void deallocate_page(PageId page_id);
@@ -41,7 +41,6 @@ public:
   }
 
   fs::path table_file_for(const string& table_name);
-
 
   void remove_all_files() {
     auto iter = fs::directory_iterator(db_directory());
@@ -78,6 +77,5 @@ private:
   fstream log_io_;
 
   // stream to write db file
-  bool flush_log_;
   std::future<void> *flush_log_f_{nullptr};
 };

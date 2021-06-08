@@ -52,7 +52,7 @@ private:
   void release_locks(Txn& txn) const;
 
   // Atomic, to ensure that no two Txns end up with the same ID
-  Atomic<txn_id_t> curr_txn_id_ = 0;
+  atomic<txn_id_t> curr_txn_id_ = 0;
   LockMgr& lock_mgr_;
   UNUSED LogMgr& log_mgr_;
   TableMgr& table_mgr_;

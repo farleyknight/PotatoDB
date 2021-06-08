@@ -1,7 +1,7 @@
 
 #include "recovery/log_mgr.hpp"
 
-LogMgr::LogMgr(const DiskMgr& disk_mgr)
+LogMgr::LogMgr(DiskMgr& disk_mgr)
   : disk_mgr_(disk_mgr)
 {
   log_buffer_.resize(LOG_BUFFER_SIZE);
@@ -12,7 +12,7 @@ LogMgr::LogMgr(const DiskMgr& disk_mgr)
 //
 // It blocks the thread it's been run on, and waits until the flush has been completed before resuming.
 void LogMgr::sync_flush(bool force) {
-  std::lock_guard<std::mutex> flush_latch(latch_);
+  unique_lock<mutex> flush_latch(latch_);
 
   if (force) {
     flush_requested_ = false;
@@ -20,38 +20,40 @@ void LogMgr::sync_flush(bool force) {
     flush_cv_.notify_one();
     // Block until flush completes
     append_cv_.wait(flush_latch, [&]() {
-      return !request_flush_;
+      return !flush_requested_;
     });
   } else {
     // When force == false, we are performing a group commit
     // But instead of forcing flush,
-    // you need to wait for LOG_TIMEOUT or other operations to implicitly
+    // we wait for LOG_TIMEOUT or other operations to implicitly
     // trigger the flush operations
     append_cv_.wait(flush_latch);
   }
 }
 
-bool LogMgr::logging_enabled() const {
-  return logging_enabled_;
-}
-
 void LogMgr::run_flush_thread() {
-  // NOTE: If we're already runn
+  // NOTE: If we're being called, that means we want logging to
+  // be enabled. This updates the flag if necessary
+  if (!is_logging_enabled_) {
+    is_logging_enabled_ = true;
+  }
+
+  // NOTE: If we're already run
   if (running_flush_thread_) {
     return;
   }
   running_flush_thread_ = true;
 
   flush_future_ = std::async([&]() {
-    while (logging_enabled_) {
+    while (is_logging_enabled_) {
       // Acquire latch around all internal data structures
-      std::lock_guard<std::mutex> flush_latch(latch_);
+      unique_lock<mutex> flush_latch(latch_);
       // Wait for a request to flush is made..
       //
       // BUT..
       // If the wait is longer than LOG_TIMEOUT = 1 second
       // then we flush anyways
-      flush_cv_.wait_for(flush_lock, LOG_TIMEOUT, [&]() {
+      flush_cv_.wait_for(flush_latch, LOG_TIMEOUT, [&]() {
         return flush_requested_.load();
       });
 
@@ -61,7 +63,8 @@ void LogMgr::run_flush_thread() {
 
         std::cout << "Attempting flush to WAL" << std::endl;
 
-        disk_manager_->write_log(flush_buffer_);
+        // TODO: Change `disk_mgr_` to a different object
+        disk_mgr_.write_log(flush_buffer_);
         flush_buffer_.truncate();
       }
       flush_requested_ = false;
@@ -72,9 +75,9 @@ void LogMgr::run_flush_thread() {
 
 void LogMgr::stop_flush_thread() {
   // Force a flush
-  flush(true);
+  sync_flush(true);
   // Logging no longer enbled
-  logging_enabled_ = false;
+  is_logging_enabled_ = false;
   // Join the flush thread
   flush_future_.get();
   // No longer running thread
@@ -84,50 +87,107 @@ void LogMgr::stop_flush_thread() {
   assert(flush_buffer_.size() == 0);
 }
 
-lsn_t LogManager::AppendLogRecord(LogRecord &log_record) {
-  std::lock_guard<mutex> append_latch(latch_);
-  if (logBufferOffset_ + log_record.GetSize() >= LOG_BUFFER_SIZE) {
-    needFlush_ = true;
-    flush_cv_.notify_one();  // let RunFlushThread wake up.
-    appendCv_.wait(latch, [&] {
-      return offset_ + log_record.size() < LOG_BUFFER_SIZE;
+void LogMgr::write_header(const LogRecord& log_record) {
+  // Start with size
+  log_buffer_.write_int32(log_buffer_offset_, log_record.size());
+  log_buffer_offset_ += sizeof(int32_t);
+
+  // Add LSN
+  log_buffer_.write_lsn(log_buffer_offset_, log_record.lsn());
+  log_buffer_offset_ += sizeof(lsn_t);
+
+  // Add TXN id
+  log_buffer_.write_txn_id(log_buffer_offset_, log_record.txn_id());
+  log_buffer_offset_ += sizeof(txn_id_t);
+
+  // Add prev LSN
+  log_buffer_.write_lsn(log_buffer_offset_, log_record.prev_lsn());
+  log_buffer_offset_ += sizeof(lsn_t);
+
+  // Add record type
+  auto log_record_type = static_cast<int32_t>(log_record.record_type());
+  log_buffer_.write_int32(log_buffer_offset_, log_record_type);
+  log_buffer_offset_ += sizeof(int32_t);
+}
+
+void LogMgr::write_insert_record(const LogRecord& log_record) {
+  // Write the RID
+  log_buffer_.write_rid(log_buffer_offset_, log_record.insert_rid());
+  log_buffer_offset_ += sizeof(RID);
+
+  // Write the inserted Tuple
+  log_buffer_.write_tuple(log_buffer_offset_, log_record.insert_tuple());
+  log_buffer_offset_ += log_record.insert_tuple().size();
+}
+
+void LogMgr::write_delete_record(const LogRecord& log_record) {
+  // Write the RID
+  log_buffer_.write_rid(log_buffer_offset_, log_record.delete_rid());
+  log_buffer_offset_ += sizeof(RID);
+
+  // Write the deleted Tuple
+  log_buffer_.write_tuple(log_buffer_offset_, log_record.delete_tuple());
+  log_buffer_offset_ += log_record.delete_tuple().size();
+}
+
+void LogMgr::write_update_record(const LogRecord& log_record) {
+  // Write the RID
+  log_buffer_.write_rid(log_buffer_offset_, log_record.update_rid());
+  log_buffer_offset_ += sizeof(RID);
+
+  // Write the old tuple (before update)
+  log_buffer_.write_tuple(log_buffer_offset_, log_record.old_tuple());
+  log_buffer_offset_ += log_record.old_tuple().size();
+
+  // Write the new tuple (after update)
+  log_buffer_.write_tuple(log_buffer_offset_, log_record.new_tuple());
+  log_buffer_offset_ += log_record.new_tuple().size();
+}
+
+void LogMgr::write_new_page(const LogRecord& log_record) {
+  // Write prev page ID
+  log_buffer_.write_page_id(log_buffer_offset_, log_record.prev_page_id());
+  log_buffer_offset_ += sizeof(page_id_t);
+
+  // Write new page ID
+  log_buffer_.write_page_id(log_buffer_offset_, log_record.page_id());
+  log_buffer_offset_ += sizeof(page_id_t);
+}
+
+lsn_t LogMgr::append(LogRecord& log_record) {
+  unique_lock<mutex> append_latch(latch_);
+
+  if (log_buffer_offset_ + log_record.size() >= LOG_BUFFER_SIZE) {
+    flush_requested_ = true;
+    // NOTE: Wake up the flush thread
+    flush_cv_.notify_one();
+    // NOTE: Wait for the log buffer size to go down before
+    // appending new records.
+    append_cv_.wait(append_latch, [&] {
+      return log_buffer_offset_ + log_record.size() < LOG_BUFFER_SIZE;
     });
   }
-  log_record.lsn_ = next_lsn_++;
 
-  // header = It is a public field and can be added in advance
-  memcpy(log_buffer_ + logBufferOffset_, &log_record, LogRecord::HEADER_SIZE);
-  int pos = logBufferOffset_ + LogRecord::HEADER_SIZE;
+  log_record.set_lsn(next_lsn_++);
+  write_header(log_record);
 
-  // When inserting
-  if (log_record.log_record_type_ == LogRecordType::INSERT) {
-    memcpy(log_buffer_ + pos, &log_record.insert_rid_, sizeof(RID));
-    pos += sizeof(RID);
-    // we have provided serialize function for tuple class
-    log_record.insert_tuple_.SerializeTo(log_buffer_ + pos);
-
-    // When deleting
-  } else if (log_record.log_record_type_ == LogRecordType::MARKDELETE ||
-             log_record.log_record_type_ == LogRecordType::APPLYDELETE ||
-             log_record.log_record_type_ == LogRecordType::ROLLBACKDELETE) {
-    memcpy(log_buffer_ + pos, &log_record.delete_rid_, sizeof(RID));
-    pos += sizeof(RID);
-    log_record.delete_tuple_.SerializeTo(log_buffer_ + pos);
-
-    // When updating
-  } else if (log_record.log_record_type_ == LogRecordType::UPDATE) {
-    memcpy(log_buffer_ + pos, &log_record.update_rid_, sizeof(RID));
-    pos += sizeof(RID);
-    log_record.old_tuple_.SerializeTo(log_buffer_ + pos);
-    pos += log_record.old_tuple_.GetLength() + sizeof(int32_t);
-    log_record.new_tuple_.SerializeTo(log_buffer_ + pos);
-    // When opening a new page
-  } else if (log_record.log_record_type_ == LogRecordType::NEWPAGE) {
-    // prev_page_id
-    memcpy(log_buffer_ + pos, &log_record.prev_page_id_, sizeof(page_id_t));
-    pos += sizeof(page_id_t);
-    memcpy(log_buffer_ + pos, &log_record.page_id_, sizeof(page_id_t));
+  switch (log_record.record_type()) {
+  case LogRecordType::INSERT:
+    write_insert_record(log_record);
+    break;
+  case LogRecordType::MARK_DELETE:
+  case LogRecordType::APPLY_DELETE:
+  case LogRecordType::ROLLBACK_DELETE:
+    write_delete_record(log_record);
+    break;
+  case LogRecordType::UPDATE:
+    write_update_record(log_record);
+    break;
+  case LogRecordType::NEW_PAGE:
+    write_new_page_record(log_record);
+    break;
   }
-  logBufferOffset_ += log_record.GetSize();
-  return lastLsn_ = log_record.lsn_;
+
+  persisted_lsn_ = log_record.lsn();
+  return persisted_lsn_;
 }

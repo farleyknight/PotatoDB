@@ -20,6 +20,8 @@ PotatoDB::PotatoDB()
 {}
 
 void PotatoDB::reset_installation() {
+  log_mgr_.disable_logging();
+
   disk_mgr_.remove_all_files();
   disk_mgr_.setup_db_directory();
   disk_mgr_.setup_log_file();

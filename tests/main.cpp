@@ -8,6 +8,10 @@
 #include "potatodb_test.hpp"
 #include "potatodb_todos_test.hpp"
 
+#include "recovery_redo_test.hpp"
+#include "recovery_undo_test.hpp"
+#include "recovery_checkpoint_test.hpp"
+
 #include "schema_test.hpp"
 
 #include "tuple_test.hpp"

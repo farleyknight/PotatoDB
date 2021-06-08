@@ -58,6 +58,7 @@ using std::stringstream;
 using std::tuple;
 
 using std::unique_ptr;
+using std::unique_lock;
 
 template<typename K, typename V>
 using map         = std::unordered_map<K, V>;
@@ -134,8 +135,6 @@ using std::condition_variable;
 using CondVar = condition_variable;
 
 using std::atomic;
-template<class T>
-using Atomic    = atomic<T>;
 
 template<class T>
 using RefWrap   = std::reference_wrapper<T>;

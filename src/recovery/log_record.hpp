@@ -8,17 +8,16 @@
 
 /** The type of the log record. */
 enum class LogRecordType {
-  INVALID = 0,
-  INSERT,
-  MARK_DELETE,
-  APPLY_DELETE,
-  ROLLBACK_DELETE,
-  UPDATE,
-  BEGIN,
-  COMMIT,
-  ABORT,
-  /** Creating a new page in the table heap. */
-  NEW_PAGE,
+  INVALID         = 0,
+  INSERT          = 1,
+  MARK_DELETE     = 2,
+  APPLY_DELETE    = 3,
+  ROLLBACK_DELETE = 4,
+  UPDATE          = 5,
+  BEGIN           = 6,
+  COMMIT          = 7,
+  ABORT           = 8,
+  NEW_PAGE        = 9,
 };
 
 /**
@@ -120,24 +119,26 @@ public:
 
   ~LogRecord() = default;
 
-  const Tuple& delete_tuple()        { return delete_tuple_; }
-  const RID&   delete_rid()          { return delete_rid_.value(); }
+  const Tuple& delete_tuple()   const { return delete_tuple_; }
+  const RID&   delete_rid()     const { return delete_rid_.value(); }
 
-  const Tuple& insert_tuple()        { return insert_tuple_; }
-  const RID&   insert_rid()          { return insert_rid_.value(); }
+  const Tuple& insert_tuple()   const { return insert_tuple_; }
+  const RID&   insert_rid()     const { return insert_rid_.value(); }
 
-  const Tuple& original_tuple()      { return old_tuple_; }
-  const Tuple& update_tuple()        { return new_tuple_; }
-  const RID&   update_rid()          { return update_rid_.value(); }
+  const Tuple& original_tuple() const { return old_tuple_; }
+  const Tuple& update_tuple()   const { return new_tuple_; }
+  const RID&   update_rid()     const { return update_rid_.value(); }
 
-  PageId       prev_page_id()        { return prev_page_id_; }
+  const PageId prev_page_id()   const { return prev_page_id_; }
 
-  size_t size()     { return size_; }
-  lsn_t lsn()       { return lsn_; }
-  txn_id_t txn_id() { return txn_id_; }
-  lsn_t prev_lsn()  { return prev_lsn_; }
+  // NOTE!
+  // size should *not* include the header!
+  size_t size()     const { return size_; }
+  lsn_t lsn()       const { return lsn_; }
+  txn_id_t txn_id() const { return txn_id_; }
+  lsn_t prev_lsn()  const { return prev_lsn_; }
 
-  const LogRecordType& log_record_type() { return log_record_type_; }
+  const LogRecordType& record_type() const { return log_record_type_; }
 
   // For debug purpose
   const string to_string() const {
@@ -155,29 +156,36 @@ public:
   }
 
  private:
-  // the size of log record(for serialization, in bytes)
+  // NOTE: The size of log record(for serialization, in bytes)
   int32_t size_{0};
-  // must have fields
+  // NOTE: Included in log record "HEADER"
   lsn_t lsn_       = INVALID_LSN;
   txn_id_t txn_id_ = INVALID_TXN_ID;
   lsn_t prev_lsn_  = INVALID_LSN;
   LogRecordType log_record_type_ = LogRecordType::INVALID;
 
-  // case1: for delete operation, delete_tuple_ for UNDO operation
+  // NOTE: Case 1: Delete operation
   optional<RID> delete_rid_;
   Tuple delete_tuple_;
 
-  // case2: for insert operation
+  // NOTE: Case 2: Insert operation
   optional<RID> insert_rid_;
   Tuple insert_tuple_;
 
-  // case3: for update operation
+  // NOTE: Case 3: Update operation
   optional<RID> update_rid_;
   Tuple old_tuple_, new_tuple_;
 
-  // case4: for new page operation
+  // NOTE Case 4: for new page operation
   PageId page_id_ = PageId::INVALID(),
     prev_page_id_ = PageId::INVALID();
-  
+
+  // TODO: We can replace this hard-coded `20` with a sum of sizeof(..)
+  // NOTE: I _think_ it should be:
+  //
+  // 20 == sizeof(int32_t) + sizeof(lsn_t) + sizeof(txn_id_t) + sizeof(lsn_t) +
+  //       sizeof(LogRecordType)
+  //
+  // Just double check that I suppose
   static const int HEADER_SIZE = 20;
 };

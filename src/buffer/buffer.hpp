@@ -169,11 +169,6 @@ public:
 
     auto c_string = reinterpret_cast<const unsigned char*>(value.c_str());
 
-    // std::cout << "Writing c_string " << c_string << std::endl;
-    // std::cout << "with length " << length << std::endl;
-    // std::cout << "Buffer size: " << size() << std::endl;
-    // std::cout << "At offset: " << offset << std::endl;
-
     std::memcpy(ptr(offset),
                 &length, sizeof(string_size_t));
     std::memcpy(ptr(offset + sizeof(string_size_t)),
@@ -191,6 +186,30 @@ public:
 
     return new_string;
   }
+
+  /**********************************************
+   * DB specific types
+   **********************************************/
+
+  void write_lsn(buffer_offset_t offset, lsn_t lsn) {
+    *reinterpret_cast<lsn_t*>(ptr(offset)) = lsn;
+  }
+
+  void write_txn_id(buffer_offset_t offset, txn_id_t txn_id) {
+    *reinterpret_cast<txn_id_t*>(ptr(offset)) = txn_id;
+  }
+
+  void write_rid(buffer_offset_t offset, const RID& rid) {
+    *reinterpret_cast<uint64_t*>(ptr(offset)) = rid.as_uint64();
+  }
+
+  RID read_rid(buffer_offset_t offset) const {
+    auto rid_as_int64 = *reinterpret_cast<const uint64_t*>(cptr(offset));
+    return RID(rid_as_int64);
+  }
+
+
+
 
   Data data_;
 };

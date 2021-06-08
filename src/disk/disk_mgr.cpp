@@ -78,9 +78,9 @@ void DiskMgr::read_page(PageId page_id, Page& page) {
 // TODO: Move this method to another class that is more appropriate
 // for direct file access. Maybe FileMgr?
 bool DiskMgr::read_log(Buffer& log_data,
-                       size_t size,
                        buffer_offset_t offset)
 {
+  auto size = log_data.size();
   if (offset >= fs::file_size(log_file_name())) {
     return false;
   }
@@ -110,8 +110,6 @@ void DiskMgr::write_log(const Buffer& log_data) {
     return;
   }
 
-  flush_log_ = true;
-
   if (flush_log_f_ != nullptr) {
     // used for checking non-blocking flushing
     assert(flush_log_f_->wait_for(std::chrono::seconds(10)) ==
@@ -119,7 +117,7 @@ void DiskMgr::write_log(const Buffer& log_data) {
   }
 
   // sequence write
-  log_io_.write(log_data.char_ptr(), size);
+  log_io_.write(log_data.char_ptr(), log_data.size());
 
   // check for I/O error
   if (log_io_.bad()) {
@@ -127,5 +125,4 @@ void DiskMgr::write_log(const Buffer& log_data) {
   }
   // needs to flush to keep disk file in sync
   log_io_.flush();
-  flush_log_ = false;
 }

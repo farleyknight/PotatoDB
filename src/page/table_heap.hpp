@@ -29,15 +29,10 @@ public:
     return first_page_id_;
   }
 
-  bool insert_tuple(Tuple& tuple,
-                    Txn& txn);
-  bool mark_delete(const RID& rid,
-                   Txn& txn);
-  bool update_tuple(Tuple& tuple,
-                    const RID& rid,
-                    Txn& txn);
-  bool apply_delete(RID& rid,
-                    Txn& txn);
+  bool insert_tuple(Tuple& tuple, Txn& txn);
+  bool mark_delete(const RID& rid, Txn& txn);
+  bool update_tuple(Tuple& tuple, const RID& rid, Txn& txn);
+  bool apply_delete(RID& rid, Txn& txn);
   void rollback_delete(const RID& rid, Txn& txn);
 
   ptr<Tuple> find_tuple(const RID& rid, Txn& txn) const;

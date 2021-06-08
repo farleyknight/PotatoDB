@@ -17,15 +17,13 @@ public:
   {
     set_page_id(page_id);
 
-    if (log_mgr.logging_enabled()) {
+    if (log_mgr.is_logging_enabled()) {
       LogRecord log_record(txn.id(),
                            txn.prev_lsn(),
                            LogRecordType::NEW_PAGE,
                            prev_page_id,
                            page_id);
-      // TODO: LogMgr append should take exact same args as
-      // LogRecord's constructor
-      lsn_t lsn = log_mgr.emplace(move(log_record));
+      lsn_t lsn = log_mgr.append(log_record);
       set_lsn(lsn);
       txn.set_prev_lsn(lsn);
     }
@@ -101,7 +99,7 @@ public:
       return false;
     }
 
-    if (log_mgr.logging_enabled()) {
+    if (log_mgr.is_logging_enabled()) {
        // Acquire an exclusive lock,
        // upgrading from a shared lock if necessary.
        if (txn.is_shared_locked(rid)) {
@@ -118,7 +116,7 @@ public:
                             LogRecordType::MARK_DELETE,
                             rid,
                             dummy_tuple);
-       lsn_t lsn = log_mgr.emplace(std::move(log_record));
+       lsn_t lsn = log_mgr.append(log_record);
        set_lsn(lsn);
        txn.set_prev_lsn(lsn);
      }
@@ -136,7 +134,7 @@ public:
                        LogMgr& log_mgr)
   {
     // Log the rollback.
-    if (log_mgr.logging_enabled()) {
+    if (log_mgr.is_logging_enabled()) {
       // We must own an exclusive lock on the RID.
       assert(txn.is_exclusive_locked(rid));
       Tuple dummy_tuple;
@@ -145,7 +143,7 @@ public:
                            LogRecordType::ROLLBACK_DELETE,
                            rid,
                            dummy_tuple);
-      lsn_t lsn = log_mgr.emplace(move(log_record));
+      lsn_t lsn = log_mgr.append(log_record);
       set_lsn(lsn);
       txn.set_prev_lsn(lsn);
     }
@@ -209,7 +207,7 @@ public:
 
     delete_tuple.set_rid(rid);
 
-    if (log_mgr.logging_enabled()) {
+    if (log_mgr.is_logging_enabled()) {
       //, "We must own the exclusive lock!";
       assert(txn.is_exclusive_locked(rid));
 
@@ -219,7 +217,7 @@ public:
                            rid,
                            delete_tuple);
 
-      lsn_t lsn = log_mgr.emplace(move(log_record));
+      lsn_t lsn = log_mgr.append(log_record);
       set_lsn(lsn);
       txn.set_prev_lsn(lsn);
     }

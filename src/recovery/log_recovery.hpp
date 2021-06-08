@@ -37,8 +37,8 @@ private:
   UNUSED const DiskMgr& disk_mgr_;
   UNUSED const BuffMgr& buff_mgr_;
 
-  MutMap<txn_id_t, lsn_t> active_txn_;
-  MutMap<lsn_t, int> lsn_mapping_;
+  map<txn_id_t, lsn_t> active_txn_;
+  map<lsn_t, int> lsn_mapping_;
 
   UNUSED int offset_ = 0;
   // TODO: Remove this raw pointer to memory bullshit.

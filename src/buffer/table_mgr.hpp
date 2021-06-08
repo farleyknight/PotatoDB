@@ -21,17 +21,10 @@ public:
                     table_oid_t table_oid,
                     Txn& txn)
   {
-    // TODO
-    // 1) Create file via FileMgr/FileHandle
-    // 2) Create TableHeap as first page
-    // 3) Add TableHeap to vector of TableHeaps
-
     file_id_t file_id = disk_mgr_.create_table_file(table_name);
     auto page_id      = disk_mgr_.allocate_page(file_id);
     page_ids_.insert(make_pair(table_oid, page_id));
 
-    //auto maybe_page   = buff_mgr_.fetch_page(page_id);
-    //assert(maybe_page);
     auto heap = make_unique<TableHeap>(file_id,
                                        table_oid,
                                        page_id,
@@ -53,6 +46,6 @@ private:
   LogMgr& log_mgr_;
   BuffMgr& buff_mgr_;
 
-  MutMap<table_oid_t, PageId> page_ids_;
-  MutMap<table_oid_t, ptr<TableHeap>> table_heaps_;
+  map<table_oid_t, PageId> page_ids_;
+  map<table_oid_t, ptr<TableHeap>> table_heaps_;
 };
