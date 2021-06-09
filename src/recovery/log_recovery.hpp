@@ -18,9 +18,16 @@ class LogRecovery {
     log_buffer_.resize(LOG_BUFFER_SIZE);
   }
 
+  // No copy
+  LogRecovery(const LogRecovery&) = delete;
+  // No copy assign
+  LogRecovery& operator=(const LogRecovery&) = delete;
+  ~LogRecovery() = default; // Default delete
+
   void redo();
   void undo();
 
+  // TODO: Replace with references & buffer
   bool deserialize_log_record(const char *data, LogRecord *log_record);
 
 private:

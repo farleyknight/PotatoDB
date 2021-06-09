@@ -24,16 +24,10 @@ public:
     stop_flush_thread();
   }
 
-  bool is_logging_enabled() const {
-    return is_logging_enabled_;
-  }
-
-  void disable_logging() {
-    is_logging_enabled_ = false;
-  }
-
   void run_flush_thread();
   void stop_flush_thread();
+  void sync_flush(bool force);
+  lsn_t append(LogRecord& log_record);
 
   lsn_t next_lsn() {
     return next_lsn_;
@@ -47,9 +41,17 @@ public:
     persisted_lsn_ = lsn;
   }
 
-  void sync_flush(bool force);
+  void set_log_timeout(std::chrono::duration<uint64_t> timeout) {
+    log_timeout_ = timeout;
+  }
 
-  lsn_t append(LogRecord& log_record);
+  bool is_logging_enabled() const {
+    return is_logging_enabled_;
+  }
+
+  void disable_logging() {
+    is_logging_enabled_ = false;
+  }
 
 private:
   void write_header(const LogRecord& log_record);
@@ -80,4 +82,6 @@ private:
     flush_requested_      {false};
 
   DiskMgr& disk_mgr_;
+
+  std::chrono::duration<uint64_t> log_timeout_ = std::chrono::seconds(1);
 };

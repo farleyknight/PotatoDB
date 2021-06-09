@@ -4,16 +4,16 @@
 #include "txns/txn_mgr.hpp"
 #include "recovery/log_mgr.hpp"
 
-class CheckPMgr {
+class CheckpointMgr {
 public:
-  CheckPMgr(const TxnMgr& txn_mgr,
-            const LogMgr& log_mgr,
-            const BuffMgr& buff_mgr)
+  CheckpointMgr(const TxnMgr& txn_mgr,
+                const LogMgr& log_mgr,
+                const BuffMgr& buff_mgr)
     : txn_mgr_  (txn_mgr),
       log_mgr_  (log_mgr),
       buff_mgr_ (buff_mgr) {}
 
-  ~CheckPMgr() = default;
+  ~CheckpointMgr() = default;
 
   void begin();
   void end();

@@ -76,13 +76,13 @@ void redo_test_part2(const RID& rid1, const RID& rid2) {
 
   std::cout << "Begin recovery" << std::endl;
 
-  auto log_recovery = db.log_recovery();
+  auto &log_recovery = db.log_recovery();
   EXPECT_FALSE(db.is_logging_enabled());
 
   std::cout << "Redo underway" << std::endl;
-  log_recovery->redo();
+  log_recovery.redo();
   std::cout << "Undo underway" << std::endl;
-  log_recovery->undo();
+  log_recovery.undo();
 
   std::cout << "Check if recovery success" << std::endl;
 
@@ -94,10 +94,10 @@ void redo_test_part2(const RID& rid1, const RID& rid2) {
   EXPECT_TRUE(tuple2 != nullptr);
   db.txn_mgr().commit(recovery_txn);
 
-  EXPECT_EQ(tuple1.value(test_schema, 0).as<string>(), "x");
-  EXPECT_EQ(tuple2.value(test_schema, 0).as<string>(), "y");
-  EXPECT_EQ(tuple1.value(test_schema, 1).as<int>(), 2);
-  EXPECT_EQ(tuple2.value(test_schema, 1).as<int>(), 3);
+  EXPECT_EQ(tuple1->value(test_schema, 0).as<string>(), "x");
+  EXPECT_EQ(tuple2->value(test_schema, 0).as<string>(), "y");
+  EXPECT_EQ(tuple1->value(test_schema, 1).as<int>(), 2);
+  EXPECT_EQ(tuple2->value(test_schema, 1).as<int>(), 3);
 }
 
 TEST(RecoveryRedoTest, RedoTest) {

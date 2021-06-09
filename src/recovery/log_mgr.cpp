@@ -53,7 +53,7 @@ void LogMgr::run_flush_thread() {
       // BUT..
       // If the wait is longer than LOG_TIMEOUT = 1 second
       // then we flush anyways
-      flush_cv_.wait_for(flush_latch, LOG_TIMEOUT, [&]() {
+      flush_cv_.wait_for(flush_latch, log_timeout_, [&]() {
         return flush_requested_.load();
       });
 

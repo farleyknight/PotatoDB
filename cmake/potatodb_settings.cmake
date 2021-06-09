@@ -96,7 +96,7 @@ set(main_sources
   "src/query/query_comp.cpp"
   "src/query/query_column.cpp"
   "src/query/query_join.cpp"
-  "src/recovery/checkpoint_manager.cpp"
+  "src/recovery/checkpoint_mgr.cpp"
   "src/recovery/log_mgr.cpp"
   "src/recovery/log_recovery.cpp"
   "src/server/client_socket.cpp"

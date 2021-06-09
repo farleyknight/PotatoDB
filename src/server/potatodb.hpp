@@ -6,7 +6,9 @@
 
 #include "server/session.hpp"
 #include "server/socket_server.hpp"
+
 #include "recovery/log_recovery.hpp"
+#include "recovery/checkpoint_mgr.hpp"
 
 enum class ServerState {
   STARTING_UP   = 0,
@@ -78,6 +80,26 @@ public:
     return table_mgr_;
   }
 
+  LogMgr& log_mgr() {
+    return log_mgr_;
+  }
+
+  BuffMgr& buff_mgr() {
+    return buff_mgr_;
+  }
+
+  CheckpointMgr& checkpoint_mgr() {
+    return checkpoint_mgr_;
+  }
+
+  FileMgr& file_mgr() {
+    return file_mgr_;
+  }
+
+  LogRecovery& log_recovery() {
+    return log_recovery_;
+  }
+
   bool file_exists(fs::path file_path) const;
   bool is_logging_enabled() const;
   void run_flush_thread();
@@ -89,16 +111,17 @@ private:
 
   ServerState state_ = ServerState::STARTING_UP;
 
-  FileMgr     file_mgr_;
-  DiskMgr     disk_mgr_;
-  BuffMgr     buff_mgr_;
-  LogMgr      log_mgr_;
-  LogRecovery log_recovery_;
-  LockMgr     lock_mgr_;
-  TableMgr    table_mgr_;
-  TxnMgr      txn_mgr_;
-  Catalog     catalog_;
-  ExecEngine  exec_eng_;
+  FileMgr       file_mgr_;
+  DiskMgr       disk_mgr_;
+  BuffMgr       buff_mgr_;
+  LogMgr        log_mgr_;
+  LogRecovery   log_recovery_;
+  LockMgr       lock_mgr_;
+  CheckpointMgr checkpoint_mgr_;
+  TableMgr      table_mgr_;
+  TxnMgr        txn_mgr_;
+  Catalog       catalog_;
+  ExecEngine    exec_eng_;
 };
 
 extern PotatoDB potatodb;

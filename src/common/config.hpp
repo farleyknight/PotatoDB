@@ -26,5 +26,3 @@ static constexpr int          LOG_BUFFER_SIZE = ((BUFFER_POOL_SIZE + 1) * PAGE_S
 static constexpr int          LEAF_PAGE_HEADER_SIZE = 28;
 
 static constexpr int          MAX_VARCHAR_SIZE = 128;
-
-static constexpr std::chrono::duration<int64_t> LOG_TIMEOUT = std::chrono::seconds(1);
