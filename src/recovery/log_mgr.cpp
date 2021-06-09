@@ -144,7 +144,7 @@ void LogMgr::write_update_record(const LogRecord& log_record) {
   log_buffer_offset_ += log_record.new_tuple().size();
 }
 
-void LogMgr::write_new_page(const LogRecord& log_record) {
+void LogMgr::write_new_page_record(const LogRecord& log_record) {
   // Write prev page ID
   log_buffer_.write_page_id(log_buffer_offset_, log_record.prev_page_id());
   log_buffer_offset_ += sizeof(page_id_t);
@@ -185,6 +185,9 @@ lsn_t LogMgr::append(LogRecord& log_record) {
     break;
   case LogRecordType::NEW_PAGE:
     write_new_page_record(log_record);
+    break;
+  default:
+    // NO-OP
     break;
   }
 

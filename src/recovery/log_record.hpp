@@ -125,11 +125,12 @@ public:
   const Tuple& insert_tuple()   const { return insert_tuple_; }
   const RID&   insert_rid()     const { return insert_rid_.value(); }
 
-  const Tuple& original_tuple() const { return old_tuple_; }
-  const Tuple& update_tuple()   const { return new_tuple_; }
-  const RID&   update_rid()     const { return update_rid_.value(); }
+  const Tuple& old_tuple()     const { return old_tuple_; }
+  const Tuple& new_tuple()     const { return new_tuple_; }
+  const RID&   update_rid()    const { return update_rid_.value(); }
 
-  const PageId prev_page_id()   const { return prev_page_id_; }
+  const PageId& page_id()      const { return page_id_; }
+  const PageId& prev_page_id() const { return prev_page_id_; }
 
   // NOTE!
   // size should *not* include the header!
@@ -137,10 +138,10 @@ public:
   lsn_t lsn()       const { return lsn_; }
   txn_id_t txn_id() const { return txn_id_; }
   lsn_t prev_lsn()  const { return prev_lsn_; }
+  void set_lsn(lsn_t lsn) { lsn_ = lsn; }
 
   const LogRecordType& record_type() const { return log_record_type_; }
 
-  // For debug purpose
   const string to_string() const {
     std::ostringstream os;
     os << "Log["
@@ -155,13 +156,13 @@ public:
     return os.str();
   }
 
- private:
+private:
   // NOTE: The size of log record(for serialization, in bytes)
   int32_t size_{0};
   // NOTE: Included in log record "HEADER"
-  lsn_t lsn_       = INVALID_LSN;
-  txn_id_t txn_id_ = INVALID_TXN_ID;
-  lsn_t prev_lsn_  = INVALID_LSN;
+  lsn_t lsn_                     = INVALID_LSN;
+  txn_id_t txn_id_               = INVALID_TXN_ID;
+  lsn_t prev_lsn_                = INVALID_LSN;
   LogRecordType log_record_type_ = LogRecordType::INVALID;
 
   // NOTE: Case 1: Delete operation

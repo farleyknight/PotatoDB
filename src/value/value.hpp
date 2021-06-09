@@ -91,6 +91,12 @@ public:
     return Value(TypeId::VARCHAR, DataStoreT(data));
   }
 
+  template <class T,
+            std::enable_if_t<std::is_same<T, const char*>::value, bool> = false>
+  static Value make(T data) {
+    return Value(TypeId::VARCHAR, DataStoreT(data));
+  }
+
   // TODO! Need to differentiate between COUNT(*) and *
   // COUNT(*) has should have `type_id == TypeId::INTEGER`
   static Value count_splat() {

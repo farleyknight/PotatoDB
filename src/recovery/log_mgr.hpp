@@ -56,7 +56,7 @@ private:
   void write_insert_record(const LogRecord& log_record);
   void write_delete_record(const LogRecord& log_record);
   void write_update_record(const LogRecord& log_record);
-  void write_new_page(const LogRecord& log_record);
+  void write_new_page_record(const LogRecord& log_record);
 
   atomic<lsn_t> next_lsn_ {0};
   // TODO: Rename this to "persisted_lsn"

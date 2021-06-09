@@ -87,14 +87,7 @@ bool TableIterator::operator==(const TableIterator& iter) const {
     return false;
   }
 
-  auto first_rid = rid();
-  auto second_rid = iter.rid();
-
-  // std::cout << "Tuple RID: " << tuple_rid.to_string() << std::endl;
-  // std::cout << "First RID: " << first_rid.to_string() << std::endl;
-  // std::cout << "Second RID: " << second_rid.to_string() << std::endl;
-
-  return first_rid.get() == second_rid.get();
+  return rid() == iter.rid();
 }
 
 bool TableIterator::stop_iterating() const {

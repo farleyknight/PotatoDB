@@ -27,4 +27,4 @@ static constexpr int          LEAF_PAGE_HEADER_SIZE = 28;
 
 static constexpr int          MAX_VARCHAR_SIZE = 128;
 
-std::chrono::duration<int64_t> LOG_TIMEOUT = std::chrono::seconds(1);
+static constexpr std::chrono::duration<int64_t> LOG_TIMEOUT = std::chrono::seconds(1);

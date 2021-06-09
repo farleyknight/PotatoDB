@@ -7,11 +7,11 @@ std::tuple<RID, RID> undo_test_part1() {
   PotatoDB db;
   db.reset_installation();
 
-  ASSERT_FALSE(db.logging_enabled());
+  EXPECT_FALSE(db.is_logging_enabled());
   std::cout << "Skip system recovering..." << std::endl;
 
   db.run_flush_thread();
-  ASSERT_TRUE(db.logging_enabled());
+  EXPECT_TRUE(db.logging_enabled());
   std::cout << "System logging thread running..." << std::endl;
 
   auto txn = db.txn_mgr().begin();
@@ -32,8 +32,8 @@ std::tuple<RID, RID> undo_test_part1() {
   auto tuple1 = Tuple({value_A_1, value_B_1}, test_schema);
   auto tuple2 = Tuple({value_A_2, value_B_2}, test_schema);
 
-  ASSERT_TRUE(test_table_heap->insert_tuple(tuple1, txn));
-  ASSERT_TRUE(test_table_heap->insert_tuple(tuple2, txn));
+  EXPECT_TRUE(test_table_heap->insert_tuple(tuple1, txn));
+  EXPECT_TRUE(test_table_heap->insert_tuple(tuple2, txn));
 
   std::cout << "System crash before commit" << std::endl;
 
@@ -45,11 +45,11 @@ void undo_test_part2(const RID& rid1, const RID& rid2) {
 
   std::cout << "Restarting system" << std::endl;
   db.startup();
-  ASSERT_FALSE(db.logging_enabled());
+  EXPECT_FALSE(db.logging_enabled());
 
   std::cout << "Recovery started" << std::endl;
   auto log_recovery = db.log_recovery();
-  ASSERT_FALSE(db.logging_enabled());
+  EXPECT_FALSE(db.logging_enabled());
 
   std::cout << "Redo underway" << std::endl;
   log_recovery->redo();
@@ -62,8 +62,8 @@ void undo_test_part2(const RID& rid1, const RID& rid2) {
   auto test_table_heap = db.table_mgr().table_heap_for("test_table");
   auto tuple1          = test_table_heap.find_tuple(rid1, txn);
   auto tuple2          = test_table_heap.find_tuple(rid2, txn);
-  ASSERT_TRUE(tuple1 == nullptr);
-  ASSERT_TRUE(tuple2 == nullptr);
+  EXPECT_TRUE(tuple1 == nullptr);
+  EXPECT_TRUE(tuple2 == nullptr);
 
   db.txn_mgr().commit(txn);
 }

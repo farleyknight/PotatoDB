@@ -8,15 +8,16 @@
 PotatoDB potatodb;
 
 PotatoDB::PotatoDB()
-  : server_    (this),
-    file_mgr_  (),
-    disk_mgr_  (file_mgr_),
-    buff_mgr_  (pool_size(), disk_mgr_, log_mgr_),
-    log_mgr_   (disk_mgr_),
-    table_mgr_ (disk_mgr_, lock_mgr_, log_mgr_, buff_mgr_),
-    txn_mgr_   (lock_mgr_, log_mgr_, table_mgr_),
-    catalog_   (),
-    exec_eng_  (buff_mgr_, txn_mgr_, catalog_)
+  : server_       (this),
+    file_mgr_     (),
+    disk_mgr_     (file_mgr_),
+    buff_mgr_     (pool_size(), disk_mgr_, log_mgr_),
+    log_mgr_      (disk_mgr_),
+    log_recovery_ (disk_mgr_, buff_mgr_),
+    table_mgr_    (disk_mgr_, lock_mgr_, log_mgr_, buff_mgr_),
+    txn_mgr_      (lock_mgr_, log_mgr_, table_mgr_),
+    catalog_      (),
+    exec_eng_     (buff_mgr_, txn_mgr_, catalog_)
 {}
 
 void PotatoDB::reset_installation() {
@@ -182,6 +183,14 @@ void PotatoDB::verify_system_files() {
   // 3) and that every file has it's own table. (or is the log file)
   //
   // Write a method to verify everything is lined up correctly.
+}
+
+bool PotatoDB::is_logging_enabled() const {
+  return log_mgr_.is_logging_enabled();
+}
+
+void PotatoDB::run_flush_thread() {
+  log_mgr_.run_flush_thread();
 }
 
 void PotatoDB::startup() {

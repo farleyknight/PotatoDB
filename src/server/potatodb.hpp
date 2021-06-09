@@ -6,6 +6,7 @@
 
 #include "server/session.hpp"
 #include "server/socket_server.hpp"
+#include "recovery/log_recovery.hpp"
 
 enum class ServerState {
   STARTING_UP   = 0,
@@ -20,6 +21,10 @@ public:
   void shutdown(UNUSED int signal) {
     state_ = ServerState::SHUTTING_DOWN;
     server_.shutdown();
+  }
+
+  void shutdown() {
+    shutdown(0);
   }
 
   void startup();
@@ -69,7 +74,13 @@ public:
     return txn_mgr_;
   }
 
+  TableMgr& table_mgr() {
+    return table_mgr_;
+  }
+
   bool file_exists(fs::path file_path) const;
+  bool is_logging_enabled() const;
+  void run_flush_thread();
 
 private:
   int port_ = 7878;
@@ -78,15 +89,16 @@ private:
 
   ServerState state_ = ServerState::STARTING_UP;
 
-  FileMgr    file_mgr_;
-  DiskMgr    disk_mgr_;
-  BuffMgr    buff_mgr_;
-  LogMgr     log_mgr_;
-  LockMgr    lock_mgr_;
-  TableMgr   table_mgr_;
-  TxnMgr     txn_mgr_;
-  Catalog    catalog_;
-  ExecEngine exec_eng_;
+  FileMgr     file_mgr_;
+  DiskMgr     disk_mgr_;
+  BuffMgr     buff_mgr_;
+  LogMgr      log_mgr_;
+  LogRecovery log_recovery_;
+  LockMgr     lock_mgr_;
+  TableMgr    table_mgr_;
+  TxnMgr      txn_mgr_;
+  Catalog     catalog_;
+  ExecEngine  exec_eng_;
 };
 
 extern PotatoDB potatodb;

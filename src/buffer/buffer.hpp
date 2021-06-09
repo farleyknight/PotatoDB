@@ -4,6 +4,9 @@
 #include <iostream>
 
 #include "common/config.hpp"
+#include "tuple/rid.hpp"
+
+class Tuple;
 
 class Buffer {
 public:
@@ -55,8 +58,8 @@ public:
     return data_.data() + offset;
   }
 
-  void copy_n_bytes(size_t source_offset,
-                    size_t dest_offset,
+  void copy_n_bytes(buffer_offset_t source_offset,
+                    buffer_offset_t dest_offset,
                     const Buffer& source,
                     size_t n_bytes)
   {
@@ -65,6 +68,8 @@ public:
                 source.cptr(source_offset),
                 n_bytes);
   }
+
+  void write_tuple(buffer_offset_t offset, const Tuple& tuple);
 
   void copy_from(const Buffer& other) {
     data_ = other.data_;
@@ -208,8 +213,9 @@ public:
     return RID(rid_as_int64);
   }
 
-
-
+  void write_page_id(buffer_offset_t offset, const PageId& page_id) {
+    *reinterpret_cast<uint32_t*>(ptr(offset)) = page_id.as_uint32();
+  }
 
   Data data_;
 };

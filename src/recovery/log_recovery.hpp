@@ -8,9 +8,6 @@
 #include "txns/lock_mgr.hpp"
 #include "recovery/log_record.hpp"
 
-/**
- * Read log file from disk, redo and undo.
- */
 class LogRecovery {
  public:
   LogRecovery(const DiskMgr& disk_mgr,
@@ -18,14 +15,7 @@ class LogRecovery {
     : disk_mgr_ (disk_mgr),
       buff_mgr_ (buff_mgr)
   {
-    // TODO: Remove this new bullshit
-    log_buffer_ = new char[LOG_BUFFER_SIZE];
-  }
-
-  ~LogRecovery() {
-    // TODO: Remove this delete bullshit
-    delete[] log_buffer_;
-    log_buffer_ = nullptr;
+    log_buffer_.resize(LOG_BUFFER_SIZE);
   }
 
   void redo();
@@ -41,6 +31,6 @@ private:
   map<lsn_t, int> lsn_mapping_;
 
   UNUSED int offset_ = 0;
-  // TODO: Remove this raw pointer to memory bullshit.
-  char *log_buffer_;
+
+  Buffer log_buffer_;
 };
