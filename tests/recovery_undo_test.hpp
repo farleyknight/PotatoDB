@@ -17,7 +17,7 @@ std::tuple<RID, RID> undo_test_part1() {
   auto &txn = db.txn_mgr().begin();
 
   std::cout << "Create a test table" << std::endl;
-  db.run_statement("CREATE TABLE test_table ( a VARCHAR(20), b SMALLINT ) ");
+  db.run("CREATE TABLE test_table ( a VARCHAR(20), b SMALLINT ) ");
 
   auto test_schema      = db.catalog().query_schema_for("test_table");
   auto test_table_oid   = db.catalog().table_oid_for("test_table");

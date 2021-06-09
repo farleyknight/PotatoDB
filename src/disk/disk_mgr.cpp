@@ -49,7 +49,7 @@ file_id_t DiskMgr::create_table_file(const string& table_name) {
   return file_mgr_.create_file(table_file_for(table_name));
 }
 
-fs::path DiskMgr::table_file_for(const string& table_name) {
+fs::path DiskMgr::table_file_for(const string& table_name) const {
   return file_path_for(table_name + ".tbl");
 }
 

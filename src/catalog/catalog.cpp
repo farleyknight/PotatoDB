@@ -162,13 +162,13 @@ bool Catalog::has_table_named(const table_name_t& table_name) const {
   return table_oids_.count(table_name) > 0;
 }
 
-table_oid_t
-Catalog::create_table(// TODO: We should be attempting to get an exclusive lock
-                      // on the table, and abort the txn if we cannot get it.
-                      UNUSED Txn& txn,
-                      const table_name_t& table_name,
-                      const string& primary_key,
-                      ColumnDefListExpr column_list)
+// TODO: We should be attempting to get an
+// exclusive lock on the table, and abort the txn
+// if we cannot get it.
+table_oid_t Catalog::create_table(UNUSED Txn& txn,
+                                  const table_name_t& table_name,
+                                  const string& primary_key,
+                                  ColumnDefListExpr column_list)
 {
   assert(table_oids_.count(table_name) == 0);
 
@@ -191,6 +191,11 @@ Catalog::create_table(// TODO: We should be attempting to get an exclusive lock
   return table_oid;
 }
 
+void Catalog::load_from_query(const table_name_t& table_name,
+                              StatementResult& result)
+{
+  // TODO!
+}
 
 void Catalog::create_index(UNUSED Txn& txn,
                            const string index_name,

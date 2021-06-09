@@ -113,6 +113,8 @@ public:
       return TypeId::BOOLEAN;
     } else if (name == "TIMESTAMP") {
       return TypeId::TIMESTAMP;
+    } else if (name == "SMALLINT") {
+      return TypeId::SMALLINT;
     } else {
       throw Exception("Type not handled! " + name);
     }

@@ -18,7 +18,7 @@ public:
   void write_buffer(PageId page_id, const Buffer& buffer);
   void read_buffer(PageId page_id, Buffer& buffer);
 
-  void deallocate_page(UNUSED PageId page_id);
+  void deallocate_page(PageId page_id);
   PageId allocate_page(file_id_t file_id);
 
   file_id_t create_file(fs::path file_path) {

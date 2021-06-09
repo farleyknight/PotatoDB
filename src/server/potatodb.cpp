@@ -32,7 +32,7 @@ void PotatoDB::reset_installation() {
 }
 
 bool PotatoDB::file_exists(fs::path file_path) const {
-  return file_mgr_.file_exists(file_path);
+  return disk_mgr_.file_exists(file_path);
 }
 
 fs::path PotatoDB::table_file_for(const string& table_name) {
@@ -40,8 +40,8 @@ fs::path PotatoDB::table_file_for(const string& table_name) {
 }
 
 ptr<BasePlan> PotatoDB::sql_to_plan(const string& statement) const {
-  std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
-  std::cout << statement << std::endl;
+  // std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
+  // std::cout << statement << std::endl;
 
   // TODO: Rename as_exprs to as_stmts
   auto exprs = SQLParser::as_exprs(statement);
@@ -54,7 +54,7 @@ ptr<BasePlan> PotatoDB::sql_to_plan(const string& statement) const {
   return PlanFactory::create(catalog_, move(exprs[0]));
 }
 
-StatementResult PotatoDB::run_statement(const string& statement) {
+StatementResult PotatoDB::run(const string& statement) {
   try {
     auto plan = sql_to_plan(statement);
     // Create and run the txn
@@ -129,26 +129,21 @@ StatementResult PotatoDB::run_create_table(CreateTablePlan* create_table_plan,
 }
 
 void PotatoDB::build_system_catalog() {
-  // std::cout << "Begin loading system catalog" << std::endl;
-  // NOTE: These steps only need to be run if the system_catalog
-  // table does not already exist.
-  //
-  // TODO: Write a conditional here to check for that table.
-  //
-  // TODO: Wrap this all in a try block and capture any errors
+  std::cout << "Begin loading system catalog" << std::endl;
 
-  run_statement(SystemCatalog::create_table_sql);
-
-  run_statement(SystemCatalog::create_column_sql_for("system_catalog", "id"));
-  run_statement(SystemCatalog::create_column_sql_for("system_catalog", "type"));
-  run_statement(SystemCatalog::create_column_sql_for("system_catalog", "name"));
-  run_statement(SystemCatalog::create_column_sql_for("system_catalog", "table_name"));
+  if (table_file_exists("system_catalog")) {
+    SystemCatalog::load(*this);
+  } else {
+    SystemCatalog::create(*this);
+  }
 }
 
 // TODO: During testing, we sometimes want to delete all database files.
 // Write a method here to delete them.
 
 void PotatoDB::start_server() {
+  state_ = ServerState::RUNNING;
+
   // TODO: Add logging for this line
   std::cout << "Start PotatoDB Server (0.1.0)" << std::endl;
   server_.set_port(port_);
@@ -199,7 +194,4 @@ void PotatoDB::startup() {
 
   build_system_catalog();
   verify_system_files();
-
-  start_server();
-  state_ = ServerState::RUNNING;
 }

@@ -54,7 +54,7 @@ public:
     return 100;
   }
 
-  StatementResult run_statement(const string& statement);
+  StatementResult run(const string& statement);
   StatementResult run_create_table(CreateTablePlan* create_table_plan,
                                    const string& message,
                                    Txn& txn,
@@ -94,6 +94,10 @@ public:
 
   FileMgr& file_mgr() {
     return file_mgr_;
+  }
+
+  DiskMgr& disk_mgr() {
+    return disk_mgr_;
   }
 
   LogRecovery& log_recovery() {

@@ -12,7 +12,7 @@
 #include "value/value.hpp"
 
 const ptr<Type>& Type::instance(TypeId type_id) {
-  static MutMap<TypeId, ptr<Type>> types_;
+  static map<TypeId, ptr<Type>> types_;
   if (types_.empty()) {
     types_.emplace(TypeId::BOOLEAN,    make_unique<BooleanType>());
     types_.emplace(TypeId::TINYINT,    make_unique<TinyIntType>());
@@ -27,3 +27,4 @@ const ptr<Type>& Type::instance(TypeId type_id) {
 
   return types_.at(type_id);
 }
+

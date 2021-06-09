@@ -69,6 +69,10 @@ public:
   string_size_t variable_length() const { return variable_length_; }
   const column_name_t& name()     const { return name_; }
 
+  void set_primary_key(bool is_primary_key) {
+    primary_key_ = is_primary_key;
+  }
+
   bool is_splat() const {
     return false;
   }
@@ -135,7 +139,7 @@ private:
   // is the column inlined ?
   bool inlined_ = true;
   // is the column nullable?
-  bool nullable_ = false;
+  bool nullable_ = false; // TODO: Default should be true!
   // is the column a primary key?
   bool primary_key_ = false;
   // is the column an autoincrement?

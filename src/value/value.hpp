@@ -94,7 +94,7 @@ public:
   template <class T,
             std::enable_if_t<std::is_same<T, const char*>::value, bool> = false>
   static Value make(T data) {
-    return Value(TypeId::VARCHAR, DataStoreT(data));
+    return Value(TypeId::VARCHAR, DataStoreT(std::string(data)));
   }
 
   // TODO! Need to differentiate between COUNT(*) and *

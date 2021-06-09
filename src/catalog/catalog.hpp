@@ -15,7 +15,7 @@
 #include "index/base_index.hpp"
 #include "index/index_meta.hpp"
 
-class SchemaManager;
+#include "server/statement_result.hpp"
 
 class Catalog {
 public:
@@ -34,12 +34,18 @@ public:
                    const string& primary_key,
                    const ColumnDefListExpr& column_list) const;
 
-  table_oid_t create_table(UNUSED Txn& txn,
-                           const string& table_name,
-                           const string& primary_key,
-                           ColumnDefListExpr column_list);
+  table_oid_t
+  create_table(Txn& txn,
+               const table_name_t& table_name,
+               const column_name_t& primary_key,
+               ColumnDefListExpr column_list);
 
-  table_oid_t table_oid_for(const string& table_name) const {
+  TableColumn
+  create_table_column(const column_name_t& column_name) {
+
+  }
+
+  table_oid_t table_oid_for(const column_name_t& table_name) const {
     return table_oids_.at(table_name);
   }
 
@@ -89,11 +95,15 @@ public:
   vector<QueryColumn>
   all_columns_for(table_oid_t table_oid) const;
 
+  void load_from_query(const table_name_t& table_name,
+                       StatementResult& result);
+
 private:
   map<table_name_t, table_oid_t> table_oids_;
   atomic<table_oid_t> next_table_oid_ = 0;
   map<table_oid_t, TableSchema> table_schemas_;
 
+  atomic<column_oid_t> next_column_oid_ = 0;
   // MutMap<column_name_t, vector<table_oid_t>> column_name_to_table_oids_;
 
   map<table_name_t,

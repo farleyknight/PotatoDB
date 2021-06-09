@@ -36,11 +36,19 @@ public:
     log_io_.close();
   }
 
-  fs::path file_path_for(const string& file_name) {
+  fs::path file_path_for(const string& file_name) const {
     return db_directory() / file_name;
   }
 
-  fs::path table_file_for(const string& table_name);
+  fs::path table_file_for(const string& table_name) const;
+
+  bool file_exists(const string& file_name) const {
+    return file_mgr_.file_exists(file_name);
+  }
+
+  bool table_file_exists(const string& table_name) const {
+    return file_mgr_.file_exists(table_file_for(table_name));
+  }
 
   void remove_all_files() {
     auto iter = fs::directory_iterator(db_directory());
