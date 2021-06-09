@@ -66,9 +66,11 @@ private:
   atomic<lsn_t> persisted_lsn_ {INVALID_LSN};
 
   // TODO: Replace with Buffer class
-  Buffer log_buffer_, flush_buffer_;
+  Buffer log_buffer_   {LOG_BUFFER_SIZE},
+         flush_buffer_ {LOG_BUFFER_SIZE};
 
-  buffer_offset_t log_buffer_offset_ = 0;
+  buffer_offset_t log_buffer_length_ = 0,
+                  flush_buffer_length_ = 0;
 
   mutex latch_;
 
@@ -78,8 +80,8 @@ private:
   std::future<void> flush_future_;
 
   atomic<bool> running_flush_thread_ {false},
-    is_logging_enabled_   {false},
-    flush_requested_      {false};
+               is_logging_enabled_   {false},
+               flush_requested_      {false};
 
   DiskMgr& disk_mgr_;
 

@@ -1,12 +1,8 @@
-
 #include "recovery/log_mgr.hpp"
 
 LogMgr::LogMgr(DiskMgr& disk_mgr)
   : disk_mgr_(disk_mgr)
-{
-  log_buffer_.resize(LOG_BUFFER_SIZE);
-  flush_buffer_.resize(LOG_BUFFER_SIZE);
-}
+{}
 
 // Performs a synchronous flush
 //
@@ -57,15 +53,16 @@ void LogMgr::run_flush_thread() {
         return flush_requested_.load();
       });
 
-      assert(flush_buffer_.size() == 0);
+      assert(flush_buffer_length_ == 0);
       if (log_buffer_.size() > 0) {
+        std::swap(log_buffer_length_, flush_buffer_length_);
         log_buffer_.swap(flush_buffer_);
 
         std::cout << "Attempting flush to WAL" << std::endl;
 
         // TODO: Change `disk_mgr_` to a different object
         disk_mgr_.write_log(flush_buffer_);
-        flush_buffer_.truncate();
+        flush_buffer_length_ = 0;
       }
       flush_requested_ = false;
       append_cv_.notify_all();
@@ -79,12 +76,14 @@ void LogMgr::stop_flush_thread() {
   // Logging no longer enbled
   is_logging_enabled_ = false;
   // Join the flush thread
-  flush_future_.get();
+  if (flush_future_.valid()) {
+    flush_future_.get();
+  }
   // No longer running thread
   running_flush_thread_ = false;
   // Assert both log & flush buffers are empty
-  assert(log_buffer_.size() == 0);
-  assert(flush_buffer_.size() == 0);
+  assert(log_buffer_length_ == 0);
+  assert(flush_buffer_length_ == 0);
 }
 
 void LogMgr::write_header(const LogRecord& log_record) {
