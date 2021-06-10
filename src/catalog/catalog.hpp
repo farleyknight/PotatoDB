@@ -17,6 +17,14 @@
 
 #include "server/statement_result.hpp"
 
+
+// TODO:
+// I'm thinking about renaming `Catalog` to `SchemaMgr` since it seems to be
+// handling a lot of details related to the schema objects.
+//
+// If that does happen, then we would have to figure out what exactly
+// `SystemCatalog` is responsible for.
+//
 class Catalog {
 public:
   Catalog();
@@ -39,11 +47,6 @@ public:
                const table_name_t& table_name,
                const column_name_t& primary_key,
                ColumnDefListExpr column_list);
-
-  TableColumn
-  create_table_column(const column_name_t& column_name) {
-
-  }
 
   table_oid_t table_oid_for(const column_name_t& table_name) const {
     return table_oids_.at(table_name);
@@ -99,12 +102,19 @@ public:
                        StatementResult& result);
 
 private:
+  // I'm thinking that these two instance variables should be long to
+  // `SystemCatalog`
   map<table_name_t, table_oid_t> table_oids_;
   atomic<table_oid_t> next_table_oid_ = 0;
+
+  // I'm thinking this instance variable should stay here, in `Catalog`
+  // (or `SchemaMgr` if I rename it)
   map<table_oid_t, TableSchema> table_schemas_;
 
+  // I'm thinking that these two instance variables should be long to
+  // `SystemCatalog`
   atomic<column_oid_t> next_column_oid_ = 0;
-  // MutMap<column_name_t, vector<table_oid_t>> column_name_to_table_oids_;
+  map<column_name_t, column_oid_t> column_oids_;
 
   map<table_name_t,
       map<index_name_t, index_oid_t>> index_oids_;
