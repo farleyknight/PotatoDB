@@ -136,7 +136,10 @@ public:
   }
 
   static void load(PotatoDB& db) {
+    auto &txn = db.txn_mgr().begin();
+
     db.catalog().load_table(system_catalog_table_oid(), "system_catalog", schema());
+    db.table_mgr().load_table("system_catalog", system_catalog_table_oid(), txn);
 
     assert(db.catalog().has_table_named("system_catalog"));
 
@@ -150,7 +153,6 @@ public:
     assert(result_set);
     assert(result_set->size() > 0);
 
-    auto &txn = db.txn_mgr().begin();
 
     for (size_t i = 0; i < result_set->size(); ++i) {
       auto table_oid  = result_set->value_at<int32_t>("id", i);
