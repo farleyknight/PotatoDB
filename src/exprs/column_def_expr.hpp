@@ -11,6 +11,8 @@ public:
       type_id_   (type_id)
   {}
 
+  // TODO: Rename type_length to variable_length, which is the same
+  // variable on the TableColumn class
   ColumnDefExpr(column_name_t name, TypeId type_id, length_t type_length)
     : BaseExpr     (ExprType::COLUMN_DEF),
       name_        (name),
@@ -18,8 +20,8 @@ public:
       type_length_ (type_length)
   {}
 
- virtual const string to_string() const override {
-   return name_ + " " + Type::as_string(type_id_);
+  virtual const string to_string() const override {
+    return name_ + " " + Type::as_string(type_id_);
   }
 
   const column_name_t& name() const {
@@ -46,8 +48,8 @@ public:
     return primary_key_;
   }
 
-  void is_primary_key(bool state) {
-    primary_key_ = state;
+  void is_primary_key(bool primary_key) {
+    primary_key_ = primary_key;
   }
 
   bool auto_increment() {

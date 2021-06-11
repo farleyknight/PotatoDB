@@ -98,8 +98,13 @@ public:
   vector<QueryColumn>
   all_columns_for(table_oid_t table_oid) const;
 
-  void load_from_query(const table_name_t& table_name,
+  void load_from_query(table_oid_t table_oid,
+                       const table_name_t& table_name,
                        StatementResult& result);
+
+  void load_table(table_oid_t table_oid,
+                  const table_name_t& table_name,
+                  const TableSchema& schema);
 
 private:
   // I'm thinking that these two instance variables should be long to

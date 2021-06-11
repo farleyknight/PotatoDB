@@ -55,7 +55,7 @@ protected:
   // keeps track of unlined columns, using logical position(start with 0)
   vector<column_index_t> unlined_columns_;
 
-  MutMap<column_name_t, column_oid_t> column_oids_;
+  map<column_name_t, column_oid_t> column_oids_;
   vector<buffer_offset_t> offsets_;
 
   // size of fixed length columns

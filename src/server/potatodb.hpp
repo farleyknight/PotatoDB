@@ -55,10 +55,11 @@ public:
   }
 
   StatementResult run(const string& statement);
-  StatementResult run_create_table(CreateTablePlan* create_table_plan,
-                                   const string& message,
-                                   Txn& txn,
-                                   ExecCtx& exec_ctx);
+
+  void run_create_table(const table_name_t table_name,
+                        const vector<ColumnDefExpr> column_list,
+                        Txn& txn,
+                        ExecCtx& exec_ctx);
 
   void reset_installation();
   void verify_system_files();
@@ -69,6 +70,10 @@ public:
   }
 
   Catalog& catalog() {
+    return catalog_;
+  }
+
+  const Catalog& catalog() const {
     return catalog_;
   }
 

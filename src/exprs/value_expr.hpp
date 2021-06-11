@@ -5,6 +5,7 @@
 #include "value/value.hpp"
 
 enum class ValueType {
+  NIL       = 0,
   BOOLEAN   = 1,
   INTEGER   = 2,
   STRING    = 3,
@@ -25,6 +26,13 @@ public:
       number_     (number)
   {}
 
+  explicit ValueExpr(ValueType type)
+    : BaseExpr     (ExprType::VALUE),
+      value_type_  (type)
+  {
+    assert(type == ValueType::NIL);
+  }
+
   explicit ValueExpr(ValueType type, string data)
     : BaseExpr     (ExprType::VALUE),
       value_type_  (type),
@@ -44,6 +52,7 @@ public:
     case ValueType::TIMESTAMP: return std::to_string(timestamp_data_);
     case ValueType::BOOLEAN:   return std::to_string(flag_);
     case ValueType::INTEGER:   return std::to_string(number_);
+    case ValueType::NIL:       return "NULL";
     }
   }
 
@@ -54,6 +63,7 @@ public:
     case ValueType::TIMESTAMP: return Value::make(timestamp_data_);
     case ValueType::BOOLEAN:   return Value::make(flag_);
     case ValueType::INTEGER:   return Value::make(number_);
+    case ValueType::NIL:       return Value::make(nullptr);
     }
   }
 

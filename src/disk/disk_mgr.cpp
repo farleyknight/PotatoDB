@@ -49,6 +49,10 @@ file_id_t DiskMgr::create_table_file(const string& table_name) {
   return file_mgr_.create_file(table_file_for(table_name));
 }
 
+file_id_t DiskMgr::load_table_file(const string& table_name) {
+  return file_mgr_.load_file(table_file_for(table_name));
+}
+
 fs::path DiskMgr::table_file_for(const string& table_name) const {
   return file_path_for(table_name + ".tbl");
 }
@@ -61,6 +65,10 @@ void DiskMgr::setup_db_directory() {
 
 PageId DiskMgr::allocate_page(file_id_t file_id) {
   return file_mgr_.allocate_page(file_id);
+}
+
+PageId DiskMgr::first_page(file_id_t file_id) {
+  return file_mgr_.first_page(file_id);
 }
 
 void DiskMgr::deallocate_page(PageId page_id) {

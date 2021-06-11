@@ -7,7 +7,7 @@
 
 class PlanFactory {
 public:
-  static ptr<BasePlan> create(const Catalog& catalog_,
+  static ptr<BasePlan> create(const PotatoDB& db,
                               ptr<BaseExpr>&& expr)
   {
     switch (expr->expr_type()) {
@@ -17,31 +17,35 @@ public:
     }
     case ExprType::SELECT: {
       auto select_expr = dynamic_cast<SelectExpr*>(expr.get());
-      return from_expr(catalog_, *select_expr);
+      return from_expr(db.catalog(), *select_expr);
     }
     case ExprType::COMPOUND_SELECT: {
       auto compound_expr = dynamic_cast<CompoundSelectExpr*>(expr.get());
-      return from_expr(catalog_, *compound_expr);
+      return from_expr(db.catalog(), *compound_expr);
     }
     case ExprType::INSERT: {
       auto insert_expr = dynamic_cast<InsertExpr*>(expr.get());
-      return from_expr(catalog_, *insert_expr);
+      return from_expr(db.catalog(), *insert_expr);
     }
     case ExprType::SHOW_TABLES: {
-      auto show_tables_expr = dynamic_cast<ShowTablesExpr*>(expr.get());
-      return from_expr(catalog_, *show_tables_expr);
+      auto object_type = SystemCatalog::table_type();
+      return db.sql_to_plan("SELECT * FROM system_catalog WHERE object_type == " + object_type);
     }
     case ExprType::DESCRIBE_TABLE: {
+      auto object_type = SystemCatalog::column_type();
       auto describe_table_expr = dynamic_cast<DescribeTableExpr*>(expr.get());
-      return from_expr(catalog_, *describe_table_expr);
+      auto table_name = "'" + describe_table_expr->table().name() + "'";
+      auto sql = "SELECT * FROM system_catalog WHERE object_type = " \
+        + object_type + " AND table_name = " + table_name;
+      return db.sql_to_plan(sql);
     }
     case ExprType::UPDATE: {
       auto update_expr = dynamic_cast<UpdateExpr*>(expr.get());
-      return from_expr(catalog_, *update_expr);
+      return from_expr(db.catalog(), *update_expr);
     }
     case ExprType::DELETE_FROM: {
       auto delete_from_expr = dynamic_cast<DeleteFromExpr*>(expr.get());
-      return from_expr(catalog_, *delete_from_expr);
+      return from_expr(db.catalog(), *delete_from_expr);
     }
     default:
       throw NotImplementedException("Not finished :(");
@@ -250,61 +254,6 @@ public:
     return make_unique<QueryWhere>(move(left_query),
                                    clause->logical_type(),
                                    move(right_query));
-  }
-
-  static ptr<BasePlan> from_expr(const Catalog& catalog,
-                                 UNUSED const ShowTablesExpr& expr)
-  {
-    auto table_name = "system_catalog";
-    auto table_oid = catalog.table_oid_for(table_name);
-    auto schema = catalog.query_schema_for(table_name);
-
-    auto type_col = make_unique<QueryColumn>(schema["type"]);
-
-    auto value = Value::make(static_cast<int32_t>(SystemCatalogTypes::TABLE));
-    auto query_const = make_unique<QueryConst>(value);
-
-    auto table_comp = make_unique<QueryComp>(move(type_col),
-                                             CompareType::EQ,
-                                             move(query_const));
-
-    auto table_pred = make_unique<QueryWhere>(move(table_comp));
-
-    return make_unique<SeqScanPlan>(schema,
-                                    table_oid,
-                                    move(table_pred));
-  }
-
-  static ptr<BasePlan> from_expr(const Catalog& catalog, const DescribeTableExpr& expr) {
-    auto system_table_name = "system_catalog";
-    auto table_oid = catalog.table_oid_for(system_table_name);
-    auto schema = catalog.query_schema_for(system_table_name);
-
-    auto type_col = make_unique<QueryColumn>(schema["type"]);
-
-    auto column_value = Value::make(static_cast<int32_t>(SystemCatalogTypes::COLUMN));
-    auto column_const = make_unique<QueryConst>(column_value);
-
-    auto column_comp = make_unique<QueryComp>(move(type_col),
-                                              CompareType::EQ,
-                                              move(column_const));
-
-    auto table_value = Value::make(expr.table().name());
-    auto table_name = make_unique<QueryConst>(table_value);
-
-    auto name_col = make_unique<QueryColumn>(schema["table_name"]);
-
-    auto table_comp = make_unique<QueryComp>(move(name_col),
-                                             CompareType::EQ,
-                                             move(table_name));
-
-    auto table_pred = make_unique<QueryWhere>(move(column_comp),
-                                              LogicalType::AND,
-                                              move(table_comp));
-
-    return make_unique<SeqScanPlan>(schema,
-                                    table_oid,
-                                    move(table_pred));
   }
 
   static ptr<BasePlan> from_expr(const Catalog& catalog, const InsertExpr& expr) {

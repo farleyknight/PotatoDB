@@ -97,6 +97,14 @@ public:
     return Value(TypeId::VARCHAR, DataStoreT(std::string(data)));
   }
 
+  template <class T,
+            std::enable_if_t<std::is_same<T, nullptr_t>::value, bool> = false>
+  static Value make(T data) {
+    // TODO: How to properly handle NULLs here?
+    // The type "INVALID" is probably not the best choice..
+    return Value(TypeId::INVALID, DataStoreT(data));
+  }
+
   // TODO! Need to differentiate between COUNT(*) and *
   // COUNT(*) has should have `type_id == TypeId::INTEGER`
   static Value count_splat() {

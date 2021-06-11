@@ -17,6 +17,26 @@ public:
       buff_mgr_ (buff_mgr)
   {}
 
+  void load_table(const string table_name,
+                  table_oid_t table_oid,
+                  Txn& txn)
+  {
+    // TODO: During load_table_file
+    file_id_t file_id = disk_mgr_.load_table_file(table_name);
+    auto page_id      = disk_mgr_.first_page(file_id);
+    page_ids_.insert(make_pair(table_oid, page_id));
+
+    auto heap = make_unique<TableHeap>(file_id,
+                                       table_oid,
+                                       page_id,
+                                       buff_mgr_,
+                                       lock_mgr_,
+                                       log_mgr_,
+                                       txn);
+
+    table_heaps_.insert(make_pair(table_oid, move(heap)));
+  }
+
   void create_table(const string table_name,
                     table_oid_t table_oid,
                     Txn& txn)
@@ -37,6 +57,7 @@ public:
   }
 
   TableHeap& table_heap_for(table_oid_t table_oid) {
+    assert(table_heaps_.count(table_oid) == 1);
     return *table_heaps_.at(table_oid);
   }
 

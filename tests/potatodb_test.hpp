@@ -115,7 +115,7 @@ TEST(PotatoDBTest, CreateTableTest) {
 
   EXPECT_TRUE(db.disk_mgr().table_file_exists("foo_bar"));
 
-  auto result = db.run("SELECT * FROM system_catalog WHERE name == 'foo_bar'");
+  auto result = db.run("SELECT * FROM system_catalog WHERE table_name == 'foo_bar'");
   auto &result_set = result.set();
 
   EXPECT_EQ(result_set->size(), 1);
@@ -149,6 +149,18 @@ TEST(PotatoDBTest, CreateTableIfNotExistsTest) {
   EXPECT_EQ(result.to_payload(), "Just a WARNING");
 }
 
+TEST(PotatoDBTest, DISABLED_MissingColumnTest) {
+  PotatoDB db;
+  db.reset_installation();
+
+  db.run("CREATE TABLE foo_bar ( colA INTEGER, colB INTEGER )");
+
+  auto result = db.run("SELECT colC FROM foo_bar");
+
+  EXPECT_TRUE(result.set() == nullptr);
+  EXPECT_EQ(result.to_payload(), "Could not find column 'colC' on table 'foo_bar");
+}
+
 TEST(PotatoDBTest, ShowTablesTest) {
   PotatoDB db;
   db.reset_installation();
@@ -156,7 +168,7 @@ TEST(PotatoDBTest, ShowTablesTest) {
   auto result = db.run("SHOW TABLES");
   auto &result_set = result.set();
 
-  EXPECT_EQ(result_set->size(), 1);
+  ASSERT_EQ(result_set->size(), 1);
   EXPECT_EQ(result_set->value_at<string>("table_name", 0), "system_catalog");
 }
 
@@ -169,7 +181,7 @@ TEST(PotatoDBTest, ShowTablesFooBarTest) {
   auto result = db.run("SHOW TABLES");
   auto &result_set = result.set();
 
-  EXPECT_EQ(result_set->size(), 2);
+  ASSERT_EQ(result_set->size(), 2);
   EXPECT_EQ(result_set->value_at<string>("table_name", 0), "system_catalog");
   EXPECT_EQ(result_set->value_at<string>("table_name", 1), "foo_bar");
 }
@@ -182,9 +194,45 @@ TEST(PotatoDBTest, DescribeTableTest) {
   auto result = db.run("DESCRIBE TABLE foo_bar");
   auto &result_set = result.set();
 
-  EXPECT_EQ(result_set->size(), 2);
-  EXPECT_EQ(result_set->value_at<string>("name", 0), "colA");
-  EXPECT_EQ(result_set->value_at<string>("name", 1), "colB");
+  ASSERT_EQ(result_set->size(), 2);
+  EXPECT_EQ(result_set->value_at<string>("object_name", 0), "colA");
+  EXPECT_EQ(result_set->value_at<string>("object_name", 1), "colB");
+}
+
+TEST(PotatoDBTest, LoadSystemCatalogAfterRestartTest) {
+  PotatoDB db;
+  db.reset_installation();
+
+  db.run("CREATE TABLE foo_bar ( colA INTEGER, colB INTEGER )");
+
+  // NOTE: Use 2nd instance to simulate starting a new DB
+  PotatoDB db2;
+  // NOTE: startup() should NOT start the server!
+  // Otherwise it will block all other tests!
+  db2.startup();
+
+  auto result = db2.run("DESCRIBE TABLE foo_bar");
+  auto &result_set = result.set();
+
+  ASSERT_EQ(result_set->size(), 2);
+  EXPECT_EQ(result_set->value_at<string>("object_name", 0), "colA");
+  EXPECT_EQ(result_set->value_at<string>("object_name", 1), "colB");
+}
+
+TEST(PotatoDBTest, LoadSchemaAfterRestartTest) {
+  PotatoDB db;
+  db.reset_installation();
+
+  db.run("CREATE TABLE foo_bar ( colA INTEGER, colB INTEGER )");
+
+  PotatoDB db2;
+  // NOTE: startup() should NOT start the server!
+  // Otherwise it will block all other tests!
+  db2.startup();
+
+  EXPECT_TRUE(db2.catalog().has_table_named("foo_bar"));
+  EXPECT_TRUE(db2.catalog().table_has_column_named("foo_bar", "colA"));
+  EXPECT_TRUE(db2.catalog().table_has_column_named("foo_bar", "colB"));
 }
 
 TEST(PotatoDBTest, DISABLED_DropTableTest) {
@@ -215,10 +263,10 @@ TEST(PotatoDBTest, DISABLED_TruncateTableTest) {
   EXPECT_EQ(result_set->size(), 0);
 }
 
-TEST(PotatoDBTest, AlterTableDropColumnTest) {
+TEST(PotatoDBTest, DISABLED_AlterTableDropColumnTest) {
   // TODO!
 }
 
-TEST(PotatoDBTest, AlterTableAddColumnTest) {
+TEST(PotatoDBTest, DISABLED_AlterTableAddColumnTest) {
   // TODO!
 }

@@ -20,6 +20,7 @@ public:
   DiskMgr& operator=(const DiskMgr&) = delete;
 
   file_id_t create_table_file(const string& table_name);
+  file_id_t load_table_file(const string& table_name);
 
   void write_page(PageId page_id, const Page& page);
   void read_page(PageId page_id, Page& page);
@@ -28,8 +29,9 @@ public:
   bool read_log(Buffer& log_data, buffer_offset_t offset);
 
   PageId allocate_page(file_id_t file_id);
-  void deallocate_page(PageId page_id);
+  PageId first_page(file_id_t file_id);
 
+  void deallocate_page(PageId page_id);
 
   void shutdown() {
     // TODO Close all file handles, not just the log file

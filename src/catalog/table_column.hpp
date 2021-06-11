@@ -17,7 +17,7 @@ public:
   TableColumn()
     : fixed_length_(INVALID_LENGTH) {}
 
-  TableColumn(const string name,
+  TableColumn(const column_name_t name,
               table_oid_t table_oid,
               column_oid_t column_oid,
               TypeId type_id)
@@ -32,7 +32,7 @@ public:
     assert(type_id != TypeId::VARCHAR);
   }
 
-  explicit TableColumn(const string name,
+  explicit TableColumn(const column_name_t name,
                        table_oid_t table_oid,
                        column_oid_t column_oid,
                        TypeId type_id,

@@ -14,7 +14,7 @@ void FileMgr::read_buffer(PageId page_id, Buffer& buffer) {
 
 // TODO:
 // 1) allocate_page should take a file_id
-// 2) keep track fo all file_ids
+// 2) keep track of all file_ids
 // 3) on each call to `allocate_path`, increment a counter just for
 //    that particular file_id
 PageId FileMgr::allocate_page(file_id_t file_id) {
@@ -22,12 +22,18 @@ PageId FileMgr::allocate_page(file_id_t file_id) {
   // or "CREATE INDEX" context.
 
   if (next_block_ids_.count(file_id) == 0) {
-    next_block_ids_.emplace(make_pair(0, 0));
-    return PageId(file_id, 0);
+    next_block_ids_[file_id] = 0;
   } else {
-    auto block_id = next_block_ids_[file_id]++;
-    return PageId(file_id, block_id);
+    next_block_ids_[file_id]++;
   }
+
+  return PageId(file_id, next_block_ids_[file_id]);
+}
+
+PageId FileMgr::first_page(file_id_t file_id) {
+  assert(next_block_ids_.count(file_id) == 0);
+  next_block_ids_[file_id] = 0;
+  return PageId(file_id, next_block_ids_[file_id]);
 }
 
 void FileMgr::deallocate_page(UNUSED PageId page_id) {
