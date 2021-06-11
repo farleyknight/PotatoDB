@@ -66,6 +66,10 @@ public:
   string_size_t variable_length() const { return variable_length_; }
   const column_name_t& name()     const { return name_; }
 
+  void set_nullable(bool nullable) {
+    nullable_ = nullable;
+  }
+
   void set_primary_key(bool primary_key) {
     primary_key_ = primary_key;
   }

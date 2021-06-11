@@ -113,7 +113,7 @@ public:
   }
 
   static void create(PotatoDB& db) {
-    db.run(create_table_sql);
+    db.run(create_table_sql());
 
     db.run(insert_column_sql_for(id_column()));
     db.run(insert_column_sql_for(object_type_column()));
