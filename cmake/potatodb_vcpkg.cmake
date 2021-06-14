@@ -37,25 +37,3 @@ endif()
 # NOTE: Previous build was not picking up "MurmurHash3.h"
 include_directories(${CMAKE_BINARY_DIR}/vcpkg_installed/x64-osx/include)
 
-# -----------------------------------------------------------------------------
-# Packages - Manually maintained duplicate list of packages from `vcpkg.json`
-# -----------------------------------------------------------------------------
-
-# fmt
-find_package(fmt CONFIG REQUIRED)
-# MurmurHash
-find_package(murmurhash CONFIG REQUIRED)
-# GTest
-find_package(GTest CONFIG REQUIRED)
-# ASIO
-find_package(asio CONFIG REQUIRED)
-# Google benchmark
-find_package(benchmark CONFIG REQUIRED)
-# ANTLR4
-# TODO: Use this to figure out setting up ANTLR4 w/ CMake
-# https://github.com/antlr/antlr4/tree/master/runtime/Cpp/cmake
-#find_package(antlr4-generator CONFIG REQUIRED)
-#find_package(antlr4-runtime CONFIG REQUIRED)
-
-# NOTE: Not sure if I need this?
-# find_package(Threads CONFIG REQUIRED)

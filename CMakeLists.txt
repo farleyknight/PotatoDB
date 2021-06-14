@@ -12,6 +12,7 @@ include(potatodb_settings)
 
 # C++ packages via vcpkg
 include(potatodb_vcpkg)
+include(potatodb_vcpkg_packages)
 
 include(potatodb_build_libraries)
 

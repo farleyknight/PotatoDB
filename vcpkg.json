@@ -1,13 +1,14 @@
 {
-    "name": "potatodb",
-    "version-string": "0.1.0",
-    "dependencies": [
-        "fmt",
-        "murmurhash",
-        "antlr4",
-        "benchmark",
-        "gtest",
-        "ms-gsl",
-        "asio"
-    ]
+  "name": "potatodb",
+  "version-string": "0.1.0",
+  "dependencies": [
+    "fmt",
+    "spdlog",
+    "murmurhash",
+    "antlr4",
+    "benchmark",
+    "gtest",
+    "ms-gsl",
+    "asio"
+  ]
 }
