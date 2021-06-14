@@ -187,6 +187,7 @@ void Catalog::load_table(table_oid_t table_oid,
                          const TableSchema& schema)
 {
   table_oids_[table_name] = table_oid;
+  table_names_[table_oid] = table_name;
 
   table_schemas_.insert(make_pair(table_oid, schema));
 

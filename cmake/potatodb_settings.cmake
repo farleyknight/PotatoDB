@@ -75,6 +75,7 @@ set(main_sources
   "src/common/hash_util.cpp"
   "src/disk/disk_mgr.cpp"
   "src/disk/file_mgr.cpp"
+  "src/disk/file_handle.cpp"
   "src/execs/agg_exec.cpp"
   "src/execs/exec_ctx.cpp"
   "src/execs/hash_join_exec.cpp"

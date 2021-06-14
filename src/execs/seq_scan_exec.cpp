@@ -11,6 +11,7 @@ bool SeqScanExec::match_found(const Tuple& tuple) {
     auto result = plan_->pred().
       eval(tuple, schema()).as<bool>();
 
+    std::cout << "Result from match attempt: " << std::to_string(result) << std::endl;
     return result;
   } else {
     return true;
@@ -22,18 +23,23 @@ bool SeqScanExec::at_the_end() {
 }
 
 bool SeqScanExec::has_next() {
-  // std::cout << "Checking if we have a tuple" << std::endl;
+  std::cout << "Checking if we have a tuple" << std::endl;
   if (!table_iter_->has_tuple()) {
-    // std::cout << "NO TUPLE! " << std::endl;
+    std::cout << "NO TUPLE! :( :( :(" << std::endl;
     return false;
   }
 
   while (!at_the_end()) {
+    std::cout << "%%%%%%%%%%%%%%%% Checking Tuple: " << table_iter_->tuple().to_string(schema()) << std::endl;
+
     if (match_found(table_iter_->tuple())) {
+      std::cout << "MATCH FOUND! :) :) :)" << std::endl;
       return true;
     }
     ++(*table_iter_);
   }
+
+  std::cout << "NO MATCH WAS FOUND! :( :( :(" << std::endl;
   return false;
 }
 

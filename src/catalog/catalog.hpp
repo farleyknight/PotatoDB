@@ -48,8 +48,12 @@ public:
                const column_name_t& primary_key,
                ColumnDefListExpr column_list);
 
-  table_oid_t table_oid_for(const column_name_t& table_name) const {
+  table_oid_t table_oid_for(const table_name_t& table_name) const {
     return table_oids_.at(table_name);
+  }
+
+  table_name_t table_name_for(table_oid_t table_oid) const {
+    return table_names_.at(table_oid);
   }
 
   TableSchema& table_schema_for(table_oid_t table_oid) {
@@ -110,6 +114,8 @@ private:
   // I'm thinking that these two instance variables should be long to
   // `SystemCatalog`
   map<table_name_t, table_oid_t> table_oids_;
+  map<table_oid_t, table_name_t> table_names_;
+
   atomic<table_oid_t> next_table_oid_ = 0;
 
   // I'm thinking this instance variable should stay here, in `Catalog`

@@ -37,6 +37,9 @@ public:
     // NOTE: At this point, the tuple should include all columns from the table schema
     // Hence we need to pass in the table schema.
 
+    std::cout << std::endl;
+    auto table_name = exec_ctx_.catalog().table_name_for(plan_->table_oid());
+    std::cout << "Inserting tuple into table: " << table_name << std::endl;
     heap.insert_tuple(new_tuple, txn());
 
     return tuple;

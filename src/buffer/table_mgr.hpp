@@ -18,8 +18,7 @@ public:
   {}
 
   void load_table(const string table_name,
-                  table_oid_t table_oid,
-                  Txn& txn)
+                  table_oid_t table_oid)
   {
     // TODO: During load_table_file
     file_id_t file_id = disk_mgr_.load_table_file(table_name);
@@ -31,8 +30,7 @@ public:
                                        page_id,
                                        buff_mgr_,
                                        lock_mgr_,
-                                       log_mgr_,
-                                       txn);
+                                       log_mgr_);
 
     table_heaps_.insert(make_pair(table_oid, move(heap)));
   }
@@ -50,8 +48,14 @@ public:
                                        page_id,
                                        buff_mgr_,
                                        lock_mgr_,
-                                       log_mgr_,
-                                       txn);
+                                       log_mgr_);
+
+    // NOTE: We should only be allocating the first page when this is a brand new
+    // table.
+    //
+    // Tables that already exist in the file system should use `load_table`, thus
+    // preventing the allocation step from having to happen at all!
+    heap->allocate_first_page(txn);
 
     table_heaps_.insert(make_pair(table_oid, move(heap)));
   }

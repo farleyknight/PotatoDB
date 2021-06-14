@@ -15,8 +15,7 @@ public:
             PageId first_page_id,
             BuffMgr& buff_mgr,
             LockMgr& lock_mgr,
-            LogMgr& log_mgr,
-            Txn& txn);
+            LogMgr& log_mgr);
 
   ~TableHeap() = default;
 
@@ -24,6 +23,8 @@ public:
   TableHeap(const TableHeap&) = delete;
   // No copy assign
   TableHeap& operator=(const TableHeap&) = delete;
+
+  void allocate_first_page(Txn& txn);
 
   const PageId first_page_id() const {
     return first_page_id_;

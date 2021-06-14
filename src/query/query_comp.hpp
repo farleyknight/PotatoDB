@@ -27,22 +27,24 @@ public:
                  const vector<Value>& aggregates) const override;
 
 private:
-  bool compare(const Value& lhs,
-               const Value& rhs) const
+  bool compare(const Value& left,
+               const Value& right) const
   {
+    std::cout << "Comparing left: " << left.to_string() << " and right: " << right.to_string() << std::endl;
+
     switch (type_) {
     case CompareType::EQ:
-      return lhs.eq(rhs);
+      return left.eq(right);
     case CompareType::NE:
-      return lhs.ne(rhs);
+      return left.ne(right);
     case CompareType::LT:
-      return lhs.lt(rhs);
+      return left.lt(right);
     case CompareType::LTE:
-      return lhs.lte(rhs);
+      return left.lte(right);
     case CompareType::GT:
-      return lhs.gt(rhs);
+      return left.gt(right);
     case CompareType::GTE:
-      return lhs.gte(rhs);
+      return left.gte(right);
     default:
       throw NotImplementedException("Unsupported comparison type.");
     }

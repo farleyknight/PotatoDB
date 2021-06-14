@@ -225,6 +225,18 @@ TEST(PotatoDBTest, LoadSystemCatalogAfterRestartTest) {
   EXPECT_EQ(result_set->value_at<string>("object_name", 1), "colB");
 }
 
+TEST(PotatoDBTest, SelectOnlySomeColumnsTest) {
+  PotatoDB db;
+  db.reset_installation();
+
+  auto result = db.run("SELECT id, table_name FROM system_catalog WHERE object_type = 1");
+  ASSERT_TRUE(result.set() != nullptr);
+  ASSERT_TRUE(result.set()->size() > 0);
+
+  EXPECT_EQ(result.set()->value_at<int32_t>("id", 0), 1);
+  EXPECT_EQ(result.set()->value_at<string>("table_name", 0), "system_catalog");
+}
+
 TEST(PotatoDBTest, LoadSchemaAfterRestartTest) {
   PotatoDB db;
   db.reset_installation();

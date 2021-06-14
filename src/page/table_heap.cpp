@@ -17,22 +17,29 @@ TableHeap::TableHeap(file_id_t file_id,
                      PageId first_page_id,
                      BuffMgr& buff_mgr,
                      LockMgr& lock_mgr,
-                     LogMgr& log_mgr,
-                     Txn& txn)
+                     LogMgr& log_mgr)
   : file_id_       (file_id),
     table_oid_     (table_oid),
     first_page_id_ (first_page_id),
     lock_mgr_      (lock_mgr),
     log_mgr_       (log_mgr),
     buff_mgr_      (buff_mgr)
-{
-  SlottedTablePage first_page(buff_mgr_.fetch_page(first_page_id));
+{}
+
+void TableHeap::allocate_first_page(Txn& txn) {
+  // NOTE: txn is only necessary here because we are creating the
+  // first page of the table.
+  //
+  // Therefore txn is no longer needed in the constructor.
+  SlottedTablePage first_page(buff_mgr_.fetch_page(first_page_id_));
 
   first_page.wlatch();
-  first_page.init(first_page_id_,
-                  PageId::STOP_ITERATING(file_id),
-                  txn,
-                  log_mgr_);
+  // TODO: If `allocate` fails (run out of disk space?) then we
+  // need to abort the transaction.
+  first_page.allocate(first_page_id_,
+                      PageId::STOP_ITERATING(file_id_),
+                      txn,
+                      log_mgr_);
   first_page.wunlatch();
 
   buff_mgr_.unpin(first_page_id_, true);
@@ -87,10 +94,10 @@ bool TableHeap::insert_tuple(Tuple& tuple,
 
       // Otherwise we were able to create a new page. We initialize it now.
       curr_page.set_next_page_id(new_page.page_id());
-      new_page.init(new_page.page_id(),
-                    curr_page.table_page_id(),
-                    txn,
-                    log_mgr_);
+      new_page.allocate(new_page.page_id(),
+                        curr_page.table_page_id(),
+                        txn,
+                        log_mgr_);
       buff_mgr_.unpin(curr_page.table_page_id(), true);
       curr_page = new_page;
     }

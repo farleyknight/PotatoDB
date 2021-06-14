@@ -10,10 +10,10 @@ public:
   {}
 
   // TODO: Rename to `allocate`
-  void init(PageId page_id,
-            PageId prev_page_id,
-            Txn& txn,
-            LogMgr& log_mgr)
+  void allocate(PageId page_id,
+                PageId prev_page_id,
+                Txn& txn,
+                LogMgr& log_mgr)
   {
     set_page_id(page_id);
 
@@ -43,8 +43,10 @@ public:
       return false;
     }
 
+    std::cout << "Before inserting tuple, the tuple count is now " << tuple_count() << std::endl;
+
     // Try to find a free slot to reuse.
-    uint32_t i;
+    slot_id_t i;
     for (i = 0; i < tuple_count(); i++) {
       // If the slot is empty, i.e. its tuple has size 0,
       if (tuple_size_at(i) == 0) {
@@ -63,6 +65,7 @@ public:
     // Otherwise we claim available free space..
     set_free_space_pointer(free_space_pointer() - tuple.size());
 
+    // TODO: Change this to 'copy_tuple' or something?
     page_->copy_n_bytes(0, // Source offset
                         // Destination offset
                         free_space_pointer(),
@@ -76,6 +79,8 @@ public:
     if (i == tuple_count()) {
       set_tuple_count(tuple_count() + 1);
     }
+
+    std::cout << "After inserting tuple, the tuple count is now " << tuple_count() << std::endl;
 
     tuple.set_rid(RID(table_page_id(), i));
 

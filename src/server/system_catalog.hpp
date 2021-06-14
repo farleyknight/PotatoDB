@@ -44,7 +44,43 @@ public:
   }
 
   static const string load_tables_sql() {
-    return "SELECT id, table_name FROM system_catalog WHERE object_type = 1";
+    // NOTE: Since we don't include object_type here, this query fails!
+    //
+    // Why? Because, the way I grab data from the Buffer Pool is actually
+    // kind of wrong and also kind of slow.
+    //
+    // I started to think about the diagrams that Pavlo had shown with the
+    // "projection" operator: the operator that takes a full tuple and
+    // only emits those attributes that are necessary for the query.
+    //
+    // Then I realized that BusTub HAS NO projection operator!
+    //
+    // Now I realize that when we grab data from the Buffer Pool, we grab
+    // the whole tuple, even if we don't need it!
+    //
+    // There may be a way to write a "lazy" byte stream, that only reads
+    // from the Buffer Pool exactly those bytes that are necessary.
+    //
+    // Not only that, but some operators do not really need "all" of the tuple.
+    // We can probably use Projection Operators between a Seq Scan Operator
+    // and another operator, like Update or Delete?? This is possibly where
+    // others begin looking for ways to combine and reorder operators to
+    // somehow find the best query plan.
+
+    // NOTE: I've addded "object_type" for a quick fix. In a future fix for
+    // this problem, we need to introduce a new query operator, the Projection
+    // Operator.
+    //
+    // Introducing this operator will allow us to remove QuerySchema completely
+    // and explains why other database systems are not doing something similar.
+    // return "SELECT id, table_name, object_type FROM system_catalog WHERE object_type = 1";
+
+    // NOTE: The old SQL for this query doesn't quite work.. I think it's because
+    // QuerySchema is buggy? Maybe doing the projection operator will fix those bugs?
+
+    // NOTE: Also we are not using column_oids properly. We could get rid of a lot of strings
+    // via column oids I think?
+    return "SELECT * FROM system_catalog WHERE object_type = 1";
   }
 
   static TableColumn id_column() {
@@ -136,10 +172,8 @@ public:
   }
 
   static void load(PotatoDB& db) {
-    auto &txn = db.txn_mgr().begin();
-
     db.catalog().load_table(system_catalog_table_oid(), "system_catalog", schema());
-    db.table_mgr().load_table("system_catalog", system_catalog_table_oid(), txn);
+    db.table_mgr().load_table("system_catalog", system_catalog_table_oid());
 
     assert(db.catalog().has_table_named("system_catalog"));
 
@@ -153,7 +187,6 @@ public:
     assert(result_set);
     assert(result_set->size() > 0);
 
-
     for (size_t i = 0; i < result_set->size(); ++i) {
       auto table_oid  = result_set->value_at<int32_t>("id", i);
       auto table_name = result_set->value_at<string>("table_name", i);
@@ -166,10 +199,8 @@ public:
       std::cout << table_sql << std::endl;
       auto result = db.run(table_sql);
       db.catalog().load_from_query(table_oid, table_name, result);
-      db.table_mgr().load_table(table_name, table_oid, txn);
+      db.table_mgr().load_table(table_name, table_oid);
     }
-
-    db.txn_mgr().commit(txn);
   }
 
   static const string load_table_sql_for(const table_name_t table_name) {

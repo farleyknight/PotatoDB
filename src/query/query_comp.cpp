@@ -17,8 +17,6 @@ const string query_node_to_string(QueryNodeType type)  {
   }
 }
 
-
-
 Value QueryComp::eval(const Tuple& tuple,
                       const QuerySchema& schema) const
 {
