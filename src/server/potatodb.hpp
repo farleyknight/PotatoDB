@@ -26,6 +26,9 @@ public:
   }
 
   void shutdown() {
+    std::cout << "Flushing all pages to disk" << std::endl;
+    buff_mgr().flush_all();
+    std::cout << "Shutting down server" << std::endl;
     shutdown(0);
   }
 

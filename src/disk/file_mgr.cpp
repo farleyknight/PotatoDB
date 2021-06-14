@@ -3,12 +3,26 @@
 void FileMgr::write_buffer(PageId page_id, const Buffer& buffer) {
   file_id_t file_id = page_id.file_id();
   buffer_offset_t offset = page_id.block_id() * buffer.size();
+
+  std::cout << "Writing buffer to file_id " << file_id << std::endl;
+  std::cout << "Buffer offset " << offset << std::endl;
+  std::cout << "File name: " << files_[file_id]->file_path() << std::endl;
+  std::cout << "File size: " << files_[file_id]->size() << std::endl;
+  std::cout << std::endl;
+
   files_[file_id]->write_buffer(offset, buffer);
 }
 
 void FileMgr::read_buffer(PageId page_id, Buffer& buffer) {
   file_id_t file_id = page_id.file_id();
   buffer_offset_t offset = page_id.block_id() * buffer.size();
+
+  std::cout << "Reading buffer from file_id " << file_id << std::endl;
+  std::cout << "Buffer offset " << offset << std::endl;
+  std::cout << "File name: " << files_[file_id]->file_path() << std::endl;
+  std::cout << "File size: " << files_[file_id]->size() << std::endl;
+  std::cout << std::endl;
+
   files_[file_id]->read_buffer(offset, buffer);
 }
 

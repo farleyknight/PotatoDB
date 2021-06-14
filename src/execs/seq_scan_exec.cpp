@@ -22,7 +22,9 @@ bool SeqScanExec::at_the_end() {
 }
 
 bool SeqScanExec::has_next() {
+  // std::cout << "Checking if we have a tuple" << std::endl;
   if (!table_iter_->has_tuple()) {
+    // std::cout << "NO TUPLE! " << std::endl;
     return false;
   }
 

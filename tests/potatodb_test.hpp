@@ -1,6 +1,7 @@
 #pragma once
 
 #include "server/potatodb.hpp"
+#include "server/system_catalog.hpp"
 
 #include "gtest/gtest.h"
 
@@ -30,7 +31,7 @@ TEST(PotatoDBTest, SelectEmptyTableTest) {
   EXPECT_TRUE(result.set() != nullptr);
   EXPECT_EQ(result.set()->size(), 0);
 
-  EXPECT_EQ(result.to_payload(), "");
+  EXPECT_EQ(result.to_payload(), "No entries to send");
 }
 
 TEST(PotatoDBTest, CreateInsertSelectStringTest) {
@@ -115,7 +116,10 @@ TEST(PotatoDBTest, CreateTableTest) {
 
   EXPECT_TRUE(db.disk_mgr().table_file_exists("foo_bar"));
 
-  auto result = db.run("SELECT * FROM system_catalog WHERE table_name == 'foo_bar'");
+  auto object_type = SystemCatalog::table_type();
+  auto sql = "SELECT * FROM system_catalog WHERE table_name == 'foo_bar' AND object_type == " + object_type;
+
+  auto result = db.run(sql);
   auto &result_set = result.set();
 
   EXPECT_EQ(result_set->size(), 1);
@@ -204,6 +208,8 @@ TEST(PotatoDBTest, LoadSystemCatalogAfterRestartTest) {
   db.reset_installation();
 
   db.run("CREATE TABLE foo_bar ( colA INTEGER, colB INTEGER )");
+  // NOTE: We must shutdown first to flush all the pages to disk.
+  db.shutdown();
 
   // NOTE: Use 2nd instance to simulate starting a new DB
   PotatoDB db2;
@@ -224,6 +230,8 @@ TEST(PotatoDBTest, LoadSchemaAfterRestartTest) {
   db.reset_installation();
 
   db.run("CREATE TABLE foo_bar ( colA INTEGER, colB INTEGER )");
+  // NOTE: We must shutdown first to flush all the pages to disk.
+  db.shutdown();
 
   PotatoDB db2;
   // NOTE: startup() should NOT start the server!
