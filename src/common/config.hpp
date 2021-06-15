@@ -5,6 +5,9 @@
 #include "common/types.hpp"
 #include "common/type_limits.hpp"
 
+// Logger used across project
+#include "spdlog/spdlog.h"
+
 /**********************************************
  * System configuration as constant values
  **********************************************/

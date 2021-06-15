@@ -31,6 +31,7 @@ add_definitions(
   "-ferror-limit=50"
   "-Wall"
   "-Wextra"
+  "-Wno-unknown-pragmas"
   "-pedantic"
   "-g"
   "-fexceptions"

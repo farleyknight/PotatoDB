@@ -53,7 +53,7 @@ message(STATUS "The output files for PotatoSQL are ${ANTLR_PotatoSQL_CXX_OUTPUTS
 set(PARSER_BINARY parser)
 
 message(STATUS "Parser binary target is ${PARSER_BINARY}")
-message(STATUS "Parser sources are ${PARSER_SOURCES}")
+message(STATUS "Parser sources are ${parser_sources}")
 
 # add generated grammar to demo binary target
 add_executable(${PARSER_BINARY} "parser/main.cpp"
