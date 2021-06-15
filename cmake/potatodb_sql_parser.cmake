@@ -62,4 +62,5 @@ add_executable(${PARSER_BINARY} "parser/main.cpp"
 
 target_link_libraries(${PARSER_BINARY}
   PRIVATE -fstandalone-debug # So we can see full parse results in lldb
+  PRIVATE fmt::fmt
   PRIVATE antlr4_static)

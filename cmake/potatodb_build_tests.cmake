@@ -14,5 +14,6 @@ target_link_libraries(${TEST_BINARY}
   PRIVATE GTest::gmock GTest::gtest GTest::gmock_main GTest::gtest_main
   PRIVATE murmurhash::murmurhash
   PRIVATE antlr4_static
+  PRIVATE fmt::fmt
   PRIVATE -fsanitize=address # Address Sanitizer
   )

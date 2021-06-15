@@ -14,4 +14,5 @@ target_link_libraries(${PERF_BINARY}
   PRIVATE benchmark::benchmark
   PRIVATE murmurhash::murmurhash
   PRIVATE antlr4_static
+  PRIVATE fmt::fmt
   )

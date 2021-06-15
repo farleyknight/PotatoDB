@@ -13,5 +13,6 @@ target_link_libraries(${SERVER_BINARY}
   PRIVATE potatodb-parser
   PRIVATE murmurhash::murmurhash
   PRIVATE antlr4_static
+  PRIVATE fmt::fmt
   PRIVATE -fsanitize=address # Address Sanitizer
   )
