@@ -82,6 +82,7 @@ public:
       update_values[oid] = to_query_node(catalog, table_name, expr);
     }
 
+
     return make_unique<UpdatePlan>(schema,
                                    table_oid,
                                    move(scan_plan),
