@@ -13,7 +13,8 @@ public:
       name_    (name)
   {}
 
-  ColumnExpr(const column_name_t name, const table_name_t table)
+  ColumnExpr(const column_name_t name,
+             const table_name_t table)
     : BaseExpr (ExprType::COLUMN),
       name_    (name),
       table_   (table)

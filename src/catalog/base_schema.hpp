@@ -4,7 +4,6 @@
 
 #include "common/config.hpp"
 #include "catalog/base_column.hpp"
-#include "query/query_column.hpp"
 #include "catalog/table_column.hpp"
 
 template<class ColT>

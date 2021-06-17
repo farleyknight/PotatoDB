@@ -23,8 +23,8 @@ class ErrorListener : public BaseErrorListener {
                            UNUSED std::exception_ptr e)
     override
   {
-    string message(msg);
-    string full_message = "Line(" + std::to_string(line) + ":" +
+    auto message = string(msg);
+    auto full_message = "Line(" + std::to_string(line) + ":" +
       std::to_string(charPositionInLine) + ") Error(" + message + ")";
 
     throw std::invalid_argument(full_message);
@@ -53,7 +53,7 @@ public:
     }
   }
 
-  static Vec<string> as_expr_strings(string input) {
+  static vector<string> as_expr_strings(string input) {
     ANTLRInputStream stream(input);
 
     PotatoSQLLexer lexer(&stream);
@@ -68,6 +68,9 @@ public:
     try {
       tree::ParseTree* tree = parser.main();
       EvalParseVisitor visitor;
+      // TODO: We should pass in a reference to the `Catalog`
+      // like this:
+      // visitor.set_catalog(catalog)
       visitor.visit(tree);
 
       if (visitor.results().size() > 0) {
@@ -98,6 +101,13 @@ public:
     try {
       tree::ParseTree* tree = parser.main();
       EvalParseVisitor visitor;
+      // TODO: We should pass in a reference to the `Catalog`
+      // like this:
+      //
+      // > visitor.set_catalog(catalog)
+      //
+      // And then we can check the system catalog as we
+      // traverse the syntax tree.
       visitor.visit(tree);
 
       if (visitor.exprs().size() > 0) {

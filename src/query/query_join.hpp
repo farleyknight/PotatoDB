@@ -62,17 +62,9 @@ public:
     throw NotImplementedException("eval_aggregate not implemented");
   }
 
-  string to_string() const {
-    std::ostringstream os;
-
-    os << "Type id is :: " << Type::as_string(type_id()) << std::endl;
-    os << "Join side is :: " << (int)join_side_ << std::endl;
-    os << "Column name is :: " << column_name_ << std::endl;
-    os << "\n";
-
-    return os.str();
-  }
   column_index_t column_index(const QuerySchema& schema) const;
+
+  const string to_string() const;
 
   JoinSide side() const  {
     return join_side_;

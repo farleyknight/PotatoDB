@@ -82,17 +82,19 @@ public:
       update_values[oid] = to_query_node(catalog, table_name, expr);
     }
 
-
     return make_unique<UpdatePlan>(schema,
                                    table_oid,
                                    move(scan_plan),
                                    move(update_values));
   }
 
-  static ptr<BasePlan> from_expr(const Catalog& catalog, const DeleteFromExpr& expr) {
+  static ptr<BasePlan> from_expr(const Catalog& catalog,
+                                 const DeleteFromExpr& expr)
+  {
     auto table_name = expr.table().name();
     auto table_oid = catalog.table_oid_for(table_name);
-    auto maybe_pred = to_query_where(catalog, table_name, expr.pred().get());
+    auto maybe_pred = to_query_where(catalog, table_name,
+                                     expr.pred().get());
 
     auto schema = catalog.query_schema_for(table_name);
 
@@ -105,24 +107,51 @@ public:
                                    move(scan_plan));
   }
 
-  static ptr<BasePlan> make_seq_scan_plan(const Catalog& catalog, const SelectExpr& expr) {
+  static ptr<BasePlan> make_seq_scan_plan(const Catalog& catalog,
+                                          const SelectExpr& expr)
+  {
     // TODO: A SELECT statement can have multiple tables!
     // Need to support this at some point.
     auto table_name = expr.table_list().front().name();
-    auto table_oid = catalog.table_oid_for(table_name);
+    auto table_oid  = catalog.table_oid_for(table_name);
+    auto schema     = catalog.query_schema_for(table_name);
 
-    auto schema = catalog.query_schema_for(table_name,
-                                           expr.column_list());
+    vector<QueryColumn> cols;
 
-    auto maybe_pred = to_query_where(catalog, table_name, expr.pred().get());
+    for (const auto& col_expr : expr.column_list().list()) {
+      auto column_name = col_expr.name();
+      if (column_name == "*") {
+        for (const auto &col : schema.all()) {
+          cols.push_back(col);
+        }
+      } else {
+        cols.push_back(catalog.query_column_for(table_name,
+                                                column_name));
+      }
+    }
 
-    return make_unique<SeqScanPlan>(schema,
+    // TODO: We need to include the aggregation list as well!
+    for (const auto& col_expr : expr.agg_list().list()) {
+      // TODO! TODO!
+    }
+
+    if (expr.pred() != nullptr) {
+      for (const auto& pred_col : expr.pred()->column_list()) {
+        cols.push_back(pred_col);
+      }
+    }
+
+    auto maybe_pred = to_query_where(catalog, table_name,
+                                     expr.pred().get());
+
+    return make_unique<SeqScanPlan>(QuerySchema(cols),
                                     table_oid,
                                     move(maybe_pred));
   }
 
-
-  static ptr<BasePlan> from_expr(const Catalog& catalog, const CompoundSelectExpr& expr) {
+  static ptr<BasePlan> from_expr(const Catalog& catalog,
+                                 const CompoundSelectExpr& expr)
+  {
     // TODO LATER
     // * Add support for UNION, INTERSECTION
     // * Use right_select appropriately
@@ -147,7 +176,9 @@ public:
     }
   }
 
-  static ptr<BasePlan> make_sort_plan(const Catalog& catalog, const SelectExpr& expr) {
+  static ptr<BasePlan> make_sort_plan(const Catalog& catalog,
+                                      const SelectExpr& expr)
+  {
     auto scan_plan = make_seq_scan_plan(catalog, expr);
     auto order_by = expr.order_by();
 
@@ -157,7 +188,9 @@ public:
                                  move(scan_plan));
   }
 
-  static ptr<BasePlan> make_agg_plan(const Catalog& catalog, const SelectExpr& expr) {
+  static ptr<BasePlan> make_agg_plan(const Catalog& catalog,
+                                     const SelectExpr& expr)
+  {
     // TODO!
     // AggExpr will have ColumnExpr inside it
     // Convert AggExpr to QueryAgg and ColumnExpr to QueryColumn
@@ -226,8 +259,10 @@ public:
     }
     case ExprType::COMPARE: {
       auto comp_expr = dynamic_cast<CompExpr*>(expr.get());
-      auto left_node  = to_query_node(catalog, name, comp_expr->left_expr());
-      auto right_node = to_query_node(catalog, name, comp_expr->right_expr());
+      auto left_node  = to_query_node(catalog, name,
+                                      comp_expr->left_expr());
+      auto right_node = to_query_node(catalog, name,
+                                      comp_expr->right_expr());
       return make_unique<QueryComp>(move(left_node),
                                     comp_expr->compare_type(),
                                     move(right_node));
@@ -249,6 +284,9 @@ public:
       return ptr<QueryWhere>(nullptr);
     }
 
+    // TODO: Not sure I really want WhereClauseExpr to have TWO children.
+    // I'd rather it have only ONE child, and that child itself can have TWO children.
+    // Because most likely the ONE child will be something like a `LogicalExpr`
     auto left_query = to_query_node(catalog, name, clause->left_expr());
     auto right_query = to_query_node(catalog, name, clause->right_expr());
 
@@ -257,7 +295,9 @@ public:
                                    move(right_query));
   }
 
-  static ptr<BasePlan> from_expr(const Catalog& catalog, const InsertExpr& expr) {
+  static ptr<BasePlan> from_expr(const Catalog& catalog,
+                                 const InsertExpr& expr)
+  {
     auto table_name = expr.table_name();
     auto table_oid = catalog.table_oid_for(table_name);
 

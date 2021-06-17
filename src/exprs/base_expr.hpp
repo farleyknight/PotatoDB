@@ -2,6 +2,7 @@
 
 #include "common/config.hpp"
 #include "exprs/expr_type.hpp"
+#include "query/query_column.hpp"
 
 class BaseExpr {
 public:
@@ -15,6 +16,10 @@ public:
 
   ExprType expr_type() const {
     return expr_type_;
+  }
+
+  vector<QueryColumn> column_list() const {
+    return vector<QueryColumn>();
   }
 
 protected:

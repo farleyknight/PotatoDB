@@ -49,14 +49,17 @@ public:
                ColumnDefListExpr column_list);
 
   table_oid_t table_oid_for(const table_name_t& table_name) const {
+    assert(table_oids_.count(table_name) > 0);
     return table_oids_.at(table_name);
   }
 
   table_name_t table_name_for(table_oid_t table_oid) const {
+    assert(table_names_.count(table_oid) > 0);
     return table_names_.at(table_oid);
   }
 
   TableSchema& table_schema_for(table_oid_t table_oid) {
+    assert(table_schemas_.count(table_oid) > 0);
     return table_schemas_.at(table_oid);
   }
 

@@ -128,7 +128,13 @@ QueryColumn
 Catalog::query_column_for(const table_name_t& table_name,
                           const column_name_t& column_name) const
 {
-  const auto &col = table_schemas_.at(table_oids_.at(table_name)).by_name(column_name);
+  assert(table_name.size() > 0);
+  assert(table_oids_.count(table_name) > 0);
+  auto oid = table_oids_.at(table_name);
+
+  assert(table_schemas_.count(oid) > 0);
+  const auto &schema = table_schemas_.at(oid);
+  const auto &col    = schema.by_name(column_name);
   return QueryColumn::from(col);
 }
 

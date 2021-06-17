@@ -1,12 +1,12 @@
 #pragma once
 
-#include "catalog/table_column.hpp"
 #include "query/base_query.hpp"
 #include "query/query_comp.hpp"
 #include "query/query_const.hpp"
 
 class TableSchema;
 class QuerySchema;
+class TableColumn;
 
 class QueryColumn : public BaseQuery {
 public:
@@ -57,12 +57,7 @@ public:
     return (name_ == "COUNT(*)");
   }
 
-  static QueryColumn from(TableColumn col) {
-    return QueryColumn(col.type_id(),
-                       col.table_oid(),
-                       col.oid(),
-                       col.name());
-  }
+  static QueryColumn from(TableColumn col);
 
   Value eval(const Tuple& tuple,
              const QuerySchema& schema) const override;
@@ -84,9 +79,7 @@ public:
     return type_id_ != TypeId::VARCHAR;
   }
 
-  size_t fixed_length() {
-    return Type::size_of(type_id_);
-  }
+  size_t fixed_length();
 
   size_t variable_length() const {
     return 0; // TODO!
@@ -111,12 +104,7 @@ public:
     return table_oid_;
   }
 
-  const string to_string() const {
-    stringstream os;
-    os << "Name : " << name_ << std::endl;
-    os << "Type : " << Type::as_string(type_id_) << std::endl;
-    return os.str();
-  }
+  const string to_string() const;
 
 private:
   table_oid_t table_oid_   = INVALID_TABLE_OID;
