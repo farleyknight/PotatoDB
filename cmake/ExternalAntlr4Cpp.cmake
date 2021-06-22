@@ -1,8 +1,18 @@
-# https://raw.githubusercontent.com/antlr/antlr4/master/runtime/Cpp/cmake/ExternalAntlr4Cpp.cmake
+#
+# NOTE: To fully understand what this file is doing, read this:
+# https://github.com/antlr/antlr4/blob/master/runtime/Cpp/cmake/README.md
+#
+#
+# Original Version: https://raw.githubusercontent.com/antlr/antlr4/master/runtime/Cpp/cmake/ExternalAntlr4Cpp.cmake
+
 
 cmake_minimum_required(VERSION 3.7)
 
 include(ExternalProject)
+
+message(STATUS "ANTLR4_ZIP_REPOSITORY is defined as ${ANTLR4_ZIP_REPOSITORY}")
+
+cmake_policy(SET CMP0114 NEW)
 
 set(ANTLR4_ROOT ${CMAKE_CURRENT_BINARY_DIR}/antlr4_runtime/src/antlr4_runtime)
 set(ANTLR4_INCLUDE_DIRS ${ANTLR4_ROOT}/runtime/Cpp/runtime/src)
@@ -78,6 +88,8 @@ if(NOT DEFINED ANTLR4_WITH_STATIC_CRT)
 endif()
 
 if(ANTLR4_ZIP_REPOSITORY)
+  message(STATUS "Running ExternalProject_Add for ANTLR4")
+
   ExternalProject_Add(
       antlr4_runtime
       PREFIX antlr4_runtime

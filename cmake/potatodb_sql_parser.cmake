@@ -11,9 +11,9 @@ add_definitions(-DANTLR4CPP_STATIC)
 set(ANTLR4_ZIP_REPOSITORY "https://github.com/antlr/antlr4/archive/refs/tags/4.9.2.zip")
 
 # using /MD flag for antlr4_runtime (for Visual C++ compilers only)
-set(ANTLR4_WITH_STATIC_CRT ON)
+# set(ANTLR4_WITH_STATIC_CRT ON)
 
-# set(ANTLR4_WITH_STATIC_CRT OFF)
+set(ANTLR4_WITH_STATIC_CRT OFF)
 
 # add external build for antlrcpp
 include(ExternalAntlr4Cpp)
@@ -22,12 +22,12 @@ include_directories(${ANTLR4_INCLUDE_DIRS})
 
 # set variable pointing to the antlr tool that supports C++
 # this is not required if the jar file can be found under PATH environment
-# set(ANTLR_EXECUTABLE /home/user/antlr-4.9.2-complete.jar)
+set(ANTLR_EXECUTABLE "${PROJECT_SOURCE_DIR}/antlr-4.9.2-complete.jar")
 
 # This JAR was installed with homebrew
 # For now we'll hard-code it, until we can find a better way for
 # `brew` and `CMake` to get along.
-set(ANTLR_EXECUTABLE "/usr/local/Cellar/antlr/4.9.2/antlr-4.9.2-complete.jar")
+# set(ANTLR_EXECUTABLE "/usr/local/Cellar/antlr/4.9.2/antlr-4.9.2-complete.jar")
 
 # add macros to generate ANTLR C++ code from grammar
 find_package(ANTLR REQUIRED)
@@ -61,6 +61,6 @@ add_executable(${PARSER_BINARY} "parser/main.cpp"
   )
 
 target_link_libraries(${PARSER_BINARY}
-  PRIVATE -fstandalone-debug # So we can see full parse results in lldb
-  PRIVATE fmt::fmt
-  PRIVATE antlr4_static)
+  -fstandalone-debug # So we can see full parse results in lldb
+  fmt::fmt
+  antlr4_static)
