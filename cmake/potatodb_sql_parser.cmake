@@ -19,7 +19,7 @@ set(ANTLR4_WITH_STATIC_CRT OFF)
 # include(ExternalAntlr4Cpp)
 # add antrl4cpp artifacts to project environment
 
-set(VCPKG_ANTLR4_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/vcpkg_installed/x64-osx/include/antlr4-runtime/")
+set(VCPKG_ANTLR4_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/vcpkg_installed/x64-osx/include/antlr4-runtime/")
 include_directories(${VCPKG_ANTLR4_INCLUDE_DIRS})
 message(STATUS "Including vcpkg ANTLR4 directories: ${VCPKG_ANTLR4_INCLUDE_DIRS}")
 
