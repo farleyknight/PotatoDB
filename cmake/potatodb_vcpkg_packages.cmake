@@ -33,14 +33,20 @@ find_package(fmt CONFIG REQUIRED)
 # ASIO -- networking
 # find_package(asio CONFIG REQUIRED)
 
+# *****************************************
+# UUID -
+# *****************************************
+find_package(crossguid CONFIG REQUIRED)
 
-# Google benchmark
+# *****************************************
+# Google benchmark -
+# *****************************************
 find_package(benchmark CONFIG REQUIRED)
+
+# *****************************************
 # ANTLR4
-# TODO: Use this to figure out setting up ANTLR4 w/ CMake
-# https://github.com/antlr/antlr4/tree/master/runtime/Cpp/cmake
-#find_package(antlr4-generator CONFIG REQUIRED)
-#find_package(antlr4-runtime CONFIG REQUIRED)
+# *****************************************
+find_library(ANTLR4_LIB antlr4-runtime)
 
 # NOTE: Not sure if I need this?
 # find_package(Threads CONFIG REQUIRED)

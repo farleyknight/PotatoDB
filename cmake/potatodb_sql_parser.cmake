@@ -60,10 +60,14 @@ message(STATUS "Parser sources are ${parser_sources}")
 
 # add generated grammar to demo binary target
 add_executable(${PARSER_BINARY} "parser/main.cpp"
-  ${parser_sources}
-  )
+  ${parser_sources})
+
+message(STATUS "Adding link directory ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed/x64-osx/lib")
+link_directories("${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed/x64-osx/lib")
+
+
 
 target_link_libraries(${PARSER_BINARY}
-  -fstandalone-debug # So we can see full parse results in lldb
-  fmt::fmt
-  antlr4_static)
+  #-fstandalone-debug # So we can see full parse results in lldb
+  PRIVATE fmt::fmt
+  PRIVATE antlr4-runtime)

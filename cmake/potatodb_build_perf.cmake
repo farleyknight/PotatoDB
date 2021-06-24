@@ -13,6 +13,6 @@ target_link_libraries(${PERF_BINARY}
   PRIVATE potatodb-parser
   PRIVATE benchmark::benchmark
   PRIVATE murmurhash::murmurhash
-  PRIVATE antlr4_static
+  PRIVATE antlr4-runtime
   PRIVATE fmt::fmt
   )
