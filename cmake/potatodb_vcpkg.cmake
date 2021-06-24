@@ -8,3 +8,5 @@ include(${CMAKE_TOOLCHAIN_FILE})
 
 # NOTE: Previous build was not picking up "MurmurHash3.h"
 include_directories(${CMAKE_BINARY_DIR}/vcpkg_installed/x64-osx/include)
+# NOTE: GitHub Action build not picking up "antlr4-common.h"
+include_directories(${CMAKE_BINARY_DIR}/vcpkg_installed/x64-osx/include/antlr4-runtime)
