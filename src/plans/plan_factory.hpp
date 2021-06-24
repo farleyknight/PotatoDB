@@ -348,7 +348,7 @@ public:
                                                move(right_query));
 
     vector<QueryColumn> cols;
-    cols.insert(std::end(cols), std::begin(left_cols), std::end(right_cols));
+    cols.insert(std::end(cols), std::begin(left_cols), std::end(left_cols));
     cols.insert(std::end(cols), std::begin(right_cols), std::end(right_cols));
 
     return std::make_tuple(move(query_where), move(cols));
