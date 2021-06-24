@@ -65,10 +65,12 @@ public:
                                         column_def_list);
   }
 
-  static ptr<BasePlan> from_expr(const Catalog& catalog, const UpdateExpr& expr) {
+  static ptr<BasePlan> from_expr(const Catalog& catalog,
+                                 const UpdateExpr& expr)
+  {
     auto table_name = expr.table().name();
     auto table_oid = catalog.table_oid_for(table_name);
-    auto maybe_pred = to_query_where(catalog, table_name, expr.pred().get());
+    auto [maybe_pred, cols] = to_query_where(catalog, table_name, expr.pred().get());
 
     auto schema = catalog.query_schema_for(table_name);
 
@@ -79,7 +81,8 @@ public:
     map<column_oid_t, ptr<BaseQuery>> update_values;
     for (const auto &[name, expr] : expr.update_values()) {
       auto oid = catalog.query_column_for(table_name, name).column_oid();
-      update_values[oid] = to_query_node(catalog, table_name, expr);
+      auto [query_where_ptr, cols] = to_query_node(catalog, table_name, expr);
+      update_values[oid] = move(query_where_ptr);
     }
 
     return make_unique<UpdatePlan>(schema,
@@ -93,8 +96,7 @@ public:
   {
     auto table_name = expr.table().name();
     auto table_oid = catalog.table_oid_for(table_name);
-    auto maybe_pred = to_query_where(catalog, table_name,
-                                     expr.pred().get());
+    auto [maybe_pred, cols] = to_query_where(catalog, table_name, expr.pred().get());
 
     auto schema = catalog.query_schema_for(table_name);
 
@@ -107,8 +109,10 @@ public:
                                    move(scan_plan));
   }
 
-  static ptr<BasePlan> make_seq_scan_plan(const Catalog& catalog,
-                                          const SelectExpr& expr)
+  static
+  ptr<BasePlan>
+  make_seq_scan_plan(const Catalog& catalog,
+                     const SelectExpr& expr)
   {
     // TODO: A SELECT statement can have multiple tables!
     // Need to support this at some point.
@@ -118,39 +122,68 @@ public:
 
     vector<QueryColumn> cols;
 
-    for (const auto& col_expr : expr.column_list().list()) {
-      auto column_name = col_expr.name();
-      if (column_name == "*") {
-        for (const auto &col : schema.all()) {
-          cols.push_back(col);
-        }
-      } else {
-        cols.push_back(catalog.query_column_for(table_name,
-                                                column_name));
-      }
-    }
+    // NOTE: Columns found in SELECT
+    auto select_cols = find_columns(table_name, catalog, expr.column_list().list());
+    cols.insert(std::end(cols), std::begin(select_cols), std::end(select_cols));
 
-    // TODO: We need to include the aggregation list as well!
-    for (const auto& col_expr : expr.agg_list().list()) {
-      // TODO! TODO!
-    }
+    // NOTE: Columns found in SUM, COUNT, etc
+    auto agg_cols = find_columns(table_name, catalog, expr.agg_list().list());
+    cols.insert(std::end(cols), std::begin(agg_cols), std::end(agg_cols));
 
-    if (expr.pred() != nullptr) {
-      for (const auto& pred_col : expr.pred()->column_list()) {
-        cols.push_back(pred_col);
-      }
-    }
-
-    auto maybe_pred = to_query_where(catalog, table_name,
-                                     expr.pred().get());
+    // NOTE: Columns found in WHERE
+    auto [maybe_pred, pred_cols] = to_query_where(catalog, table_name,
+                                                  expr.pred().get());
+    cols.insert(std::end(cols), std::begin(pred_cols), std::end(pred_cols));
 
     return make_unique<SeqScanPlan>(QuerySchema(cols),
                                     table_oid,
                                     move(maybe_pred));
   }
 
-  static ptr<BasePlan> from_expr(const Catalog& catalog,
-                                 const CompoundSelectExpr& expr)
+  static
+  vector<QueryColumn>
+  find_columns(const table_name_t& table_name,
+               const Catalog& catalog,
+               const vector<ColumnExpr>& col_exprs)
+  {
+    vector<QueryColumn> cols;
+    for (const auto& col_expr : col_exprs) {
+      auto column_name = col_expr.name();
+      if (column_name == "*") {
+        auto schema     = catalog.query_schema_for(table_name);
+        auto table_cols = schema.all();
+        cols.insert(std::end(cols), std::begin(table_cols), std::end(table_cols));
+      } else {
+        cols.push_back(catalog.query_column_for(table_name,
+                                                column_name));
+      }
+    }
+    return cols;
+  }
+
+  static
+  vector<QueryColumn>
+  find_columns(const table_name_t& table_name,
+               const Catalog& catalog,
+               const vector<AggExpr>& agg_exprs)
+  {
+    vector<QueryColumn> cols;
+    for (const auto& agg_expr : agg_exprs) {
+      auto column_name = agg_expr.column_expr().name();
+      if (column_name == "*") {
+        continue;
+      } else {
+        cols.push_back(catalog.query_column_for(table_name,
+                                                column_name));
+      }
+    }
+    return cols;
+  }
+
+  static
+  ptr<BasePlan>
+  from_expr(const Catalog& catalog,
+            const CompoundSelectExpr& expr)
   {
     // TODO LATER
     // * Add support for UNION, INTERSECTION
@@ -233,39 +266,54 @@ public:
                                 agg_nodes);
   }
 
-  static ptr<BaseQuery> to_query_node(const Catalog& catalog,
-                                      const table_name_t name,
-                                      const ptr<BaseExpr>& expr)
+  static
+  std::tuple<ptr<BaseQuery>, vector<QueryColumn>>
+  to_query_node(const Catalog& catalog,
+                const table_name_t name,
+                const ptr<BaseExpr>& expr)
   {
     if (expr == nullptr) {
-      return ptr<BaseQuery>(nullptr);
+      auto base_query_null = ptr<BaseQuery>(nullptr);
+      return std::make_tuple(move(base_query_null), vector<QueryColumn>());
     }
 
     switch (expr->expr_type()) {
     case ExprType::COLUMN: {
       auto column_expr = dynamic_cast<ColumnExpr*>(expr.get());
       auto query_col = catalog.query_column_for(name, column_expr->name());
-      return make_unique<QueryColumn>(query_col);
+      auto query_col_ptr = make_unique<QueryColumn>(query_col);
+      auto query_cols = vector<QueryColumn> { query_col };
+      return std::make_tuple(move(query_col_ptr), move(query_cols));
     }
     case ExprType::AGG: {
       auto agg_expr = dynamic_cast<AggExpr*>(expr.get());
       auto col_name = agg_expr->column_expr().name();
       auto query_col = catalog.query_column_for(name, col_name);
-      return make_unique<QueryAgg>(query_col, agg_expr->agg_type());
+      auto query_agg_ptr = make_unique<QueryAgg>(query_col, agg_expr->agg_type());
+      auto query_cols = vector<QueryColumn> { query_col };
+      return std::make_tuple(move(query_agg_ptr), move(query_cols));
     }
     case ExprType::VALUE: {
       auto value_expr = dynamic_cast<ValueExpr*>(expr.get());
-      return make_unique<QueryConst>(value_expr->to_value());
+      auto query_const_ptr = make_unique<QueryConst>(value_expr->to_value());
+      return std::make_tuple(move(query_const_ptr), vector<QueryColumn>());
     }
     case ExprType::COMPARE: {
       auto comp_expr = dynamic_cast<CompExpr*>(expr.get());
-      auto left_node  = to_query_node(catalog, name,
+      auto [left_node, left_cols]   = to_query_node(catalog, name,
                                       comp_expr->left_expr());
-      auto right_node = to_query_node(catalog, name,
+      auto [right_node, right_cols] = to_query_node(catalog, name,
                                       comp_expr->right_expr());
-      return make_unique<QueryComp>(move(left_node),
-                                    comp_expr->compare_type(),
-                                    move(right_node));
+
+      auto query_comp_ptr = make_unique<QueryComp>(move(left_node),
+                                                   comp_expr->compare_type(),
+                                                   move(right_node));
+
+      vector<QueryColumn> cols;
+      cols.insert(std::end(cols), std::begin(left_cols), std::end(left_cols));
+      cols.insert(std::end(cols), std::begin(right_cols), std::end(right_cols));
+
+      return std::make_tuple(move(query_comp_ptr), move(cols));
     }
     case ExprType::WHERE: {
       auto where_expr = dynamic_cast<WhereClauseExpr*>(expr.get());
@@ -276,23 +324,34 @@ public:
     }
   }
 
-  static ptr<QueryWhere> to_query_where(const Catalog& catalog,
-                                        const table_name_t name,
-                                        const WhereClauseExpr* clause)
+  static
+  std::tuple<ptr<QueryWhere>, vector<QueryColumn>>
+  to_query_where(const Catalog& catalog,
+                 const table_name_t name,
+                 const WhereClauseExpr* clause)
   {
     if (clause == nullptr) {
-      return ptr<QueryWhere>(nullptr);
+      auto null_where = ptr<QueryWhere>(nullptr);
+      auto empty_cols = vector<QueryColumn>();
+      return std::make_tuple(move(null_where), move(empty_cols));
     }
 
     // TODO: Not sure I really want WhereClauseExpr to have TWO children.
     // I'd rather it have only ONE child, and that child itself can have TWO children.
     // Because most likely the ONE child will be something like a `LogicalExpr`
-    auto left_query = to_query_node(catalog, name, clause->left_expr());
-    auto right_query = to_query_node(catalog, name, clause->right_expr());
 
-    return make_unique<QueryWhere>(move(left_query),
-                                   clause->logical_type(),
-                                   move(right_query));
+    auto [left_query, left_cols]   = to_query_node(catalog, name, clause->left_expr());
+    auto [right_query, right_cols] = to_query_node(catalog, name, clause->right_expr());
+
+    auto query_where = make_unique<QueryWhere>(move(left_query),
+                                               clause->logical_type(),
+                                               move(right_query));
+
+    vector<QueryColumn> cols;
+    cols.insert(std::end(cols), std::begin(left_cols), std::end(right_cols));
+    cols.insert(std::end(cols), std::begin(right_cols), std::end(right_cols));
+
+    return std::make_tuple(move(query_where), move(cols));
   }
 
   static ptr<BasePlan> from_expr(const Catalog& catalog,
@@ -315,5 +374,4 @@ public:
                                    table_oid,
                                    move(child_plan));
   }
-
 };

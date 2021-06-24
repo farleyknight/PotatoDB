@@ -57,7 +57,7 @@ builds/
 *.zip
 *.zip
 antlr_generated/
-
+test_logs.txt
 GPATH
 GRTAGS
 GTAGS

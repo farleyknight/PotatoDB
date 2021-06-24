@@ -5,8 +5,14 @@
 #include "common/types.hpp"
 #include "common/type_limits.hpp"
 
-// Logger used across project
+/**********************************************
+ * Logger across all of PotatoDB
+ **********************************************/
+
 #include "spdlog/spdlog.h"
+#include "spdlog/sinks/basic_file_sink.h"
+
+extern sptr<spdlog::logger> logger;
 
 /**********************************************
  * System configuration as constant values

@@ -5,6 +5,12 @@
 #include "parser/sql_parser.hpp"
 #include "plans/plan_factory.hpp"
 
+#include "spdlog/spdlog.h"
+#include "spdlog/sinks/basic_file_sink.h"
+
+sptr<spdlog::logger> logger =
+  spdlog::basic_logger_mt("basic_logger", "test_logs.txt");
+
 PotatoDB potatodb;
 
 PotatoDB::PotatoDB()
@@ -40,9 +46,9 @@ fs::path PotatoDB::table_file_for(const string& table_name) {
 }
 
 ptr<BasePlan> PotatoDB::sql_to_plan(const string& statement) const {
-  std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
-  std::cout << statement << std::endl;
-  std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
+  logger->debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+  logger->debug(statement);
+  logger->debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 
   // TODO: Rename as_exprs to as_stmts
   auto exprs = SQLParser::as_exprs(statement);

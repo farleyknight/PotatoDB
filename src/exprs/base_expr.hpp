@@ -18,10 +18,6 @@ public:
     return expr_type_;
   }
 
-  vector<QueryColumn> column_list() const {
-    return vector<QueryColumn>();
-  }
-
 protected:
   ExprType expr_type_;
 };
