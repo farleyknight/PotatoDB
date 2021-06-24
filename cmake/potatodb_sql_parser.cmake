@@ -16,11 +16,12 @@ set(ANTLR4_ZIP_REPOSITORY "https://github.com/antlr/antlr4/archive/refs/tags/4.9
 set(ANTLR4_WITH_STATIC_CRT OFF)
 
 # add external build for antlrcpp
-include(ExternalAntlr4Cpp)
+# include(ExternalAntlr4Cpp)
 # add antrl4cpp artifacts to project environment
-include_directories(${ANTLR4_INCLUDE_DIRS})
-message(STATUS "Including ANTLR4 Include Directories: ${ANTLR4_INCLUDE_DIRS}")
 
+set(VCPKG_ANTLR4_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/vcpkg_installed/x64-osx/include/antlr4-runtime/")
+include_directories(${VCPKG_ANTLR4_INCLUDE_DIRS})
+message(STATUS "Including vcpkg ANTLR4 directories: ${VCPKG_ANTLR4_INCLUDE_DIRS}")
 
 # set variable pointing to the antlr tool that supports C++
 # this is not required if the jar file can be found under PATH environment

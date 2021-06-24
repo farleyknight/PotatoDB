@@ -1,10 +1,12 @@
+#pragma once
+
 #include <iostream>
 #include <strstream>
 #include <string>
 
 #include "common/types.hpp"
 
-#include "antlr4-runtime.h"
+#include "antlr4-runtime/antlr4-runtime.h"
 #include "PotatoSQLLexer.h"
 #include "PotatoSQLParser.h"
 #include "PotatoSQLListener.h"
