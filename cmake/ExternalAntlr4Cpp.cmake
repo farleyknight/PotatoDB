@@ -14,7 +14,7 @@ message(STATUS "ANTLR4_ZIP_REPOSITORY is defined as ${ANTLR4_ZIP_REPOSITORY}")
 
 cmake_policy(SET CMP0114 NEW)
 
-set(ANTLR4_ROOT ${CMAKE_CURRENT_BINARY_DIR}/antlr4_runtime/src/antlr4_runtime)
+set(ANTLR4_ROOT ${PROJECT_SOURCE_DIR}/antlr4_runtime/src/antlr4_runtime)
 set(ANTLR4_INCLUDE_DIRS ${ANTLR4_ROOT}/runtime/Cpp/runtime/src)
 set(ANTLR4_GIT_REPOSITORY https://github.com/antlr/antlr4.git)
 if(NOT DEFINED ANTLR4_TAG)
