@@ -29,5 +29,7 @@ $ ninja tests
 
 At the moment PotatoDB has no easy-to-use installers. This is because it is still under heavy develompent. Instead, you'll be building it from scratch. 
 
-
 ... TODO! Explain how to properly use `conan` here..
+
+1) Explain how to build the `antlr4` package that has a `conanfile.py`
+2) Explain how to build the `murmurhash` package that has a `conanfile.py`

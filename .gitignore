@@ -65,6 +65,9 @@ CPackSourceConfig.cmake
 antlr4/antlr4
 antlr4/runtime
 
+# MurmurHash
+murmurhash/libmurmurhash
+
 # Project ignores
 builds/
 *.zip
