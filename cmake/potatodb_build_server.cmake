@@ -9,10 +9,7 @@ add_executable(${SERVER_BINARY}
   )
 
 target_link_libraries(${SERVER_BINARY}
-  PRIVATE potatodb-main
-  PRIVATE potatodb-parser
-  PRIVATE murmurhash::murmurhash
-  PRIVATE ${ANTLR4_IB}
-  PRIVATE fmt::fmt
-  PRIVATE -fsanitize=address # Address Sanitizer
-  )
+  -fsanitize=address # Address Sanitizer
+  potatodb-main
+  potatodb-parser
+  ${CONAN_LIBS})

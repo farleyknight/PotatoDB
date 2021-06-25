@@ -15,41 +15,16 @@ set(ANTLR4_ZIP_REPOSITORY "https://github.com/antlr/antlr4/archive/refs/tags/4.9
 
 set(ANTLR4_WITH_STATIC_CRT OFF)
 
-# add external build for antlrcpp
-# include(ExternalAntlr4Cpp)
-# add antrl4cpp artifacts to project environment
-
-set(VCPKG_ANTLR4_INCLUDE_DIRS
-  "${CMAKE_SOURCE_DIR}/vcpkg_installed/x64-osx/include/antlr4-runtime/")
-
-include_directories(${VCPKG_ANTLR4_INCLUDE_DIRS})
-message(STATUS "Including vcpkg ANTLR4 directories: ${VCPKG_ANTLR4_INCLUDE_DIRS}")
-
-# set variable pointing to the antlr tool that supports C++
-# this is not required if the jar file can be found under PATH environment
-set(ANTLR_EXECUTABLE "${PROJECT_SOURCE_DIR}/antlr-4.9.2-complete.jar")
-
-# This JAR was installed with homebrew
-# For now we'll hard-code it, until we can find a better way for
-# `brew` and `CMake` to get along.
-# set(ANTLR_EXECUTABLE "/usr/local/Cellar/antlr/4.9.2/antlr-4.9.2-complete.jar")
-
-# add macros to generate ANTLR C++ code from grammar
-find_package(ANTLR REQUIRED)
-
-# Call macro to add lexer and grammar to your build dependencies.
-
 # -----------------------------------------------------------------------------
 # ANTLR target directive
 # -----------------------------------------------------------------------------
 
+#antlr_target(PotatoSQL "parser/PotatoSQL.g4" LEXER PARSER LISTENER VISITOR
+#  PACKAGE potatosql
+#  OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
-antlr_target(PotatoSQL "parser/PotatoSQL.g4" LEXER PARSER LISTENER VISITOR
-  PACKAGE potatosql
-  OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-
-message(STATUS "Current binary directory is ${CMAKE_CURRENT_BINARY_DIR}")
-message(STATUS "The output files for PotatoSQL are ${ANTLR_PotatoSQL_CXX_OUTPUTS}")
+#message(STATUS "Current binary directory is ${CMAKE_CURRENT_BINARY_DIR}")
+#message(STATUS "The output files for PotatoSQL are ${ANTLR_PotatoSQL_CXX_OUTPUTS}")
 
 # -----------------------------------------------------------------------------
 # SQL Parser target binary
@@ -61,15 +36,10 @@ message(STATUS "Parser binary target is ${PARSER_BINARY}")
 message(STATUS "Parser sources are ${parser_sources}")
 
 # add generated grammar to demo binary target
-add_executable(${PARSER_BINARY} "parser/main.cpp"
+add_executable(${PARSER_BINARY}
+  "parser/main.cpp"
   ${parser_sources})
 
-set(VCPKG_LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed/x64-osx/lib)
-message(STATUS "Adding link directory ${VCPKG_LIB_DIR}")
-link_directories(${VCPKG_LIB_DIR})
-
 target_link_libraries(${PARSER_BINARY}
-  #-fstandalone-debug # So we can see full parse results in lldb
-  PRIVATE fmt::fmt
-  PRIVATE ${ANTLR4_LIB})
-
+  -fstandalone-debug # So we can see full parse results in lldb
+  ${CONAN_LIBS})
