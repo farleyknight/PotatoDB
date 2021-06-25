@@ -52,6 +52,19 @@ _deps
 build
 DartConfiguration.tcl
 
+# Conan stuff
+graph_info.json
+conan.lock
+conanbuildinfo.cmake
+conanbuildinfo.txt
+conaninfo.txt
+CPackConfig.cmake
+CPackSourceConfig.cmake
+
+# ANTLR4
+antlr4/antlr4
+antlr4/runtime
+
 # Project ignores
 builds/
 *.zip
@@ -61,7 +74,6 @@ test_logs.txt
 GPATH
 GRTAGS
 GTAGS
-
 
 # Graphviz
 potatodb.dot*

@@ -19,7 +19,9 @@ set(ANTLR4_WITH_STATIC_CRT OFF)
 # include(ExternalAntlr4Cpp)
 # add antrl4cpp artifacts to project environment
 
-set(VCPKG_ANTLR4_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/vcpkg_installed/x64-osx/include/antlr4-runtime/")
+set(VCPKG_ANTLR4_INCLUDE_DIRS
+  "${CMAKE_SOURCE_DIR}/vcpkg_installed/x64-osx/include/antlr4-runtime/")
+
 include_directories(${VCPKG_ANTLR4_INCLUDE_DIRS})
 message(STATUS "Including vcpkg ANTLR4 directories: ${VCPKG_ANTLR4_INCLUDE_DIRS}")
 
@@ -62,12 +64,12 @@ message(STATUS "Parser sources are ${parser_sources}")
 add_executable(${PARSER_BINARY} "parser/main.cpp"
   ${parser_sources})
 
-message(STATUS "Adding link directory ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed/x64-osx/lib")
-link_directories("${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed/x64-osx/lib")
-
-
+set(VCPKG_LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed/x64-osx/lib)
+message(STATUS "Adding link directory ${VCPKG_LIB_DIR}")
+link_directories(${VCPKG_LIB_DIR})
 
 target_link_libraries(${PARSER_BINARY}
   #-fstandalone-debug # So we can see full parse results in lldb
   PRIVATE fmt::fmt
-  PRIVATE antlr4-runtime)
+  PRIVATE ${ANTLR4_LIB})
+

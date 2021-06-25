@@ -36,7 +36,7 @@ find_package(fmt CONFIG REQUIRED)
 # *****************************************
 # UUID -
 # *****************************************
-find_package(crossguid CONFIG REQUIRED)
+# find_package(crossguid CONFIG REQUIRED)
 
 # *****************************************
 # Google benchmark -
@@ -46,7 +46,9 @@ find_package(benchmark CONFIG REQUIRED)
 # *****************************************
 # ANTLR4
 # *****************************************
-find_library(ANTLR4_LIB antlr4-runtime)
+find_library(ANTLR4_LIB libantlr4-runtime.a)
+
+message(STATUS "ANTLR4 library: ${ANTLR4_LIB}")
 
 # NOTE: Not sure if I need this?
 # find_package(Threads CONFIG REQUIRED)

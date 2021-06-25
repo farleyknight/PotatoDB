@@ -9,7 +9,6 @@
     "benchmark",
     "gtest",
     "ms-gsl",
-    "crossuuid",
     "asio"
   ]
 }

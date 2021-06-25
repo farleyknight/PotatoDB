@@ -12,7 +12,7 @@ target_link_libraries(${SERVER_BINARY}
   PRIVATE potatodb-main
   PRIVATE potatodb-parser
   PRIVATE murmurhash::murmurhash
-  PRIVATE antlr4-runtime
+  PRIVATE ${ANTLR4_IB}
   PRIVATE fmt::fmt
   PRIVATE -fsanitize=address # Address Sanitizer
   )
