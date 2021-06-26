@@ -10,9 +10,10 @@ enum class PlanType {
   DELETE       = 6,
   AGG          = 7,
   LIMIT        = 8,
-  LOOP_JOIN    = 9,
-  INDEX_JOIN   = 10,
-  HASH_JOIN    = 11,
-  SORT         = 12,
-  CREATE_TABLE = 13
+  PROJECT      = 9,
+  LOOP_JOIN    = 10,
+  INDEX_JOIN   = 11,
+  HASH_JOIN    = 12,
+  SORT         = 13,
+  CREATE_TABLE = 14
 };

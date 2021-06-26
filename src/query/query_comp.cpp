@@ -1,5 +1,6 @@
 
 #include "query/query_comp.hpp"
+#include "tuple/tuple.hpp"
 
 // TODO: Stick this in BaseQuery
 const string query_node_to_string(QueryNodeType type)  {
@@ -22,6 +23,8 @@ Value QueryComp::eval(const Tuple& tuple,
 {
   auto lhs = left_->eval(tuple, schema);
   auto rhs = right_->eval(tuple, schema);
+
+  logger->debug("QueryComp::eval tuple = " + tuple.to_string(schema));
 
   return Value::make(compare(lhs, rhs));
 }

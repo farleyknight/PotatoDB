@@ -129,7 +129,11 @@ const string Tuple::to_string(const TableSchema& schema) const {
 }
 
 const string Tuple::to_string(const QuerySchema& schema) const {
-  assert(source_ == TupleSources::QUERY_SCHEMA);
+  // TODO: Figure out a way to hold a schema object on an operator
+  // without saying if it's a QuerySchema or TableSchema..
+  // Is that possible?
+  //
+  // assert(source_ == TupleSources::QUERY_SCHEMA);
 
   stringstream os;
 

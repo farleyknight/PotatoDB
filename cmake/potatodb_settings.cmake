@@ -82,6 +82,7 @@ set(main_sources
   "src/disk/file_handle.cpp"
   "src/execs/agg_exec.cpp"
   "src/execs/exec_ctx.cpp"
+  "src/execs/exec_factory.cpp"
   "src/execs/hash_join_exec.cpp"
   "src/execs/seq_scan_exec.cpp"
   "src/execs/update_exec.cpp"
@@ -94,7 +95,8 @@ set(main_sources
   "src/page/table_heap.cpp"
   "src/page/table_iterator.cpp"
   "src/plans/agg_plan.cpp"
-  "src/plans/plan_builder.cpp"
+  "src/plans/plan_builder.cpp" # TODO: Delete this
+  "src/plans/plan_factory.cpp"
   "src/query/query_agg.cpp"
   "src/query/query_group_by.cpp"
   "src/query/query_having.cpp"

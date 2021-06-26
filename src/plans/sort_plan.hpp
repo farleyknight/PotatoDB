@@ -1,6 +1,7 @@
 #pragma once
 
 #include "plans/base_plan.hpp"
+#include "plans/has_child_plan.hpp"
 #include "exprs/order_by_expr.hpp"
 
 enum class SortDirection {
@@ -10,21 +11,18 @@ enum class SortDirection {
 };
 
 class SortPlan : public BasePlan,
-                 public SchemaPlan
+                 public SchemaPlan,
+                 public HasChildPlan
 {
 public:
   SortPlan(QuerySchema schema,
            OrderByExpr order_by,
            ptr<BasePlan>&& child)
-    : BasePlan    (PlanType::SORT),
-      SchemaPlan  (schema),
-      child_      (move(child)),
-      order_by_   (order_by)
+    : BasePlan     (PlanType::SORT),
+      SchemaPlan   (schema),
+      HasChildPlan (move(child)),
+      order_by_    (order_by)
   {}
-
-  ptr<BasePlan>&& child() {
-    return move(child_);
-  }
 
   bool is_query() const {
     return true;
@@ -35,6 +33,5 @@ public:
   }
 
 private:
-  ptr<BasePlan> child_;
   OrderByExpr order_by_;
 };

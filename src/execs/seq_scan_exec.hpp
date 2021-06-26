@@ -1,9 +1,7 @@
 #pragma once
 
 #include "execs/base_exec.hpp"
-
 #include "plans/seq_scan_plan.hpp"
-
 #include "page/table_iterator.hpp"
 
 class SeqScanExec : public BaseExec {

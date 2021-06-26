@@ -2,28 +2,29 @@
 
 #include "plans/agg_plan.hpp"
 
-#include "execs/agg_ht.hpp"
 #include "execs/base_exec.hpp"
+#include "execs/has_child_exec.hpp"
+#include "execs/agg_ht.hpp"
 #include "execs/seq_scan_exec.hpp"
 #include "plans/schema_plan.hpp"
+#include "execs/has_child_exec.hpp"
 
-class AggExec : public BaseExec {
+class AggExec : public BaseExec,
+                public HasChildExec
+{
 public:
   AggExec(ExecCtx& exec_ctx,
           ptr<AggPlan>&& plan,
           ptr<BaseExec>&& child)
-    : BaseExec    (exec_ctx),
-      plan_       (move(plan)),
-      child_      (move(child)),
-      table_iter_ (table_.begin())
-  {}
-
-  const BaseExec& child() {
-    return *child_;
+    : BaseExec     (exec_ctx),
+      HasChildExec (move(child)),
+      plan_        (move(plan)),
+      table_iter_  (table_.begin())
+  {
+    assert(child_ != nullptr);
   }
 
   void init() override;
-
   bool has_next() override;
   Tuple next() override;
 
