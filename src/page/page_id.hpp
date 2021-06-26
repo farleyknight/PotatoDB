@@ -59,6 +59,10 @@ public:
     return os;
   }
 
+  const string to_string() const {
+    return "file_id: " + std::to_string(file_id_) + " block_id: " + std::to_string(block_id_);
+  }
+
 private:
   file_id_t file_id_;
   block_id_t block_id_;

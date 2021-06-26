@@ -82,6 +82,10 @@ TableIterator TableIterator::operator++(int) {
   return clone;
 }
 
+table_oid_t TableIterator::table_oid() const {
+  return table_heap_.table_oid();
+}
+
 bool TableIterator::operator==(const TableIterator& iter) const {
   if (tuple_ == nullptr) {
     return false;

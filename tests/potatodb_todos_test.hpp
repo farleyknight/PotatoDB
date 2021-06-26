@@ -44,7 +44,7 @@ TEST(TodoAppTest, CountStarTest) {
   create_todo_table(db, size);
 
   auto result = db.run("SELECT COUNT(*) FROM todos");
-  EXPECT_TRUE(result.set() != nullptr);
+  ASSERT_TRUE(result.set() != nullptr);
   EXPECT_EQ(result.set()->size(), 1);
   EXPECT_EQ(result.set()->value_at<int32_t>("COUNT(*)", 0), size);
 }

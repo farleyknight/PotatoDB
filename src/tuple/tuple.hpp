@@ -8,18 +8,24 @@
 #include "value/value.hpp"
 #include "value/value_factory.hpp"
 
+enum class TupleSources {
+  TABLE_HEAP   = 0,
+  QUERY_SCHEMA = 1
+};
+
 class Tuple {
 public:
   Tuple() = default;
 
   Tuple(uint32_t size)
-    : buffer_ (size)
+    : source_ (TupleSources::TABLE_HEAP),
+      buffer_ (size)
   {}
 
-  // Constructor for table heap tuple
-  // NOTE: Has no data
-  Tuple(RID rid) : rid_(rid) {}
-  // Provide values w/ schema
+  Tuple(RID rid)
+    : rid_    (rid),
+      source_ (TupleSources::TABLE_HEAP)
+  {}
 
   Tuple(vector<Value> values, const QuerySchema& schema);
 
@@ -30,20 +36,23 @@ public:
     return rid_.has_value();
   }
 
-  buffer_offset_t buffer_offset_for(const QuerySchema& schema,
-                                    column_oid_t column_index) const;
+  buffer_offset_t buffer_offset_for(const auto& schema,
+                                    column_index_t index) const;
 
   void copy_from(const Tuple& tuple) {
     buffer_.copy_from(tuple.buffer_);
   }
 
-  Value value(const QuerySchema& schema,
+  Value value(const auto& schema,
               column_index_t column_index) const;
 
   Value value_by_name(const QuerySchema& schema,
                       const column_name_t& name) const;
 
-  bool is_null(const QuerySchema& schema,
+  Value value_by_oid(const auto& schema,
+                     column_oid_t oid) const;
+
+  bool is_null(const auto& schema,
                uint32_t column_index) const;
 
   Tuple key_from_tuple(const QuerySchema& schema,
@@ -52,7 +61,6 @@ public:
 
   const RID rid()               const { return rid_.value(); }
   void set_rid(RID rid)               { rid_.emplace(rid); }
-
   size_t size()                 const { return buffer_.size(); }
 
   void reset(size_t new_size) {
@@ -67,6 +75,7 @@ public:
                      const TableSchema& table_schema,
                      const QuerySchema& query_schema) const;
 
+  // TODO: Rename this method
   void copy_n_bytes(size_t source_offset,
                     size_t dest_offset,
                     const Buffer& source_buffer,
@@ -74,11 +83,12 @@ public:
   {
     //assert(buffer_.size() >= n);
     // TODO: Handle this inside the Buffer
-    memcpy(buffer_.ptr() + dest_offset,
-           source_buffer.cptr() + source_offset,
+    memcpy(buffer_.ptr(dest_offset),
+           source_buffer.cptr(source_offset),
            n_bytes);
   }
 
+  const string to_string(const TableSchema& schema) const;
   const string to_string(const QuerySchema& schema) const;
   const string to_payload(const QuerySchema& schema) const;
 
@@ -92,7 +102,13 @@ public:
     return buffer_;
   }
 
+  void set_source(TupleSources source) {
+    source_ = source;
+  }
+
 private:
+  // TODO: Change this to a pointer.
   optional<RID> rid_ = nullopt;
+  TupleSources source_ = TupleSources::TABLE_HEAP;
   Buffer buffer_;
 };

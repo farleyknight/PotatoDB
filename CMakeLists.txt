@@ -7,11 +7,12 @@ project(potatodb VERSION 0.1.0)
 
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
+# Project level settings
+include(potatodb_settings)
+
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-# Project level settings
-include(potatodb_settings)
 
 include(potatodb_build_libraries)
 

@@ -30,6 +30,7 @@ public:
     return first_page_id_;
   }
 
+  table_oid_t table_oid() const;
   bool insert_tuple(Tuple& tuple, Txn& txn);
   bool mark_delete(const RID& rid, Txn& txn);
   bool update_tuple(Tuple& tuple, const RID& rid, Txn& txn);

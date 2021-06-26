@@ -3,8 +3,8 @@
 # -----------------------------------------------------------------------------
 
 # specify the C++ standard
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED True) 
 
 # NOTE: Turning this off to make builds faster
 # set(CMAKE_CXX_CPPCHECK "cppcheck")
@@ -31,7 +31,10 @@ add_definitions(
   "-ferror-limit=50"
   "-Wall"
   "-Wextra"
-  "-Wno-unknown-pragmas"
+
+  "-Wno-unknown-pragmas" # This one comes up rarely, and it's annoying to see.
+  # "-Wno-sign-compare"    # This one I don't care about for now, but probably should *not* ignore it in the future.
+
   "-pedantic"
   "-g"
   "-fexceptions"

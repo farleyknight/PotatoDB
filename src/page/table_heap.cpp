@@ -26,6 +26,10 @@ TableHeap::TableHeap(file_id_t file_id,
     buff_mgr_      (buff_mgr)
 {}
 
+table_oid_t TableHeap::table_oid() const {
+  return table_oid_;
+}
+
 void TableHeap::allocate_first_page(Txn& txn) {
   // NOTE: txn is only necessary here because we are creating the
   // first page of the table.

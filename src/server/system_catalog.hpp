@@ -28,18 +28,18 @@ public:
   }
 
   static const string create_table_sql() {
-    return "CREATE TABLE IF NOT EXISTS system_catalog ( "     \
-      "id          INTEGER PRIMARY KEY AUTOINCREMENT, "  \
-      "object_type INTEGER NOT NULL, "                   \
+    return "CREATE TABLE IF NOT EXISTS system_catalog ( "   \
+      "id          INTEGER PRIMARY KEY AUTOINCREMENT, "     \
+      "object_type INTEGER NOT NULL, "                      \
       // TODO: Allow this to be NULL
       // "data_type   INTEGER, "
-      "data_type   INTEGER NOT NULL, "                   \
+      "data_type   INTEGER NOT NULL, "                      \
       // TODO: Allow this to be NULL
       // "data_size   INTEGER, "
-      "data_size   INTEGER NOT NULL, "                   \
-      "primary_key BOOLEAN NOT NULL, "                   \
-      "object_name VARCHAR(32) NOT NULL, "               \
-      "table_name  VARCHAR(32) NOT NULL "                \
+      "data_size   INTEGER NOT NULL, "                      \
+      "primary_key BOOLEAN NOT NULL, "                      \
+      "object_name VARCHAR(32) NOT NULL, "                  \
+      "table_name  VARCHAR(32) NOT NULL "                   \
       ");";
   }
 
@@ -178,8 +178,8 @@ public:
     assert(db.catalog().has_table_named("system_catalog"));
 
     auto all_tables_sql = load_tables_sql();
-    std::cout << "SQL for LOADING ALL TABLES " << std::endl;
-    std::cout << all_tables_sql << std::endl;
+    logger->debug("SQL for LOADING ALL TABLES");
+    logger->debug(all_tables_sql);
 
     auto tables      = db.run(all_tables_sql);
     auto &result_set = tables.set();
@@ -187,16 +187,16 @@ public:
     assert(result_set);
     assert(result_set->size() > 0);
 
-    for (size_t i = 0; i < result_set->size(); ++i) {
+    for (int i = 0; i < result_set->size(); ++i) {
       auto table_oid  = result_set->value_at<int32_t>("id", i);
       auto table_name = result_set->value_at<string>("table_name", i);
-      std::cout << "Found table_name " << table_name << std::endl;
+      logger->debug("Found table_name " + table_name);
       if (table_name == "system_catalog") {
         continue;
       }
       auto table_sql = load_table_sql_for(table_name);
-      std::cout << "SQL for LOADING TABLE " << std::endl;
-      std::cout << table_sql << std::endl;
+      logger->debug("SQL for LOADING TABLE");
+      logger->debug(table_sql);
       auto result = db.run(table_sql);
       db.catalog().load_from_query(table_oid, table_name, result);
       db.table_mgr().load_table(table_name, table_oid);

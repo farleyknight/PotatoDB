@@ -11,7 +11,7 @@ bool SeqScanExec::match_found(const Tuple& tuple) {
     auto result = plan_->pred().
       eval(tuple, schema()).as<bool>();
 
-    std::cout << "Result from match attempt: " << std::to_string(result) << std::endl;
+    logger->debug("Result from match attempt: " + std::to_string(result));
     return result;
   } else {
     return true;
@@ -23,23 +23,28 @@ bool SeqScanExec::at_the_end() {
 }
 
 bool SeqScanExec::has_next() {
-  std::cout << "Checking if we have a tuple" << std::endl;
+  logger->debug("Checking if we have a tuple");
   if (!table_iter_->has_tuple()) {
-    std::cout << "NO TUPLE! :( :( :(" << std::endl;
+    logger->debug("NO TUPLE! :( :( :(");
     return false;
   }
 
+  logger->debug("We have a tuple! :)");
+
   while (!at_the_end()) {
-    std::cout << "%%%%%%%%%%%%%%%% Checking Tuple: " << table_iter_->tuple().to_string(schema()) << std::endl;
+    logger->debug("Got schema: " + schema().to_string());
+    logger->debug("%%%%%%%%%%%%%%%% Checking Tuple: " +
+                  table_iter_->tuple().to_string(table_schema()));
 
     if (match_found(table_iter_->tuple())) {
-      std::cout << "MATCH FOUND! :) :) :)" << std::endl;
+
+      logger->debug("MATCH FOUND! :) :) :)");
       return true;
     }
     ++(*table_iter_);
   }
 
-  std::cout << "NO MATCH WAS FOUND! :( :( :(" << std::endl;
+  logger->debug("NO MATCH WAS FOUND! :( :( :(");
   return false;
 }
 
@@ -57,6 +62,11 @@ void SeqScanExec::init() {
   table_iter_ = make_unique<TableIterator>(table_heap().begin(txn()));
 }
 
-const QuerySchema& SeqScanExec::schema()  {
+const QuerySchema& SeqScanExec::schema() {
   return plan_->schema();
+}
+
+const TableSchema& SeqScanExec::table_schema() {
+  auto table_oid = plan_->table_oid();
+  return exec_ctx_.catalog().table_schema_for(table_oid);
 }

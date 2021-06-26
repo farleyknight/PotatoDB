@@ -21,6 +21,7 @@ public:
   }
 
   const QuerySchema& schema();
+  const TableSchema& table_schema();
 
 private:
   bool match_found(const Tuple& tuple);

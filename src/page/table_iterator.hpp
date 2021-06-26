@@ -26,6 +26,7 @@ public:
   bool has_tuple() const;
   const Tuple& tuple() const;
 
+  table_oid_t table_oid() const;
   bool stop_iterating() const;
 
   const RID& rid() const {

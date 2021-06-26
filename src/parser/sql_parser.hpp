@@ -6,8 +6,8 @@
 
 #include "common/types.hpp"
 
-#include "antlr4-runtime/antlr4-common.h"
-#include "antlr4-runtime/antlr4-runtime.h"
+#include "antlr4-common.h"
+#include "antlr4-runtime.h"
 
 #include "PotatoSQLLexer.h"
 #include "PotatoSQLParser.h"
@@ -37,28 +37,11 @@ class ErrorListener : public BaseErrorListener {
 
 class SQLParser {
 public:
-  static string as_tree(string input) {
-    ANTLRInputStream stream(input);
-
-    PotatoSQLLexer lexer(&stream);
-    CommonTokenStream tokens(&lexer);
-
-    ErrorListener errorListener;
-
-    PotatoSQLParser parser(&tokens);
-    parser.removeErrorListeners();
-    parser.addErrorListener(&errorListener);
-
-    try {
-      tree::ParseTree* tree = parser.main();
-      return tree->toStringTree();
-    } catch (UNUSED std::invalid_argument &e) {
-      return e.what();
-    }
-  }
 
   static vector<string> as_expr_strings(string input) {
-    ANTLRInputStream stream(input);
+    const char* str = input.c_str();
+    size_t length   = input.size();
+    ANTLRInputStream stream(str, length);
 
     PotatoSQLLexer lexer(&stream);
     CommonTokenStream tokens(&lexer);
@@ -91,7 +74,9 @@ public:
   }
 
   static vector<ptr<BaseExpr>> as_exprs(string input) {
-    ANTLRInputStream stream(input);
+    const char* str = input.c_str();
+    size_t length   = input.size();
+    ANTLRInputStream stream(str, length);
 
     PotatoSQLLexer lexer(&stream);
     CommonTokenStream tokens(&lexer);

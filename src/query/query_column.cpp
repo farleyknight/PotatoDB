@@ -23,7 +23,7 @@ Value QueryColumn::eval_join(UNUSED const Tuple& lt,
 QueryColumn QueryColumn::from(TableColumn col) {
   return QueryColumn(col.type_id(),
                      col.table_oid(),
-                     col.oid(),
+                     col.column_oid(),
                      col.name());
 }
 
@@ -50,7 +50,7 @@ Value QueryColumn::eval_agg(const QuerySchema& schema,
     return aggregates[0];
   }
 
-  auto index = schema.index_for(name_);
+  auto index = schema.column_index_for(name_);
   return aggregates[index];
 }
 

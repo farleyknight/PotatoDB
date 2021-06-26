@@ -30,7 +30,7 @@ private:
   bool compare(const Value& left,
                const Value& right) const
   {
-    std::cout << "Comparing left: " << left.to_string() << " and right: " << right.to_string() << std::endl;
+    logger->debug("Comparing left: " + left.to_string() + " and right: " + right.to_string());
 
     switch (type_) {
     case CompareType::EQ:

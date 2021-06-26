@@ -337,7 +337,7 @@ TEST_F(ExecTest, DISABLED_SimpleSelectInsertTest) {
   ASSERT_EQ(where_set->size(),
             full_set->size());
 
-  for (size_t i = 0; i < full_set->size(); ++i) {
+  for (int i = 0; i < full_set->size(); ++i) {
     ASSERT_EQ(full_set->value_at<int>("colA", i),
               where_set->value_at<int>("colA", i));
 

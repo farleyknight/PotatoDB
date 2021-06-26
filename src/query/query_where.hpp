@@ -67,7 +67,7 @@ public:
 
 protected:
   bool combine(const Value& left, const Value& right) const {
-    std::cout << "Combining left: " << left.to_string() << " and right: " << right.to_string() << std::endl;
+    logger->debug("Combining left: " + left.to_string() + " and right: " + right.to_string());
 
     switch (combine_) {
     case LogicalType::AND:

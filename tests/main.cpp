@@ -21,6 +21,17 @@
 
 #include "value_test.hpp"
 
+
+/*
+ *
+ TEST(MainTest, HelloWorldTest) {
+ std::cout << "Hello, world!" << std::endl;
+ ASSERT_TRUE(true);
+ }
+
+ 
+ */
+
 int main(int argc, char **argv) {
   spdlog::set_level(spdlog::level::debug); // Set global log level to debug
   ::testing::InitGoogleTest(&argc, argv);

@@ -5,36 +5,37 @@ template<class ColT>
 BaseSchema<ColT>::BaseSchema(vector<ColT> cols) {
   size_t offset = 0;
 
-  // // TODO: This whole entire block can probably be moved into the constructor for QuerySchema?
-  // if (cols.size() == 1 && cols[0].is_count_splat()) {
-  //   // TODO
-  //   // In the case of a "SELECT COUNT(*)" query, we may not need to
-  //   // materialize the tuple at all!
-  //   //
-  //   // If that's the case, we don't need extra columns here either.
-  //   // Likely we can populate `columns_` with just one element
-  //   // (the splat) and leave everything else empty.
-  //   //
-  //   // This likely has down-stream effects, so we may need to
-  //   // correct those as we go along.
+  assert(cols.size() > 0); // NOTE: Empty schemas are not a thing :/
+  // NOTE: If we have a table_oid_ for the schema, it is because
+  // all columns have the same table_oid_
+  table_oid_ = cols[0].table_oid();
 
-  //   columns_.push_back(cols[0]);
-  //   tuple_length_ = Type::size_of(TypeId::INTEGER);
-  //   return;
-  // }
+  for (uint32_t index = 0; index < cols.size(); ++index) {
+    auto &col = cols[index];
 
-  for (index_t oid = 0; oid < cols.size(); ++oid) {
-    auto &col = cols[oid];
+    // NOTE: If the 2nd column has a different table_oid,
+    // then we have more than one.
+    // The variable is set to INVALID_TABLE_OID
+    if (index > 0 && table_oid_ != col.table_oid()) {
+      table_oid_ = INVALID_TABLE_OID;
+    }
+
+    if (column_oids_.count(col.name()) > 0) {
+      continue; // NOTE: Skip duplicates
+    }
 
     if (!col.is_inlined()) {
+      // NOTE: Inlined tuples are faster to read because of less indirection
       all_tuples_inlined_ = false;
-      unlined_columns_.push_back(oid);
+      unlined_columns_.push_back(index);
     }
+
+    indexes_[col.name()] = index;
 
     offsets_.push_back(offset);
     offset += col.fixed_length();
 
-    column_oids_[col.name()] = oid;
+    column_oids_[col.name()] = col.column_oid();
     columns_.push_back(col);
   }
 
@@ -59,6 +60,14 @@ BaseSchema<ColT>::column_oid_for(const column_name_t& name) const
 }
 
 template<class ColT>
+column_oid_t
+BaseSchema<ColT>::column_oid_for(column_index_t index) const
+{
+  return columns_[index].column_oid();
+}
+
+
+template<class ColT>
 bool BaseSchema<ColT>::operator==(const BaseSchema& other) const {
   if (other.columns_.size() != columns_.size()) {
     return false;
@@ -75,8 +84,8 @@ bool BaseSchema<ColT>::operator==(const BaseSchema& other) const {
 
 template<class ColT>
 buffer_offset_t
-BaseSchema<ColT>::buffer_offset_for(column_oid_t oid) const {
-  return offsets_.at(oid);
+BaseSchema<ColT>::buffer_offset_for(column_index_t index) const {
+  return offsets_.at(index);
 }
 
 template<class ColT>
@@ -87,43 +96,48 @@ BaseSchema<ColT>::buffer_offset_for(const column_name_t& name) const {
 
 template<class ColT>
 column_index_t
-BaseSchema<ColT>::index_for(const column_name_t& name) const {
-  return column_oid_for(name);
+BaseSchema<ColT>::column_index_for(const column_name_t& name) const {
+  assert(indexes_.count(name) == 1);
+  return indexes_.at(name);
 }
 
 template<class ColT>
-column_index_t BaseSchema<ColT>::column_count() const {
+column_index_t
+BaseSchema<ColT>::column_count() const {
   return columns_.size();
 }
 
 template<class ColT>
-buffer_offset_t BaseSchema<ColT>::tuple_length() const {
+buffer_offset_t
+BaseSchema<ColT>::tuple_length() const {
   return tuple_length_;
 }
 
 template<class ColT>
-const vector<column_index_t>& BaseSchema<ColT>::unlined_columns() const {
+const vector<column_index_t>&
+BaseSchema<ColT>::unlined_columns() const {
   return unlined_columns_;
 }
 
 template<class ColT>
-const ColT& BaseSchema<ColT>::by_name(const column_name_t& name) const {
-  auto oid = column_oid_for(name);
-  auto size = static_cast<long>(columns_.size());
-  assert(size >= oid);
-  return columns_.at(oid);
+const ColT&
+BaseSchema<ColT>::by_name(const column_name_t& name) const {
+  auto index = column_index_for(name);
+  return by_column_index(index);
 }
 
 template<class ColT>
-const ColT& BaseSchema<ColT>::operator[](const column_name_t& name) const {
+const ColT&
+BaseSchema<ColT>::operator[](const column_name_t& name) const {
   return by_name(name);
 }
 
 template<class ColT>
-const ColT& BaseSchema<ColT>::by_column_oid(column_oid_t oid) const {
+const ColT&
+BaseSchema<ColT>::by_column_index(column_index_t index) const {
   auto size = static_cast<long>(columns_.size());
-  assert(size >= oid);
-  return columns_.at(oid);
+  assert(size >= index);
+  return columns_.at(index);
 }
 
 template<class ColT>

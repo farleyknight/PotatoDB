@@ -4,11 +4,10 @@ void FileMgr::write_buffer(PageId page_id, const Buffer& buffer) {
   file_id_t file_id = page_id.file_id();
   buffer_offset_t offset = page_id.block_id() * buffer.size();
 
-  std::cout << "Writing buffer to file_id " << file_id << std::endl;
-  std::cout << "Buffer offset " << offset << std::endl;
-  std::cout << "File name: " << files_[file_id]->file_path() << std::endl;
-  std::cout << "File size: " << files_[file_id]->size() << std::endl;
-  std::cout << std::endl;
+  logger->debug("Writing buffer to file_id " + std::to_string(file_id));
+  logger->debug("Buffer offset " + std::to_string(offset));
+  logger->debug("File name: " + files_[file_id]->file_path());
+  logger->debug("File size: " + std::to_string(files_[file_id]->size()));
 
   files_[file_id]->write_buffer(offset, buffer);
 }
@@ -17,11 +16,12 @@ void FileMgr::read_buffer(PageId page_id, Buffer& buffer) {
   file_id_t file_id = page_id.file_id();
   buffer_offset_t offset = page_id.block_id() * buffer.size();
 
-  std::cout << "Reading buffer from file_id " << file_id << std::endl;
-  std::cout << "Buffer offset " << offset << std::endl;
-  std::cout << "File name: " << files_[file_id]->file_path() << std::endl;
-  std::cout << "File size: " << files_[file_id]->size() << std::endl;
-  std::cout << std::endl;
+  logger->debug("Reading buffer at file_id " + std::to_string(file_id));
+  logger->debug("Reading block_id " + std::to_string(page_id.block_id()));
+
+  logger->debug("Buffer offset " + std::to_string(offset));
+  logger->debug("File name: " + files_[file_id]->file_path());
+  logger->debug("File size: " + std::to_string(files_[file_id]->size()));
 
   files_[file_id]->read_buffer(offset, buffer);
 }

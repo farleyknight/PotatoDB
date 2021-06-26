@@ -212,7 +212,7 @@ void Catalog::load_from_query(table_oid_t table_oid,
   vector<TableColumn> cols;
   string primary_key_name = "";
 
-  for (size_t i = 0; i < result_set->size(); ++i) {
+  for (int32_t i = 0; i < result_set->size(); ++i) {
     auto column_oid     = result_set->value_at<int32_t>("id", i);
     auto data_type      = result_set->value_at<int32_t>("data_type", i);
 

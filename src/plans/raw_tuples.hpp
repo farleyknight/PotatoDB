@@ -62,8 +62,8 @@ public:
       return *this;
     }
 
-    bool operator==(const Iterator& other) { return iter_ == other.iter_; }
-    bool operator!=(const Iterator& other) { return iter_ != other.iter_; }
+    bool operator==(const Iterator& other) const { return iter_ == other.iter_; }
+    bool operator!=(const Iterator& other) const { return iter_ != other.iter_; }
 
   private:
     Data::const_iterator iter_;

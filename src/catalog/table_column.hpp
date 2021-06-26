@@ -61,7 +61,7 @@ public:
   bool is_nullable()              const { return nullable_; }
   TypeId type_id()                const { return type_id_; }
   table_oid_t table_oid()         const { return table_oid_; }
-  column_oid_t oid()              const { return column_oid_; }
+  column_oid_t column_oid()       const { return column_oid_; }
   int32_t fixed_length()          const { return fixed_length_; }
   string_size_t variable_length() const { return variable_length_; }
   const column_name_t& name()     const { return name_; }

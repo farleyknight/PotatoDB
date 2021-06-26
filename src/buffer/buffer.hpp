@@ -165,28 +165,8 @@ public:
     return *reinterpret_cast<const double*>(cptr(offset));
   }
 
-  void write_string(buffer_offset_t offset, const string& value) {
-    string_size_t length = value.size();
-
-    auto c_string = reinterpret_cast<const unsigned char*>(value.c_str());
-
-    std::memcpy(ptr(offset),
-                &length, sizeof(string_size_t));
-    std::memcpy(ptr(offset + sizeof(string_size_t)),
-                c_string, length);
-  }
-
-  const string read_string(buffer_offset_t offset) const {
-    string_size_t size;
-    std::memcpy(&size, cptr(offset), sizeof(string_size_t));
-
-    string new_string(size, 0);
-    std::memcpy(new_string.data(),
-                cptr(offset + sizeof(string_size_t)),
-                size);
-
-    return new_string;
-  }
+  void write_string(buffer_offset_t offset, const string& value);
+  const string read_string(buffer_offset_t offset) const;
 
   /**********************************************
    * DB specific types
@@ -212,8 +192,6 @@ public:
   void write_page_id(buffer_offset_t offset, const PageId& page_id) {
     *reinterpret_cast<uint32_t*>(ptr(offset)) = page_id.as_uint32();
   }
-
-  
 
   Data data_;
 };

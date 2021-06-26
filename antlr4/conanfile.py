@@ -23,7 +23,9 @@ class Antlr4Conan(ConanFile):
 
     def _configure_cmake(self):
         cmake = CMake(self)
-        cmake.definitions["WITH_LIBCXX"]="OFF"
+        cmake.definitions['CMAKE_CXX_STANDARD'] = 17
+        cmake.definitions['CMAKE_CXX_STANDARD_REQUIRED'] = 'Required'
+        cmake.definitions['BUILD_SHARED_LIBS'] = 'OFF'
         cmake.configure(source_folder=self._source_subfolder)
         return cmake
 
@@ -32,8 +34,8 @@ class Antlr4Conan(ConanFile):
         cmake.build(target='antlr4_static')
 
     def package(self):
-        self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "runtime", "src"))
-        self.copy("*.a", dst="lib", keep_path=False)
+        self.copy("*.h",   dst="include", src=os.path.join(self._source_subfolder, "runtime", "src"))
+        self.copy("*-runtime.a", dst="lib", keep_path=False)
         self.copy("*.jar", dst="bin", keep_path=False)
 
     def package_info(self):

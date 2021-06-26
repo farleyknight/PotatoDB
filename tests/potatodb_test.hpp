@@ -75,7 +75,7 @@ TEST(PotatoDBTest, AggegrationTest) {
 
   db.run("CREATE TABLE foo_bar ( colA INTEGER )");
 
-  const index_t size = 10;
+  const int size = 10;
 
   for (index_t i = 0; i < size; ++i) {
     db.run("INSERT INTO foo_bar VALUES (" + std::to_string(i) + ")");
@@ -87,7 +87,7 @@ TEST(PotatoDBTest, AggegrationTest) {
   EXPECT_TRUE(result.set() != nullptr);
   EXPECT_EQ(result.set()->size(), 1);
 
-  EXPECT_EQ(result.set()->schema().all().size(), 4);
+  EXPECT_EQ(result.set()->schema().all().size(), 4u);
 
   auto countA = result.set()->value_at<int32_t>("COUNT(colA)", 0);
   auto sumA   = result.set()->value_at<int32_t>("SUM(colA)", 0);

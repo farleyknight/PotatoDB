@@ -171,7 +171,7 @@ public:
     for (const auto& agg_expr : agg_exprs) {
       auto column_name = agg_expr.column_expr().name();
       if (column_name == "*") {
-        continue;
+        cols.push_back(QueryColumn::splat());
       } else {
         cols.push_back(catalog.query_column_for(table_name,
                                                 column_name));
@@ -199,10 +199,14 @@ public:
                                  move(left_scan_plan));
   }
 
-  static ptr<BasePlan> from_expr(const Catalog& catalog, const SelectExpr& expr) {
+  static ptr<BasePlan>
+  from_expr(const Catalog& catalog,
+            const SelectExpr& expr)
+  {
     if (expr.agg_list().list().size() > 0) {
       return make_agg_plan(catalog, expr);
     } else if (expr.order_by().is_valid()) {
+      logger->debug("ORDER BY is valid! " + expr.order_by().to_string());
       return make_sort_plan(catalog, expr);
     } else {
       return make_seq_scan_plan(catalog, expr);

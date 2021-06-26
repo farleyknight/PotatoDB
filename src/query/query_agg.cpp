@@ -13,7 +13,7 @@ Value QueryAgg::eval_agg(const QuerySchema& schema,
                          UNUSED const vector<Value>& group_bys,
                          const vector<Value>& aggregates) const
 {
-  auto index = schema.index_for(col_.name());
+  auto index = schema.column_index_for(col_.name());
   return aggregates[index];
 }
 

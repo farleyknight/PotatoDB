@@ -46,6 +46,7 @@ fs::path PotatoDB::table_file_for(const string& table_name) {
 }
 
 ptr<BasePlan> PotatoDB::sql_to_plan(const string& statement) const {
+  // TODO: Get the loggering working! :/
   logger->debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
   logger->debug(statement);
   logger->debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
@@ -54,7 +55,7 @@ ptr<BasePlan> PotatoDB::sql_to_plan(const string& statement) const {
   auto exprs = SQLParser::as_exprs(statement);
   // TODO: Allow for multiple statements
   if (exprs.size() == 0) {
-    std::cout << "No exprs for : " << statement << std::endl;
+    logger->debug("No exprs for : " + statement);
   }
 
   assert(exprs.size() > 0);
@@ -76,7 +77,7 @@ StatementResult PotatoDB::run(const string& statement) {
     if (plan->is_query()) {
       auto result_set = exec_eng_.query(move(plan), txn, exec_ctx);
       txn_mgr_.commit(txn);
-      std::cout << "Returning result set " << std::endl;
+      logger->debug("Returning result set");
       return StatementResult(move(result_set));
     } else if (plan->type() == PlanType::CREATE_TABLE) {
       // CREATE TABLE``
@@ -92,9 +93,9 @@ StatementResult PotatoDB::run(const string& statement) {
       return StatementResult(message);
     }
   } catch (std::exception& e) {
-    std::cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXX" << std::endl;
-    std::cout << "ERROR MESSAGE" << std::endl;
-    std::cout << e.what() << std::endl;
+    logger->debug("XXXXXXXXXXXXXXXXXXXXXXXXXXX");
+    logger->debug("ERROR MESSAGE");
+    logger->debug(e.what());
     return StatementResult(e.what());
   }
 }
@@ -117,13 +118,12 @@ void PotatoDB::run_create_table(const table_name_t table_name,
   auto insert_table_plan = sql_to_plan(insert_table_sql);
   exec_eng_.execute(move(insert_table_plan), txn, exec_ctx);
 
-  // std::cout << "%%%%%%%%%%%%%%%%%%%%%%" << std::endl;
-  // std::cout << "Inserting the columns" << std::endl;
-  // std::cout << "Column count: " << std::to_string(column_list.size()) << std::endl;
-  // std::cout << "%%%%%%%%%%%%%%%%%%%%%%" << std::endl;
+  logger->debug("%%%%%%%%%%%%%%%%%%%%%%");
+  logger->debug("Inserting the columns");
+  logger->debug("Column count: " + std::to_string(column_list.size()));
+  logger->debug("%%%%%%%%%%%%%%%%%%%%%%");
 
   for (const auto &col : column_list) {
-    // INSERT INTO system_catalog VALUES (...)
     auto insert_column_sql
       = SystemCatalog::insert_column_sql_for(table_name, col);
 
@@ -133,11 +133,12 @@ void PotatoDB::run_create_table(const table_name_t table_name,
 }
 
 void PotatoDB::build_system_catalog() {
+  logger->debug("Checking if system_catalog table exists");
   if (disk_mgr().table_file_exists("system_catalog")) {
-    std::cout << "Begin loading system catalog" << std::endl;
+    logger->debug("Begin loading system catalog");
     SystemCatalog::load(*this);
   } else {
-    std::cout << "Begin creating system catalog" << std::endl;
+    logger->debug("Begin creating system catalog");
     SystemCatalog::create(*this);
   }
 }
@@ -149,16 +150,16 @@ void PotatoDB::start_server() {
   state_ = ServerState::RUNNING;
 
   // TODO: Add logging for this line
-  std::cout << "Start PotatoDB Server (0.1.0)" << std::endl;
+  logger->debug("Start PotatoDB Server (0.1.0)");
   server_.set_port(port_);
   server_.on_read([&](WPtr<ClientSocket> socket_ptr) {
     if (auto client = socket_ptr.lock()) {
       auto statement = client->read();
-      // std::cout << "Client Socket got query " << statement << std::endl;
+      logger->debug("Client Socket got query " + statement);
 
       try {
         auto result = client->session().run_statement(statement);
-        std::cout << "Sending Payload " << result.to_payload() << std::endl;
+        logger->debug("Sending Payload " + result.to_payload());
         client->write(result.to_payload());
       } catch (std::exception &e) {
         // TODO: Send better error message
@@ -166,13 +167,13 @@ void PotatoDB::start_server() {
       }
     } else {
       // TODO: Logger
-      std::cout << "Could not get lock!" << std::endl;
+      logger->debug("Could not get lock!");
     }
   });
 
   // TODO: Allow port customization
   // TODO: Add logging for this line
-  std::cout << "Server listening on port " << port_ << std::endl;
+  logger->debug("Server listening on port " + std::to_string(port_));
   server_.accept_connections();
 }
 
@@ -194,8 +195,16 @@ void PotatoDB::run_flush_thread() {
 }
 
 void PotatoDB::startup() {
-  state_ = ServerState::STARTING_UP;
+  try {
+    logger->debug("Warming up the PotatoDB server");
+    state_ = ServerState::STARTING_UP;
 
-  build_system_catalog();
-  verify_system_files();
+    logger->debug("Building system catalog");
+    build_system_catalog();
+    logger->debug("Verifying system files");
+    verify_system_files();
+  } catch (std::exception &e) {
+    logger->debug("An error occurred during startup()");
+    logger->debug(e.what());
+  }
 }

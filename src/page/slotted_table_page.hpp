@@ -43,7 +43,7 @@ public:
       return false;
     }
 
-    std::cout << "Before inserting tuple, the tuple count is now " << tuple_count() << std::endl;
+    logger->debug("Before inserting tuple, the tuple count is now " + std::to_string(tuple_count()));
 
     // Try to find a free slot to reuse.
     slot_id_t i;
@@ -80,7 +80,7 @@ public:
       set_tuple_count(tuple_count() + 1);
     }
 
-    std::cout << "After inserting tuple, the tuple count is now " << tuple_count() << std::endl;
+    logger->debug("After inserting tuple, the tuple count is now " + std::to_string(tuple_count()));
 
     tuple.set_rid(RID(table_page_id(), i));
 
@@ -252,16 +252,15 @@ public:
     uint32_t slot_id = rid.slot_id();
     // If somehow we have more slots than tuples, abort the txn.
     if (slot_id >= tuple_count()) {
-      std::cout << "Slot ID is greater or equal to tuple count! " << slot_id << std::endl;
-      std::cout << "Tuple count " << tuple_count() << std::endl;
+      logger->debug("Slot ID is greater or equal to tuple count! " + std::to_string(slot_id));
+      logger->debug("Tuple count " + std::to_string(tuple_count()));
       return unique_ptr<Tuple>(nullptr);
     }
     // Otherwise get the current tuple size too.
     uint32_t tuple_size = tuple_size_at(slot_id);
     // If the tuple is deleted, abort the txn.
     if (is_deleted(tuple_size)) {
-      std::cout << "This tuple is deleted! " << slot_id << std::endl;
-      // assert(false);
+      logger->debug("This tuple is deleted! " + std::to_string(slot_id));
       return unique_ptr<Tuple>(nullptr);
     }
 
@@ -269,13 +268,12 @@ public:
     // Copy the tuple data into our result.
     uint32_t tuple_offset = tuple_offset_at_slot(slot_id);
     auto tuple = make_unique<Tuple>(tuple_size);
-    // tuple->reset(tuple_size);
     tuple->copy_n_bytes(tuple_offset, // Source offset
                         0, // Destination offset
                         page_->buffer(), // Source buffer
                         tuple_size); // N bytes
-
     tuple->set_rid(rid);
+
     return tuple;
   }
 
