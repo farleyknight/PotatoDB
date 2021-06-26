@@ -8,7 +8,6 @@
 #include "PotatoSQLParser.h"
 
 
-namespace potatosql {
 
 /**
  * This class defines an abstract visitor for a parse tree
@@ -213,4 +212,3 @@ public:
 
 };
 
-}  // namespace potatosql

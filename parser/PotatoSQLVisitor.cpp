@@ -5,5 +5,3 @@
 #include "PotatoSQLVisitor.h"
 
 
-using namespace potatosql;
-

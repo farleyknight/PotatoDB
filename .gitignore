@@ -79,6 +79,8 @@ test_logs.txt
 GPATH
 GRTAGS
 GTAGS
+antlr4/package
+antlr.jar
 
 # Graphviz
 potatodb.dot*

@@ -23,6 +23,11 @@ add_executable(${PARSER_BINARY}
   "parser/main.cpp"
   ${parser_sources})
 
+set_target_properties(${PARSER_BINARY}
+  PROPERTIES
+  CXX_STANDARD 20
+  CXX_EXTENSIONS ON)
+
 target_link_libraries(${PARSER_BINARY}
   -fstandalone-debug # So we can see full parse results in lldb
   ${CONAN_LIBS})

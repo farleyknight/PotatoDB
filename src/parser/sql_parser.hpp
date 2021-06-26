@@ -15,7 +15,6 @@
 
 #include "parser/eval_parse_visitor.hpp"
 
-using namespace potatosql;
 using namespace antlr4;
 
 class ErrorListener : public BaseErrorListener {
