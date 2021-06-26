@@ -60,31 +60,44 @@ bool BuffMgr::flush_page(PageId page_id) {
 }
 
 Page* BuffMgr::fetch_page(PageId page_id) {
-  assert(page_id.is_valid());
-  if (contains_page(page_id)) {
-    auto frame_id = page_table_[page_id.as_uint32()];
-    Page& page = pages_[frame_id];
+  try {
+    assert(page_id.is_valid());
+    if (contains_page(page_id)) {
+      auto frame_id = page_table_[page_id.as_uint32()];
+      Page& page = pages_[frame_id];
+      pin_page(page, frame_id);
+
+      return &pages_[frame_id];
+    }
+
+    auto [maybe_page, frame_id] = pick_or_evict_page();
+    if (maybe_page == nullptr) {
+      return nullptr;
+    }
+    Page& page = *maybe_page;
+
+    logger->debug("PAAAAAAAAAAAAAAGE REEEEEEEEEEAD - " + page_id.to_string());
+    disk_mgr_.read_page(page_id, page);
+    page_table_[page_id.as_uint32()] = frame_id;
+    page.set_id(page_id);
+
+    assert(page.page_id().is_valid());
+
+    logger->debug("Page ID is valid");
+    logger->flush();
+
     pin_page(page, frame_id);
 
-    return &pages_[frame_id];
+    logger->debug("Ready to pin frame_id: " + std::to_string(frame_id));
+    logger->flush();
+
+    return maybe_page;
+  } catch (std::exception& e) {
+    logger->debug("Caught error in BuffMgr::fetch_page");
+    logger->debug(e.what());
   }
 
-  auto [maybe_page, frame_id] = pick_or_evict_page();
-  if (maybe_page == nullptr) {
-    return nullptr;
-  }
-  Page& page = *maybe_page;
-
-  logger->debug("PAAAAAAAAAAAAAAGE REEEEEEEEEEAD - " + page_id.to_string());
-  disk_mgr_.read_page(page_id, page);
-  page_table_[page_id.as_uint32()] = frame_id;
-  page.set_id(page_id);
-
-  assert(page.page_id().is_valid());
-
-  pin_page(page, frame_id);
-
-  return maybe_page;
+  return nullptr;
 }
 
 bool BuffMgr::unpin(PageId page_id, bool is_dirty) {

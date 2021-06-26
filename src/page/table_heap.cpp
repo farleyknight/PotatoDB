@@ -46,6 +46,10 @@ void TableHeap::allocate_first_page(Txn& txn) {
                       log_mgr_);
   first_page.wunlatch();
 
+  auto next_page_id = first_page.next_page_id();
+  logger->debug("next_page_id: " + next_page_id.to_string());
+  assert(next_page_id == PageId::STOP_ITERATING(file_id_));
+
   buff_mgr_.unpin(first_page_id_, true);
 }
 
@@ -233,7 +237,11 @@ TableIterator TableHeap::begin(Txn& txn) {
   auto page_id = first_page_id_;
   RID rid(page_id, 0);
 
-  while (page_id != PageId::STOP_ITERATING(file_id_)) {
+  auto stop_iterating = PageId::STOP_ITERATING(file_id_);
+  logger->debug("stop_iterating: " + stop_iterating.to_string());
+
+  while (page_id != stop_iterating) {
+    logger->debug("page_id is now: " + page_id.to_string());
     auto maybe_page = buff_mgr_.fetch_page(page_id);
     assert(maybe_page);
 
@@ -246,7 +254,12 @@ TableIterator TableHeap::begin(Txn& txn) {
       rid = maybe_rid.value();
       break;
     }
-    page_id = page.next_page_id();
+    auto next_page_id = page.next_page_id();
+    if (next_page_id == page_id) {
+      logger->debug("next_page_id == page_id, breaking out of loop");
+      break; // NOTE: Prevent infinite loop
+    }
+    page_id = next_page_id;
   }
 
   assert(rid.page_id().is_valid());

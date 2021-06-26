@@ -43,7 +43,8 @@ public:
       return false;
     }
 
-    logger->debug("Before inserting tuple, the tuple count is now " + std::to_string(tuple_count()));
+    logger->debug("Before inserting tuple, the tuple count is now "
+                  + std::to_string(tuple_count()));
 
     // Try to find a free slot to reuse.
     slot_id_t i;
@@ -80,7 +81,8 @@ public:
       set_tuple_count(tuple_count() + 1);
     }
 
-    logger->debug("After inserting tuple, the tuple count is now " + std::to_string(tuple_count()));
+    logger->debug("After inserting tuple, the tuple count is now "
+                  + std::to_string(tuple_count()));
 
     tuple.set_rid(RID(table_page_id(), i));
 
@@ -278,6 +280,9 @@ public:
   }
 
   Option<RID> first_tuple_rid() {
+    logger->debug("Looking for first tuple RID");
+    logger->debug("Page has tuple_count: "
+                  + std::to_string(tuple_count()));
     // Find and return the first valid tuple.
     for (uint32_t i = 0; i < tuple_count(); ++i) {
       if (tuple_size_at(i) > 0) {

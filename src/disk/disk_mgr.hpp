@@ -49,6 +49,7 @@ public:
   }
 
   bool table_file_exists(const string& table_name) const {
+    logger->debug("Checking if there is a table file for : " + table_name);
     return file_mgr_.file_exists(table_file_for(table_name));
   }
 

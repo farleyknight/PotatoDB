@@ -85,4 +85,5 @@ void FileHandle::read_buffer(buffer_offset_t offset,
   logger->debug("After read, what is file status?");
   print_status();
   logger->debug("READ READ READ READ READ READ READ: " + file_path());
+  logger->flush();
 }

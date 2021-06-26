@@ -28,10 +28,13 @@ TableIterator::TableIterator(const TableIterator& other)
 TableIterator& TableIterator::operator++() {
   assert(tuple_);
 
-  auto &buff_mgr = table_heap_.buff_mgr();
-  auto page_id   = tuple_->page_id();
-  auto file_id   = page_id.file_id();
-  SlottedTablePage curr_page(buff_mgr.fetch_page(page_id));
+  auto &buff_mgr  = table_heap_.buff_mgr();
+  auto page_id    = tuple_->page_id();
+  auto file_id    = page_id.file_id();
+  auto maybe_page = buff_mgr.fetch_page(page_id);
+  logger->debug("Pulling up curr_page via page_id: "
+                + page_id.to_string());
+  SlottedTablePage curr_page(maybe_page);
 
   auto next_tuple_rid = curr_page.next_tuple_rid(tuple_->rid());
 
