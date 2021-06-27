@@ -29,7 +29,44 @@ $ ninja tests
 
 At the moment PotatoDB has no easy-to-use installers. This is because it is still under heavy develompent. Instead, you'll be building it from scratch. 
 
-... TODO! Explain how to properly use `conan` here..
+At the moment, we have to build to extra `conan` packages in order to properly build the main one.
 
-1) Explain how to build the `antlr4` package that has a `conanfile.py`
-2) Explain how to build the `murmurhash` package that has a `conanfile.py`
+Step 1) Build the `antlr4` package
+
+```
+$ cd antlr4
+$ conan create .
+$ cd ..
+```
+
+Step 2) Build the `murmurhash` package
+
+```
+$ cd murmurhash
+$ conan create .
+$ cd ..
+```
+
+Step 3) Build PotatoDB
+
+```
+$ conan create .
+```
+
+## Conan setup
+
+Make sure your `conan` profile is something like this:
+
+```
+[settings]
+os=Macos
+os_build=Macos
+arch=x86_64
+arch_build=x86_64
+compiler=apple-clang
+compiler.version=12.0
+compiler.libcxx=libc++
+build_type=Release
+[options]
+[build_re
+```

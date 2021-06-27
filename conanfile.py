@@ -10,7 +10,7 @@ class PotatoDBConan(ConanFile):
     }
 
     requires = "antlr4/4.9.2", "asio/1.18.1", "benchmark/1.5.2", "fmt/7.1.3", "gtest/1.10.0", "ms-gsl/3.1.0", "spdlog/1.8.5", "libmurmurhash/1.5.0"
-    generators = "cmake", "clang"
+    generators = "cmake"
     antlr4_version = "4.9.2"
     jar_sha256 = "bb117b1476691dc2915a318efd36f8957c0ad93447fb1dac01107eb15fe137cd"
 
@@ -26,7 +26,7 @@ class PotatoDBConan(ConanFile):
 
     def build(self):
         self._make_parser()
-        cmake = CMake(self, "Ninja")
+        cmake = CMake(self)
         cmake.build()
 
 
