@@ -23,6 +23,10 @@ public:
 
   virtual bool is_query() const = 0;
 
+  virtual const string explain_plan() const {
+    return "TODO";
+  }
+
 private:
   PlanType type_ = PlanType::INVALID;
 };

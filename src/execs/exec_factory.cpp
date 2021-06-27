@@ -5,6 +5,8 @@ ptr<BaseExec>
 ExecFactory::create(ExecCtx& exec_ctx,
                     ptr<BasePlan>&& plan)
 {
+  assert(plan != nullptr);
+
   switch (plan->type()) {
   case PlanType::TABLE_SCAN: {
     auto scan_plan = cast<SeqScanPlan>(move(plan));
@@ -71,6 +73,7 @@ ExecFactory::create(ExecCtx& exec_ctx,
     assert(agg_plan->child() != nullptr);
     auto child_exec = ExecFactory::create(exec_ctx,
                                           move(agg_plan->child()));
+    assert(child_exec != nullptr);
     return make_unique<AggExec>(exec_ctx,
                                 move(agg_plan),
                                 move(child_exec));

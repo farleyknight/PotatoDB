@@ -8,6 +8,7 @@ AggPlan::AggPlan(QuerySchema      schema,
     SchemaPlan   (schema),
     aggs_        (aggs)
 {
+  assert(child != nullptr);
   build_agg_types();
 }
 
@@ -21,6 +22,7 @@ AggPlan::AggPlan(QuerySchema           schema,
     aggs_        (aggs),
     group_bys_   (group_bys)
 {
+  assert(child != nullptr);
   build_agg_types();
 }
 
@@ -36,6 +38,7 @@ AggPlan::AggPlan(QuerySchema schema,
     group_bys_   (group_bys),
     having_      (move(having))
 {
+  assert(child != nullptr);
   build_agg_types();
 }
 
