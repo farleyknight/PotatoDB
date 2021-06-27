@@ -69,6 +69,13 @@ ExecFactory::create(ExecCtx& exec_ctx,
                                  move(child_exec));
   }
   case PlanType::AGG: {
+    // TODO: BasePlan should have an `explain_plan()` method that returns
+    // a string representation of the plan.
+    //
+    // This is useful for two reasons:
+    // - Makes it easier to debug this part of the code
+    // - Will eventually be useful for EXPLAIN statements in the future.
+    logger->debug("AggPlan: " + plan->explain_plan());
     auto agg_plan = cast<AggPlan>(move(plan));
     assert(agg_plan->child() != nullptr);
     auto child_exec = ExecFactory::create(exec_ctx,
