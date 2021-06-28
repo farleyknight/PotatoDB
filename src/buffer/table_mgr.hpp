@@ -17,6 +17,8 @@ public:
       buff_mgr_ (buff_mgr)
   {}
 
+  // TODO: I'm thinking this class is where we can make TableCursor objects?
+
   void load_table(const string table_name,
                   table_oid_t table_oid)
   {

@@ -8,10 +8,11 @@
 
 class SeqScanPlan : public BasePlan,
                     public TablePlan,
-                    public SchemaPlan, // TODO: If we need a custom schema,
-                                       // use the Projection plan to emit
-                                       // only those columns the query is
-                                       // asking for.
+                    public SchemaPlan,
+                    // TODO: If we need a custom schema,
+                    // use the Projection plan to emit
+                    // only those columns the query is
+                    // asking for.
                     public MaybePredPlan
 {
 public:
@@ -27,6 +28,4 @@ public:
   bool is_query() const {
     return true;
   }
-
-  const string
 };

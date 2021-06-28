@@ -26,6 +26,7 @@ class PotatoDBConan(ConanFile):
 
     def build(self):
         self._make_parser()
+        self.run("cmake . -G Ninja")
         cmake = CMake(self)
         cmake.build()
 

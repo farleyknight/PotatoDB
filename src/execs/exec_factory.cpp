@@ -1,6 +1,22 @@
 
 #include "execs/exec_factory.hpp"
 
+// QUESTION QUESTION QUESTION QUESTION
+//
+// What value is this code giving us?
+// It turns plans into execs, I know that
+// But from the way it looks, plans & execs
+// have the same structure?
+//
+// Does there need to be a separation at this point?
+//
+// I want to keep this project small, and managable
+// for one person. In that case, this stuff might
+// get chucked, if I can find a way to merge all of
+// the Plan stuff w/ all of the Exec stuff.
+//
+// I think it's doable though.
+
 ptr<BaseExec>
 ExecFactory::create(ExecCtx& exec_ctx,
                     ptr<BasePlan>&& plan)

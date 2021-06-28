@@ -1,5 +1,17 @@
 #include "plans/plan_factory.hpp"
 
+vector<ptr<BasePlan>>
+PlanFactory::build(const PotatoDB& db,
+                   ptr<BaseExpr>&& expr)
+{
+  vector<ptr<BaseBase>> plans;
+
+  // TODO
+  // Based on expr, we append new plans to `plans`
+  // We return 
+}
+
+
 ptr<BasePlan>
 PlanFactory::create(const PotatoDB& db,
                     ptr<BaseExpr>&& expr)
@@ -108,10 +120,9 @@ PlanFactory::from_expr(const Catalog& catalog,
                                  move(scan_plan));
 }
 
-
 ptr<BasePlan>
-PlanFactory::make_seq_scan_plan(const Catalog& catalog,
-                                const SelectExpr& expr)
+PlanFactory::make_scan_plan(const Catalog& catalog,
+                            const SelectExpr& expr)
 {
   // TODO: A SELECT statement can have multiple tables!
   // Need to support this at some point.
@@ -175,7 +186,7 @@ PlanFactory::from_expr(const Catalog& catalog,
   // * Use right_select appropriately
 
   auto left_select_ptr = expr.left_select().get();
-  auto left_scan_plan = make_seq_scan_plan(catalog, *left_select_ptr);
+  auto left_scan_plan = make_scan_plan(catalog, *left_select_ptr);
   auto order_by = expr.order_by();
 
   auto schema = dynamic_cast<SchemaPlan*>(left_scan_plan.get())->schema();
@@ -236,7 +247,7 @@ PlanFactory::from_expr(const Catalog& catalog,
     return make_sort_plan(catalog, expr);
   } else {
     auto schema = make_projection_schema(catalog, expr);
-    auto plan = make_seq_scan_plan(catalog, expr);
+    auto plan = make_scan_plan(catalog, expr);
 
     return make_unique<ProjectionPlan>(schema, move(plan));
   }
@@ -246,7 +257,7 @@ ptr<BasePlan>
 PlanFactory::make_sort_plan(const Catalog& catalog,
                             const SelectExpr& expr)
 {
-  auto scan_plan = make_seq_scan_plan(catalog, expr);
+  auto scan_plan = make_scan_plan(catalog, expr);
   auto order_by = expr.order_by();
 
   auto schema = dynamic_cast<SchemaPlan*>(scan_plan.get())->schema();
@@ -288,16 +299,17 @@ PlanFactory::make_agg_plan(const Catalog& catalog,
     }
   }
 
-  auto scan_plan = make_seq_scan_plan(catalog, expr);
-  auto schema = dynamic_cast<SchemaPlan*>(scan_plan.get())->schema();
+  // auto scan_plan = ;
 
   vector<QueryColumn> agg_cols;
   for (const auto& agg_node : agg_nodes) {
     agg_cols.push_back(agg_node.to_query_column());
   }
 
+  // assert(scan_plan != nullptr);
+
   return make_unique<AggPlan>(QuerySchema(agg_cols),
-                              move(scan_plan),
+                              make_scan_plan(catalog, expr),
                               agg_nodes);
 }
 

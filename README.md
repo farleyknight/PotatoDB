@@ -50,14 +50,23 @@ $ cd ..
 Step 3) Build PotatoDB
 
 ```
-$ conan create .
+$ conan source . 
+... # This step downloads the ANTLR4 jar
+$ conan install .
+... # This step generates a new parser based on the g4 file. 
+... # It also runs through some initial setup for the build step
+$ conan build .
+... # Actual compilation & linking
 ```
 
-## Conan setup
+## `conan` profile
 
 Make sure your `conan` profile is something like this:
 
 ```
+$ conan profile show default
+Configuration for profile default:
+
 [settings]
 os=Macos
 os_build=Macos
@@ -68,5 +77,12 @@ compiler.version=12.0
 compiler.libcxx=libc++
 build_type=Release
 [options]
-[build_re
+[build_requires]
+[env]
+```
+
+You might have to run this line
+
+```
+$ conan profile update settings.compiler.version=12.0 default
 ```

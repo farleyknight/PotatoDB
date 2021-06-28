@@ -14,6 +14,49 @@
 
 #include "server/system_catalog.hpp"
 
+
+// TODO
+// (6/26/2021)
+//
+// A new way to handle Plan building:
+// Let us use a vector of ptr<BasePlan>
+// Instead of using `move` all over the place,
+// we just append to this one vector, and then
+// iterate/move through it like a heap.
+//
+// As Plans are placed into the list, they are
+// given a `plan_index` which is just the index
+// they are given.
+//
+// At the moment, almost all of PlanFactory is
+// static methods. Instead, let PlanFactory
+// have one instance, with one main instance
+// variable: vector<ptr<BasePlan>>
+//
+// The PlanFactory then has to process all of the plans
+// according to the corresponding executor.
+//
+// Come to think of it, why is the executor separate
+// from the plan anyways? It's kind of an extra
+// layer at this point?
+//
+// We can likely generate tuples here! Maybe that
+// makes this a TupleFactory, not a PlanFactory?
+//
+// I think we should maybe find a way to combine
+// Plan & Exec into Operator?
+//
+// The reason I saw this is because ExecFactory is,
+// at this point, a little redundant? It's moving
+// pointers around? But I don't really see what work
+// it's doing?
+//
+// I think we can collapse Plan & Exec into Operator
+//
+// I also think this class could be called DB Engine
+// after all is said and done?
+//
+
 class PlanFactory {
 public:
   static ptr<BasePlan> create(const PotatoDB& db,
@@ -45,8 +88,8 @@ public:
                                           const vector<AggExpr>& agg_exprs);
 
 
-  static ptr<BasePlan> make_seq_scan_plan(const Catalog& catalog,
-                                          const SelectExpr& expr);
+  static ptr<BasePlan> make_scan_plan(const Catalog& catalog,
+                                      const SelectExpr& expr);
 
   static const QuerySchema make_projection_schema(const Catalog& catalog,
                                                   const SelectExpr& expr);
