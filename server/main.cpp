@@ -15,6 +15,7 @@ int main() {
   signal(SIGINT, handle_exit);
 
   potatodb.startup();
+  potatodb.start_server();
 
   return 0;
 }

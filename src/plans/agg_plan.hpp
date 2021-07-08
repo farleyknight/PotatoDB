@@ -81,6 +81,12 @@ public:
     return true;
   }
 
+  const string explain_plan() const {
+    // TODO: Include child plan!
+    // Include the `aggs_`!
+    return "AggPlan: (With stuff for later..)";
+  }
+
 private:
   ptr<BasePlan> child_;
 

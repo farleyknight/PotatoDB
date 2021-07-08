@@ -27,7 +27,7 @@ private:
 
   bool match_found(const Tuple& left,
                    const Tuple& right);
-  Value make_value_at(column_oid_t oid,
+  Value make_value_at(column_index_t index,
                       const Tuple& left,
                       const Tuple& right);
 

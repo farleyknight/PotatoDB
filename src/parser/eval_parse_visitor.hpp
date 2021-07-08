@@ -17,8 +17,6 @@
 #include "exprs/agg_expr.hpp"
 
 using antlrcpp::Any;
-using potatosql::PotatoSQLBaseVisitor;
-using potatosql::PotatoSQLParser;
 
 // TODO: Rename these! Not a fan of underscores in class names
 using SelectStmtContext         = PotatoSQLParser::Select_stmtContext;

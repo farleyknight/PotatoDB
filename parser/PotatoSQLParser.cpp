@@ -9,7 +9,6 @@
 
 
 using namespace antlrcpp;
-using namespace potatosql;
 using namespace antlr4;
 
 PotatoSQLParser::PotatoSQLParser(TokenStream *input) : Parser(input) {

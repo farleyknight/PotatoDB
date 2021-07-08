@@ -9,9 +9,10 @@ set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 # Project level settings
 include(potatodb_settings)
+include(potatodb_use_clang)
 
-# C++ packages via vcpkg
-include(potatodb_vcpkg)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
 
 include(potatodb_build_libraries)
 

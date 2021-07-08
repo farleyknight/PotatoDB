@@ -28,10 +28,13 @@ TableIterator::TableIterator(const TableIterator& other)
 TableIterator& TableIterator::operator++() {
   assert(tuple_);
 
-  auto &buff_mgr = table_heap_.buff_mgr();
-  auto page_id   = tuple_->page_id();
-  auto file_id   = page_id.file_id();
-  SlottedTablePage curr_page(buff_mgr.fetch_page(page_id));
+  auto &buff_mgr  = table_heap_.buff_mgr();
+  auto page_id    = tuple_->page_id();
+  auto file_id    = page_id.file_id();
+  auto maybe_page = buff_mgr.fetch_page(page_id);
+  logger->debug("Pulling up curr_page via page_id: "
+                + page_id.to_string());
+  SlottedTablePage curr_page(maybe_page);
 
   auto next_tuple_rid = curr_page.next_tuple_rid(tuple_->rid());
 
@@ -82,19 +85,16 @@ TableIterator TableIterator::operator++(int) {
   return clone;
 }
 
+table_oid_t TableIterator::table_oid() const {
+  return table_heap_.table_oid();
+}
+
 bool TableIterator::operator==(const TableIterator& iter) const {
   if (tuple_ == nullptr) {
     return false;
   }
 
-  auto first_rid = rid();
-  auto second_rid = iter.rid();
-
-  // std::cout << "Tuple RID: " << tuple_rid.to_string() << std::endl;
-  // std::cout << "First RID: " << first_rid.to_string() << std::endl;
-  // std::cout << "Second RID: " << second_rid.to_string() << std::endl;
-
-  return first_rid.get() == second_rid.get();
+  return rid() == iter.rid();
 }
 
 bool TableIterator::stop_iterating() const {

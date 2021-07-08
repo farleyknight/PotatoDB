@@ -10,22 +10,20 @@ public:
   {}
 
   // TODO: Rename to `allocate`
-  void init(PageId page_id,
-            PageId prev_page_id,
-            Txn& txn,
-            LogMgr& log_mgr)
+  void allocate(PageId page_id,
+                PageId prev_page_id,
+                Txn& txn,
+                LogMgr& log_mgr)
   {
     set_page_id(page_id);
 
-    if (log_mgr.logging_enabled()) {
+    if (log_mgr.is_logging_enabled()) {
       LogRecord log_record(txn.id(),
                            txn.prev_lsn(),
                            LogRecordType::NEW_PAGE,
                            prev_page_id,
                            page_id);
-      // TODO: LogMgr append should take exact same args as
-      // LogRecord's constructor
-      lsn_t lsn = log_mgr.emplace(move(log_record));
+      lsn_t lsn = log_mgr.append(log_record);
       set_lsn(lsn);
       txn.set_prev_lsn(lsn);
     }
@@ -45,8 +43,11 @@ public:
       return false;
     }
 
+    logger->debug("Before inserting tuple, the tuple count is now "
+                  + std::to_string(tuple_count()));
+
     // Try to find a free slot to reuse.
-    uint32_t i;
+    slot_id_t i;
     for (i = 0; i < tuple_count(); i++) {
       // If the slot is empty, i.e. its tuple has size 0,
       if (tuple_size_at(i) == 0) {
@@ -65,6 +66,7 @@ public:
     // Otherwise we claim available free space..
     set_free_space_pointer(free_space_pointer() - tuple.size());
 
+    // TODO: Change this to 'copy_tuple' or something?
     page_->copy_n_bytes(0, // Source offset
                         // Destination offset
                         free_space_pointer(),
@@ -78,6 +80,9 @@ public:
     if (i == tuple_count()) {
       set_tuple_count(tuple_count() + 1);
     }
+
+    logger->debug("After inserting tuple, the tuple count is now "
+                  + std::to_string(tuple_count()));
 
     tuple.set_rid(RID(table_page_id(), i));
 
@@ -101,7 +106,7 @@ public:
       return false;
     }
 
-    if (log_mgr.logging_enabled()) {
+    if (log_mgr.is_logging_enabled()) {
        // Acquire an exclusive lock,
        // upgrading from a shared lock if necessary.
        if (txn.is_shared_locked(rid)) {
@@ -118,7 +123,7 @@ public:
                             LogRecordType::MARK_DELETE,
                             rid,
                             dummy_tuple);
-       lsn_t lsn = log_mgr.emplace(std::move(log_record));
+       lsn_t lsn = log_mgr.append(log_record);
        set_lsn(lsn);
        txn.set_prev_lsn(lsn);
      }
@@ -136,7 +141,7 @@ public:
                        LogMgr& log_mgr)
   {
     // Log the rollback.
-    if (log_mgr.logging_enabled()) {
+    if (log_mgr.is_logging_enabled()) {
       // We must own an exclusive lock on the RID.
       assert(txn.is_exclusive_locked(rid));
       Tuple dummy_tuple;
@@ -145,7 +150,7 @@ public:
                            LogRecordType::ROLLBACK_DELETE,
                            rid,
                            dummy_tuple);
-      lsn_t lsn = log_mgr.emplace(move(log_record));
+      lsn_t lsn = log_mgr.append(log_record);
       set_lsn(lsn);
       txn.set_prev_lsn(lsn);
     }
@@ -209,7 +214,7 @@ public:
 
     delete_tuple.set_rid(rid);
 
-    if (log_mgr.logging_enabled()) {
+    if (log_mgr.is_logging_enabled()) {
       //, "We must own the exclusive lock!";
       assert(txn.is_exclusive_locked(rid));
 
@@ -219,7 +224,7 @@ public:
                            rid,
                            delete_tuple);
 
-      lsn_t lsn = log_mgr.emplace(move(log_record));
+      lsn_t lsn = log_mgr.append(log_record);
       set_lsn(lsn);
       txn.set_prev_lsn(lsn);
     }
@@ -249,16 +254,15 @@ public:
     uint32_t slot_id = rid.slot_id();
     // If somehow we have more slots than tuples, abort the txn.
     if (slot_id >= tuple_count()) {
-      std::cout << "Slot ID is greater or equal to tuple count! " << slot_id << std::endl;
-      std::cout << "Tuple count " << tuple_count() << std::endl;
+      logger->debug("Slot ID is greater or equal to tuple count! " + std::to_string(slot_id));
+      logger->debug("Tuple count " + std::to_string(tuple_count()));
       return unique_ptr<Tuple>(nullptr);
     }
     // Otherwise get the current tuple size too.
     uint32_t tuple_size = tuple_size_at(slot_id);
     // If the tuple is deleted, abort the txn.
     if (is_deleted(tuple_size)) {
-      std::cout << "This tuple is deleted! " << slot_id << std::endl;
-      // assert(false);
+      logger->debug("This tuple is deleted! " + std::to_string(slot_id));
       return unique_ptr<Tuple>(nullptr);
     }
 
@@ -266,17 +270,19 @@ public:
     // Copy the tuple data into our result.
     uint32_t tuple_offset = tuple_offset_at_slot(slot_id);
     auto tuple = make_unique<Tuple>(tuple_size);
-    // tuple->reset(tuple_size);
     tuple->copy_n_bytes(tuple_offset, // Source offset
                         0, // Destination offset
                         page_->buffer(), // Source buffer
                         tuple_size); // N bytes
-
     tuple->set_rid(rid);
+
     return tuple;
   }
 
   Option<RID> first_tuple_rid() {
+    logger->debug("Looking for first tuple RID");
+    logger->debug("Page has tuple_count: "
+                  + std::to_string(tuple_count()));
     // Find and return the first valid tuple.
     for (uint32_t i = 0; i < tuple_count(); ++i) {
       if (tuple_size_at(i) > 0) {

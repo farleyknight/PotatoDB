@@ -2,6 +2,7 @@
 
 #include "common/config.hpp"
 #include "exprs/expr_type.hpp"
+#include "query/query_column.hpp"
 
 class BaseExpr {
 public:

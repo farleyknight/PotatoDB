@@ -8,8 +8,6 @@
 #include "PotatoSQLParser.h"
 
 
-namespace potatosql {
-
 /**
  * This interface defines an abstract listener for a parse tree produced by PotatoSQLParser.
  */
@@ -304,4 +302,3 @@ public:
 
 };
 
-}  // namespace potatosql

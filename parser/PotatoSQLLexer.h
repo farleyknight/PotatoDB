@@ -7,7 +7,6 @@
 #include "antlr4-runtime.h"
 
 
-namespace potatosql {
 
 
 class  PotatoSQLLexer : public antlr4::Lexer {
@@ -86,4 +85,3 @@ private:
   static Initializer _init;
 };
 
-}  // namespace potatosql

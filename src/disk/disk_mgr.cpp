@@ -49,7 +49,11 @@ file_id_t DiskMgr::create_table_file(const string& table_name) {
   return file_mgr_.create_file(table_file_for(table_name));
 }
 
-fs::path DiskMgr::table_file_for(const string& table_name) {
+file_id_t DiskMgr::load_table_file(const string& table_name) {
+  return file_mgr_.load_file(table_file_for(table_name));
+}
+
+fs::path DiskMgr::table_file_for(const string& table_name) const {
   return file_path_for(table_name + ".tbl");
 }
 
@@ -61,6 +65,10 @@ void DiskMgr::setup_db_directory() {
 
 PageId DiskMgr::allocate_page(file_id_t file_id) {
   return file_mgr_.allocate_page(file_id);
+}
+
+PageId DiskMgr::first_page(file_id_t file_id) {
+  return file_mgr_.first_page(file_id);
 }
 
 void DiskMgr::deallocate_page(PageId page_id) {
@@ -75,10 +83,12 @@ void DiskMgr::read_page(PageId page_id, Page& page) {
   file_mgr_.read_buffer(page_id, page.buffer());
 }
 
+// TODO: Move this method to another class that is more appropriate
+// for direct file access. Maybe FileMgr?
 bool DiskMgr::read_log(Buffer& log_data,
-                       size_t size,
                        buffer_offset_t offset)
 {
+  auto size = log_data.size();
   if (offset >= fs::file_size(log_file_name())) {
     return false;
   }
@@ -100,13 +110,13 @@ bool DiskMgr::read_log(Buffer& log_data,
   return true;
 }
 
-void DiskMgr::write_log(const Buffer& log_data, size_t size) {
+// TODO: Move this method to another class that is more appropriate
+// for direct file access. Maybe FileMgr?
+void DiskMgr::write_log(const Buffer& log_data) {
   // no effect on num_flushes_ if log buffer is empty
-  if (size == 0) {
+  if (log_data.size() == 0) {
     return;
   }
-
-  flush_log_ = true;
 
   if (flush_log_f_ != nullptr) {
     // used for checking non-blocking flushing
@@ -115,7 +125,7 @@ void DiskMgr::write_log(const Buffer& log_data, size_t size) {
   }
 
   // sequence write
-  log_io_.write(log_data.char_ptr(), size);
+  log_io_.write(log_data.char_ptr(), log_data.size());
 
   // check for I/O error
   if (log_io_.bad()) {
@@ -123,5 +133,4 @@ void DiskMgr::write_log(const Buffer& log_data, size_t size) {
   }
   // needs to flush to keep disk file in sync
   log_io_.flush();
-  flush_log_ = false;
 }

@@ -3,8 +3,9 @@
 # -----------------------------------------------------------------------------
 
 # specify the C++ standard
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS ON)
 
 # NOTE: Turning this off to make builds faster
 # set(CMAKE_CXX_CPPCHECK "cppcheck")
@@ -31,6 +32,10 @@ add_definitions(
   "-ferror-limit=50"
   "-Wall"
   "-Wextra"
+
+  "-Wno-unknown-pragmas" # This one comes up rarely, and it's annoying to see.
+  # "-Wno-sign-compare"    # This one I don't care about for now, but probably should *not* ignore it in the future.
+
   "-pedantic"
   "-g"
   "-fexceptions"
@@ -62,6 +67,7 @@ set(parser_sources
 set(main_sources
   "src/btree/b_plus_tree.cpp"
   "src/buffer/buff_mgr.cpp"
+  "src/buffer/buffer.cpp"
   "src/buffer/clock_replacer.cpp"
   "src/buffer/lru_replacer.cpp"
   "src/buffer/replacer.cpp"
@@ -74,8 +80,10 @@ set(main_sources
   "src/common/hash_util.cpp"
   "src/disk/disk_mgr.cpp"
   "src/disk/file_mgr.cpp"
+  "src/disk/file_handle.cpp"
   "src/execs/agg_exec.cpp"
   "src/execs/exec_ctx.cpp"
+  "src/execs/exec_factory.cpp"
   "src/execs/hash_join_exec.cpp"
   "src/execs/seq_scan_exec.cpp"
   "src/execs/update_exec.cpp"
@@ -88,14 +96,15 @@ set(main_sources
   "src/page/table_heap.cpp"
   "src/page/table_iterator.cpp"
   "src/plans/agg_plan.cpp"
-  "src/plans/plan_builder.cpp"
+  "src/plans/plan_builder.cpp" # TODO: Delete this
+  "src/plans/plan_factory.cpp"
   "src/query/query_agg.cpp"
   "src/query/query_group_by.cpp"
   "src/query/query_having.cpp"
   "src/query/query_comp.cpp"
   "src/query/query_column.cpp"
   "src/query/query_join.cpp"
-  "src/recovery/checkpoint_manager.cpp"
+  "src/recovery/checkpoint_mgr.cpp"
   "src/recovery/log_mgr.cpp"
   "src/recovery/log_recovery.cpp"
   "src/server/client_socket.cpp"

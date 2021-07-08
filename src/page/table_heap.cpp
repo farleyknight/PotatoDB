@@ -17,23 +17,38 @@ TableHeap::TableHeap(file_id_t file_id,
                      PageId first_page_id,
                      BuffMgr& buff_mgr,
                      LockMgr& lock_mgr,
-                     LogMgr& log_mgr,
-                     Txn& txn)
+                     LogMgr& log_mgr)
   : file_id_       (file_id),
     table_oid_     (table_oid),
     first_page_id_ (first_page_id),
     lock_mgr_      (lock_mgr),
     log_mgr_       (log_mgr),
     buff_mgr_      (buff_mgr)
-{
-  SlottedTablePage first_page(buff_mgr_.fetch_page(first_page_id));
+{}
+
+table_oid_t TableHeap::table_oid() const {
+  return table_oid_;
+}
+
+void TableHeap::allocate_first_page(Txn& txn) {
+  // NOTE: txn is only necessary here because we are creating the
+  // first page of the table.
+  //
+  // Therefore txn is no longer needed in the constructor.
+  SlottedTablePage first_page(buff_mgr_.fetch_page(first_page_id_));
 
   first_page.wlatch();
-  first_page.init(first_page_id_,
-                  PageId::STOP_ITERATING(file_id),
-                  txn,
-                  log_mgr_);
+  // TODO: If `allocate` fails (run out of disk space?) then we
+  // need to abort the transaction.
+  first_page.allocate(first_page_id_,
+                      PageId::STOP_ITERATING(file_id_),
+                      txn,
+                      log_mgr_);
   first_page.wunlatch();
+
+  auto next_page_id = first_page.next_page_id();
+  logger->debug("next_page_id: " + next_page_id.to_string());
+  assert(next_page_id == PageId::STOP_ITERATING(file_id_));
 
   buff_mgr_.unpin(first_page_id_, true);
 }
@@ -87,10 +102,10 @@ bool TableHeap::insert_tuple(Tuple& tuple,
 
       // Otherwise we were able to create a new page. We initialize it now.
       curr_page.set_next_page_id(new_page.page_id());
-      new_page.init(new_page.page_id(),
-                    curr_page.table_page_id(),
-                    txn,
-                    log_mgr_);
+      new_page.allocate(new_page.page_id(),
+                        curr_page.table_page_id(),
+                        txn,
+                        log_mgr_);
       buff_mgr_.unpin(curr_page.table_page_id(), true);
       curr_page = new_page;
     }
@@ -222,7 +237,11 @@ TableIterator TableHeap::begin(Txn& txn) {
   auto page_id = first_page_id_;
   RID rid(page_id, 0);
 
-  while (page_id != PageId::STOP_ITERATING(file_id_)) {
+  auto stop_iterating = PageId::STOP_ITERATING(file_id_);
+  logger->debug("stop_iterating: " + stop_iterating.to_string());
+
+  while (page_id != stop_iterating) {
+    logger->debug("page_id is now: " + page_id.to_string());
     auto maybe_page = buff_mgr_.fetch_page(page_id);
     assert(maybe_page);
 
@@ -235,7 +254,12 @@ TableIterator TableHeap::begin(Txn& txn) {
       rid = maybe_rid.value();
       break;
     }
-    page_id = page.next_page_id();
+    auto next_page_id = page.next_page_id();
+    if (next_page_id == page_id) {
+      logger->debug("next_page_id == page_id, breaking out of loop");
+      break; // NOTE: Prevent infinite loop
+    }
+    page_id = next_page_id;
   }
 
   assert(rid.page_id().is_valid());

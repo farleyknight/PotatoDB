@@ -52,16 +52,35 @@ _deps
 build
 DartConfiguration.tcl
 
+# Conan stuff
+graph_info.json
+conan.lock
+conanbuildinfo.cmake
+conanbuildinfo.txt
+conaninfo.txt
+CPackConfig.cmake
+CPackSourceConfig.cmake
+
+# ANTLR4
+antlr4/antlr4
+antlr4/runtime
+antlr4/source
+
+# MurmurHash
+murmurhash/libmurmurhash
+
 # Project ignores
+bin/
 builds/
 *.zip
 *.zip
 antlr_generated/
-
+test_logs.txt
 GPATH
 GRTAGS
 GTAGS
-
+antlr4/package
+antlr.jar
 
 # Graphviz
 potatodb.dot*

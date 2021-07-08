@@ -29,38 +29,60 @@ $ ninja tests
 
 At the moment PotatoDB has no easy-to-use installers. This is because it is still under heavy develompent. Instead, you'll be building it from scratch. 
 
-First install `vcpkg`. That boils down to cloning it locally from GitHub and running the bootstrap script. Check out the instructions here:
+At the moment, we have to build to extra `conan` packages in order to properly build the main one.
 
-https://docs.microsoft.com/en-us/cpp/build/install-vcpkg?view=msvc-160&tabs=macos#to-copy-and-set-up-vcpkg-on-macos
-It basically boils down to these steps:
+Step 1) Build the `antlr4` package
 
-```bash
-$ git clone https://github.com/microsoft/vcpkg
-$ cd vcpkg
-# ./bootstrap-vcpkg.sh
-$ export $VCPKG_ROOT=`pwd`
+```
+$ cd antlr4
+$ conan create .
+$ cd ..
 ```
 
-In the CMake scripts, we verify the `VCPKG_ROOT` environment variable gives the root location of your `vcpkg` installation. So double check:
+Step 2) Build the `murmurhash` package
 
-```bash
-$ echo $VCPKG_ROOT
-/home/farleyknight/code/vcpkg # I typically keep it installed here
+```
+$ cd murmurhash
+$ conan create .
+$ cd ..
 ```
 
-The `VCPKG_FEATURE_FLAGS` environment variable gives us the ability to use "manifest mode", which means that `vcpkg` can look at the local file `vcpkg.json` and install the necessary dependencies.
+Step 3) Build PotatoDB
 
-```bash
-$ echo $VCPKG_FEATURE_FLAG
-manifests
+```
+$ conan source . 
+... # This step downloads the ANTLR4 jar
+$ conan install .
+... # This step generates a new parser based on the g4 file. 
+... # It also runs through some initial setup for the build step
+$ conan build .
+... # Actual compilation & linking
 ```
 
-## Package management
+## `conan` profile
 
-I have tried my best to use the same best practices in this project as there are with other mainsteam languages. In that case, I've decided to adopt [`vcpkg`](https://github.com/microsoft/vcpkg).
+Make sure your `conan` profile is something like this:
 
-Towards that end, there is a section in my `CMakeLists.txt` dedicated to those dependencies. They are management by hand at the moment.
+```
+$ conan profile show default
+Configuration for profile default:
 
-### Using git module
+[settings]
+os=Macos
+os_build=Macos
+arch=x86_64
+arch_build=x86_64
+compiler=apple-clang
+compiler.version=12.0
+compiler.libcxx=libc++
+build_type=Release
+[options]
+[build_requires]
+[env]
+```
 
-I can't remember where I read this, but I do recall seeing a piece of advice: In order to get `vcpkg` working with GitHub actions (to show badges), we may have to make it a git submodule. Will research this further at some point...
+You might have to run this line
+
+```
+$ conan profile update settings.compiler.version=12.0 default
+```

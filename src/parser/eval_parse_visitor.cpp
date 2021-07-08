@@ -73,6 +73,7 @@ ValueExpr EvalParseVisitor::make_value_expr(ExprContext* expr_ctx) const {
   if (expr_ctx->literal_value() != nullptr) {
     auto literal_ctx = expr_ctx->literal_value();
 
+    // TODO: Allow for NULLs
     if (literal_ctx->K_TRUE()) {
       return ValueExpr(true);
     } else if (literal_ctx->K_FALSE()) {
@@ -137,7 +138,7 @@ ptr<BaseExpr> EvalParseVisitor::make_expr(ExprContext *ctx) {
   } else if (ctx->literal_value()) {
     auto value_expr = make_value_expr(ctx);
     return make_unique<ValueExpr>(value_expr);
-  } else if (ctx->EQ()) {
+  } else if (ctx->EQ() || ctx->ASSIGN()) {
     auto left_expr  = make_expr(ctx->expr()[0]);
     auto right_expr = make_expr(ctx->expr()[1]);
 
@@ -146,6 +147,7 @@ ptr<BaseExpr> EvalParseVisitor::make_expr(ExprContext *ctx) {
                                  move(right_expr));
   }
 
+  std::cout << "expr as string " << ctx->getText() << std::endl;
   throw Exception("not all of it implemented yet :/");
 }
 
@@ -180,8 +182,6 @@ ptr<WhereClauseExpr>
 EvalParseVisitor::make_where_clause_expr(WhereClauseContext *ctx) {
   auto expr = ctx->expr();
 
-  std::cout << "expr as string " << expr->getText() << std::endl;
-
   // NOTE: We may have to support WHERE (a = 5)
   // I believe MySQL treats this as (a == 5)
   if (expr->EQ() || expr->ASSIGN()) {
@@ -209,6 +209,7 @@ EvalParseVisitor::make_where_clause_expr(WhereClauseContext *ctx) {
                                         LogicalType::AND,
                                         move(right_expr));
   } else {
+    std::cout << "where expr as string " << expr->getText() << std::endl; 
     throw Exception("Other types of WHERE clauses are not yet implemented! :/");
   }
 }

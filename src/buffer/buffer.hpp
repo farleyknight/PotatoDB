@@ -4,6 +4,9 @@
 #include <iostream>
 
 #include "common/config.hpp"
+#include "tuple/rid.hpp"
+
+class Tuple;
 
 class Buffer {
 public:
@@ -55,8 +58,8 @@ public:
     return data_.data() + offset;
   }
 
-  void copy_n_bytes(size_t source_offset,
-                    size_t dest_offset,
+  void copy_n_bytes(buffer_offset_t source_offset,
+                    buffer_offset_t dest_offset,
                     const Buffer& source,
                     size_t n_bytes)
   {
@@ -66,12 +69,18 @@ public:
                 n_bytes);
   }
 
+  void write_tuple(buffer_offset_t offset, const Tuple& tuple);
+
   void copy_from(const Buffer& other) {
     data_ = other.data_;
   }
 
   void reset_memory() {
     std::fill(data_.begin(), data_.end(), 0);
+  }
+
+  void swap(Buffer& other) {
+    data_.swap(other.data_);
   }
 
   buffer_offset_t size() const {
@@ -156,32 +165,32 @@ public:
     return *reinterpret_cast<const double*>(cptr(offset));
   }
 
-  void write_string(buffer_offset_t offset, const string& value) {
-    string_size_t length = value.size();
+  void write_string(buffer_offset_t offset, const string& value);
+  const string read_string(buffer_offset_t offset) const;
 
-    auto c_string = reinterpret_cast<const unsigned char*>(value.c_str());
+  /**********************************************
+   * DB specific types
+   **********************************************/
 
-    // std::cout << "Writing c_string " << c_string << std::endl;
-    // std::cout << "with length " << length << std::endl;
-    // std::cout << "Buffer size: " << size() << std::endl;
-    // std::cout << "At offset: " << offset << std::endl;
-
-    std::memcpy(ptr(offset),
-                &length, sizeof(string_size_t));
-    std::memcpy(ptr(offset + sizeof(string_size_t)),
-                c_string, length);
+  void write_lsn(buffer_offset_t offset, lsn_t lsn) {
+    *reinterpret_cast<lsn_t*>(ptr(offset)) = lsn;
   }
 
-  const string read_string(buffer_offset_t offset) const {
-    string_size_t size;
-    std::memcpy(&size, cptr(offset), sizeof(string_size_t));
+  void write_txn_id(buffer_offset_t offset, txn_id_t txn_id) {
+    *reinterpret_cast<txn_id_t*>(ptr(offset)) = txn_id;
+  }
 
-    string new_string(size, 0);
-    std::memcpy(new_string.data(),
-                cptr(offset + sizeof(string_size_t)),
-                size);
+  void write_rid(buffer_offset_t offset, const RID& rid) {
+    *reinterpret_cast<uint64_t*>(ptr(offset)) = rid.as_uint64();
+  }
 
-    return new_string;
+  RID read_rid(buffer_offset_t offset) const {
+    auto rid_as_int64 = *reinterpret_cast<const uint64_t*>(cptr(offset));
+    return RID(rid_as_int64);
+  }
+
+  void write_page_id(buffer_offset_t offset, const PageId& page_id) {
+    *reinterpret_cast<uint32_t*>(ptr(offset)) = page_id.as_uint32();
   }
 
   Data data_;

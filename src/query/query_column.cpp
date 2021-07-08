@@ -20,6 +20,25 @@ Value QueryColumn::eval_join(UNUSED const Tuple& lt,
   throw NotImplementedException("eval_join not implemented!");
 }
 
+QueryColumn QueryColumn::from(TableColumn col) {
+  return QueryColumn(col.type_id(),
+                     col.table_oid(),
+                     col.column_oid(),
+                     col.name());
+}
+
+size_t QueryColumn::fixed_length() {
+  return Type::size_of(type_id_);
+}
+
+const string QueryColumn::to_string() const {
+  stringstream os;
+  os << "Name : " << name_ << std::endl;
+  os << "Type : " << Type::as_string(type_id_) << std::endl;
+  return os.str();
+}
+
+
 Value QueryColumn::eval_agg(const QuerySchema& schema,
                             UNUSED const vector<Value>& group_bys,
                             const vector<Value>& aggregates) const
@@ -31,7 +50,7 @@ Value QueryColumn::eval_agg(const QuerySchema& schema,
     return aggregates[0];
   }
 
-  auto index = schema.index_for(name_);
+  auto index = schema.column_index_for(name_);
   return aggregates[index];
 }
 

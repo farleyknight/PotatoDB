@@ -15,8 +15,16 @@
 #include "index/base_index.hpp"
 #include "index/index_meta.hpp"
 
-class SchemaManager;
+#include "server/statement_result.hpp"
 
+
+// TODO:
+// I'm thinking about renaming `Catalog` to `SchemaMgr` since it seems to be
+// handling a lot of details related to the schema objects.
+//
+// If that does happen, then we would have to figure out what exactly
+// `SystemCatalog` is responsible for.
+//
 class Catalog {
 public:
   Catalog();
@@ -34,16 +42,24 @@ public:
                    const string& primary_key,
                    const ColumnDefListExpr& column_list) const;
 
-  table_oid_t create_table(UNUSED Txn& txn,
-                           const string& table_name,
-                           const string& primary_key,
-                           ColumnDefListExpr column_list);
+  table_oid_t
+  create_table(Txn& txn,
+               const table_name_t& table_name,
+               const column_name_t& primary_key,
+               ColumnDefListExpr column_list);
 
-  table_oid_t table_oid_for(const string& table_name) const {
+  table_oid_t table_oid_for(const table_name_t& table_name) const {
+    assert(table_oids_.count(table_name) > 0);
     return table_oids_.at(table_name);
   }
 
+  table_name_t table_name_for(table_oid_t table_oid) const {
+    assert(table_names_.count(table_oid) > 0);
+    return table_names_.at(table_oid);
+  }
+
   TableSchema& table_schema_for(table_oid_t table_oid) {
+    assert(table_schemas_.count(table_oid) > 0);
     return table_schemas_.at(table_oid);
   }
 
@@ -89,14 +105,32 @@ public:
   vector<QueryColumn>
   all_columns_for(table_oid_t table_oid) const;
 
+  void load_from_query(table_oid_t table_oid,
+                       const table_name_t& table_name,
+                       StatementResult& result);
+
+  void load_table(table_oid_t table_oid,
+                  const table_name_t& table_name,
+                  const TableSchema& schema);
+
 private:
+  // I'm thinking that these two instance variables should be long to
+  // `SystemCatalog`
   map<table_name_t, table_oid_t> table_oids_;
-  Atomic<table_oid_t> next_table_oid_ = 0;
+  map<table_oid_t, table_name_t> table_names_;
+
+  atomic<table_oid_t> next_table_oid_ = 0;
+
+  // I'm thinking this instance variable should stay here, in `Catalog`
+  // (or `SchemaMgr` if I rename it)
   map<table_oid_t, TableSchema> table_schemas_;
 
-  // MutMap<column_name_t, vector<table_oid_t>> column_name_to_table_oids_;
+  // I'm thinking that these two instance variables should be long to
+  // `SystemCatalog`
+  atomic<column_oid_t> next_column_oid_ = 0;
+  map<column_name_t, column_oid_t> column_oids_;
 
   map<table_name_t,
       map<index_name_t, index_oid_t>> index_oids_;
-  Atomic<index_oid_t> next_index_oid_ = 0;
+  atomic<index_oid_t> next_index_oid_ = 0;
 };

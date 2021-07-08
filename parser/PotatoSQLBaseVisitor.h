@@ -8,8 +8,6 @@
 #include "PotatoSQLVisitor.h"
 
 
-namespace potatosql {
-
 /**
  * This class provides an empty implementation of PotatoSQLVisitor, which can be
  * extended to create a visitor which only needs to handle a subset of the available methods.
@@ -400,4 +398,3 @@ public:
 
 };
 
-}  // namespace potatosql

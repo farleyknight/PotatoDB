@@ -4,6 +4,7 @@
 // Constructor for creating a new tuple based on input value
 // TODO: It does not look like nulls are supported. Add a null bitmap?
 Tuple::Tuple(vector<Value> values, const QuerySchema& schema)
+  : source_ (TupleSources::QUERY_SCHEMA)
 {
   if (values.size() != schema.column_count()) {
     std::cout << "values.size() == " << values.size() << std::endl;
@@ -18,7 +19,7 @@ Tuple::Tuple(vector<Value> values, const QuerySchema& schema)
     tuple_length += (values[i].length() + sizeof(string_size_t));
   }
 
-  // std::cout << "Resizing tuple " << tuple_length << std::endl;
+  logger->debug("Resizing tuple " + std::to_string(tuple_length));
 
   buffer_.resize(tuple_length);
   assert(buffer_.size() == tuple_length);
@@ -28,7 +29,7 @@ Tuple::Tuple(vector<Value> values, const QuerySchema& schema)
   buffer_offset_t offset = schema.tuple_length();
 
   for (column_index_t i = 0; i < column_count; i++) {
-    const auto &col = schema.by_column_oid(i);
+    const auto &col = schema.by_column_index(i);
     auto col_offset = schema.buffer_offset_for(i);
 
     if (col.is_inlined()) {
@@ -42,11 +43,12 @@ Tuple::Tuple(vector<Value> values, const QuerySchema& schema)
   }
 }
 
-buffer_offset_t Tuple::buffer_offset_for(const QuerySchema& schema,
-                                         column_oid_t column_oid) const
+buffer_offset_t
+Tuple::buffer_offset_for(const auto& schema,
+                         column_index_t index) const
 {
-  auto is_inlined = schema.by_column_oid(column_oid).is_inlined();
-  auto offset     = schema.buffer_offset_for(column_oid);
+  auto is_inlined = schema.by_column_index(index).is_inlined();
+  auto offset     = schema.buffer_offset_for(index);
 
   // For inlined data types, data is stored where it is.
   if (is_inlined) {
@@ -59,7 +61,8 @@ buffer_offset_t Tuple::buffer_offset_for(const QuerySchema& schema,
   return new_offset;
 }
 
-vector<Value> Tuple::to_values(const QuerySchema& schema) const
+vector<Value>
+Tuple::to_values(const QuerySchema& schema) const
 {
   vector<Value> values;
   for (column_index_t i = 0; i < schema.column_count(); ++i) {
@@ -68,24 +71,29 @@ vector<Value> Tuple::to_values(const QuerySchema& schema) const
   return values;
 }
 
-Tuple Tuple::add_defaults(deque<Value>& defaults,
-                          const TableSchema& table_schema,
-                          const QuerySchema& query_schema) const
+Tuple
+Tuple::add_defaults(deque<Value>& defaults,
+                    const TableSchema& table_schema,
+                    const QuerySchema& query_schema) const
 {
+  logger->debug("Query Schema is: " + query_schema.to_string());
+
   auto values = to_values(query_schema);
   vector<Value> new_values;
 
   for (const auto &col : table_schema.all()) {
     if (query_schema.has_column(col.name())) {
-      // std::cout << "Found col w/ name " << col.name() << std::endl;
-      auto index = query_schema.index_for(col.name());
-      // std::cout << "Adding new value " << values[index].to_string() << std::endl;
+      logger->debug("Found col w/ name: " + col.name());
+      auto index = query_schema.column_index_for(col.name());
+      logger->debug("Got index: " + std::to_string(index));
+      logger->debug("Size of values: " + std::to_string(values.size()));
+      logger->debug("Adding new value: " + values[index].to_string());
       new_values.push_back(values[index]);
     } else {
-      // std::cout << "Could not find col w/ name " << col.name() << std::endl;
+      logger->debug("Could not find col w/ name: " + col.name());
       auto value = defaults.front();
       defaults.pop_front();
-      // std::cout << "Adding new value " << value.to_string() << std::endl;
+      logger->debug("Adding new value: " + value.to_string());
       new_values.push_back(value);
     }
   }
@@ -95,19 +103,53 @@ Tuple Tuple::add_defaults(deque<Value>& defaults,
   return Tuple(new_values, schema);
 }
 
-const string Tuple::to_string(const QuerySchema& schema) const {
+const string Tuple::to_string(const TableSchema& schema) const {
+  assert(source_ == TupleSources::TABLE_HEAP);
+
   stringstream os;
 
   os << "(";
-  for (column_index_t i = 0; i < schema.column_count(); ++i) {
+  for (uint32_t i = 0; i < schema.column_count(); ++i) {
     if (i > 0) {
       os << ", ";
     }
 
-    if (is_null(schema, i)) {
+    auto val = value(schema, i);
+
+    // TODO: We need to properly implement NULL!
+    if (val.is_null()) {
       os << "NULL";
     } else {
-      os << value(schema, i).to_string();
+      os << val.to_string();
+    }
+  }
+  os << ")";
+
+  return os.str();
+}
+
+const string Tuple::to_string(const QuerySchema& schema) const {
+  // TODO: Figure out a way to hold a schema object on an operator
+  // without saying if it's a QuerySchema or TableSchema..
+  // Is that possible?
+  //
+  // assert(source_ == TupleSources::QUERY_SCHEMA);
+
+  stringstream os;
+
+  os << "(";
+  for (uint32_t i = 0; i < schema.column_count(); ++i) {
+    if (i > 0) {
+      os << ", ";
+    }
+
+    auto val = value(schema, i);
+
+    // TODO: We need to properly implement NULL!
+    if (val.is_null()) {
+      os << "NULL";
+    } else {
+      os << val.to_string();
     }
   }
   os << ")";
@@ -145,12 +187,12 @@ const string Tuple::to_payload(const QuerySchema& schema) const {
   return os.str();
 }
 
-Value Tuple::value(const QuerySchema& schema,
+Value Tuple::value(const auto& schema,
                    column_index_t column_index) const
 {
   assert(column_index < schema.column_count());
 
-  const TypeId type_id = schema.by_column_oid(column_index).type_id();
+  const TypeId type_id = schema.by_column_index(column_index).type_id();
   const auto offset = buffer_offset_for(schema, column_index);
 
   return Value::deserialize_from(offset, buffer_, type_id);
@@ -159,11 +201,11 @@ Value Tuple::value(const QuerySchema& schema,
 Value Tuple::value_by_name(const QuerySchema& schema,
                            const column_name_t& name) const
 {
-  auto index = schema.index_for(name);
+  auto index = schema.column_index_for(name);
   return value(schema, index);
 }
 
-bool Tuple::is_null(const QuerySchema& schema,
+bool Tuple::is_null(const auto& schema,
                     column_index_t column_index) const
 {
   return value(schema, column_index).is_null();

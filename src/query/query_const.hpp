@@ -1,7 +1,5 @@
 #pragma once
 
-#include "exprs/base_expr.hpp"
-
 class QueryConst : public BaseQuery {
 public:
   explicit QueryConst(Value value)

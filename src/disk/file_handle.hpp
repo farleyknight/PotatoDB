@@ -10,25 +10,13 @@ namespace fs = std::filesystem;
 
 class FileHandle {
 public:
-  FileHandle(fs::path file_path)
-    : file_path_ (file_path)
-  {
-    if (!fs::exists(file_path)) {
-      create();
-    }
-    open();
-  }
+  FileHandle(fs::path file_path);
 
-  void write_buffer(buffer_offset_t offset, const Buffer& buffer) {
-    handle_.seekp(offset);
-    handle_.write(buffer.char_ptr(), buffer.size());
-    handle_.flush();
-  }
+  void write_buffer(buffer_offset_t offset, const Buffer& buffer);
 
-  void read_buffer(buffer_offset_t offset, Buffer& buffer) {
-    handle_.seekp(offset);
-    handle_.read(buffer.char_ptr(), buffer.size());
-  }
+  void print_status() const;
+
+  void read_buffer(buffer_offset_t offset, Buffer& buffer);
 
   void create() {
     handle_.open(file_path_, fstream::out);
@@ -37,7 +25,7 @@ public:
   }
 
   void open() {
-    handle_.open(file_path_, fstream::out);
+    handle_.open(file_path_, fstream::in | fstream::out | fstream::binary);
   }
 
   void close() {
@@ -46,6 +34,14 @@ public:
 
   ~FileHandle() {
     close();
+  }
+
+  buffer_offset_t size() const {
+    return fs::file_size(file_path_);
+  }
+
+  const string file_path() const {
+    return file_path_.string();
   }
 
 private:

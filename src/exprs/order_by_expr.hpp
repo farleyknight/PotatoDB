@@ -1,6 +1,7 @@
 #pragma once
 
 #include "exprs/base_expr.hpp"
+#include "exprs/column_expr.hpp"
 
 class OrderByExpr : public BaseExpr {
 public:

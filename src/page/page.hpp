@@ -97,7 +97,6 @@ public:
   static constexpr size_t OFFSET_LSN = 4;
 
 private:
-
   PageId  page_id_ = PageId::INVALID();
   Buffer  buffer_;
   int     pin_count_ = 0;

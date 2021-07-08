@@ -12,15 +12,12 @@
 
 static constexpr int32_t INVALID_LENGTH = -1;
 
-// TODO: Add `NOT NULL` stuff to this class
-// TODO: Add `PRIMARY KEY` stuff to this class
-// TODO: Add `AUTOINCREMENT` stuff to this class
 class TableColumn {
 public:
   TableColumn()
     : fixed_length_(INVALID_LENGTH) {}
 
-  TableColumn(const string name,
+  TableColumn(const column_name_t name,
               table_oid_t table_oid,
               column_oid_t column_oid,
               TypeId type_id)
@@ -35,7 +32,7 @@ public:
     assert(type_id != TypeId::VARCHAR);
   }
 
-  explicit TableColumn(const string name,
+  explicit TableColumn(const column_name_t name,
                        table_oid_t table_oid,
                        column_oid_t column_oid,
                        TypeId type_id,
@@ -64,10 +61,22 @@ public:
   bool is_nullable()              const { return nullable_; }
   TypeId type_id()                const { return type_id_; }
   table_oid_t table_oid()         const { return table_oid_; }
-  column_oid_t oid()              const { return column_oid_; }
+  column_oid_t column_oid()       const { return column_oid_; }
   int32_t fixed_length()          const { return fixed_length_; }
   string_size_t variable_length() const { return variable_length_; }
   const column_name_t& name()     const { return name_; }
+
+  void set_nullable(bool nullable) {
+    nullable_ = nullable;
+  }
+
+  void set_primary_key(bool primary_key) {
+    primary_key_ = primary_key;
+  }
+
+  void set_autoincrement(bool autoincrement) {
+    autoincrement_ = autoincrement;
+  }
 
   bool is_splat() const {
     return false;
@@ -96,29 +105,29 @@ public:
 
   bool operator==(const TableColumn& other) const {
     return
-      name_            == other.name_ &&
-      type_id_         == other.type_id_ &&
-      table_oid_       == other.table_oid_ &&
-      column_oid_      == other.column_oid_ &&
-      inlined_         == other.inlined_ &&
-      nullable_        == other.nullable_ &&
-      primary_key_     == other.primary_key_ &&
-      autoincrement_   == other.autoincrement_ &&
-      fixed_length_    == other.fixed_length_ &&
+      name_            == other.name_            &&
+      type_id_         == other.type_id_         &&
+      table_oid_       == other.table_oid_       &&
+      column_oid_      == other.column_oid_      &&
+      inlined_         == other.inlined_         &&
+      nullable_        == other.nullable_        &&
+      primary_key_     == other.primary_key_     &&
+      autoincrement_   == other.autoincrement_   &&
+      fixed_length_    == other.fixed_length_    &&
       variable_length_ == other.variable_length_;
   }
 
   bool operator!=(const TableColumn& other) const {
     return
-      name_            != other.name_ ||
-      type_id_         != other.type_id_ ||
-      table_oid_       != other.table_oid_ ||
-      column_oid_      != other.column_oid_ ||
-      inlined_         != other.inlined_ ||
-      nullable_        != other.nullable_ ||
-      primary_key_     != other.primary_key_ ||
-      autoincrement_   != other.autoincrement_ ||
-      fixed_length_    != other.fixed_length_ ||
+      name_            != other.name_            ||
+      type_id_         != other.type_id_         ||
+      table_oid_       != other.table_oid_       ||
+      column_oid_      != other.column_oid_      ||
+      inlined_         != other.inlined_         ||
+      nullable_        != other.nullable_        ||
+      primary_key_     != other.primary_key_     ||
+      autoincrement_   != other.autoincrement_   ||
+      fixed_length_    != other.fixed_length_    ||
       variable_length_ != other.variable_length_;
   }
 
@@ -135,7 +144,7 @@ private:
   // is the column inlined ?
   bool inlined_ = true;
   // is the column nullable?
-  bool nullable_ = false;
+  bool nullable_ = false; // TODO: Default should be true!
   // is the column a primary key?
   bool primary_key_ = false;
   // is the column an autoincrement?

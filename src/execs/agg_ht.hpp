@@ -97,11 +97,11 @@ public:
       return tmp;
     }
 
-    bool operator==(Iterator& other) const {
+    bool operator==(Iterator& other) {
       return iter_ == other.iter_;
     }
 
-    bool operator!=(Iterator& other) const {
+    bool operator!=(Iterator& other) {
       return iter_ != other.iter_;
     }
 

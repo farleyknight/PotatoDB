@@ -128,7 +128,13 @@ QueryColumn
 Catalog::query_column_for(const table_name_t& table_name,
                           const column_name_t& column_name) const
 {
-  const auto &col = table_schemas_.at(table_oids_.at(table_name)).by_name(column_name);
+  assert(table_name.size() > 0);
+  assert(table_oids_.count(table_name) > 0);
+  auto oid = table_oids_.at(table_name);
+
+  assert(table_schemas_.count(oid) > 0);
+  const auto &schema = table_schemas_.at(oid);
+  const auto &col    = schema.by_name(column_name);
   return QueryColumn::from(col);
 }
 
@@ -162,23 +168,32 @@ bool Catalog::has_table_named(const table_name_t& table_name) const {
   return table_oids_.count(table_name) > 0;
 }
 
-table_oid_t
-Catalog::create_table(// TODO: We should be attempting to get an exclusive lock
-                      // on the table, and abort the txn if we cannot get it.
-                      UNUSED Txn& txn,
-                      const table_name_t& table_name,
-                      const string& primary_key,
-                      ColumnDefListExpr column_list)
+// TODO: We should be attempting to get an
+// exclusive lock on the table, and abort the txn
+// if we cannot get it.
+table_oid_t Catalog::create_table(UNUSED Txn& txn,
+                                  const table_name_t& table_name,
+                                  const column_name_t& primary_key,
+                                  ColumnDefListExpr column_list)
 {
   assert(table_oids_.count(table_name) == 0);
 
   table_oid_t table_oid = next_table_oid_++;
-  table_oids_[table_name] = table_oid;
-
   auto schema = make_schema_from(table_name,
                                  table_oid,
                                  primary_key,
                                  column_list);
+
+  load_table(table_oid, table_name, schema);
+  return table_oid;
+}
+
+void Catalog::load_table(table_oid_t table_oid,
+                         const table_name_t& table_name,
+                         const TableSchema& schema)
+{
+  table_oids_[table_name] = table_oid;
+  table_names_[table_oid] = table_name;
 
   table_schemas_.insert(make_pair(table_oid, schema));
 
@@ -187,10 +202,40 @@ Catalog::create_table(// TODO: We should be attempting to get an exclusive lock
 
   index_oids_.emplace(table_name,
                       map<index_name_t, index_oid_t>());
-
-  return table_oid;
 }
 
+void Catalog::load_from_query(table_oid_t table_oid,
+                              const table_name_t& table_name,
+                              StatementResult& result)
+{
+  auto &result_set = result.set();
+  vector<TableColumn> cols;
+  string primary_key_name = "";
+
+  for (int32_t i = 0; i < result_set->size(); ++i) {
+    auto column_oid     = result_set->value_at<int32_t>("id", i);
+    auto data_type      = result_set->value_at<int32_t>("data_type", i);
+
+    auto size           = result_set->value_at<int32_t>("data_size", i);
+    auto column_name    = result_set->value_at<string>("object_name", i);
+    auto is_primary_key = result_set->value_at<bool>("primary_key", i);
+
+    auto type_id = static_cast<TypeId>(data_type);
+    if (is_primary_key) {
+      primary_key_name = column_name;
+    }
+
+    if (type_id == TypeId::VARCHAR) {
+      cols.push_back(TableColumn(column_name, table_oid, column_oid, type_id, size));
+    } else {
+      cols.push_back(TableColumn(column_name, table_oid, column_oid, type_id));
+    }
+  }
+
+  auto table_schema = TableSchema(cols, table_name, primary_key_name, table_oid);
+
+  load_table(table_oid, table_name, table_schema);
+}
 
 void Catalog::create_index(UNUSED Txn& txn,
                            const string index_name,

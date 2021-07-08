@@ -15,18 +15,30 @@ public:
       table_riter_ (table_.rbegin())
   {}
 
+  const TableSchema& table_schema() const {
+    auto table_oid = child_schema().table_oid();
+    return exec_ctx_.catalog().table_schema_for(table_oid);
+  }
+
   void init() override {
     child_->init();
 
     while (child_->has_next()){
       auto tuple = child_->next();
+      logger->debug("Adding tuple to SortHT: " +
+                    tuple.to_string(table_schema()));
+
       auto sort_key = make_key(tuple);
+
+      logger->debug("SortKey: " + sort_key.to_string());
       // NOTE: Multiple tuples might generate the same sort_key
       // Because of this, we are not sorting tuples but instead
       // sorting buckets of tuples, and the sort_key identifies
       // the buckets.
       table_.insert_into_bucket(sort_key, tuple);
     }
+
+    logger->debug("SortHT size: " + std::to_string(table_.size()));
 
     table_.merge_sort(sort_dir());
 
@@ -51,11 +63,9 @@ public:
 
   bool at_the_end() {
     if (sort_asc()) {
-      auto end = table_.end();
-      return table_iter_ == end;
+      return !table_iter_.has_next();
     } else {
-      auto end = table_.rend();
-      return table_riter_ == end;
+      return !table_riter_.has_next();
     }
   }
 

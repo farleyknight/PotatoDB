@@ -30,5 +30,3 @@ private:
   string message_ = "";
   ptr<ResultSet> result_set_;
 };
-
-

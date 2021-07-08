@@ -16,6 +16,10 @@ public:
     return value_.lt(other.value_);
   }
 
+  const string to_string() const {
+    return value_.to_string();
+  }
+
 private:
   Value value_;
 };

@@ -28,8 +28,16 @@ public:
     case TypeId::INTEGER: {
       return value;
     }
+    case TypeId::SMALLINT: {
+      auto as_int32 = value.as<int32_t>();
+      if (as_int32 > Int16::MAX || as_int32 < Int16::MIN) {
+        throw Exception(ExceptionType::OUT_OF_RANGE, "Numeric value out of range.");
+      }
+      auto as_int16 = static_cast<int16_t>(as_int32);
+      return Value::make(as_int16);
+    }
     default:
-      throw Exception("Not implemented! :(");
+      throw Exception("cast_as in IntegerType is not fully implemented! :(");
     }
 
     throw Exception("This cast not handled yet");

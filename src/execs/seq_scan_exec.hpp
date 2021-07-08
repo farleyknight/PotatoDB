@@ -1,9 +1,7 @@
 #pragma once
 
 #include "execs/base_exec.hpp"
-
 #include "plans/seq_scan_plan.hpp"
-
 #include "page/table_iterator.hpp"
 
 class SeqScanExec : public BaseExec {
@@ -21,6 +19,7 @@ public:
   }
 
   const QuerySchema& schema();
+  const TableSchema& table_schema();
 
 private:
   bool match_found(const Tuple& tuple);

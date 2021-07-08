@@ -5,5 +5,3 @@
 #include "PotatoSQLBaseListener.h"
 
 
-using namespace potatosql;
-

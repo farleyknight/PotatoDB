@@ -95,7 +95,10 @@ private:
   TwoPLMode two_pl_mode_;
   DeadlockMode deadlock_mode_;
   mutex latch_;
-  Atomic<bool> enable_cycle_detection_;
+
+  // TODO: Work on the cycle detection!
+
+  atomic<bool> enable_cycle_detection_;
   std::thread *cycle_detection_thread_;
   std::chrono::milliseconds cycle_detection_interval_ =
     std::chrono::milliseconds(50);

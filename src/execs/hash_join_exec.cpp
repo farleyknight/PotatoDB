@@ -78,12 +78,12 @@ bool HashJoinExec::has_next() {
   return !output_tuples_.empty();
 }
 
-Value HashJoinExec::make_value_at(column_oid_t oid,
+Value HashJoinExec::make_value_at(column_index_t index,
                                   const Tuple& left,
                                   const Tuple& right)
 {
-  return schema().by_column_oid(oid).eval_join(left,  left_schema(),
-                                               right, right_schema());
+  return schema().by_column_index(index).eval_join(left,  left_schema(),
+                                                   right, right_schema());
 }
 
 bool HashJoinExec::match_found(const Tuple& left,

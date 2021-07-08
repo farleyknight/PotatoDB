@@ -15,8 +15,7 @@ public:
             PageId first_page_id,
             BuffMgr& buff_mgr,
             LockMgr& lock_mgr,
-            LogMgr& log_mgr,
-            Txn& txn);
+            LogMgr& log_mgr);
 
   ~TableHeap() = default;
 
@@ -25,19 +24,17 @@ public:
   // No copy assign
   TableHeap& operator=(const TableHeap&) = delete;
 
+  void allocate_first_page(Txn& txn);
+
   const PageId first_page_id() const {
     return first_page_id_;
   }
 
-  bool insert_tuple(Tuple& tuple,
-                    Txn& txn);
-  bool mark_delete(const RID& rid,
-                   Txn& txn);
-  bool update_tuple(Tuple& tuple,
-                    const RID& rid,
-                    Txn& txn);
-  bool apply_delete(RID& rid,
-                    Txn& txn);
+  table_oid_t table_oid() const;
+  bool insert_tuple(Tuple& tuple, Txn& txn);
+  bool mark_delete(const RID& rid, Txn& txn);
+  bool update_tuple(Tuple& tuple, const RID& rid, Txn& txn);
+  bool apply_delete(RID& rid, Txn& txn);
   void rollback_delete(const RID& rid, Txn& txn);
 
   ptr<Tuple> find_tuple(const RID& rid, Txn& txn) const;

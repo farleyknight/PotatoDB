@@ -20,28 +20,38 @@ public:
   DiskMgr& operator=(const DiskMgr&) = delete;
 
   file_id_t create_table_file(const string& table_name);
+  file_id_t load_table_file(const string& table_name);
 
   void write_page(PageId page_id, const Page& page);
   void read_page(PageId page_id, Page& page);
 
-  void write_log(const Buffer& log_data, size_t size);
-  bool read_log(Buffer& log_data, size_t size, buffer_offset_t offset);
+  void write_log(const Buffer& log_data);
+  bool read_log(Buffer& log_data, buffer_offset_t offset);
 
   PageId allocate_page(file_id_t file_id);
-  void deallocate_page(PageId page_id);
+  PageId first_page(file_id_t file_id);
 
+  void deallocate_page(PageId page_id);
 
   void shutdown() {
     // TODO Close all file handles, not just the log file
     log_io_.close();
   }
 
-  fs::path file_path_for(const string& file_name) {
+  fs::path file_path_for(const string& file_name) const {
     return db_directory() / file_name;
   }
 
-  fs::path table_file_for(const string& table_name);
+  fs::path table_file_for(const string& table_name) const;
 
+  bool file_exists(const string& file_name) const {
+    return file_mgr_.file_exists(file_name);
+  }
+
+  bool table_file_exists(const string& table_name) const {
+    logger->debug("Checking if there is a table file for : " + table_name);
+    return file_mgr_.file_exists(table_file_for(table_name));
+  }
 
   void remove_all_files() {
     auto iter = fs::directory_iterator(db_directory());
@@ -51,7 +61,6 @@ public:
   }
 
   void setup_log_file();
-  void setup_db_file();
   void setup_db_directory();
 
 private:
@@ -79,6 +88,5 @@ private:
   fstream log_io_;
 
   // stream to write db file
-  bool flush_log_;
   std::future<void> *flush_log_f_{nullptr};
 };

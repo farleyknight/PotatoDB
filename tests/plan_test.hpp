@@ -36,8 +36,7 @@ TEST_F(PlanTest, SelectStarGivesAllColumnsTest) {
   auto foobar_query_schema =
     db.catalog().query_schema_for("foobar");
 
-  const string select_statement
-    = "SELECT * FROM foobar";
+  const string select_statement = "SELECT * FROM foobar";
 
   auto exprs = SQLParser::as_exprs(select_statement);
   auto plan  = PlanFactory::create(db.catalog(), expr[0]);

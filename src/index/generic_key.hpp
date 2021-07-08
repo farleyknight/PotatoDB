@@ -53,7 +53,7 @@ public:
 
   Value to_value(const QuerySchema& schema, column_index_t index) const {
     size_t offset = 0;
-    const auto &col = schema.by_column_oid(index);
+    const auto &col = schema.by_column_index(index);
     const TypeId column_type = col.type_id();
     const bool is_inlined = col.is_inlined();
     if (is_inlined) {
