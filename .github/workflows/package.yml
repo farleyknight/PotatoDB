@@ -41,10 +41,12 @@ jobs:
         run: |
             pip install conan --upgrade
             conan profile new default --detect
+            conan profile update settings.compiler=clang default
                     
       - name: Linux build
         if: matrix.os == 'ubuntu-20.04'
         run: |
+            apt install autoconf libtool
             conan profile update settings.compiler.libcxx=libstdc++11 default
             chmod +x build.sh
             ./build.sh
@@ -55,6 +57,7 @@ jobs:
       - name: Mac build
         if: matrix.os == 'macos-latest'
         run: |
+            brew install automake
             conan profile update settings.compiler.libcxx=libc++ default
             chmod +x build.sh
             ./build.sh
