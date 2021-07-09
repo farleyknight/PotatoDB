@@ -26,6 +26,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     
     env:
+      CC: 'clang'
+      CXX: 'clang++'
       CONAN_USER_HOME: "${{ github.workspace }}/release"
       CONAN_USER_HOME_SHORT: "${{ github.workspace }}/release/short"
       INSTALL_DIR: ${{ github.workspace }}/install/
