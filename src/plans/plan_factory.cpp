@@ -1,17 +1,5 @@
 #include "plans/plan_factory.hpp"
 
-vector<ptr<BasePlan>>
-PlanFactory::build(const PotatoDB& db,
-                   ptr<BaseExpr>&& expr)
-{
-  vector<ptr<BaseBase>> plans;
-
-  // TODO
-  // Based on expr, we append new plans to `plans`
-  // We return 
-}
-
-
 ptr<BasePlan>
 PlanFactory::create(const PotatoDB& db,
                     ptr<BaseExpr>&& expr)
