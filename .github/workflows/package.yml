@@ -46,7 +46,7 @@ jobs:
       - name: Linux build
         if: matrix.os == 'ubuntu-20.04'
         run: |
-            apt install autoconf libtool
+            sudo apt install autoconf libtool
             conan profile update settings.compiler.libcxx=libstdc++11 default
             chmod +x build.sh
             ./build.sh
