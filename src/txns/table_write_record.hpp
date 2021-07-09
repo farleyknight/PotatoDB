@@ -5,8 +5,6 @@
 #include "tuple/tuple.hpp"
 #include "tuple/rid.hpp"
 
-#include "table/table_heap_ref.hpp"
-
 enum class WType {
   INSERT = 0,
   DELETE = 1,
