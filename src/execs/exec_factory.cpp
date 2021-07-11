@@ -69,7 +69,9 @@ ExecFactory::create(ExecCtx& exec_ctx,
   }
 
   case PlanType::LIMIT: {
+    logger->debug("LimitPlan: " + plan->explain_plan());
     auto limit_plan = cast<LimitPlan>(move(plan));
+    assert(limit_plan->child() != nullptr);
     auto child_exec = ExecFactory::create(exec_ctx,
                                           move(limit_plan->child()));
     return make_unique<LimitExec>(exec_ctx,

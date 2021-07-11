@@ -287,17 +287,17 @@ PlanFactory::make_agg_plan(const Catalog& catalog,
     }
   }
 
-  // auto scan_plan = ;
-
   vector<QueryColumn> agg_cols;
   for (const auto& agg_node : agg_nodes) {
     agg_cols.push_back(agg_node.to_query_column());
   }
+  auto agg_schema = QuerySchema(agg_cols);
 
-  // assert(scan_plan != nullptr);
+  auto scan_plan = make_scan_plan(catalog, expr);
+  assert(scan_plan != nullptr);
 
-  return make_unique<AggPlan>(QuerySchema(agg_cols),
-                              make_scan_plan(catalog, expr),
+  return make_unique<AggPlan>(agg_schema,
+                              move(scan_plan),
                               agg_nodes);
 }
 

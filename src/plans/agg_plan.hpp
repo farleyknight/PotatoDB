@@ -88,7 +88,6 @@ public:
   }
 
 private:
-  ptr<BasePlan> child_;
 
   vector<QueryAgg> aggs_;
   vector<AggType> agg_types_;

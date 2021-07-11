@@ -49,7 +49,6 @@ public:
 
 private:
   ptr<AggPlan> plan_;
-  ptr<BaseExec> child_;
   AggHT table_;
   AggHT::Iterator table_iter_;
 };
