@@ -44,9 +44,7 @@ std::tuple<RID, RID> redo_test_part1() {
   db.txn_mgr().commit(txn);
 
   std::cout << "Txn committed" << std::endl;
-
-  db.shutdown();
-  std::cout << "System shutdown" << std::endl;
+  std::cout << "But we DO NOT SHUTDOWN because that writes all the pages to disk" << std::endl;
 
   return std::make_tuple(tuple1.rid(), tuple2.rid());
 }
@@ -69,8 +67,8 @@ void redo_test_part2(const RID& rid1, const RID& rid2) {
   auto null_tuple1 = test_table_heap.find_tuple(rid1, txn);
   auto null_tuple2 = test_table_heap.find_tuple(rid2, txn);
 
-  EXPECT_TRUE(null_tuple1 == nullptr);
-  EXPECT_TRUE(null_tuple2 == nullptr);
+  ASSERT_TRUE(null_tuple1 == nullptr);
+  ASSERT_TRUE(null_tuple2 == nullptr);
 
   db.txn_mgr().commit(txn);
 
@@ -90,8 +88,8 @@ void redo_test_part2(const RID& rid1, const RID& rid2) {
   auto &recovery_heap = db.table_mgr().table_heap_for(test_table_oid);
   auto tuple1         = recovery_heap.find_tuple(rid1, recovery_txn);
   auto tuple2         = recovery_heap.find_tuple(rid2, recovery_txn);
-  EXPECT_TRUE(tuple1 != nullptr);
-  EXPECT_TRUE(tuple2 != nullptr);
+  ASSERT_TRUE(tuple1 != nullptr);
+  ASSERT_TRUE(tuple2 != nullptr);
   db.txn_mgr().commit(recovery_txn);
 
   EXPECT_EQ(tuple1->value(test_schema, 0).as<string>(), "x");

@@ -58,7 +58,7 @@ void LogMgr::run_flush_thread() {
         std::swap(log_buffer_length_, flush_buffer_length_);
         log_buffer_.swap(flush_buffer_);
 
-        std::cout << "Attempting flush to WAL" << std::endl;
+        logger->debug("Flushing to WAL");
 
         // TODO: Change `disk_mgr_` to a different object
         disk_mgr_.write_log(flush_buffer_);
@@ -88,23 +88,33 @@ void LogMgr::stop_flush_thread() {
 
 void LogMgr::write_header(const LogRecord& log_record) {
   // Start with size
+  logger->debug("LogMgr::write_header size = "
+                + std::to_string(log_record.size()));
   log_buffer_.write_int32(log_buffer_length_, log_record.size());
   log_buffer_length_ += sizeof(int32_t);
 
   // Add LSN
+  logger->debug("LogMgr::write_header LSN = "
+                + std::to_string(log_record.lsn()));
   log_buffer_.write_lsn(log_buffer_length_, log_record.lsn());
   log_buffer_length_ += sizeof(lsn_t);
 
   // Add TXN id
+  logger->debug("LogMgr::write_header TXN = "
+                + std::to_string(log_record.txn_id()));
   log_buffer_.write_txn_id(log_buffer_length_, log_record.txn_id());
   log_buffer_length_ += sizeof(txn_id_t);
 
   // Add prev LSN
+  logger->debug("LogMgr::write_header prev LSN = "
+                + std::to_string(log_record.prev_lsn()));
   log_buffer_.write_lsn(log_buffer_length_, log_record.prev_lsn());
   log_buffer_length_ += sizeof(lsn_t);
 
   // Add record type
   auto log_record_type = static_cast<int32_t>(log_record.record_type());
+  logger->debug("LogMgr::write_header log_record_type = "
+                + std::to_string(log_record_type));
   log_buffer_.write_int32(log_buffer_length_, log_record_type);
   log_buffer_length_ += sizeof(int32_t);
 }

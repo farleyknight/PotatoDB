@@ -40,19 +40,29 @@ void TxnMgr::commit(Txn& txn) {
   }
   write_set.clear();
 
+  logger->debug("$$$$$$$$$$ Checking if Logging is Enabled");
   if (log_mgr_.is_logging_enabled()) {
-    // We make sure your log records are permanently stored on disk file before release the locks.
+    logger->debug("Logging IS Enabled");
+    // We make sure your log records are permanently stored on
+    // disk file before release the locks.
     //
-    // But instead of forcing a flush, we wait for LOG_TIMEOUT or other operations to
+    // But instead of forcing a flush, we wait for
+    // LOG_TIMEOUT or other operations to
     // implicitly trigger the flush operations.
     //
     // Write log and update transaction's prev_lsn here
     LogRecord log{txn.id(), txn.prev_lsn(), LogRecordType::COMMIT};
     txn.set_prev_lsn(log_mgr_.append(log));
+
+    logger->debug("Waiting for a Synchronous Flush");
     log_mgr_.sync_flush(false);
+    logger->debug("Log Flush Finished");
+  } else {
+    logger->debug("Logging IS NOT Enabled");
   }
 
   // Do the commit
+  logger->debug("Do the actual commit");
   txn.commit();
 
   // Release all the locks.

@@ -9,7 +9,7 @@
 #include "spdlog/sinks/basic_file_sink.h"
 
 sptr<spdlog::logger> logger =
-  spdlog::basic_logger_mt("basic_logger", "test_logs.txt");
+  spdlog::basic_logger_mt("basic_logger", "test_logs.txt", true);
 
 PotatoDB potatodb;
 
@@ -77,6 +77,7 @@ StatementResult PotatoDB::run(const string& statement) {
     if (plan->is_query()) {
       auto result_set = exec_eng_.query(move(plan), txn, exec_ctx);
       txn_mgr_.commit(txn);
+      logger->debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
       logger->debug("Returning result set");
       return StatementResult(move(result_set));
     } else if (plan->type() == PlanType::CREATE_TABLE) {
@@ -87,15 +88,18 @@ StatementResult PotatoDB::run(const string& statement) {
       auto message           = exec_eng_.execute(move(plan), txn, exec_ctx);
       run_create_table(table_name, column_list, txn, exec_ctx);
       txn_mgr_.commit(txn);
+      logger->debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
       return StatementResult(message);
     } else {
       auto message = exec_eng_.execute(move(plan), txn, exec_ctx);
+      logger->debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
       return StatementResult(message);
     }
   } catch (std::exception& e) {
     logger->debug("XXXXXXXXXXXXXXXXXXXXXXXXXXX");
     logger->debug("ERROR MESSAGE");
     logger->debug(e.what());
+    logger->debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
     return StatementResult(e.what());
   }
 }
@@ -140,6 +144,7 @@ void PotatoDB::build_system_catalog() {
   } else {
     logger->debug("Begin creating system catalog");
     SystemCatalog::create(*this);
+    buff_mgr_.flush_all();
   }
 }
 
