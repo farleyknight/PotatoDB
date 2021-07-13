@@ -31,6 +31,11 @@ public:
     slot_id_ = static_cast<slot_id_t>(rid);
   }
 
+  static RID invalid() {
+    uint64_t n = 0;
+    return RID(n);
+  }
+
   // Default copy
   RID(const RID&) = default;
   // Default copy assign
@@ -73,8 +78,8 @@ public:
 
   const string to_string() const {
     std::stringstream os;
-    os << "file_id: " << page_id_.file_id();
-    os << "block_id: " << page_id_.block_id();
+    os << " file_id:  "  << page_id_.file_id();
+    os << " block_id: " << page_id_.block_id();
     os << " slot_num: " << slot_id_ << "\n";
 
     return os.str();

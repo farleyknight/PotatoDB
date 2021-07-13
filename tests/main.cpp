@@ -19,18 +19,11 @@
 #include "type_test.hpp"
 #include "type_instance_tests.hpp"
 
+#include "virt_mach_test.hpp"
+
+// TODO: Let's get rid of Value altogether!
+// It definitely will result in slow execution if I keep it long term
 #include "value_test.hpp"
-
-
-/*
- *
- TEST(MainTest, HelloWorldTest) {
- std::cout << "Hello, world!" << std::endl;
- ASSERT_TRUE(true);
- }
-
- 
- */
 
 int main(int argc, char **argv) {
   spdlog::set_level(spdlog::level::debug); // Set global log level to debug

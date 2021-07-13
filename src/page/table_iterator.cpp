@@ -34,6 +34,18 @@ TableIterator& TableIterator::operator++() {
   auto maybe_page = buff_mgr.fetch_page(page_id);
   logger->debug("Pulling up curr_page via page_id: "
                 + page_id.to_string());
+
+
+  // NOTE: We are not actually modifying the underlying page object
+  // and it has already been allocated.
+  //
+  // Therefore we should provide a different wrapper here.
+  //
+  // SlottedTablePage assumes that we may want to insert/update/delete
+  // and thus has extra baggage (LogMgr/LogMgr/Txn).
+  //
+  // Create a new wrapper class that does not have all of this baggage.
+  //
   SlottedTablePage curr_page(maybe_page);
 
   auto next_tuple_rid = curr_page.next_tuple_rid(tuple_->rid());

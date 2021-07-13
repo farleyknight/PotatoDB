@@ -46,6 +46,15 @@ enum class LogRecordType {
  */
 class LogRecord {
 public:
+  // TODO: We can replace this hard-coded `20` with a sum of sizeof(..)
+  // NOTE: I _think_ it should be:
+  //
+  // 20 == sizeof(int32_t) + sizeof(lsn_t) + sizeof(txn_id_t) + sizeof(lsn_t) +
+  //       sizeof(LogRecordType)
+  //
+  // Just double check that I suppose
+  static const int HEADER_SIZE = 20;
+
   // constructor for Txn type(BEGIN/COMMIT/ABORT)
   LogRecord(txn_id_t txn_id,
             lsn_t prev_lsn,
@@ -125,12 +134,17 @@ public:
   const Tuple& insert_tuple()   const { return insert_tuple_; }
   const RID&   insert_rid()     const { return insert_rid_.value(); }
 
-  const Tuple& old_tuple()     const { return old_tuple_; }
-  const Tuple& new_tuple()     const { return new_tuple_; }
-  const RID&   update_rid()    const { return update_rid_.value(); }
+  const Tuple& old_tuple()      const { return old_tuple_; }
+  const Tuple& new_tuple()      const { return new_tuple_; }
+  const RID&   update_rid()     const { return update_rid_.value(); }
 
-  const PageId& page_id()      const { return page_id_; }
-  const PageId& prev_page_id() const { return prev_page_id_; }
+  const PageId& page_id()       const { return page_id_; }
+  const PageId& prev_page_id()  const { return prev_page_id_; }
+
+
+  void set_insert_tuple(const Tuple& tuple) {
+    insert_tuple_ = tuple;
+  }
 
   // NOTE!
   // size should *not* include the header!
@@ -154,6 +168,20 @@ public:
        << "LogType:" << static_cast<int>(log_record_type_) << "]";
 
     return os.str();
+  }
+
+  const RID main_rid() const {
+    switch (log_record_type) {
+    case LogRecordType::INSERT:
+      return insert_rid_;
+    case LogRecordType::UPDATE:
+      return update_rid_;
+    case LogRecordType::DELETE:
+      return delete_rid_;
+    default:
+      assert(false); // NOTE: SHOULD NOT REACH HERE!
+    }
+    return RID::invalid();
   }
 
 private:
@@ -180,13 +208,4 @@ private:
   // NOTE Case 4: for new page operation
   PageId page_id_ = PageId::INVALID(),
     prev_page_id_ = PageId::INVALID();
-
-  // TODO: We can replace this hard-coded `20` with a sum of sizeof(..)
-  // NOTE: I _think_ it should be:
-  //
-  // 20 == sizeof(int32_t) + sizeof(lsn_t) + sizeof(txn_id_t) + sizeof(lsn_t) +
-  //       sizeof(LogRecordType)
-  //
-  // Just double check that I suppose
-  static const int HEADER_SIZE = 20;
 };

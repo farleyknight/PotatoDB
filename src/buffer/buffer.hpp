@@ -83,6 +83,23 @@ public:
     data_.swap(other.data_);
   }
 
+  // NOTE: This method brings part of the buffer forward.
+  //
+  // Graphically, a call to unshift(1) will take a buffer like this:
+  //
+  // [ 0x12, 0x34, 0x56, ... ]
+  //
+  // to one that looks like this:
+  //
+  // [ 0x34, 0x56, ..., ... ]
+  //
+  // This is only really used in one place: LogRecovery
+  // However, it may be useful for other parts of the code?
+  // At the very least, it felt more natural to add this here
+  void unshift(buffer_offset_t offset) {
+    std::memmove(data_, data_ + offset, data_.size() - offset);
+  }
+
   buffer_offset_t size() const {
     return data_.size();
   }

@@ -88,23 +88,29 @@ void DiskMgr::read_page(PageId page_id, Page& page) {
 bool DiskMgr::read_log(Buffer& log_data,
                        buffer_offset_t offset)
 {
-  auto size = log_data.size();
+  // NOTE: Always try to fill up the buffer we are given with bytes from disk
+  auto amount_to_read = log_data.size() - offset;
   if (offset >= fs::file_size(log_file_name())) {
     return false;
   }
 
+  // NOTE: Move to the disk cursor offset and read in our bytes
   log_io_.seekp(offset);
-  log_io_.read(log_data.char_ptr(), size);
+  log_io_.read(log_data.char_ptr(), amount_to_read);
 
+  // NOTE: If something bad happened, let's return immediately
+  // TODO: We should try and report extra details of the error
+  // message if we can.
   if (log_io_.bad()) {
     return false;
   }
 
-  // if log file ends before reading "size"
+  // NOTE: Check if we have disk problems and cannot read the full
+  // number of requested bytes.
   size_t read_count = log_io_.gcount();
-  if (read_count < size) {
+  if (read_count < amount_to_read) {
     log_io_.clear();
-    std::memset(log_data.ptr(read_count), 0, size - read_count);
+    std::memset(log_data.ptr(read_count), 0, amount_to_read - read_count);
   }
 
   return true;

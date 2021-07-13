@@ -4,26 +4,34 @@
 #include "page/table_page.hpp"
 
 class SlottedTablePage : public TablePage {
+protected:
+  Txn& txn_;
+  LogMgr& log_mgr_;
+  LockMgr& lock_mgr_;
+
 public:
-  SlottedTablePage(Page* page)
-    : TablePage (page)
+  SlottedTablePage(Page* page,
+                   Txn& txn,
+                   LogMgr& log_mgr,
+                   LockMgr& lock_mgr)
+    : TablePage (page),
+      txn_      (txn),
+      log_mgr_  (log_mgr),
+      lock_mgr_ (lock_mgr)
   {}
 
-  // TODO: Rename to `allocate`
   void allocate(PageId page_id,
-                PageId prev_page_id,
-                Txn& txn,
-                LogMgr& log_mgr)
+                PageId prev_page_id)
   {
     set_page_id(page_id);
 
-    if (log_mgr.is_logging_enabled()) {
-      LogRecord log_record(txn.id(),
-                           txn.prev_lsn(),
+    if (log_mgr_.is_logging_enabled()) {
+      LogRecord log_record(txn_.id(),
+                           txn_.prev_lsn(),
                            LogRecordType::NEW_PAGE,
                            prev_page_id,
                            page_id);
-      lsn_t lsn = log_mgr.append(log_record);
+      lsn_t lsn = log_mgr_.append(log_record);
       set_lsn(lsn);
       txn.set_prev_lsn(lsn);
     }
@@ -67,6 +75,7 @@ public:
     set_free_space_pointer(free_space_pointer() - tuple.size());
 
     // TODO: Change this to 'copy_tuple' or something?
+    // TODO: Better: `write_tuple`
     page_->copy_n_bytes(0, // Source offset
                         // Destination offset
                         free_space_pointer(),
@@ -77,6 +86,9 @@ public:
     set_tuple_offset_at_slot(i, free_space_pointer());
     set_tuple_size_at(i, tuple.size());
 
+    auto rid = RID(table_page_id(), i);
+    tuple.set_rid(rid);
+
     if (i == tuple_count()) {
       set_tuple_count(tuple_count() + 1);
     }
@@ -84,16 +96,27 @@ public:
     logger->debug("After inserting tuple, the tuple count is now "
                   + std::to_string(tuple_count()));
 
-    tuple.set_rid(RID(table_page_id(), i));
+    if (log_mgr_.is_logging_enabled()) {
+      assert(!txn_.is_shared_locked(rid) && !txn_.is_exclusive_locked(rid));
+
+      bool locked = lock_mgr_.lock_exclusive(txn, rid);
+      assert(locked);
+
+      auto log_record = LogRecord(txn_.txn_id(),
+                                  txn_.prev_lsn(),
+                                  LogRecordType::INSERT,
+                                  rid,
+                                  tuple);
+
+      lsn_t lsn = log_mgr_.append(log_record);
+      set_lsn(lsn);
+      txn->prev_lsn(lsn);
+    }
 
     return true;
   }
 
-  bool mark_delete(const RID& rid,
-                   Txn& txn,
-                   LockMgr& lock_mgr,
-                   LogMgr& log_mgr)
-  {
+  bool mark_delete(const RID& rid) {
     uint32_t slot_id = rid.slot_id();
     // If the slot number is invalid, abort the txn.
     if (slot_id >= tuple_count()) {
@@ -113,13 +136,12 @@ public:
          if (!lock_mgr.lock_upgrade(txn, rid)) {
            return false;
          }
-       } else if (!txn.is_exclusive_locked(rid) &&
-                  !lock_mgr.lock_exclusive(txn, rid)) {
+       } else if (!txn_.is_exclusive_locked(rid) && !lock_mgr.lock_exclusive(txn, rid)) {
          return false;
        }
        Tuple dummy_tuple;
-       LogRecord log_record(txn.id(),
-                            txn.prev_lsn(),
+       LogRecord log_record(txn_.id(),
+                            txn_.prev_lsn(),
                             LogRecordType::MARK_DELETE,
                             rid,
                             dummy_tuple);
@@ -136,20 +158,16 @@ public:
     return true;
   }
 
-  void rollback_delete(const RID& rid,
-                       Txn& txn,
-                       LogMgr& log_mgr)
-  {
+  void rollback_delete(const RID& rid) {
     // Log the rollback.
-    if (log_mgr.is_logging_enabled()) {
-      // We must own an exclusive lock on the RID.
-      assert(txn.is_exclusive_locked(rid));
+    if (log_mgr_.is_logging_enabled()) {
+      assert(txn_.is_exclusive_locked(rid));
       Tuple dummy_tuple;
-      LogRecord log_record(txn.id(),
-                           txn.prev_lsn(),
-                           LogRecordType::ROLLBACK_DELETE,
-                           rid,
-                           dummy_tuple);
+      auto log_record = LogRecord(txn_.id(),
+                                  txn_.prev_lsn(),
+                                  LogRecordType::ROLLBACK_DELETE,
+                                  rid,
+                                  dummy_tuple);
       lsn_t lsn = log_mgr.append(log_record);
       set_lsn(lsn);
       txn.set_prev_lsn(lsn);
@@ -296,6 +314,8 @@ public:
     // Find and return the first valid tuple after our current slot number.
     for (uint32_t i = curr_rid.slot_id() + 1; i < tuple_count(); ++i) {
       // Q: Is this suppose to check that it's not invalid?
+      // A: NO! It checks if it's been deleted. We use negative sizes
+      // to mark a tuple as deleted in a Slotted Table Page design.
       if (tuple_size_at(i) > 0) {
         return RID::make_opt(table_page_id(), i);
       }
@@ -307,17 +327,14 @@ public:
 
   uint32_t tuple_count() {
     return page_->read_uint32(OFFSET_TUPLE_COUNT);
-    // return *reinterpret_cast<uint32_t *>(data() + OFFSET_TUPLE_COUNT);
   }
 
   /** Set the number of tuples in this page. */
   void set_tuple_count(uint32_t tuple_count) {
     page_->write_uint32(OFFSET_TUPLE_COUNT, tuple_count);
-    // memcpy(data() + OFFSET_TUPLE_COUNT, &tuple_count, sizeof(uint32_t));
   }
 
-private:
-
+protected:
   void apply_update(const Tuple& new_tuple,
                     Tuple& old_tuple,
                     const RID& rid,
@@ -332,6 +349,28 @@ private:
 
     old_tuple.set_rid(rid);
 
+    if (log_mgr_.is_logging_enabled()) {
+      // Acquire an exclusive lock, upgrading from shared if necessary.
+      if (txn_->is_shared_locked(rid)) {
+        if (!lock_mgr_->lock_upgrade(txn_, rid)) {
+          return false;
+        }
+      } else if (!txn_->is_exclusive_locked(rid) && !lock_mgr->lock_exclusive(txn, rid)) {
+        return false;
+      }
+      auto log_record = LogRecord(txn_.id(),
+                                  txn_.prev_lsn(),
+                                  LogRecordType::UPDATE,
+                                  rid,
+                                  old_tuple,
+                                  new_tuple);
+
+      lsn_t lsn = log_manager->append(log_record);
+      set_lsn(lsn);
+      txn_.prev_lsn(lsn);
+    }
+
+    // Perform the update.
     uint32_t pointer = free_space_pointer();
 
     page_->copy_n_bytes(pointer, // Source offset
@@ -339,12 +378,6 @@ private:
                         pointer + tuple_size - new_tuple.size(),
                         page_->buffer(), // Source buffer
                         tuple_offset - pointer); // N bytes
-
-    // memmove(
-    //   data() + pointer + tuple_size - new_tuple.size(),
-    //   data() + pointer,
-    //   tuple_offset - pointer
-    // );
 
     set_free_space_pointer(pointer + tuple_size - new_tuple.size());
 
