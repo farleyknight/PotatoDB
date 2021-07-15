@@ -4,10 +4,14 @@
 
 TableIterator::TableIterator(TableHeap& table_heap,
                              const RID& rid,
-                             Txn& txn)
+                             Txn& txn,
+                             LogMgr& log_mgr,
+                             LockMgr& lock_mgr)
   : table_heap_ (table_heap),
     rid_        (rid),
-    txn_        (txn)
+    txn_        (txn),
+    log_mgr_    (log_mgr),
+    lock_mgr_   (lock_mgr)
 {
   if (rid_.is_valid()) {
     tuple_ = table_heap_.find_tuple(rid_, txn);
@@ -17,7 +21,9 @@ TableIterator::TableIterator(TableHeap& table_heap,
 TableIterator::TableIterator(const TableIterator& other)
   : table_heap_ (other.table_heap_),
     rid_        (other.rid()),
-    txn_        (other.txn_)
+    txn_        (other.txn_),
+    log_mgr_    (other.log_mgr_),
+    lock_mgr_   (other.lock_mgr_)
 {
   if (rid_.is_valid()) {
     tuple_ = table_heap_.find_tuple(rid_, other.txn_);
@@ -46,7 +52,7 @@ TableIterator& TableIterator::operator++() {
   //
   // Create a new wrapper class that does not have all of this baggage.
   //
-  SlottedTablePage curr_page(maybe_page);
+  SlottedTablePage curr_page(maybe_page, txn_, log_mgr_, lock_mgr_);
 
   auto next_tuple_rid = curr_page.next_tuple_rid(tuple_->rid());
 
@@ -63,7 +69,8 @@ TableIterator& TableIterator::operator++() {
   if (!next_tuple_rid.has_value()) {
     while (curr_page.next_page_id() != PageId::STOP_ITERATING(file_id)) {
       page_id = curr_page.next_page_id();
-      auto next_page = SlottedTablePage(buff_mgr.fetch_page(page_id));
+      auto next_page_ptr = buff_mgr.fetch_page(page_id);
+      auto next_page = SlottedTablePage(next_page_ptr, txn_, log_mgr_, lock_mgr_);
 
       buff_mgr.unpin(curr_page.table_page_id(), false);
       next_tuple_rid = next_page.first_tuple_rid();

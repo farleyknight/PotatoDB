@@ -34,9 +34,8 @@ public:
   bool insert_tuple(Tuple& tuple, Txn& txn);
   bool mark_delete(const RID& rid, Txn& txn);
   bool update_tuple(Tuple& tuple, const RID& rid, Txn& txn);
-  bool apply_delete(RID& rid, Txn& txn);
-  void rollback_delete(const RID& rid, Txn& txn);
-
+  bool apply_delete(const RID& rid, Txn& txn);
+  bool rollback_delete(const RID& rid, Txn& txn);
   ptr<Tuple> find_tuple(const RID& rid, Txn& txn) const;
 
   TableIterator begin(Txn& txn);
@@ -48,7 +47,7 @@ private:
   file_id_t file_id_;
   table_oid_t table_oid_;
   PageId first_page_id_;
-  LockMgr& lock_mgr_;
-  LogMgr& log_mgr_;
   BuffMgr& buff_mgr_;
+  LogMgr& log_mgr_;
+  LockMgr& lock_mgr_;
 };

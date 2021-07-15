@@ -10,7 +10,8 @@
 
 enum class TupleSources {
   TABLE_HEAP   = 0,
-  QUERY_SCHEMA = 1
+  QUERY_SCHEMA = 1,
+  LOG_RECOVERY = 2
 };
 
 class Tuple {
@@ -29,6 +30,11 @@ public:
 
   Tuple(vector<Value> values, const QuerySchema& schema);
 
+  Tuple(Buffer buffer)
+    : source_ (TupleSources::LOG_RECOVERY),
+      buffer_ (buffer)
+  {}
+
   // Destructor
   ~Tuple() = default;
 
@@ -43,14 +49,19 @@ public:
     buffer_.copy_from(tuple.buffer_);
   }
 
-  Value value(const auto& schema,
-              column_index_t column_index) const;
+  bool eq(const Tuple& tuple) {
+    if (size() != tuple.size()) {
+      return false;
+    }
 
-  Value value_by_name(const QuerySchema& schema,
-                      const column_name_t& name) const;
+    return std::memcmp(buffer_.char_ptr(), tuple.buffer_.char_ptr(), buffer_.size()) == 0;
+  }
 
-  Value value_by_oid(const auto& schema,
-                     column_oid_t oid) const;
+  Value value(const auto& schema, column_index_t column_index) const;
+
+  Value value_by_name(const QuerySchema& schema, const column_name_t& name) const;
+
+  Value value_by_oid(const auto& schema, column_oid_t oid) const;
 
   bool is_null(const auto& schema,
                uint32_t column_index) const;

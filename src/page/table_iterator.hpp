@@ -10,11 +10,12 @@
 
 class TableIterator {
 public:
-
   TableIterator(TableHeap& table_heap,
                 const RID& rid,
-                Txn& txn);
-  // Copy constructor
+                Txn& txn,
+                LogMgr& log_mgr,
+                LockMgr& lock_mgr);
+
   TableIterator(const TableIterator& other);
 
   // pre-increment
@@ -38,4 +39,6 @@ private:
   RID rid_;
   ptr<Tuple> tuple_;
   Txn& txn_;
+  LogMgr& log_mgr_;
+  LockMgr& lock_mgr_;
 };

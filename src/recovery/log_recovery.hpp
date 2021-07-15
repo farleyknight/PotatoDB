@@ -11,14 +11,17 @@
 class LogRecovery {
  public:
   LogRecovery(DiskMgr& disk_mgr,
-              BuffMgr& buff_mgr)
-    : disk_mgr_ (disk_mgr),
-      buff_mgr_ (buff_mgr),
-      log_mgr_  (log_mgr),
-      txn_      (txn)
-  {
-    log_buffer_.resize(LOG_BUFFER_SIZE);
-  }
+              BuffMgr& buff_mgr,
+              LogMgr& log_mgr,
+              LockMgr& lock_mgr,
+              Txn& txn)
+    : disk_mgr_   (disk_mgr),
+      buff_mgr_   (buff_mgr),
+      log_mgr_    (log_mgr),
+      lock_mgr_   (lock_mgr),
+      txn_        (txn),
+      log_cursor_ (LOG_BUFFER_SIZE)
+  {}
 
   // No copy
   LogRecovery(const LogRecovery&) = delete;
@@ -29,19 +32,18 @@ class LogRecovery {
   void redo();
   void undo();
 
-  // TODO: Replace with references & buffer
-  bool deserialize_log_record(const char *data, LogRecord *log_record);
+  void apply_next_log_record();
+  bool deserialize_log_record(LogRecord& log);
 
 private:
   DiskMgr& disk_mgr_;
   BuffMgr& buff_mgr_;
   LogMgr& log_mgr_;
-  Txn& txn_; // TODO: This must be passed into the constructor
+  LockMgr& lock_mgr_;
+  Txn& txn_;
 
   map<txn_id_t, lsn_t> active_txn_;
   map<lsn_t, int> lsn_mapping_;
 
-  UNUSED int offset_ = 0;
-
-  Buffer log_buffer_;
+  BufferCursor log_cursor_;
 };

@@ -108,8 +108,9 @@ public:
     return disk_mgr_;
   }
 
-  LogRecovery& log_recovery() {
-    return log_recovery_;
+  LogRecovery log_recovery() {
+    auto &txn = txn_mgr_.begin();
+    return LogRecovery(disk_mgr_, buff_mgr_, log_mgr_, lock_mgr_, txn);
   }
 
   bool file_exists(fs::path file_path) const;
@@ -127,7 +128,6 @@ private:
   DiskMgr       disk_mgr_;
   BuffMgr       buff_mgr_;
   LogMgr        log_mgr_;
-  LogRecovery   log_recovery_;
   LockMgr       lock_mgr_;
   CheckpointMgr checkpoint_mgr_;
   TableMgr      table_mgr_;

@@ -69,6 +69,8 @@ public:
                 n_bytes);
   }
 
+  const Tuple read_tuple(buffer_offset_t offset);
+
   void write_tuple(buffer_offset_t offset, const Tuple& tuple);
 
   void copy_from(const Buffer& other) {
@@ -97,7 +99,7 @@ public:
   // However, it may be useful for other parts of the code?
   // At the very least, it felt more natural to add this here
   void unshift(buffer_offset_t offset) {
-    std::memmove(data_, data_ + offset, data_.size() - offset);
+    std::memmove(ptr(), ptr(offset), data_.size() - offset);
   }
 
   buffer_offset_t size() const {
@@ -189,8 +191,16 @@ public:
    * DB specific types
    **********************************************/
 
+  lsn_t read_lsn(buffer_offset_t offset) const {
+    return *reinterpret_cast<const lsn_t*>(cptr(offset));
+  }
+
   void write_lsn(buffer_offset_t offset, lsn_t lsn) {
     *reinterpret_cast<lsn_t*>(ptr(offset)) = lsn;
+  }
+
+  txn_id_t read_txn_id(buffer_offset_t offset) const {
+    return *reinterpret_cast<const txn_id_t*>(cptr(offset));
   }
 
   void write_txn_id(buffer_offset_t offset, txn_id_t txn_id) {
@@ -202,12 +212,17 @@ public:
   }
 
   RID read_rid(buffer_offset_t offset) const {
-    auto rid_as_int64 = *reinterpret_cast<const uint64_t*>(cptr(offset));
-    return RID(rid_as_int64);
+    auto rid_as_uint64 = *reinterpret_cast<const uint64_t*>(cptr(offset));
+    return RID(rid_as_uint64);
   }
 
   void write_page_id(buffer_offset_t offset, const PageId& page_id) {
     *reinterpret_cast<uint32_t*>(ptr(offset)) = page_id.as_uint32();
+  }
+
+  PageId read_page_id(buffer_offset_t offset) const {
+    auto page_id_as_uint32 = *reinterpret_cast<const uint32_t*>(cptr(offset));
+    return PageId::from(page_id_as_uint32);
   }
 
   Data data_;

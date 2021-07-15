@@ -3,9 +3,23 @@
 #include "tuple/tuple.hpp"
 
 void Buffer::write_tuple(buffer_offset_t offset, const Tuple& tuple) {
-  copy_n_bytes(0, offset, tuple.buffer(), tuple.buffer().size());
+  write_uint32(offset, tuple.size());
+  auto tuple_offset = offset + sizeof(uint32_t);
+
+  std::memcpy(ptr(tuple_offset),
+              tuple.buffer().cptr(0),
+              tuple.buffer().size());
 }
 
+const Tuple Buffer::read_tuple(buffer_offset_t offset) {
+  auto tuple_size = read_uint32(offset);
+  auto tuple_offset = offset + sizeof(uint32_t);
+
+  Tuple new_tuple(tuple_size);
+  std::memcpy(new_tuple.buffer().ptr(), ptr(tuple_offset), tuple_size);
+
+  return new_tuple;
+}
 
 void Buffer::write_string(buffer_offset_t offset, const string& value) {
   string_size_t length = value.size();

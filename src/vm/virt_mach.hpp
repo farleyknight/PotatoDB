@@ -28,18 +28,17 @@ public:
   vector<string> disassemble(int offset) {
     vector<string> result;
     auto instruction = stmts_.at(offset).code();
-    switch (static_cast<OpCode>(instruction)) {
+    switch (instruction) {
     case OpCode::RETURN:
       return simple(move(result), "RETURN", offset);
     default:
-      fmt::print("Unknown opcode {}\n", instruction);
       return result;
     }
   }
 
-  vector<string> simple(vector<string>&& opcodes, string name, int offset) {
+  vector<string>&& simple(vector<string>&& opcodes, string name, int offset) {
     opcodes.push_back(fmt::format("{:04} {}\n", offset, name));
-    return opcodes;
+    return std::move(opcodes);
   }
 
   int print_disassemble(int offset) {

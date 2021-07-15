@@ -95,6 +95,7 @@ set(main_sources
   "src/page/page.cpp"
   "src/page/table_heap.cpp"
   "src/page/table_iterator.cpp"
+  "src/page/slotted_table_page.cpp"
   "src/plans/agg_plan.cpp"
   "src/plans/plan_builder.cpp" # TODO: Delete this
   "src/plans/plan_factory.cpp"

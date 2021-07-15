@@ -142,8 +142,6 @@ template<class T>
 using OptRef    = std::optional<std::reference_wrapper<T>>;
 
 using std::optional;
-template<class T>
-using Option    = const optional<T>;
 
 template<class T>
 using MutOption = optional<T>;

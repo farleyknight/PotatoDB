@@ -7,8 +7,9 @@
 #include <memory>
 
 #include "common/config.hpp"
-#include "page/page.hpp"
+#include "buffer/buffer_cursor.hpp"
 #include "disk/file_mgr.hpp"
+#include "page/page.hpp"
 
 class DiskMgr {
 public:
@@ -26,7 +27,7 @@ public:
   void read_page(PageId page_id, Page& page);
 
   void write_log(const Buffer& log_data);
-  bool read_log(Buffer& log_data, buffer_offset_t offset);
+  bool read_log(BufferCursor& cursor);
 
   PageId allocate_page(file_id_t file_id);
   PageId first_page(file_id_t file_id);

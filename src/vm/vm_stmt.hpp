@@ -1,6 +1,34 @@
 #pragma once
 
-#include "vm/vm_type_id.hpp"
+#include "common/config.hpp"
+
+class VMStmt {
+public:
+  VMStmt(OpCode code)
+    : code_ (code)
+  {}
+
+  VMStmt(OpCode code, int32_t arg1)
+    : code_ (code),
+      arg1_ (arg1)
+  {}
+
+  VMStmt(OpCode code, int32_t arg1, int32_t arg2)
+    : code_ (code),
+      arg1_ (arg1),
+      arg2_ (arg2)
+  {}
+
+  OpCode code() {
+    return code_;
+  }
+
+
+private:
+  OpCode code_;
+  UNUSED int32_t arg1_, arg2_;
+};
+
 
 class VMValue {
 public:
@@ -11,8 +39,8 @@ public:
   {}
 
 private:
-  int32_t start_, end_;
-  VMType_id type_id_;
+  UNUSED int32_t start_, end_;
+  UNUSED TypeId type_id_;
 };
 
 
@@ -34,8 +62,8 @@ public:
   }
 
 private:
-  int32_t num_of_bytes_;
-  int32_t stack_pointer_ = 0;
+  UNUSED int32_t num_of_bytes_;
+  UNUSED int32_t stack_pointer_ = 0;
   vector<byte_t> data_;
   vector<VMValue> values_;
 };

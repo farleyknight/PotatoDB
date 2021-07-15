@@ -24,9 +24,10 @@ enum class LogRecordType {
  * For every write operation on the table page, you should write ahead a corresponding log record.
  *
  * For EACH log record, HEADER is like (5 fields in common, 20 bytes in total).
- *---------------------------------------------
- * | size | lsn_t | transID | prevLSN | LogType |
- *---------------------------------------------
+ *
+ *--------------------------------------------------------------
+ * | size | lsn_t | txnID | prevLSN | LogRecordType (int32_t) |
+ *--------------------------------------------------------------
  * For insert type log record
  *---------------------------------------------------------------
  * | HEADER | tuple_rid | tuple_size | tuple_data(char[] array) |
@@ -54,6 +55,10 @@ public:
   //
   // Just double check that I suppose
   static const int HEADER_SIZE = 20;
+
+  // NOTE: For LogRecovery, we need to be able to construct the LogRecord
+  // one byte at a time. This constructor is exactly for that purpose.
+  LogRecord() { }
 
   // constructor for Txn type(BEGIN/COMMIT/ABORT)
   LogRecord(txn_id_t txn_id,
@@ -128,33 +133,49 @@ public:
 
   ~LogRecord() = default;
 
-  const Tuple& delete_tuple()   const { return delete_tuple_; }
-  const RID&   delete_rid()     const { return delete_rid_.value(); }
+  Tuple& delete_tuple()   { return delete_tuple_; }
+  Tuple& insert_tuple()   { return insert_tuple_; }
+  Tuple& old_tuple()      { return old_tuple_; }
+  Tuple& new_tuple()      { return new_tuple_; }
 
-  const Tuple& insert_tuple()   const { return insert_tuple_; }
-  const RID&   insert_rid()     const { return insert_rid_.value(); }
+  const RID& delete_rid() const { return delete_rid_.value(); }
+  const RID& update_rid() const { return update_rid_.value(); }
+  const RID& insert_rid() const { return insert_rid_.value(); }
 
-  const Tuple& old_tuple()      const { return old_tuple_; }
-  const Tuple& new_tuple()      const { return new_tuple_; }
-  const RID&   update_rid()     const { return update_rid_.value(); }
+  const Tuple& insert_tuple() const { return insert_tuple_; }
+  const Tuple& delete_tuple() const { return delete_tuple_; }
+  const Tuple& old_tuple()    const { return old_tuple_; }
+  const Tuple& new_tuple()    const { return new_tuple_; }
 
-  const PageId& page_id()       const { return page_id_; }
-  const PageId& prev_page_id()  const { return prev_page_id_; }
+  const PageId& page_id()      const { return page_id_; }
+  const PageId& prev_page_id() const { return prev_page_id_; }
 
+  void set_insert_rid(RID rid)       { insert_rid_ = rid; }
+  void set_update_rid(RID rid)       { update_rid_ = rid; }
+  void set_delete_rid(RID rid)       { delete_rid_ = rid; }
 
-  void set_insert_tuple(const Tuple& tuple) {
-    insert_tuple_ = tuple;
-  }
+  void set_insert_tuple(Tuple tuple) { insert_tuple_ = tuple; }
+  void set_delete_tuple(Tuple tuple) { delete_tuple_ = tuple; }
+  void set_old_tuple(Tuple tuple)    { old_tuple_ = tuple; }
+  void set_new_tuple(Tuple tuple)    { new_tuple_ = tuple; }
 
-  // NOTE!
-  // size should *not* include the header!
+  void set_page_id(PageId page_id)      { page_id_      = page_id; }
+  void set_prev_page_id(PageId page_id) { prev_page_id_ = page_id; }
+
+  // NOTE! size should *not* include the header!
   size_t size()     const { return size_; }
   lsn_t lsn()       const { return lsn_; }
   txn_id_t txn_id() const { return txn_id_; }
   lsn_t prev_lsn()  const { return prev_lsn_; }
-  void set_lsn(lsn_t lsn) { lsn_ = lsn; }
 
   const LogRecordType& record_type() const { return log_record_type_; }
+
+  void set_lsn(lsn_t lsn)          { lsn_      = lsn; }
+  void set_size(int32_t size)      { size_     = size; }
+  void set_txn_id(txn_id_t txn_id) { txn_id_   = txn_id; }
+  void set_prev_lsn(lsn_t lsn)     { prev_lsn_ = lsn;}
+
+  void set_record_type(LogRecordType record_type) { log_record_type_ = record_type; }
 
   const string to_string() const {
     std::ostringstream os;
@@ -171,13 +192,16 @@ public:
   }
 
   const RID main_rid() const {
-    switch (log_record_type) {
+    switch (log_record_type_) {
     case LogRecordType::INSERT:
-      return insert_rid_;
+      return insert_rid_.value();
     case LogRecordType::UPDATE:
-      return update_rid_;
-    case LogRecordType::DELETE:
-      return delete_rid_;
+      return update_rid_.value();
+    case LogRecordType::MARK_DELETE:
+    case LogRecordType::ROLLBACK_DELETE:
+    case LogRecordType::APPLY_DELETE: {
+      return delete_rid_.value();
+    }
     default:
       assert(false); // NOTE: SHOULD NOT REACH HERE!
     }

@@ -74,7 +74,7 @@ void redo_test_part2(const RID& rid1, const RID& rid2) {
 
   std::cout << "Begin recovery" << std::endl;
 
-  auto &log_recovery = db.log_recovery();
+  auto log_recovery = db.log_recovery();
   EXPECT_FALSE(db.is_logging_enabled());
 
   std::cout << "Redo underway" << std::endl;

@@ -10,6 +10,11 @@ public:
     assert(page != nullptr);
   }
 
+  void update_ptr(Page* page) {
+    assert(page != nullptr);
+    page_ = page;
+  }
+
   void reset_memory();
 
   void rlatch() {

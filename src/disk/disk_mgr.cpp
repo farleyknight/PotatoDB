@@ -83,20 +83,18 @@ void DiskMgr::read_page(PageId page_id, Page& page) {
   file_mgr_.read_buffer(page_id, page.buffer());
 }
 
-// TODO: Move this method to another class that is more appropriate
-// for direct file access. Maybe FileMgr?
-bool DiskMgr::read_log(Buffer& log_data,
-                       buffer_offset_t offset)
-{
-  // NOTE: Always try to fill up the buffer we are given with bytes from disk
-  auto amount_to_read = log_data.size() - offset;
-  if (offset >= fs::file_size(log_file_name())) {
+// NOTE: A BufferCursor is basically a buffer with an `offset_`
+bool DiskMgr::read_log(BufferCursor& cursor) {
+  if (cursor.file_offset() >= fs::file_size(log_file_name())) {
     return false;
   }
 
+  // NOTE: Always try to fill up the buffer we are given with bytes from disk
+  auto amount_to_read = cursor.buffer().size() - cursor.buffer_offset();
+
   // NOTE: Move to the disk cursor offset and read in our bytes
-  log_io_.seekp(offset);
-  log_io_.read(log_data.char_ptr(), amount_to_read);
+  log_io_.seekp(cursor.file_offset());
+  log_io_.read(cursor.buffer().char_ptr(), amount_to_read);
 
   // NOTE: If something bad happened, let's return immediately
   // TODO: We should try and report extra details of the error
@@ -110,7 +108,10 @@ bool DiskMgr::read_log(Buffer& log_data,
   size_t read_count = log_io_.gcount();
   if (read_count < amount_to_read) {
     log_io_.clear();
-    std::memset(log_data.ptr(read_count), 0, amount_to_read - read_count);
+    // NOTE: If we read too little bytes, zero-out the bytes that
+    // we did read in.
+    std::memset(cursor.buffer().ptr(read_count), 0, amount_to_read - read_count);
+    return false;
   }
 
   return true;
