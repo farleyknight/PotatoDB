@@ -28,6 +28,7 @@ public:
   void stop_flush_thread();
   void sync_flush(bool force);
   lsn_t append(LogRecord& log_record);
+  void flush_log_buffer();
 
   lsn_t next_lsn() {
     return next_lsn_;

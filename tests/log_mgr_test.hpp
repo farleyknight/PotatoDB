@@ -57,6 +57,7 @@ TEST_F(LogMgrSerialization, InsertTupleTest) {
   // 2) Write it to disk
 
   log_mgr.append(original);
+  log_mgr.flush_log_buffer();
 
   // 3) Read it back
 
@@ -64,6 +65,7 @@ TEST_F(LogMgrSerialization, InsertTupleTest) {
 
   auto &txn = txn_mgr.begin();
   LogRecovery recovery(disk_mgr, buff_mgr, log_mgr, lock_mgr, txn);
+  recovery.init_log_buffer();
   recovery.deserialize_log_record(copy);
 
   // 4) Make sure it is identical

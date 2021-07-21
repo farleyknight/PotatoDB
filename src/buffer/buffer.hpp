@@ -34,6 +34,12 @@ public:
     return data_;
   }
 
+  // TODO: This really doesn't print anything :(
+  // We may need to convert each byte_t into hexidecimal format
+  const string to_string() const {
+    return string(char_ptr(), data_.size());
+  }
+
   byte_t* ptr() {
     return data_.data();
   }
@@ -54,6 +60,7 @@ public:
     return data_.data() + offset;
   }
 
+  // TODO: Rename to `const_ptr`
   const byte_t* cptr(buffer_offset_t offset) const {
     return data_.data() + offset;
   }

@@ -1,8 +1,12 @@
 #include "disk/file_mgr.hpp"
 
+
+// TODO: Let's move the DiskMgr::write_log stuff into this class?
+
 void FileMgr::write_buffer(PageId page_id, const Buffer& buffer) {
   file_id_t file_id = page_id.file_id();
   buffer_offset_t offset = page_id.block_id() * buffer.size();
+  assert(files_.size() > file_id);
 
   logger->debug("[FileMgr] Writing buffer to file_id " + std::to_string(file_id));
   logger->debug("[FileMgr] Buffer offset " + std::to_string(offset));
@@ -15,6 +19,7 @@ void FileMgr::write_buffer(PageId page_id, const Buffer& buffer) {
 void FileMgr::read_buffer(PageId page_id, Buffer& buffer) {
   file_id_t file_id = page_id.file_id();
   buffer_offset_t offset = page_id.block_id() * buffer.size();
+  assert(files_.size() > file_id);
 
   logger->debug("[FileMgr] Reading buffer at file_id " + std::to_string(file_id));
   logger->debug("[FileMgr] Reading block_id " + std::to_string(page_id.block_id()));

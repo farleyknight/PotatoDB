@@ -50,7 +50,7 @@ public:
   }
 
   bool table_file_exists(const string& table_name) const {
-    logger->debug("Checking if there is a table file for : " + table_name);
+    logger->debug("[DiskMgr] Checking if there is a table file for : " + table_name);
     return file_mgr_.file_exists(table_file_for(table_name));
   }
 
@@ -58,6 +58,15 @@ public:
     auto iter = fs::directory_iterator(db_directory());
     for (const auto &entry : iter) {
       file_mgr_.remove_file(entry.path());
+    }
+  }
+
+  void remove_table_files() {
+    auto iter = fs::directory_iterator(db_directory());
+    for (const auto &entry : iter) {
+      if (entry.path().extension() == ".tbl") {
+        file_mgr_.remove_file(entry.path());
+      }
     }
   }
 

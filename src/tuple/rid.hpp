@@ -55,8 +55,7 @@ public:
   uint64_t as_uint64() const {
     uint64_t result = static_cast<uint64_t>(page_id_.as_uint32());
     result = result << 32;
-    result = result | slot_id_;
-    return result;
+    return result | slot_id_;
   }
 
   PageId page_id() const {
@@ -78,9 +77,9 @@ public:
 
   const string to_string() const {
     std::stringstream os;
-    os << " file_id:  "  << page_id_.file_id();
+    os << " file_id: " << page_id_.file_id();
     os << " block_id: " << page_id_.block_id();
-    os << " slot_num: " << slot_id_ << "\n";
+    os << " slot_num: " << slot_id_;
 
     return os.str();
   }

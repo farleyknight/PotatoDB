@@ -27,6 +27,20 @@ void LogMgr::sync_flush(bool force) {
   }
 }
 
+void LogMgr::flush_log_buffer() {
+  assert(flush_buffer_length_ == 0);
+  if (log_buffer_.size() > 0) {
+    std::swap(log_buffer_length_, flush_buffer_length_);
+    log_buffer_.swap(flush_buffer_);
+
+    logger->debug("[LogMgr] Flushing to WAL");
+
+    // TODO: Change `disk_mgr_` to a different object
+    disk_mgr_.write_log(flush_buffer_);
+    flush_buffer_length_ = 0;
+  }
+}
+
 void LogMgr::run_flush_thread() {
   // NOTE: If we're being called, that means we want logging to
   // be enabled. This updates the flag if necessary
@@ -53,17 +67,7 @@ void LogMgr::run_flush_thread() {
         return flush_requested_.load();
       });
 
-      assert(flush_buffer_length_ == 0);
-      if (log_buffer_.size() > 0) {
-        std::swap(log_buffer_length_, flush_buffer_length_);
-        log_buffer_.swap(flush_buffer_);
-
-        logger->debug("[LogMgr] Flushing to WAL");
-
-        // TODO: Change `disk_mgr_` to a different object
-        disk_mgr_.write_log(flush_buffer_);
-        flush_buffer_length_ = 0;
-      }
+      flush_log_buffer();
       flush_requested_ = false;
       append_cv_.notify_all();
     }
@@ -121,10 +125,21 @@ void LogMgr::write_header(const LogRecord& log_record) {
 
 void LogMgr::write_insert_record(const LogRecord& log_record) {
   // Write the RID
+  std::cout << "LogMgr::write_insert_record RID : " << log_record.insert_rid() << std::endl;
+  std::cout << "LogMgr::write_insert_record RID offset : " << log_buffer_length_ << std::endl;
+
+  // TODO: Replace log_buffer_ with log_cursor_
+  // TODO: Replace write_rid with append_rid
   log_buffer_.write_rid(log_buffer_length_, log_record.insert_rid());
+  std::cout << "LogMgr::write_insert_record RID (read back): " << log_buffer_.read_rid(log_buffer_length_) << std::endl;
   log_buffer_length_ += sizeof(RID);
 
+  if (log_buffer_length_ >= 48) {
+    std::cout << "LogMgr::write_insert_record RID (read back) 48 48 48 48: " << log_buffer_.read_rid(48) << std::endl;
+  }
+
   // Write the inserted Tuple
+  // TODO: Replace write_tuple with append_tuple
   log_buffer_.write_tuple(log_buffer_length_, log_record.insert_tuple());
   log_buffer_length_ += log_record.insert_tuple().size();
 }

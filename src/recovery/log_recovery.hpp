@@ -32,6 +32,7 @@ class LogRecovery {
   void redo();
   void undo();
 
+  bool init_log_buffer();
   void apply_next_log_record();
   bool deserialize_log_record(LogRecord& log);
 
@@ -45,5 +46,7 @@ private:
   map<txn_id_t, lsn_t> active_txn_;
   map<lsn_t, int> lsn_mapping_;
 
+  // TODO: Let's add a FileHandle here.
+  // It should automatically be hooked up to the BufferCursor somehow..
   BufferCursor log_cursor_;
 };

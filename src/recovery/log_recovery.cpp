@@ -97,20 +97,12 @@ void LogRecovery::apply_next_log_record() {
   }
 }
 
-/*
- *redo phase on TABLE PAGE level(table/table_page.h)
- *read log file from the beginning to end (you must prefetch log records into
- *log buffer to reduce unnecessary I/O operations), remember to compare page's
- *lsn_t with log_record's sequence number, and also build active_txn_ table &
- *lsn_mapping_ table
- */
 void LogRecovery::redo() {
   assert(log_mgr_.is_logging_enabled() == false);
 
   log_cursor_.buffer_reset();
 
-  auto read_status = disk_mgr_.read_log(log_cursor_);
-  logger->debug("[LogRecovery] Was read_status successful? " + std::to_string(read_status));
+  auto read_status = init_log_buffer();
   while (read_status) {
     logger->debug("[LogRecovery] Applying next log record");
     apply_next_log_record();
@@ -118,18 +110,23 @@ void LogRecovery::redo() {
   }
 }
 
-/*
- * deserialize a log record from log buffer
- * @return: true means deserialize succeed, otherwise can't deserialize cause
- * incomplete log record
- */
+bool LogRecovery::init_log_buffer() {
+  auto read_status = disk_mgr_.read_log(log_cursor_);
+  logger->debug("[LogRecovery] Was read_status successful? " + std::to_string(read_status));
+  std::cout << "[LogRecovery] Was read_status successful? " << std::to_string(read_status) << std::endl;
+  return read_status;
+}
+
 bool LogRecovery::deserialize_log_record(LogRecord& log) {
   logger->debug("[LogRecovery] Deserializing Log Record");
   if (log_cursor_.buffer_offset() + LogRecord::HEADER_SIZE > log_cursor_.buffer().size()) {
-    logger->debug("[LogRecovery] Could not deserialize! Not enough space..");
+    std::cout << "Could not deserialize! Not enough space.." << std::endl;
+    logger->debug("[LogRecovery] Could not deseriali ze! Not enough space..");
     return false;
   }
 
+  std::cout << std::endl;
+  std::cout << "READING LogRecord Header" << std::endl;
   auto size = log_cursor_.next_int32();
   std::cout << "Size is " << size << std::endl;
   log.set_size(size);
@@ -147,32 +144,52 @@ bool LogRecovery::deserialize_log_record(LogRecord& log) {
   log.set_prev_lsn(prev_lsn);
 
   int32_t record_type_as_int = log_cursor_.next_int32();
+  std::cout << "record_type_as_int is " << record_type_as_int << std::endl;
   LogRecordType record_type  = static_cast<LogRecordType>(record_type_as_int);
   log.set_record_type(record_type);
 
   switch (record_type) {
   case LogRecordType::INSERT: {
-    log.set_insert_rid(log_cursor_.next_rid());
+    std::cout << "RecordType == INSERT" << std::endl;
+    auto rid = log_cursor_.next_rid();
+    std::cout << "RID is " << rid << std::endl;
+    log.set_insert_rid(rid);
     log.set_insert_tuple(log_cursor_.next_tuple());
+    return true;
   }
   case LogRecordType::MARK_DELETE:
   case LogRecordType::APPLY_DELETE:
   case LogRecordType::ROLLBACK_DELETE: {
+    std::cout << "RecordType == DELETE" << std::endl;
     log.set_delete_rid(log_cursor_.next_rid());
     log.set_delete_tuple(log_cursor_.next_tuple());
+    return true;
   }
   case LogRecordType::UPDATE: {
+    std::cout << "RecordType == UPDATE" << std::endl;
     log.set_update_rid(log_cursor_.next_rid());
     log.set_old_tuple(log_cursor_.next_tuple());
     log.set_new_tuple(log_cursor_.next_tuple());
+    return true;
   }
   case LogRecordType::BEGIN:
   case LogRecordType::COMMIT:
-  case LogRecordType::ABORT:
-    break;
+  case LogRecordType::ABORT: {
+    std::cout << "RecordType == BEGIN|COMMIT|ABORT" << std::endl;
+    return true;
+  }
   case LogRecordType::NEW_PAGE: {
-    log.set_prev_page_id(log_cursor_.next_page_id());
-    log.set_page_id(log_cursor_.next_page_id());
+    std::cout << "RecordType == NEW_PAGE" << std::endl;
+
+    auto prev_page_id = log_cursor_.next_page_id();
+    std::cout << "Prev Page ID : " << prev_page_id << std::endl;
+    log.set_prev_page_id(prev_page_id);
+
+    auto page_id = log_cursor_.next_page_id();
+    std::cout << "Page ID : " << page_id << std::endl;
+    log.set_page_id(page_id);
+
+    return true;
   }
   default:
     // TODO: Debug here!

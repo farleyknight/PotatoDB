@@ -14,7 +14,7 @@ std::tuple<RID, RID> redo_test_part1() {
   logger->set_level(spdlog::level::off);
 
   PotatoDB db;
-  db.reset_installation();
+  db.rebuild_system_catalog();
 
   EXPECT_FALSE(db.is_logging_enabled());
   std::cout << "Skip system recovering..." << std::endl;

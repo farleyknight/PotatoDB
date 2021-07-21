@@ -2,14 +2,25 @@
 #include "page/slotted_table_page.hpp"
 
 void SlottedTablePage::allocate(const PageId page_id, const PageId prev_page_id) {
+  assert(page_id.is_valid());
+  //assert(prev_page_id.is_valid());
   set_page_id(page_id);
 
   if (log_mgr_.is_logging_enabled()) {
+    std::cout << std::endl;
+    std::cout << "NEW_PAGE TXN id = " << txn_.id() << std::endl;
+    std::cout << "NEW_PAGE prev LSN = " << txn_.prev_lsn() << std::endl;
+    std::cout << "NEW_PAGE prev page ID = " << prev_page_id << std::endl;
+    std::cout << "NEW_PAGE page ID = " << page_id << std::endl;
+
     LogRecord log_record(txn_.id(),
                          txn_.prev_lsn(),
                          LogRecordType::NEW_PAGE,
                          prev_page_id,
                          page_id);
+
+    std::cout << "NEW_PAGE SIZE = " << log_record.size() << std::endl;
+
     lsn_t lsn = log_mgr_.append(log_record);
     set_lsn(lsn);
     txn_.set_prev_lsn(lsn);
@@ -87,11 +98,18 @@ bool SlottedTablePage::insert_tuple(Tuple& tuple) {
     bool locked = lock_mgr_.lock_exclusive(txn_, rid);
     assert(locked);
 
+    std::cout << std::endl;
+    std::cout << "INSERT RID = " << rid << std::endl;
+    std::cout << "INSERT TXN id = " << txn_.id() << std::endl;
+    std::cout << "INSERT prev LSN = " << txn_.prev_lsn() << std::endl;
+
     auto log_record = LogRecord(txn_.id(),
                                 txn_.prev_lsn(),
                                 LogRecordType::INSERT,
                                 rid,
                                 tuple);
+
+    std::cout << "INSERT SIZE = " << log_record.size() << std::endl;
 
     lsn_t lsn = log_mgr_.append(log_record);
     set_lsn(lsn);

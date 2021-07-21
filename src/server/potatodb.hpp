@@ -11,9 +11,9 @@
 #include "recovery/checkpoint_mgr.hpp"
 
 enum class ServerState {
-  STARTING_UP   = 0,
-  RUNNING       = 1,
-  SHUTTING_DOWN = 2
+  STARTING_UP   = 1,
+  RUNNING       = 2,
+  SHUTTING_DOWN = 3
 };
 
 class PotatoDB {
@@ -66,6 +66,7 @@ public:
 
   void reset_installation();
   void verify_system_files();
+
   fs::path table_file_for(const string& table_name);
 
   ExecEngine& exec_eng() {
@@ -116,6 +117,7 @@ public:
   bool file_exists(fs::path file_path) const;
   bool is_logging_enabled() const;
   void run_flush_thread();
+  void rebuild_system_catalog();
 
 private:
   int port_ = 7878;

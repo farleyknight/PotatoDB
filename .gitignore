@@ -81,6 +81,7 @@ GRTAGS
 GTAGS
 antlr4/package
 antlr.jar
+logs.txt
 
 # Ninja
 build.ninja
