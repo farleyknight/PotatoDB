@@ -49,11 +49,11 @@ public:
   }
 
   bool operator==(const RID& other) {
-    return as_uint64() == other.as_uint64();
+    return as_int64() == other.as_int64();
   }
 
-  uint64_t as_uint64() const {
-    uint64_t result = static_cast<uint64_t>(page_id_.as_uint32());
+  int64_t as_int64() const {
+    int64_t result = static_cast<uint64_t>(page_id_.as_int32());
     result = result << 32;
     return result | slot_id_;
   }
@@ -106,7 +106,7 @@ namespace std {
   template <>
   struct hash<RID> {
     size_t operator()(const RID& obj) const {
-      return hash<int64_t>()(obj.as_uint64());
+      return hash<int64_t>()(obj.as_int64());
     }
   };
 }

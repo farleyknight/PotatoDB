@@ -3,20 +3,21 @@
 #include "tuple/tuple.hpp"
 
 void Buffer::write_tuple(buffer_offset_t offset, const Tuple& tuple) {
-  write_uint32(offset, tuple.size());
-  auto tuple_offset = offset + sizeof(uint32_t);
-
+  write_int32(offset, tuple.size());
+  auto tuple_offset = offset + sizeof(int32_t);
   std::memcpy(ptr(tuple_offset),
-              tuple.buffer().cptr(0),
+              tuple.buffer().char_ptr(),
               tuple.buffer().size());
 }
 
 const Tuple Buffer::read_tuple(buffer_offset_t offset) {
-  auto tuple_size = read_uint32(offset);
-  auto tuple_offset = offset + sizeof(uint32_t);
+  auto tuple_size = read_int32(offset);
+  auto tuple_offset = offset + sizeof(int32_t);
 
   Tuple new_tuple(tuple_size);
-  std::memcpy(new_tuple.buffer().ptr(), ptr(tuple_offset), tuple_size);
+  std::memcpy(new_tuple.buffer().char_ptr(),
+              ptr(tuple_offset),
+              tuple_size);
 
   return new_tuple;
 }
@@ -33,10 +34,8 @@ void Buffer::write_string(buffer_offset_t offset, const string& value) {
 }
 
 const string Buffer::read_string(buffer_offset_t offset) const {
-  logger->debug("[Buffer] Buffer offset: " + std::to_string(offset));
-
   string_size_t size;
-  std::memcpy(&size, cptr(offset), sizeof(string_size_t));
+  std::memcpy(&size, const_ptr(offset), sizeof(string_size_t));
 
   logger->debug("[Buffer] String size: " + std::to_string(size));
 
@@ -45,7 +44,7 @@ const string Buffer::read_string(buffer_offset_t offset) const {
   string new_string(size, 0);
   assert(offset + sizeof(string_size_t) < data_.size());
   std::memcpy(new_string.data(),
-              cptr(offset + sizeof(string_size_t)),
+              const_ptr(offset + sizeof(string_size_t)),
               size);
 
   return new_string;

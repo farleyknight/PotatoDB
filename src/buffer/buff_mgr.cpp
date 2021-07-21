@@ -38,7 +38,7 @@ BuffMgr::pick_or_evict_page() {
     }
     Page& page = pages_[frame_id];
     flush_page(page);
-    page_table_.erase(page.page_id().as_uint32());
+    page_table_.erase(page.page_id().as_int32());
 
     return make_tuple(&pages_[frame_id], frame_id);
   }
@@ -63,7 +63,7 @@ Page* BuffMgr::fetch_page(PageId page_id) {
   try {
     assert(page_id.is_valid());
     if (contains_page(page_id)) {
-      auto frame_id = page_table_[page_id.as_uint32()];
+      auto frame_id = page_table_[page_id.as_int32()];
       Page& page = pages_[frame_id];
       pin_page(page, frame_id);
 
@@ -78,7 +78,7 @@ Page* BuffMgr::fetch_page(PageId page_id) {
 
     logger->debug("[BuffMgr] Page Read - " + page_id.to_string());
     disk_mgr_.read_page(page_id, page);
-    page_table_[page_id.as_uint32()] = frame_id;
+    page_table_[page_id.as_int32()] = frame_id;
     page.set_id(page_id);
 
     assert(page.page_id().is_valid());
@@ -105,7 +105,7 @@ bool BuffMgr::unpin(PageId page_id, bool is_dirty) {
     return false;
   }
 
-  frame_id_t frame_id = page_table_[page_id.as_uint32()];
+  frame_id_t frame_id = page_table_[page_id.as_int32()];
   Page& page = pages_[frame_id];
 
   if (page.pin_count() <= 0) {
@@ -126,7 +126,7 @@ bool BuffMgr::delete_page(PageId page_id) {
     return true;
   }
 
-  frame_id_t frame_id = page_table_[page_id.as_uint32()];
+  frame_id_t frame_id = page_table_[page_id.as_int32()];
   Page& page = pages_[frame_id];
   if (page.pin_count() > 0) {
     return false;
@@ -136,7 +136,7 @@ bool BuffMgr::delete_page(PageId page_id) {
   page.set_id(PageId::INVALID());
   page.reset_memory();
   free_list_.push_back(frame_id);
-  page_table_.erase(page_id.as_uint32());
+  page_table_.erase(page_id.as_int32());
 
   return true;
 }
@@ -152,11 +152,11 @@ void BuffMgr::flush_all() {
 
 bool BuffMgr::contains_page(PageId page_id) {
   assert(page_id.is_valid());
-  return page_table_.count(page_id.as_uint32()) > 0;
+  return page_table_.count(page_id.as_int32()) > 0;
 }
 
 Page& BuffMgr::page_by_id(PageId page_id) {
-  return pages_[page_table_[page_id.as_uint32()]];
+  return pages_[page_table_[page_id.as_int32()]];
 }
 
 void BuffMgr::pin_page(Page& page, frame_id_t frame_id) {

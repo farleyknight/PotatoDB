@@ -75,12 +75,12 @@ public:
 
 protected:
 
-  static constexpr size_t SIZE_TABLE_PAGE_HEADER = 24;
-  static constexpr size_t TUPLE_SLOT_SIZE = 8;
-  static constexpr size_t OFFSET_PREV_PAGE_ID = 8;
-  static constexpr size_t OFFSET_NEXT_PAGE_ID = 12;
-  static constexpr size_t OFFSET_FREE_SPACE = 16;
-  static constexpr size_t OFFSET_TUPLE_COUNT = 20;
-  static constexpr size_t OFFSET_TUPLE_OFFSET = 24;
-  static constexpr size_t OFFSET_TUPLE_SIZE = 28;
+  static constexpr int32_t SIZE_TABLE_PAGE_HEADER = 24;
+  static constexpr int32_t TUPLE_SLOT_SIZE = 8;
+  static constexpr int32_t OFFSET_PREV_PAGE_ID = 8;
+  static constexpr int32_t OFFSET_NEXT_PAGE_ID = 12;
+  static constexpr int32_t OFFSET_FREE_SPACE = 16;
+  static constexpr int32_t OFFSET_TUPLE_COUNT = 20;
+  static constexpr int32_t OFFSET_TUPLE_OFFSET = 24;
+  static constexpr int32_t OFFSET_TUPLE_SIZE = 28;
 };

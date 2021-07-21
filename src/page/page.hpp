@@ -72,8 +72,8 @@ public:
   lsn_t read_lsn() const;
   void write_lsn(lsn_t lsn);
 
-  uint32_t read_uint32(size_t offset) const;
-  void write_uint32(size_t offset, uint32_t data);
+  int32_t read_int32(size_t offset) const;
+  void write_int32(size_t offset, int32_t data);
 
   void set_dirty(bool dirty) {
     is_dirty_ = dirty;

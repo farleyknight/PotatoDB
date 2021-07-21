@@ -18,7 +18,7 @@ class Tuple {
 public:
   Tuple() = default;
 
-  Tuple(uint32_t size)
+  Tuple(int32_t size)
     : source_ (TupleSources::TABLE_HEAP),
       buffer_ (size)
   {}
@@ -72,7 +72,7 @@ public:
 
   const RID rid()               const { return rid_.value(); }
   void set_rid(RID rid)               { rid_.emplace(rid); }
-  size_t size()                 const { return buffer_.size(); }
+  int32_t size()                const { return buffer_.size(); }
 
   void reset(size_t new_size) {
     buffer_.resize(new_size);
@@ -87,15 +87,14 @@ public:
                      const QuerySchema& query_schema) const;
 
   // TODO: Rename this method
-  void copy_n_bytes(size_t source_offset,
-                    size_t dest_offset,
+  void copy_n_bytes(buffer_offset_t source_offset,
+                    buffer_offset_t dest_offset,
                     const Buffer& source_buffer,
-                    size_t n_bytes)
+                    buffer_offset_t n_bytes)
   {
-    //assert(buffer_.size() >= n);
     // TODO: Handle this inside the Buffer
     memcpy(buffer_.ptr(dest_offset),
-           source_buffer.cptr(source_offset),
+           source_buffer.const_ptr(source_offset),
            n_bytes);
   }
 

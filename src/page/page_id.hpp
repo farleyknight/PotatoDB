@@ -29,8 +29,8 @@ public:
     return PageId(file_id, block_id);
   }
 
-  uint32_t as_uint32() const {
-    return (static_cast<uint16_t>(file_id()) << 16) | block_id();
+  int32_t as_int32() const {
+    return (static_cast<int16_t>(file_id()) << 16) | block_id();
   }
 
   bool is_valid() const {
@@ -73,7 +73,7 @@ namespace std {
   template <>
   struct hash<PageId> {
     size_t operator()(const PageId& page_id) const {
-      return hash<int64_t>()(page_id.as_uint32());
+      return hash<int64_t>()(page_id.as_int32());
     }
   };
 }

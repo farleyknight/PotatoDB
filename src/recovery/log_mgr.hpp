@@ -6,6 +6,8 @@
 #include <mutex>               // NOLINT
 
 #include "recovery/log_record.hpp"
+#include "recovery/log_file_cursor.hpp"
+
 #include "disk/disk_mgr.hpp"
 
 // REFERENCES:
@@ -55,23 +57,15 @@ public:
   }
 
 private:
-  void write_header(const LogRecord& log_record);
-  void write_insert_record(const LogRecord& log_record);
-  void write_delete_record(const LogRecord& log_record);
-  void write_update_record(const LogRecord& log_record);
-  void write_new_page_record(const LogRecord& log_record);
-
   atomic<lsn_t> next_lsn_ {0};
   // TODO: Rename this to "persisted_lsn"
   // The term "peristent" is a little confusing
   atomic<lsn_t> persisted_lsn_ {INVALID_LSN};
 
-  // TODO: Replace with Buffer class
-  Buffer log_buffer_   {LOG_BUFFER_SIZE},
-         flush_buffer_ {LOG_BUFFER_SIZE};
+  Buffer flush_buffer_ {LOG_BUFFER_SIZE};
+  LogFileCursor log_cursor_ {LOG_BUFFER_SIZE};
 
-  buffer_offset_t log_buffer_length_ = 0,
-                  flush_buffer_length_ = 0;
+  buffer_offset_t flush_buffer_length_ = 0;
 
   mutex latch_;
 

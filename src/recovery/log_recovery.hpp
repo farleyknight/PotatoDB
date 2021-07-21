@@ -46,7 +46,5 @@ private:
   map<txn_id_t, lsn_t> active_txn_;
   map<lsn_t, int> lsn_mapping_;
 
-  // TODO: Let's add a FileHandle here.
-  // It should automatically be hooked up to the BufferCursor somehow..
-  BufferCursor log_cursor_;
+  LogFileCursor log_cursor_;
 };

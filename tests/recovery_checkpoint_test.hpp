@@ -64,7 +64,7 @@ TEST(RecoveryCheckpointTest, DISABLED_CheckpointTest) {
     if (page_id.is_valid()) {
       db.file_mgr().read_buffer(page_id, buffer);
 
-      if (std::memcmp(buffer.ptr(), page.buffer().cptr(), buffer.size()) != 0) {
+      if (std::memcmp(buffer.ptr(), page.buffer().const_ptr(), buffer.size()) != 0) {
         all_pages_match = false;
         break;
       }

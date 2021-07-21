@@ -7,7 +7,9 @@
 #include <memory>
 
 #include "common/config.hpp"
-#include "buffer/buffer_cursor.hpp"
+
+#include "recovery/log_file_cursor.hpp"
+
 #include "disk/file_mgr.hpp"
 #include "page/page.hpp"
 
@@ -27,7 +29,7 @@ public:
   void read_page(PageId page_id, Page& page);
 
   void write_log(const Buffer& log_data);
-  bool read_log(BufferCursor& cursor);
+  bool read_log(LogFileCursor& cursor);
 
   PageId allocate_page(file_id_t file_id);
   PageId first_page(file_id_t file_id);

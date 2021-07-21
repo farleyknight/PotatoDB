@@ -48,10 +48,6 @@ public:
     return reinterpret_cast<char*>(data_.data());
   }
 
-  const byte_t* cptr() const {
-    return data_.data();
-  }
-
   const char* char_ptr() const {
     return reinterpret_cast<const char*>(data_.data());
   }
@@ -60,8 +56,12 @@ public:
     return data_.data() + offset;
   }
 
+  const byte_t* const_ptr() const {
+    return data_.data();
+  }
+
   // TODO: Rename to `const_ptr`
-  const byte_t* cptr(buffer_offset_t offset) const {
+  const byte_t* const_ptr(buffer_offset_t offset) const {
     return data_.data() + offset;
   }
 
@@ -72,7 +72,7 @@ public:
   {
     // TODO: Add assert to prevent out-of-bounds memory operations
     std::memcpy(ptr(dest_offset),
-                source.cptr(source_offset),
+                source.const_ptr(source_offset),
                 n_bytes);
   }
 
@@ -132,7 +132,7 @@ public:
 
   template<typename numeric_t>
   numeric_t read_numeric(buffer_offset_t offset) const {
-    return *reinterpret_cast<const numeric_t*>(cptr(offset));
+    return *reinterpret_cast<const numeric_t*>(const_ptr(offset));
   }
 
   void write_int64(buffer_offset_t offset, int64_t n) {
@@ -140,7 +140,7 @@ public:
   }
 
   int64_t read_int64(buffer_offset_t offset) const {
-    return *reinterpret_cast<const int64_t*>(cptr(offset));
+    return *reinterpret_cast<const int64_t*>(const_ptr(offset));
   }
 
   void write_int32(buffer_offset_t offset, int32_t n) {
@@ -148,7 +148,7 @@ public:
   }
 
   int32_t read_int32(buffer_offset_t offset) const {
-    return *reinterpret_cast<const int32_t*>(cptr(offset));
+    return *reinterpret_cast<const int32_t*>(const_ptr(offset));
   }
 
   void write_uint32(buffer_offset_t offset, int32_t n) {
@@ -156,7 +156,7 @@ public:
   }
 
   uint32_t read_uint32(buffer_offset_t offset) const {
-    return *reinterpret_cast<const uint32_t*>(cptr(offset));
+    return *reinterpret_cast<const uint32_t*>(const_ptr(offset));
   }
 
   void write_bool(buffer_offset_t offset, bool b) {
@@ -164,7 +164,7 @@ public:
   }
 
   bool read_bool(buffer_offset_t offset) const {
-    return *reinterpret_cast<const bool*>(cptr(offset));
+    return *reinterpret_cast<const bool*>(const_ptr(offset));
   }
 
   void write_int8(buffer_offset_t offset, int8_t n) {
@@ -172,7 +172,7 @@ public:
   }
 
   int64_t read_int8(buffer_offset_t offset) const {
-    return *reinterpret_cast<const int8_t*>(cptr(offset));
+    return *reinterpret_cast<const int8_t*>(const_ptr(offset));
   }
 
   void write_float(buffer_offset_t offset, float f) {
@@ -180,7 +180,7 @@ public:
   }
 
   float read_float(buffer_offset_t offset) const {
-    return *reinterpret_cast<const float*>(cptr(offset));
+    return *reinterpret_cast<const float*>(const_ptr(offset));
   }
 
   void write_double(buffer_offset_t offset, double d) {
@@ -188,7 +188,7 @@ public:
   }
 
   double read_double(buffer_offset_t offset) const {
-    return *reinterpret_cast<const double*>(cptr(offset));
+    return *reinterpret_cast<const double*>(const_ptr(offset));
   }
 
   void write_string(buffer_offset_t offset, const string& value);
@@ -199,7 +199,7 @@ public:
    **********************************************/
 
   lsn_t read_lsn(buffer_offset_t offset) const {
-    return *reinterpret_cast<const lsn_t*>(cptr(offset));
+    return *reinterpret_cast<const lsn_t*>(const_ptr(offset));
   }
 
   void write_lsn(buffer_offset_t offset, lsn_t lsn) {
@@ -207,7 +207,7 @@ public:
   }
 
   txn_id_t read_txn_id(buffer_offset_t offset) const {
-    return *reinterpret_cast<const txn_id_t*>(cptr(offset));
+    return *reinterpret_cast<const txn_id_t*>(const_ptr(offset));
   }
 
   void write_txn_id(buffer_offset_t offset, txn_id_t txn_id) {
@@ -215,21 +215,21 @@ public:
   }
 
   void write_rid(buffer_offset_t offset, const RID& rid) {
-    *reinterpret_cast<uint64_t*>(ptr(offset)) = rid.as_uint64();
+    *reinterpret_cast<int64_t*>(ptr(offset)) = rid.as_int64();
   }
 
   RID read_rid(buffer_offset_t offset) const {
-    auto rid_as_uint64 = *reinterpret_cast<const uint64_t*>(cptr(offset));
-    return RID(rid_as_uint64);
+    auto rid_as_int64 = *reinterpret_cast<const int64_t*>(const_ptr(offset));
+    return RID(rid_as_int64);
   }
 
   void write_page_id(buffer_offset_t offset, const PageId& page_id) {
-    *reinterpret_cast<uint32_t*>(ptr(offset)) = page_id.as_uint32();
+    *reinterpret_cast<int32_t*>(ptr(offset)) = page_id.as_int32();
   }
 
   PageId read_page_id(buffer_offset_t offset) const {
-    auto page_id_as_uint32 = *reinterpret_cast<const uint32_t*>(cptr(offset));
-    return PageId::from(page_id_as_uint32);
+    auto page_id_as_int32 = *reinterpret_cast<const int32_t*>(const_ptr(offset));
+    return PageId::from(page_id_as_int32);
   }
 
   Data data_;

@@ -100,7 +100,7 @@ void DiskMgr::read_page(PageId page_id, Page& page) {
 }
 
 // NOTE: A BufferCursor is basically a buffer with an `offset_`
-bool DiskMgr::read_log(BufferCursor& cursor) {
+bool DiskMgr::read_log(LogFileCursor& cursor) {
   if (cursor.file_offset() >= fs::file_size(log_file_name())) {
     std::cout << "Cursor trying to read past file size!" << std::endl;
     std::cout << "File offset: " << cursor.file_offset() << std::endl;
@@ -142,7 +142,6 @@ bool DiskMgr::read_log(BufferCursor& cursor) {
 // for direct file access. Maybe FileMgr?
 void DiskMgr::write_log(const Buffer& log_data) {
   try {
-    std::cout << "Setting fail bit to raise exception " << std::endl;
     log_io_.exceptions(std::ios::failbit);
 
     // no effect on num_flushes_ if log buffer is empty
@@ -158,7 +157,6 @@ void DiskMgr::write_log(const Buffer& log_data) {
     }
 
     // sequence write
-    std::cout << "Performing write to log file" << std::endl;
     log_io_.write(log_data.char_ptr(), log_data.size());
   } catch (std::ios_base::failure& e) {
     std::cout << "Log file writing failed! :(" << std::endl;

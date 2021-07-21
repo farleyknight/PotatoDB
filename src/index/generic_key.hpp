@@ -61,9 +61,9 @@ public:
     } else {
       auto schema_offset = schema.buffer_offset_for(index);
       auto index_offset =
-        *reinterpret_cast<const buffer_offset_t *>(data_.cptr(schema_offset));
+        *reinterpret_cast<const buffer_offset_t *>(data_.const_ptr(schema_offset));
       offset =
-        *reinterpret_cast<const buffer_offset_t *>(data_.cptr(index_offset));
+        *reinterpret_cast<const buffer_offset_t *>(data_.const_ptr(index_offset));
     }
     return Value::deserialize_from(offset, data_, column_type);
   }

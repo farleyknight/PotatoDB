@@ -105,6 +105,7 @@ set(main_sources
   "src/recovery/checkpoint_mgr.cpp"
   "src/recovery/log_mgr.cpp"
   "src/recovery/log_recovery.cpp"
+  "src/recovery/log_file_cursor.cpp"
   "src/server/client_socket.cpp"
   "src/server/potatodb.cpp"
   "src/server/session.cpp"

@@ -120,13 +120,13 @@ bool SlottedTablePage::insert_tuple(Tuple& tuple) {
 }
 
 bool SlottedTablePage::mark_delete(const RID& rid) {
-  uint32_t slot_id = rid.slot_id();
+  int32_t slot_id = rid.slot_id();
   // If the slot number is invalid, abort the txn.
   if (slot_id >= tuple_count()) {
     return false;
   }
 
-  uint32_t tuple_size = tuple_size_at(slot_id);
+  int32_t tuple_size = tuple_size_at(slot_id);
   // If the tuple is already deleted, abort the txn.
   if (is_deleted(tuple_size)) {
     return false;
@@ -199,7 +199,7 @@ bool SlottedTablePage::update_tuple(const Tuple& new_tuple,
     return false;
   }
 
-  uint32_t tuple_size = tuple_size_at(slot_id);
+  int32_t tuple_size = tuple_size_at(slot_id);
   if (is_deleted(tuple_size)) {
     return false;
   }
@@ -214,10 +214,10 @@ bool SlottedTablePage::update_tuple(const Tuple& new_tuple,
 }
 
 bool SlottedTablePage::apply_delete(const RID& rid) {
-  uint32_t slot_id = rid.slot_id();
+  int32_t slot_id = rid.slot_id();
 
-  uint32_t tuple_offset = tuple_offset_at_slot(slot_id);
-  uint32_t tuple_size = tuple_size_at(slot_id);
+  int32_t tuple_offset = tuple_offset_at_slot(slot_id);
+  int32_t tuple_size = tuple_size_at(slot_id);
   // Check if this is a delete operation, i.e. commit a delete.
   if (is_deleted(tuple_size)) {
     tuple_size = unset_deleted_flag(tuple_size);
@@ -248,7 +248,7 @@ bool SlottedTablePage::apply_delete(const RID& rid) {
     txn_.set_prev_lsn(lsn);
   }
 
-  uint32_t pointer = free_space_pointer();
+  int32_t pointer = free_space_pointer();
 
   page_->copy_n_bytes(pointer, // Source offset
                       pointer + tuple_size, // Destination offset
@@ -260,8 +260,8 @@ bool SlottedTablePage::apply_delete(const RID& rid) {
   set_tuple_offset_at_slot(slot_id, 0);
 
   // Update all tuple offsets.
-  for (uint32_t i = 0; i < tuple_count(); ++i) {
-    uint32_t tuple_offset_i = tuple_offset_at_slot(i);
+  for (int32_t i = 0; i < tuple_count(); ++i) {
+    int32_t tuple_offset_i = tuple_offset_at_slot(i);
     if (tuple_size_at(i) != 0 && tuple_offset_i < tuple_offset) {
       set_tuple_offset_at_slot(i, tuple_offset_i + tuple_size);
     }
@@ -272,7 +272,7 @@ bool SlottedTablePage::apply_delete(const RID& rid) {
 
 ptr<Tuple> SlottedTablePage::find_tuple(const RID& rid) {
   // Get the current slot number.
-  uint32_t slot_id = rid.slot_id();
+  int32_t slot_id = rid.slot_id();
   // If somehow we have more slots than tuples, abort the txn.
   if (slot_id >= tuple_count()) {
     logger->debug("[SlottedTablePage] Slot ID is greater or equal to tuple count! " + std::to_string(slot_id));
@@ -280,7 +280,7 @@ ptr<Tuple> SlottedTablePage::find_tuple(const RID& rid) {
     return unique_ptr<Tuple>(nullptr);
   }
   // Otherwise get the current tuple size too.
-  uint32_t tuple_size = tuple_size_at(slot_id);
+  int32_t tuple_size = tuple_size_at(slot_id);
   // If the tuple is deleted, abort the txn.
   if (is_deleted(tuple_size)) {
     logger->debug("[SlottedTablePage] This tuple is deleted! " + std::to_string(slot_id));
@@ -289,7 +289,7 @@ ptr<Tuple> SlottedTablePage::find_tuple(const RID& rid) {
 
   // At this point, we have at least a shared lock on the RID.
   // Copy the tuple data into our result.
-  uint32_t tuple_offset = tuple_offset_at_slot(slot_id);
+  int32_t tuple_offset = tuple_offset_at_slot(slot_id);
   auto tuple = make_unique<Tuple>(tuple_size);
   tuple->copy_n_bytes(tuple_offset, // Source offset
                       0, // Destination offset
@@ -305,7 +305,7 @@ optional<RID> SlottedTablePage::first_tuple_rid() {
   logger->debug("[SlottedTablePage] Page has tuple_count: "
                 + std::to_string(tuple_count()));
   // Find and return the first valid tuple.
-  for (uint32_t i = 0; i < tuple_count(); ++i) {
+  for (int32_t i = 0; i < tuple_count(); ++i) {
     if (tuple_size_at(i) > 0) {
       return RID::make_opt(table_page_id(), i);
     }
@@ -315,7 +315,7 @@ optional<RID> SlottedTablePage::first_tuple_rid() {
 
 optional<RID> SlottedTablePage::next_tuple_rid(const RID& curr_rid) {
   // Find and return the first valid tuple after our current slot number.
-  for (uint32_t i = curr_rid.slot_id() + 1; i < tuple_count(); ++i) {
+  for (int32_t i = curr_rid.slot_id() + 1; i < tuple_count(); ++i) {
     // Q: Is this suppose to check that it's not invalid?
     // A: NO! It checks if it's been deleted. We use negative sizes
     // to mark a tuple as deleted in a Slotted Table Page design.
@@ -331,10 +331,10 @@ optional<RID> SlottedTablePage::next_tuple_rid(const RID& curr_rid) {
 bool SlottedTablePage::apply_update(const Tuple& new_tuple,
                                     Tuple& old_tuple,
                                     const RID& rid,
-                                    uint32_t slot_id,
-                                    uint32_t tuple_size)
+                                    int32_t slot_id,
+                                    int32_t tuple_size)
 {
-  uint32_t tuple_offset = tuple_offset_at_slot(slot_id);
+  int32_t tuple_offset = tuple_offset_at_slot(slot_id);
   old_tuple.copy_n_bytes(tuple_offset,
                          0,
                          page_->buffer(),
@@ -365,7 +365,7 @@ bool SlottedTablePage::apply_update(const Tuple& new_tuple,
   }
 
   // Perform the update.
-  uint32_t pointer = free_space_pointer();
+  int32_t pointer = free_space_pointer();
 
   page_->copy_n_bytes(pointer, // Source offset
                       // Destination offset
@@ -384,8 +384,8 @@ bool SlottedTablePage::apply_update(const Tuple& new_tuple,
   set_tuple_size_at(slot_id, new_tuple.size());
 
   // Update all tuple offsets.
-  for (uint32_t i = 0; i < tuple_count(); ++i) {
-    uint32_t tuple_offset_i = tuple_offset_at_slot(i);
+  for (int32_t i = 0; i < tuple_count(); ++i) {
+    int32_t tuple_offset_i = tuple_offset_at_slot(i);
     if (tuple_size_at(i) > 0 &&
         tuple_offset_i < tuple_offset + tuple_size) {
       auto offset = tuple_offset_i + tuple_size - new_tuple.size();
