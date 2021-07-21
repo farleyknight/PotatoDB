@@ -38,7 +38,7 @@ TableIterator& TableIterator::operator++() {
   auto page_id    = tuple_->page_id();
   auto file_id    = page_id.file_id();
   auto maybe_page = buff_mgr.fetch_page(page_id);
-  logger->debug("Pulling up curr_page via page_id: "
+  logger->debug("[TableIterator] Pulling up curr_page via page_id: "
                 + page_id.to_string());
 
 

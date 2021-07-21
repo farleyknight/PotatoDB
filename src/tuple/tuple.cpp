@@ -19,7 +19,7 @@ Tuple::Tuple(vector<Value> values, const QuerySchema& schema)
     tuple_length += (values[i].length() + sizeof(string_size_t));
   }
 
-  logger->debug("Resizing tuple " + std::to_string(tuple_length));
+  logger->debug("[Tuple] Resizing tuple " + std::to_string(tuple_length));
 
   buffer_.resize(tuple_length);
   assert(buffer_.size() == tuple_length);
@@ -76,24 +76,24 @@ Tuple::add_defaults(deque<Value>& defaults,
                     const TableSchema& table_schema,
                     const QuerySchema& query_schema) const
 {
-  logger->debug("Query Schema is: " + query_schema.to_string());
+  logger->debug("[Tuple] Query Schema is: " + query_schema.to_string());
 
   auto values = to_values(query_schema);
   vector<Value> new_values;
 
   for (const auto &col : table_schema.all()) {
     if (query_schema.has_column(col.name())) {
-      logger->debug("Found col w/ name: " + col.name());
+      logger->debug("[Tuple] Found col w/ name: " + col.name());
       auto index = query_schema.column_index_for(col.name());
-      logger->debug("Got index: " + std::to_string(index));
-      logger->debug("Size of values: " + std::to_string(values.size()));
-      logger->debug("Adding new value: " + values[index].to_string());
+      logger->debug("[Tuple] Got index: " + std::to_string(index));
+      logger->debug("[Tuple] Size of values: " + std::to_string(values.size()));
+      logger->debug("[Tuple] Adding new value: " + values[index].to_string());
       new_values.push_back(values[index]);
     } else {
-      logger->debug("Could not find col w/ name: " + col.name());
+      logger->debug("[Tuple] Could not find col w/ name: " + col.name());
       auto value = defaults.front();
       defaults.pop_front();
-      logger->debug("Adding new value: " + value.to_string());
+      logger->debug("[Tuple] Adding new value: " + value.to_string());
       new_values.push_back(value);
     }
   }

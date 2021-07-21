@@ -9,7 +9,7 @@
 #include "spdlog/sinks/basic_file_sink.h"
 
 sptr<spdlog::logger> logger =
-  spdlog::basic_logger_mt("basic_logger", "test_logs.txt", true);
+  spdlog::basic_logger_mt("basic_logger", "logs.txt", true);
 
 PotatoDB potatodb;
 
@@ -45,16 +45,15 @@ fs::path PotatoDB::table_file_for(const string& table_name) {
 }
 
 ptr<BasePlan> PotatoDB::sql_to_plan(const string& statement) const {
-  // TODO: Get the loggering working! :/
-  logger->debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+  logger->debug("[PotatoDB] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
   logger->debug(statement);
-  logger->debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+  logger->debug("[PotatoDB] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 
   // TODO: Rename as_exprs to as_stmts
   auto exprs = SQLParser::as_exprs(statement);
   // TODO: Allow for multiple statements
   if (exprs.size() == 0) {
-    logger->debug("No exprs for : " + statement);
+    logger->debug("[PotatoDB] No exprs for : " + statement);
   }
 
   assert(exprs.size() > 0);
@@ -76,8 +75,8 @@ StatementResult PotatoDB::run(const string& statement) {
     if (plan->is_query()) {
       auto result_set = exec_eng_.query(move(plan), txn, exec_ctx);
       txn_mgr_.commit(txn);
-      logger->debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-      logger->debug("Returning result set");
+      logger->debug("[PotatoDB] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+      logger->debug("[PotatoDB] Returning result set");
       return StatementResult(move(result_set));
     } else if (plan->type() == PlanType::CREATE_TABLE) {
       // CREATE TABLE``
@@ -87,18 +86,17 @@ StatementResult PotatoDB::run(const string& statement) {
       auto message           = exec_eng_.execute(move(plan), txn, exec_ctx);
       run_create_table(table_name, column_list, txn, exec_ctx);
       txn_mgr_.commit(txn);
-      logger->debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+      logger->debug("[PotatoDB] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
       return StatementResult(message);
     } else {
       auto message = exec_eng_.execute(move(plan), txn, exec_ctx);
-      logger->debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+      logger->debug("[PotatoDB] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
       return StatementResult(message);
     }
   } catch (std::exception& e) {
-    logger->debug("XXXXXXXXXXXXXXXXXXXXXXXXXXX");
-    logger->debug("ERROR MESSAGE");
-    logger->debug(e.what());
-    logger->debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+    logger->debug("[PotatoDB] XXXXXXXXXXXXXXXXXXXXXXXXXXX");
+    logger->debug("[PotatoDB] ERROR MESSAGE " + std::string(e.what()));
+    logger->debug("[PotatoDB] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
     return StatementResult(e.what());
   }
 }
@@ -121,10 +119,10 @@ void PotatoDB::run_create_table(const table_name_t table_name,
   auto insert_table_plan = sql_to_plan(insert_table_sql);
   exec_eng_.execute(move(insert_table_plan), txn, exec_ctx);
 
-  logger->debug("%%%%%%%%%%%%%%%%%%%%%%");
-  logger->debug("Inserting the columns");
-  logger->debug("Column count: " + std::to_string(column_list.size()));
-  logger->debug("%%%%%%%%%%%%%%%%%%%%%%");
+  logger->debug("[PotatoDB] %%%%%%%%%%%%%%%%%%%%%%");
+  logger->debug("[PotatoDB] Inserting the columns");
+  logger->debug("[PotatoDB] Column count: " + std::to_string(column_list.size()));
+  logger->debug("[PotatoDB] %%%%%%%%%%%%%%%%%%%%%%");
 
   for (const auto &col : column_list) {
     auto insert_column_sql
@@ -136,12 +134,12 @@ void PotatoDB::run_create_table(const table_name_t table_name,
 }
 
 void PotatoDB::build_system_catalog() {
-  logger->debug("Checking if system_catalog table exists");
+  logger->debug("[PotatoDB] Checking if system_catalog table exists");
   if (disk_mgr().table_file_exists("system_catalog")) {
-    logger->debug("Begin loading system catalog");
+    logger->debug("[PotatoDB] Begin loading system catalog");
     SystemCatalog::load(*this);
   } else {
-    logger->debug("Begin creating system catalog");
+    logger->debug("[PotatoDB] Begin creating system catalog");
     SystemCatalog::create(*this);
     buff_mgr_.flush_all();
   }
@@ -154,16 +152,16 @@ void PotatoDB::start_server() {
   state_ = ServerState::RUNNING;
 
   // TODO: Add logging for this line
-  logger->debug("Start PotatoDB Server (0.1.0)");
+  logger->debug("[PotatoDB] Start PotatoDB Server (0.1.0)");
   server_.set_port(port_);
   server_.on_read([&](WPtr<ClientSocket> socket_ptr) {
     if (auto client = socket_ptr.lock()) {
       auto statement = client->read();
-      logger->debug("Client Socket got query " + statement);
+      logger->debug("[PotatoDB] Client Socket got query " + statement);
 
       try {
         auto result = client->session().run_statement(statement);
-        logger->debug("Sending Payload " + result.to_payload());
+        logger->debug("[PotatoDB] Sending Payload " + result.to_payload());
         client->write(result.to_payload());
       } catch (std::exception &e) {
         // TODO: Send better error message
@@ -171,13 +169,13 @@ void PotatoDB::start_server() {
       }
     } else {
       // TODO: Logger
-      logger->debug("Could not get lock!");
+      logger->debug("[PotatoDB] Could not get lock!");
     }
   });
 
   // TODO: Allow port customization
   // TODO: Add logging for this line
-  logger->debug("Server listening on port " + std::to_string(port_));
+  logger->debug("[PotatoDB] Server listening on port " + std::to_string(port_));
   server_.accept_connections();
 }
 
@@ -200,15 +198,14 @@ void PotatoDB::run_flush_thread() {
 
 void PotatoDB::startup() {
   try {
-    logger->debug("Warming up the PotatoDB server");
+    logger->debug("[PotatoDB] Warming up the PotatoDB server");
     state_ = ServerState::STARTING_UP;
 
-    logger->debug("Building system catalog");
+    logger->debug("[PotatoDB] Building system catalog");
     build_system_catalog();
-    logger->debug("Verifying system files");
+    logger->debug("[PotatoDB] Verifying system files");
     verify_system_files();
   } catch (std::exception &e) {
-    logger->debug("An error occurred during startup()");
-    logger->debug(e.what());
+    logger->debug("[PotatoDB] An error occurred during startup() : " + std::string(e.what()));
   }
 }

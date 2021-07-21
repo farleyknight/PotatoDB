@@ -210,7 +210,7 @@ public:
 
 private:
   // NOTE: The size of log record(for serialization, in bytes)
-  int32_t size_{0};
+  int32_t size_ = 0;
   // NOTE: Included in log record "HEADER"
   lsn_t lsn_                     = INVALID_LSN;
   txn_id_t txn_id_               = INVALID_TXN_ID;

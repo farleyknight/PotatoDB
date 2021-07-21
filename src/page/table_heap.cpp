@@ -30,6 +30,14 @@ table_oid_t TableHeap::table_oid() const {
   return table_oid_;
 }
 
+SlottedTablePage TableHeap::first_page(Txn& txn) {
+  auto first_page_ptr = buff_mgr_.fetch_page(first_page_id_);
+  assert(first_page_ptr != nullptr);
+  auto first_page = SlottedTablePage(first_page_ptr, txn, log_mgr_, lock_mgr_);
+
+  return first_page;
+}
+
 void TableHeap::allocate_first_page(Txn& txn) {
   auto first_page_ptr = buff_mgr_.fetch_page(first_page_id_);
   assert(first_page_ptr != nullptr);
@@ -43,7 +51,7 @@ void TableHeap::allocate_first_page(Txn& txn) {
   first_page.wunlatch();
 
   auto next_page_id = first_page.next_page_id();
-  logger->debug("next_page_id: " + next_page_id.to_string());
+  logger->debug("[TableHeap] next_page_id: " + next_page_id.to_string());
   assert(next_page_id == PageId::STOP_ITERATING(file_id_));
 
   buff_mgr_.unpin(first_page_id_, true);
@@ -212,7 +220,7 @@ ptr<Tuple> TableHeap::find_tuple(const RID& rid, Txn& txn) const {
   auto page_ptr = buff_mgr_.fetch_page(rid.page_id());
 
   if (page_ptr == nullptr) {
-    std::cout << "page_ptr was NULL! No valid tuple!" << std::endl;
+    logger->debug("[TableHeap] page_ptr was NULL! No valid tuple!");
     txn.abort_with_reason(AbortReason::PAGE_NOT_AVAILABLE);
     return unique_ptr<Tuple>(nullptr);
   }
@@ -232,10 +240,10 @@ TableIterator TableHeap::begin(Txn& txn) {
   RID rid(page_id, 0);
 
   auto stop_iterating = PageId::STOP_ITERATING(file_id_);
-  logger->debug("stop_iterating: " + stop_iterating.to_string());
+  logger->debug("[TableHeap] stop_iterating: " + stop_iterating.to_string());
 
   while (page_id != stop_iterating) {
-    logger->debug("page_id is now: " + page_id.to_string());
+    logger->debug("[TableHeap] page_id is now: " + page_id.to_string());
     auto page_ptr = buff_mgr_.fetch_page(page_id);
     assert(page_ptr != nullptr);
 
@@ -250,7 +258,7 @@ TableIterator TableHeap::begin(Txn& txn) {
     }
     auto next_page_id = page.next_page_id();
     if (next_page_id == page_id) {
-      logger->debug("next_page_id == page_id, breaking out of loop");
+      logger->debug("[TableHeap] next_page_id == page_id, breaking out of loop");
       break; // NOTE: Prevent infinite loop
     }
     page_id = next_page_id;

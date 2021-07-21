@@ -21,10 +21,6 @@ enum class DeadlockMode {
 
 class LockMgr {
 public:
-  /**********************************************
-  * Constructors & destructor
-  **********************************************/
-
   explicit LockMgr(TwoPLMode two_pl_mode = TwoPLMode::STRICT,
                    DeadlockMode deadlock_mode = DeadlockMode::PREVENTION);
   ~LockMgr();
@@ -33,10 +29,6 @@ public:
   LockMgr(const LockMgr&) = delete;
   // No copy assign
   LockMgr& operator=(const LockMgr&) = delete;
-
-  /**********************************************
-  * Instance methods
-  **********************************************/
 
   bool lock_shared(Txn& txn, const RID& rid);
   bool lock_exclusive(Txn& txn, const RID& rid);

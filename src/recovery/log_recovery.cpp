@@ -12,6 +12,7 @@
 void LogRecovery::apply_next_log_record() {
   LogRecord log;
   while (deserialize_log_record(log)) {
+    logger->debug("[LogRecovery] Updating LSN mapping & active TXNs");
     // NOTE: This should be the offset for the entire file, not just the current buffer!
     lsn_mapping_[log.lsn()] = log_cursor_.file_offset();
     active_txn_[log.txn_id()] = log.lsn();
@@ -109,7 +110,9 @@ void LogRecovery::redo() {
   log_cursor_.buffer_reset();
 
   auto read_status = disk_mgr_.read_log(log_cursor_);
+  logger->debug("[LogRecovery] Was read_status successful? " + std::to_string(read_status));
   while (read_status) {
+    logger->debug("[LogRecovery] Applying next log record");
     apply_next_log_record();
     read_status = disk_mgr_.read_log(log_cursor_);
   }
@@ -121,14 +124,27 @@ void LogRecovery::redo() {
  * incomplete log record
  */
 bool LogRecovery::deserialize_log_record(LogRecord& log) {
+  logger->debug("[LogRecovery] Deserializing Log Record");
   if (log_cursor_.buffer_offset() + LogRecord::HEADER_SIZE > log_cursor_.buffer().size()) {
+    logger->debug("[LogRecovery] Could not deserialize! Not enough space..");
     return false;
   }
 
-  log.set_size(log_cursor_.next_int32());
-  log.set_lsn(log_cursor_.next_lsn());
-  log.set_txn_id(log_cursor_.next_txn_id());
-  log.set_prev_lsn(log_cursor_.next_lsn());
+  auto size = log_cursor_.next_int32();
+  std::cout << "Size is " << size << std::endl;
+  log.set_size(size);
+
+  auto lsn = log_cursor_.next_lsn();
+  std::cout << "LSN is " << lsn << std::endl;
+  log.set_lsn(lsn);
+
+  auto txn_id = log_cursor_.next_txn_id();
+  std::cout << "TXN id is " << txn_id << std::endl;
+  log.set_txn_id(txn_id);
+
+  auto prev_lsn = log_cursor_.next_lsn();
+  std::cout << "Prev LSN is " << prev_lsn << std::endl;
+  log.set_prev_lsn(prev_lsn);
 
   int32_t record_type_as_int = log_cursor_.next_int32();
   LogRecordType record_type  = static_cast<LogRecordType>(record_type_as_int);
@@ -162,6 +178,8 @@ bool LogRecovery::deserialize_log_record(LogRecord& log) {
     // TODO: Debug here!
     assert(false);
   }
+
+  logger->debug("[LogRecovery] Finished deserialization!");
   return true;
 }
 

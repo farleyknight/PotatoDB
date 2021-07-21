@@ -63,7 +63,7 @@ bool SeqScanExec::match_found(const Tuple& tuple) {
     auto result = plan_->pred().
       eval(tuple, schema()).as<bool>();
 
-    logger->debug("Result from match attempt: " + std::to_string(result));
+    logger->debug("[SeqScanExec] Result from match attempt: " + std::to_string(result));
     return result;
   } else {
     return true;
@@ -75,28 +75,28 @@ bool SeqScanExec::at_the_end() {
 }
 
 bool SeqScanExec::has_next() {
-  logger->debug("Checking if we have a tuple");
+  logger->debug("[SeqScanExec] Checking if we have a tuple");
   if (!table_iter_->has_tuple()) {
-    logger->debug("NO TUPLE! :( :( :(");
+    logger->debug("[SeqScanExec] NO TUPLE! :( :( :(");
     return false;
   }
 
-  logger->debug("We have a tuple! :)");
+  logger->debug("[SeqScanExec] We have a tuple! :)");
 
   while (!at_the_end()) {
-    logger->debug("Got schema: " + schema().to_string());
-    logger->debug("%%%%%%%%%%%%%%%% Checking Tuple: " +
+    // logger->debug("[SeqScanExec] Got schema: " + schema().to_string());
+    logger->debug("[SeqScanExec] Checking Tuple: " +
                   table_iter_->tuple().to_string(table_schema()));
 
     if (match_found(table_iter_->tuple())) {
 
-      logger->debug("MATCH FOUND! :) :) :)");
+      logger->debug("[SeqScanExec] MATCH FOUND! :) :) :)");
       return true;
     }
     ++(*table_iter_);
   }
 
-  logger->debug("NO MATCH WAS FOUND! :( :( :(");
+  logger->debug("[SeqScanExec] NO MATCH WAS FOUND! :( :( :(");
   return false;
 }
 

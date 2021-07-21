@@ -30,7 +30,7 @@ bool SlottedTablePage::insert_tuple(Tuple& tuple) {
     return false;
   }
 
-  logger->debug("Before inserting tuple, the tuple count is now "
+  logger->debug("[SlottedTablePage] Before inserting tuple, the tuple count is now "
                 + std::to_string(tuple_count()));
 
   // Try to find a free slot to reuse.
@@ -78,7 +78,7 @@ bool SlottedTablePage::insert_tuple(Tuple& tuple) {
     set_tuple_count(tuple_count() + 1);
   }
 
-  logger->debug("After inserting tuple, the tuple count is now "
+  logger->debug("[SlottedTablePage] After inserting tuple, the tuple count is now "
                 + std::to_string(tuple_count()));
 
   if (log_mgr_.is_logging_enabled()) {
@@ -257,15 +257,15 @@ ptr<Tuple> SlottedTablePage::find_tuple(const RID& rid) {
   uint32_t slot_id = rid.slot_id();
   // If somehow we have more slots than tuples, abort the txn.
   if (slot_id >= tuple_count()) {
-    logger->debug("Slot ID is greater or equal to tuple count! " + std::to_string(slot_id));
-    logger->debug("Tuple count " + std::to_string(tuple_count()));
+    logger->debug("[SlottedTablePage] Slot ID is greater or equal to tuple count! " + std::to_string(slot_id));
+    logger->debug("[SlottedTablePage] Tuple count " + std::to_string(tuple_count()));
     return unique_ptr<Tuple>(nullptr);
   }
   // Otherwise get the current tuple size too.
   uint32_t tuple_size = tuple_size_at(slot_id);
   // If the tuple is deleted, abort the txn.
   if (is_deleted(tuple_size)) {
-    logger->debug("This tuple is deleted! " + std::to_string(slot_id));
+    logger->debug("[SlottedTablePage] This tuple is deleted! " + std::to_string(slot_id));
     return unique_ptr<Tuple>(nullptr);
   }
 
@@ -283,8 +283,8 @@ ptr<Tuple> SlottedTablePage::find_tuple(const RID& rid) {
 }
 
 optional<RID> SlottedTablePage::first_tuple_rid() {
-  logger->debug("Looking for first tuple RID");
-  logger->debug("Page has tuple_count: "
+  logger->debug("[SlottedTablePage] Looking for first tuple RID");
+  logger->debug("[SlottedTablePage] Page has tuple_count: "
                 + std::to_string(tuple_count()));
   // Find and return the first valid tuple.
   for (uint32_t i = 0; i < tuple_count(); ++i) {

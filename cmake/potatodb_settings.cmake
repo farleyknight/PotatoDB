@@ -17,9 +17,6 @@ set(BUILD_SHARED_LIBS OFF)
 # NOTE: Turning this off to make builds faster
 # set(CMAKE_CXX_CLANG_TIDY clang-tidy -checks=-*)
 
-# All target binaries are placed under the directory `builds/`
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/builds)
-
 # -----------------------------------------------------------------------------
 # Compiler Error Limit (+ more settings)
 # -----------------------------------------------------------------------------

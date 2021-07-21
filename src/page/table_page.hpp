@@ -12,8 +12,6 @@
 #include "txns/txn.hpp"
 #include "txns/lock_mgr.hpp"
 
-class LockMgr;
-
 /**
 * Slotted page format:
 *  ---------------------------------------------------------

@@ -29,8 +29,7 @@ void TxnMgr::commit(Txn& txn) {
     auto &item = write_set.back();
 
     if (item.is_delete()) {
-      std::cout << "APPLY DELETE " << item.rid().to_string() << std::endl;
-
+      logger->debug("[TxnMgr] APPLY DELETE " + item.rid().to_string());
       auto &table_heap = table_mgr_.table_heap_for(item.table_oid());
       // Note that this also releases the lock when
       // holding the page latch.
@@ -40,9 +39,9 @@ void TxnMgr::commit(Txn& txn) {
   }
   write_set.clear();
 
-  logger->debug("$$$$$$$$$$ Checking if Logging is Enabled");
+  logger->debug("[TxnMgr] Checking if Logging is Enabled");
   if (log_mgr_.is_logging_enabled()) {
-    logger->debug("Logging IS Enabled");
+    logger->debug("[TxnMgr] Logging IS Enabled");
     // We make sure your log records are permanently stored on
     // disk file before release the locks.
     //
@@ -54,15 +53,15 @@ void TxnMgr::commit(Txn& txn) {
     LogRecord log{txn.id(), txn.prev_lsn(), LogRecordType::COMMIT};
     txn.set_prev_lsn(log_mgr_.append(log));
 
-    logger->debug("Waiting for a Synchronous Flush");
+    logger->debug("[TxnMgr] Waiting for a Synchronous Flush");
     log_mgr_.sync_flush(false);
-    logger->debug("Log Flush Finished");
+    logger->debug("[TxnMgr] Log Flush Finished");
   } else {
-    logger->debug("Logging IS NOT Enabled");
+    logger->debug("[TxnMgr] Logging IS NOT Enabled");
   }
 
   // Do the commit
-  logger->debug("Do the actual commit");
+  logger->debug("[TxnMgr] Do the actual commit");
   txn.commit();
 
   // Release all the locks.

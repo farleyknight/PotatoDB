@@ -82,8 +82,7 @@ GTAGS
 antlr4/package
 antlr.jar
 
-# Graphviz
-potatodb.dot*
+# Ninja
 build.ninja
 .ninja_deps
 .ninja_log

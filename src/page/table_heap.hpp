@@ -3,6 +3,7 @@
 #include "buffer/buff_mgr.hpp"
 
 #include "tuple/tuple.hpp"
+#include "page/slotted_table_page.hpp"
 
 class LockMgr;
 class TableIterator;
@@ -30,6 +31,10 @@ public:
     return first_page_id_;
   }
 
+  file_id_t file_id() const {
+    return file_id_;
+  }
+
   table_oid_t table_oid() const;
   bool insert_tuple(Tuple& tuple, Txn& txn);
   bool mark_delete(const RID& rid, Txn& txn);
@@ -43,6 +48,8 @@ public:
 
   BuffMgr& buff_mgr() { return buff_mgr_; }
 
+  SlottedTablePage first_page(Txn& txn);
+  
 private:
   file_id_t file_id_;
   table_oid_t table_oid_;

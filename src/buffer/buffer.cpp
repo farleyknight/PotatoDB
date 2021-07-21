@@ -33,12 +33,12 @@ void Buffer::write_string(buffer_offset_t offset, const string& value) {
 }
 
 const string Buffer::read_string(buffer_offset_t offset) const {
-  logger->debug("Buffer offset: " + std::to_string(offset));
+  logger->debug("[Buffer] Buffer offset: " + std::to_string(offset));
 
   string_size_t size;
   std::memcpy(&size, cptr(offset), sizeof(string_size_t));
 
-  logger->debug("String size: " + std::to_string(size));
+  logger->debug("[Buffer] String size: " + std::to_string(size));
 
   assert(size < data_.size());
 

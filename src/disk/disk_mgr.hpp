@@ -64,6 +64,8 @@ public:
   void setup_log_file();
   void setup_db_directory();
 
+  void delete_log_file();
+
 private:
   fs::path main_file_name() const {
     return db_directory() / "database.db";

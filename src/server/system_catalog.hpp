@@ -178,8 +178,7 @@ public:
     assert(db.catalog().has_table_named("system_catalog"));
 
     auto all_tables_sql = load_tables_sql();
-    logger->debug("SQL for LOADING ALL TABLES");
-    logger->debug(all_tables_sql);
+    logger->debug("[SystemCatalog] SQL for LOADING ALL TABLES " + all_tables_sql);
 
     auto tables      = db.run(all_tables_sql);
     auto &result_set = tables.set();
@@ -190,13 +189,12 @@ public:
     for (int i = 0; i < result_set->size(); ++i) {
       auto table_oid  = result_set->value_at<int32_t>("id", i);
       auto table_name = result_set->value_at<string>("table_name", i);
-      logger->debug("Found table_name " + table_name);
+      logger->debug("[SystemCatalog] Found table_name " + table_name);
       if (table_name == "system_catalog") {
         continue;
       }
       auto table_sql = load_table_sql_for(table_name);
-      logger->debug("SQL for LOADING TABLE");
-      logger->debug(table_sql);
+      logger->debug("[SystemCatalog] SQL for LOADING TABLE: " + table_sql);
       auto result = db.run(table_sql);
       db.catalog().load_from_query(table_oid, table_name, result);
       db.table_mgr().load_table(table_name, table_oid);

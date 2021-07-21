@@ -76,24 +76,24 @@ Page* BuffMgr::fetch_page(PageId page_id) {
     }
     Page& page = *maybe_page;
 
-    logger->debug("PAAAAAAAAAAAAAAGE REEEEEEEEEEAD - " + page_id.to_string());
+    logger->debug("[BuffMgr] Page Read - " + page_id.to_string());
     disk_mgr_.read_page(page_id, page);
     page_table_[page_id.as_uint32()] = frame_id;
     page.set_id(page_id);
 
     assert(page.page_id().is_valid());
 
-    logger->debug("Page ID is valid");
+    logger->debug("[BuffMgr] Page ID is valid");
     logger->flush();
 
     pin_page(page, frame_id);
 
-    logger->debug("Ready to pin frame_id: " + std::to_string(frame_id));
+    logger->debug("[BuffMgr] Ready to pin frame_id: " + std::to_string(frame_id));
     logger->flush();
 
     return maybe_page;
   } catch (std::exception& e) {
-    logger->debug("Caught error in BuffMgr::fetch_page");
+    logger->debug("[BuffMgr] Caught error in BuffMgr::fetch_page");
     logger->debug(e.what());
   }
 

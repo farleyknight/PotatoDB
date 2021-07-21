@@ -231,7 +231,7 @@ PlanFactory::from_expr(const Catalog& catalog,
   if (expr.agg_list().list().size() > 0) {
     return make_agg_plan(catalog, expr);
   } else if (expr.order_by().is_valid()) {
-    logger->debug("ORDER BY is valid! " + expr.order_by().to_string());
+    logger->debug("[PlanFactory] ORDER BY is valid! " + expr.order_by().to_string());
     return make_sort_plan(catalog, expr);
   } else {
     auto schema = make_projection_schema(catalog, expr);
