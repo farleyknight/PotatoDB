@@ -8,7 +8,7 @@ class LogFileCursor {
 private:
   Buffer buffer_;
   buffer_offset_t buffer_offset_ = 0;
-  size_t file_offset_ = 0;
+  int32_t file_offset_ = 0, last_file_offset_ = 0;
 
   void increment_offset(int32_t offset) {
     buffer_offset_ += offset;
@@ -70,8 +70,12 @@ public:
     buffer_offset_ = offset;
   }
 
-  size_t file_offset() {
+  int32_t file_offset() {
     return file_offset_;
+  }
+
+  int32_t last_file_offset() {
+    return last_file_offset_;
   }
 
   void set_file_offset(size_t offset) {

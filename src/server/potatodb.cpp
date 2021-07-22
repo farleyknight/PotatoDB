@@ -31,7 +31,6 @@ void PotatoDB::reset_installation() {
 
   disk_mgr_.remove_all_files();
   disk_mgr_.setup_db_directory();
-  std::cout << "resetting installation" << std::endl;
   disk_mgr_.setup_log_file();
 
   build_system_catalog();

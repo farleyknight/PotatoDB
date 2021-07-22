@@ -9,7 +9,6 @@ DiskMgr::DiskMgr(FileMgr& file_mgr)
   : file_mgr_    (file_mgr),
     flush_log_f_ (nullptr)
 {
-  std::cout << "Creating DiskMgr" << std::endl;
   setup_db_directory();
   setup_log_file();
 }
@@ -19,8 +18,16 @@ void DiskMgr::delete_log_file() {
   fs::remove(log_file_name());
 }
 
+// TODO: Rename to `create_log_file()`
+// TODO: We shouldn't have to be creating files here!
+// Instead, we should have some "SetupMgr" that creates the directory plus any files needed.
+// SetupMgr would be responsible for:
+// 1) Creating the log file
+// 2) Creating the system catalog
+// 3) ???
+
 void DiskMgr::setup_log_file() {
-  std::cout << "First time attempting to open" << std::endl;
+  log_io_.exceptions(std::ios::goodbit);
   log_io_.clear();
   log_io_.open(log_file_name(),
                std::ios::binary |
@@ -30,7 +37,6 @@ void DiskMgr::setup_log_file() {
 
   // directory or file does not exist
   if (!log_io_.is_open()) {
-    std::cout << "Log file is not open, clearing" << std::endl;
     log_io_.clear();
     // create a new file
     log_io_.open(log_file_name(),
@@ -55,10 +61,8 @@ void DiskMgr::setup_log_file() {
     log_io_.clear();
     log_io_.exceptions(std::ios::failbit);
   } catch (std::ios_base::failure& e) {
-    std::cout << "Log file open failed! :(" << std::endl;
-    std::cout << e.what() << std::endl;
-    std::cout << "Error code: " << e.code().value() << std::endl;
-    std::cout << "Error message: " << e.code().message() << std::endl;
+    logger->debug("[DiskMgr] Log file setup failed! :(");
+    logger->debug("[DiskMgr] Failure was " + std::string(e.what()));
   }
 }
 
@@ -101,48 +105,37 @@ void DiskMgr::read_page(PageId page_id, Page& page) {
 }
 
 bool DiskMgr::read_log(LogFileCursor& cursor) {
-  uint32_t file_size = fs::file_size(log_file_name());
-  std::cout << "DiskMgr::read_log" << std::endl;
-  std::cout << "file_offset: " << cursor.file_offset() << std::endl;
-  std::cout << "file_size: " << file_size << std::endl;
+  try {
+    log_io_.exceptions(std::ios::failbit);
+    int32_t file_size = fs::file_size(log_file_name());
 
-  if (cursor.file_offset() >= file_size) {
-    std::cout << "Cursor trying to read past file size!" << std::endl;
-    std::cout << "File offset: " << cursor.file_offset() << std::endl;
-    std::cout << "File size: " << fs::file_size(log_file_name()) << std::endl;
-    return false;
+    if (cursor.file_offset() >= file_size) {
+      logger->debug("[DiskMgr] Cursor trying to read past file size!");
+      return false;
+    }
+    cursor.buffer_reset();
+
+    int32_t amount_remaining = file_size - cursor.file_offset();
+    int32_t buffer_size      = cursor.buffer().size();
+    int32_t amount_to_read   = std::min(buffer_size, amount_remaining);
+
+    log_io_.seekp(cursor.file_offset());
+    log_io_.read(cursor.buffer().char_ptr(), amount_to_read);
+
+    size_t read_count = log_io_.gcount();
+    if (read_count < amount_to_read) {
+      log_io_.clear();
+      std::memset(cursor.buffer().ptr(read_count), 0, amount_to_read - read_count);
+      logger->debug("[DiskMgr] Read too few bytes. Zeroing out what we did read.");
+      return false;
+    }
+
+    return true;
+  } catch (std::ios_base::failure& e) {
+    logger->debug("[DiskMgr] Log file reading failed! :(");
+    logger->debug("[DiskMgr] Failure was " + std::string(e.what()));
   }
-  std::cout << "LogFileCursor::buffer_reset()" << std::endl;
-  cursor.buffer_reset();
-
-  // NOTE: Always try to fill up the buffer we are given with bytes from disk
-  auto amount_to_read = std::min(cursor.buffer().size(), file_size);
-
-  // NOTE: Move to the disk cursor offset and read in our bytes
-  log_io_.seekp(cursor.file_offset());
-  log_io_.read(cursor.buffer().char_ptr(), amount_to_read);
-
-  // NOTE: If something bad happened, let's return immediately
-  // TODO: We should try and report extra details of the error
-  // message if we can.
-  if (log_io_.bad()) {
-    std::cout << "Bad I/O when reading from log" << std::endl;
-    return false;
-  }
-
-  // NOTE: Check if we have disk problems and cannot read the full
-  // number of requested bytes.
-  size_t read_count = log_io_.gcount();
-  if (read_count < amount_to_read) {
-    log_io_.clear();
-    // NOTE: If we read too little bytes, zero-out the bytes that
-    // we did read in.
-    std::memset(cursor.buffer().ptr(read_count), 0, amount_to_read - read_count);
-    std::cout << "Read too few bytes. Zeroing out what we did read." << std::endl;
-    return false;
-  }
-
-  return true;
+  return false;
 }
 
 // TODO: Move this method to another class that is more appropriate
@@ -153,7 +146,7 @@ void DiskMgr::write_log(const Buffer& log_data, buffer_offset_t offset) {
 
     // no effect on num_flushes_ if log buffer is empty
     if (offset == 0) {
-      std::cout << "No data to write! Returning early" << std::endl;
+      logger->debug("[DiskMgr] No data to write! Returning early");
       return;
     }
 
@@ -163,20 +156,13 @@ void DiskMgr::write_log(const Buffer& log_data, buffer_offset_t offset) {
              std::future_status::ready);
     }
 
-    // sequence write
-    std::cout << "Writing " << offset << " bytes to the LogFile" << std::endl;
     log_io_.write(log_data.char_ptr(), offset);
+    log_io_.flush();
+
+    auto file_size = fs::file_size(log_file_name());
+    assert(file_size > 0);
   } catch (std::ios_base::failure& e) {
-    std::cout << "Log file writing failed! :(" << std::endl;
-    std::cout << e.what() << std::endl;
+    logger->debug("[DiskMgr] Log file writing failed! :(");
+    logger->debug("[DiskMgr] Failure was " + std::string(e.what()));
   }
-
-  // needs to flush to keep disk file in sync
-  std::cout << "Flushing to disk" << std::endl;
-  log_io_.flush();
-
-  auto file_size = fs::file_size(log_file_name());
-  assert(file_size > 0);
-
-  std::cout << "File size is now: " << file_size << std::endl;
 }

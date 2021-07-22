@@ -2,11 +2,10 @@
 #include "page/slotted_table_page.hpp"
 
 void LogRecovery::apply_log_record(LogRecord& log) {
-  std::cout << std::endl;
-  std::cout << "Applying log record" << std::endl;
   logger->debug("[LogRecovery] Updating LSN mapping & active TXNs");
 
-  lsn_mapping_[log.lsn()] = log_cursor_.file_offset();
+  // TODO: This should be found BEFORE reading the record.
+  lsn_mapping_[log.lsn()] = log_cursor_.last_file_offset(); 
   active_txn_[log.txn_id()] = log.lsn();
 
   // TODO: Add some logging here via spdlog
@@ -111,7 +110,7 @@ void LogRecovery::redo() {
       deserialize_failures++;
     }
     if (deserialize_failures > 3) {
-      std::cout << "Too many deserialize failures! Exiting.." << std::endl;
+      logger->debug("[LogRecovery] Too many deserialize failures! Returning early..");
       return;
     }
     read_status = disk_mgr_.read_log(log_cursor_);
@@ -132,7 +131,8 @@ void LogRecovery::undo() {
 
   for (auto& [txn_id, lsn] : active_txn_) {
     while (lsn != INVALID_LSN) {
-      log_cursor_.set_file_offset(lsn_mapping_[lsn]);
+      auto file_offset = lsn_mapping_[lsn];
+      log_cursor_.set_file_offset(file_offset);
       disk_mgr_.read_log(log_cursor_);
 
       LogRecord log;
@@ -178,14 +178,17 @@ void LogRecovery::undo() {
       switch (log.record_type()) {
       case LogRecordType::INSERT: {
         page.apply_delete(log.insert_rid());
+        break;
       }
       case LogRecordType::UPDATE: {
         Tuple tuple;
         page.update_tuple(log.old_tuple(), tuple, log.update_rid());
         assert(tuple.eq(log.new_tuple()));
+        break;
       }
       case LogRecordType::MARK_DELETE: {
         page.rollback_delete(log.delete_rid());
+        break;
       }
       case LogRecordType::APPLY_DELETE: {
         page.insert_tuple(log.delete_tuple());
@@ -204,4 +207,3 @@ void LogRecovery::undo() {
   active_txn_.clear();
   lsn_mapping_.clear();
 }
-
