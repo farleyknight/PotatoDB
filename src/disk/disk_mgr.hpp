@@ -28,7 +28,7 @@ public:
   void write_page(PageId page_id, const Page& page);
   void read_page(PageId page_id, Page& page);
 
-  void write_log(const Buffer& log_data);
+  void write_log(const Buffer& log_data, buffer_offset_t offset);
   bool read_log(LogFileCursor& cursor);
 
   PageId allocate_page(file_id_t file_id);

@@ -65,8 +65,8 @@ TEST_F(LogMgrSerialization, InsertTupleTest) {
 
   auto &txn = txn_mgr.begin();
   LogRecovery recovery(disk_mgr, buff_mgr, log_mgr, lock_mgr, txn);
-  recovery.init_log_buffer();
-  recovery.deserialize_log_record(copy);
+  auto log_cursor = recovery.log_cursor();
+  log_cursor.deserialize_log_record(copy);
 
   // 4) Make sure it is identical
 

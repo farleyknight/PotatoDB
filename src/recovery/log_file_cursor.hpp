@@ -10,7 +10,7 @@ private:
   buffer_offset_t buffer_offset_ = 0;
   size_t file_offset_ = 0;
 
-  void increment_offset(uint32_t offset) {
+  void increment_offset(int32_t offset) {
     buffer_offset_ += offset;
     file_offset_   += offset;
   }
@@ -20,12 +20,11 @@ public:
     : buffer_ (size)
   {}
 
+  bool deserialize_log_record(LogRecord& log);
+
   void append(LogRecord& log_record);
-
   void append_header(const LogRecord& log_record);
-
   void append_insert_record(const LogRecord& log_record);
-
   void append_delete_record(const LogRecord& log_record) {
     // Write the RID
     append_rid(log_record.delete_rid());
@@ -37,10 +36,8 @@ public:
   void append_update_record(const LogRecord& log_record) {
     // Write the RID
     append_rid(log_record.update_rid());
-
     // Write the old tuple (before update)
     append_tuple(log_record.old_tuple());
-
     // Write the new tuple (after update)
     append_tuple(log_record.new_tuple());
   }

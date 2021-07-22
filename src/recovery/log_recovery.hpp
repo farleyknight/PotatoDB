@@ -32,8 +32,8 @@ class LogRecovery {
   void redo();
   void undo();
 
-  bool init_log_buffer();
-  void apply_next_log_record();
+  LogFileCursor& log_cursor();
+  void apply_log_record(LogRecord& log);
   bool deserialize_log_record(LogRecord& log);
 
 private:

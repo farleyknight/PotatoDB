@@ -29,7 +29,7 @@ std::tuple<RID, RID> redo_test_part1() {
   auto &txn = db.txn_mgr().begin();
 
   std::cout << "Create a test table" << std::endl;
-  db.run("CREATE TABLE test_table ( a VARCHAR(20), b SMALLINT ) ");
+  db.run("CREATE TABLE test_table ( a VARCHAR(20), b INTEGER ) ");
 
   auto test_schema      = db.catalog().query_schema_for("test_table");
   auto test_table_oid   = db.catalog().table_oid_for("test_table");
@@ -114,6 +114,9 @@ void redo_test_part2(const RID& rid1, const RID& rid2) {
   ASSERT_TRUE(tuple1 != nullptr);
   ASSERT_TRUE(tuple2 != nullptr);
   db.txn_mgr().commit(recovery_txn);
+
+  std::cout << "Tuple1 as string" << tuple1->to_payload(test_schema) << std::endl;
+  std::cout << "Tuple2 as string" << tuple2->to_payload(test_schema) << std::endl;
 
   EXPECT_EQ(tuple1->value(test_schema, 0).as<string>(), "x");
   EXPECT_EQ(tuple2->value(test_schema, 0).as<string>(), "y");

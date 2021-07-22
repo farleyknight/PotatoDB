@@ -39,7 +39,7 @@ void LogMgr::flush_log_buffer() {
     logger->debug("[LogMgr] Flushing to WAL");
 
     // TODO: Change `disk_mgr_` to a different object
-    disk_mgr_.write_log(flush_buffer_);
+    disk_mgr_.write_log(flush_buffer_, flush_buffer_length_);
     flush_buffer_length_ = 0;
   }
 }

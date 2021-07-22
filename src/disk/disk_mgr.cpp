@@ -1,6 +1,7 @@
 // Provide database file name.
 // Open a connection to the file handle.
 
+#include <algorithm>
 #include "disk/disk_mgr.hpp"
 #include "common/exceptions.hpp"
 
@@ -99,17 +100,23 @@ void DiskMgr::read_page(PageId page_id, Page& page) {
   file_mgr_.read_buffer(page_id, page.buffer());
 }
 
-// NOTE: A BufferCursor is basically a buffer with an `offset_`
 bool DiskMgr::read_log(LogFileCursor& cursor) {
-  if (cursor.file_offset() >= fs::file_size(log_file_name())) {
+  uint32_t file_size = fs::file_size(log_file_name());
+  std::cout << "DiskMgr::read_log" << std::endl;
+  std::cout << "file_offset: " << cursor.file_offset() << std::endl;
+  std::cout << "file_size: " << file_size << std::endl;
+
+  if (cursor.file_offset() >= file_size) {
     std::cout << "Cursor trying to read past file size!" << std::endl;
     std::cout << "File offset: " << cursor.file_offset() << std::endl;
     std::cout << "File size: " << fs::file_size(log_file_name()) << std::endl;
     return false;
   }
+  std::cout << "LogFileCursor::buffer_reset()" << std::endl;
+  cursor.buffer_reset();
 
   // NOTE: Always try to fill up the buffer we are given with bytes from disk
-  auto amount_to_read = cursor.buffer().size() - cursor.buffer_offset();
+  auto amount_to_read = std::min(cursor.buffer().size(), file_size);
 
   // NOTE: Move to the disk cursor offset and read in our bytes
   log_io_.seekp(cursor.file_offset());
@@ -140,12 +147,12 @@ bool DiskMgr::read_log(LogFileCursor& cursor) {
 
 // TODO: Move this method to another class that is more appropriate
 // for direct file access. Maybe FileMgr?
-void DiskMgr::write_log(const Buffer& log_data) {
+void DiskMgr::write_log(const Buffer& log_data, buffer_offset_t offset) {
   try {
     log_io_.exceptions(std::ios::failbit);
 
     // no effect on num_flushes_ if log buffer is empty
-    if (log_data.size() == 0) {
+    if (offset == 0) {
       std::cout << "No data to write! Returning early" << std::endl;
       return;
     }
@@ -157,31 +164,19 @@ void DiskMgr::write_log(const Buffer& log_data) {
     }
 
     // sequence write
-    log_io_.write(log_data.char_ptr(), log_data.size());
+    std::cout << "Writing " << offset << " bytes to the LogFile" << std::endl;
+    log_io_.write(log_data.char_ptr(), offset);
   } catch (std::ios_base::failure& e) {
     std::cout << "Log file writing failed! :(" << std::endl;
     std::cout << e.what() << std::endl;
-  }
-
-  // check for I/O error
-  if (log_io_.bad()) {
-    std::cout << "For write_log - Bad I/O :(" << std::endl;
-    return;
-  }
-
-  if (log_io_.eof()) {
-    std::cout << "For write_log - EOF :(" << std::endl;
-    return;
-  }
-
-  if (log_io_.fail()) {
-    std::cout << "For write_log - Fail I/O :(" << std::endl;
-    return;
   }
 
   // needs to flush to keep disk file in sync
   std::cout << "Flushing to disk" << std::endl;
   log_io_.flush();
 
-  std::cout << "File size is now: " << log_io_.tellp() << std::endl;
+  auto file_size = fs::file_size(log_file_name());
+  assert(file_size > 0);
+
+  std::cout << "File size is now: " << file_size << std::endl;
 }
