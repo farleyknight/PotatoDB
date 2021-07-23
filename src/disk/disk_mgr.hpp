@@ -76,6 +76,7 @@ public:
   void setup_db_directory();
 
   void delete_log_file();
+  void truncate_log_file();
 
 private:
   fs::path main_file_name() const {

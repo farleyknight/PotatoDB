@@ -18,6 +18,11 @@ void DiskMgr::delete_log_file() {
   fs::remove(log_file_name());
 }
 
+void DiskMgr::truncate_log_file() {
+  fs::resize_file(log_file_name(), 0);
+}
+
+
 // TODO: Rename to `create_log_file()`
 // TODO: We shouldn't have to be creating files here!
 // Instead, we should have some "SetupMgr" that creates the directory plus any files needed.
@@ -122,7 +127,7 @@ bool DiskMgr::read_log(LogFileCursor& cursor) {
     log_io_.seekp(cursor.file_offset());
     log_io_.read(cursor.buffer().char_ptr(), amount_to_read);
 
-    size_t read_count = log_io_.gcount();
+    int32_t read_count = log_io_.gcount();
     if (read_count < amount_to_read) {
       log_io_.clear();
       std::memset(cursor.buffer().ptr(read_count), 0, amount_to_read - read_count);

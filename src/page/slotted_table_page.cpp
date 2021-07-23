@@ -3,7 +3,6 @@
 
 void SlottedTablePage::allocate(const PageId page_id, const PageId prev_page_id) {
   assert(page_id.is_valid());
-  //assert(prev_page_id.is_valid());
   set_page_id(page_id);
 
   if (log_mgr_.is_logging_enabled()) {

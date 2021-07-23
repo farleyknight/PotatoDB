@@ -17,6 +17,7 @@ public:
 
   void SetUp() override {
     ::testing::Test::SetUp();
+    disk_mgr.truncate_log_file();
   }
 
   void TearDown() override {
@@ -38,9 +39,7 @@ public:
 
 TEST_F(LogMgrSerialization, InsertTupleTest) {
 
-  // TODO:
   // 1) Create new LogRecord
-
   auto buffer   = Buffer();
   auto txn_id   = 1;
   auto prev_lsn = 2;
@@ -70,6 +69,7 @@ TEST_F(LogMgrSerialization, InsertTupleTest) {
 
   // 4) Make sure it is identical
 
+  assert(original.txn_id() == copy.txn_id());
   EXPECT_EQ(original.txn_id(),       copy.txn_id());
   EXPECT_EQ(original.prev_lsn(),     copy.prev_lsn());
   EXPECT_EQ(original.record_type(),  copy.record_type());

@@ -22,7 +22,7 @@ class PotatoDBConan(ConanFile):
 
     def _make_parser(self):
         # TODO: How do I find the jar file that is downloaded in the antlr4 conanfile.py?
-        self.run("java -jar antlr.jar -Dlanguage=Cpp -visitor parser/PotatoSQL.g4")
+        self.run("java -jar ./antlr4/source/antlr.jar -Dlanguage=Cpp -visitor parser/PotatoSQL.g4")
 
     def build(self):
         self._make_parser()
