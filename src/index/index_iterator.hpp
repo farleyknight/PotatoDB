@@ -12,42 +12,33 @@ public:
   using MappingT = pair<KeyT, ValueT>;
   using KeyComp  = GenericComp;
 
-  // You may define your own constructor based on your
-  // member variables
+  IndexIterator(BTreeLeafPage& curr_leaf,
+                BuffMgr& buff_mgr,
+                int32_t index)
+    : curr_leaf_  (curr_leaf),
+      index_      (index),
+      buff_mgr_   (buff_mgr),
+      at_the_end_ (false)
+  {}
 
-  /*
-   *
-   IndexIterator(KeyT key, ValueT value, KeyComp comp)
-   : key_   (key),
-   value_ (value),
-   comp_  (comp) {}
-   */
-
-  // IndexIterator() = default;
-  IndexIterator() {}
   ~IndexIterator() = default;
 
-  bool is_end() {
+  bool at_the_end() {
     // TODO
     return false;
   }
 
   const MappingT& operator*();
-
   IndexIterator& operator++();
 
-  bool operator==(UNUSED const IndexIterator& itr) const {
-    throw std::runtime_error("unimplemented");
-  }
-
-  bool operator!=(UNUSED const IndexIterator& itr) const {
-    throw std::runtime_error("unimplemented");
-  }
+  bool operator==(const IndexIterator& iter) const;
+  bool operator!=(const IndexIterator& iter) const;
 
 private:
+  BTreeLeafPage& curr_leaf_;
   KeyT key_;
   ValueT value_;
-  // TODO
-  // KeyComp comp_;
+  BuffMgr& buff_mgr_;
   MappingT pair_;
+  int32_t index_;
 };

@@ -1,9 +1,6 @@
 #pragma once
 
-#include "btree/b_plus_tree_page.hpp"
-
-// TODO: Delete these lines
-// #define B_PLUS_TREE_INTERNAL_PAGE_TYPE BPlusTreeInternalPage<KeyT, ValueT, KeyComparator>
+#include "btree/b_tree_page.hpp"
 
 /**
  * Store n indexed keys and n+1 child pointers (page_id) within internal page.
@@ -19,20 +16,21 @@
  *  --------------------------------------------------------------------------
  */
 template <typename KeyT, typename ValueT, typename KeyComparator>
-class BPlusTreeInternalPage : public BPlusTreePage {
+class BTreeInternalPage : public BTreePage {
 public:
   using MappingT = pair<KeyT, ValueT>;
   static constexpr int PAGE_HEADER_SIZE = 24;
-  static constexpr int INTERNAL_PAGE_SIZE = ((PAGE_SIZE - PAGE_HEADER_SIZE) / (sizeof(MappingT)));
+  static constexpr int INTERNAL_PAGE_SIZE =
+    ((PAGE_SIZE - PAGE_HEADER_SIZE) / (sizeof(MappingT)));
 
   // must call initialize method after "create" a new node
   void init(PageId page_id,
             PageId parent_id = PageId::INVALID(),
-            int max_size = INTERNAL_PAGE_SIZE);
+            int32_t max_size = INTERNAL_PAGE_SIZE);
 
-  KeyT key_at(int index) const;
-  void set_key_at(int index, const KeyT& key);
-  int value_index(const ValueT& value) const;
+  KeyT key_at(int32_t index) const;
+  void set_key_at(int32_t index, const KeyT& key);
+  int32_t value_index(const ValueT& value) const;
   ValueT value_at(int index) const;
 
   ValueT lookup(const KeyT& key,
@@ -42,25 +40,25 @@ public:
                          const KeyT& new_key,
                          const ValueT& new_value);
 
-  int insert_node_after(const ValueT& old_value,
-                        const KeyT& new_key,
-                        const ValueT& new_value);
-  void remove(int index);
+  int32_t insert_node_after(const ValueT& old_value,
+                            const KeyT& new_key,
+                            const ValueT& new_value);
+  void remove(int32_t index);
   ValueT remove_and_return_only_child();
 
   // Split and Merge utility methods
-  void move_all_to(BPlusTreeInternalPage& recipient,
+  void move_all_to(BTreeInternalPage& recipient,
                    const KeyT& middle_key,
                    const BuffMgr& buff_mgr);
 
-  void move_half_to(BPlusTreeInternalPage& recipient,
+  void move_half_to(BTreeInternalPage& recipient,
                     const BuffMgr& buff_mgr);
 
-  void move_first_to_end_of(BPlusTreeInternalPage& recipient,
+  void move_first_to_end_of(BTreeInternalPage& recipient,
                             const KeyT& middle_key,
                             const BuffMgr& buff_mgr);
 
-  void move_last_to_front_of(BPlusTreeInternalPage& recipient,
+  void move_last_to_front_of(BTreeInternalPage& recipient,
                              const KeyT& middle_key,
                              const BuffMgr& buff_mgr);
 

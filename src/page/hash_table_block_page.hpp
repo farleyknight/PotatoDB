@@ -20,6 +20,8 @@
  *
  */
 
+// TODO: Move to `/hash`
+
 template<class KeyT, class ValueT>
 class HTBlockPage {
 public:

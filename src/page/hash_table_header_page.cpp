@@ -1,6 +1,8 @@
 
 #include "page/hash_table_header_page.hpp"
 
+// TODO: Move to `/hash`
+
 size_t HTHeaderPage::size() const {
   return size_;
 }

@@ -17,7 +17,6 @@
 * https://github.com/duynguyen-ori75/bustub-2019
 * https://github.com/cakebytheoceanLuo/CMU15-445
 * https://github.com/TopCoderChen/15445-Fall2019
-* https://github.com/zwj-coder/cmudb
 * https://github.com/greenmoon55/bustub2017
 * https://github.com/wirybeaver/bustub2017
 

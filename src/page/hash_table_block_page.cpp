@@ -1,6 +1,8 @@
 
 #include "page/hash_table_block_page.hpp"
 
+// TODO: Move to `/hash`
+
 template<class KeyT, class ValueT>
 KeyT HTBlockPage<KeyT, ValueT>::key_at(UNUSED slot_offset_t bucket_ind) const {
   return {};

@@ -62,7 +62,7 @@ set(parser_sources
   "parser/PotatoSQLParser.cpp")
 
 set(main_sources
-  "src/btree/b_plus_tree.cpp"
+  "src/btree/b_tree.cpp"
   "src/buffer/buff_mgr.cpp"
   "src/buffer/buffer.cpp"
   "src/buffer/clock_replacer.cpp"

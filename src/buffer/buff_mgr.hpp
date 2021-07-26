@@ -11,12 +11,9 @@
 
 #include "recovery/log_mgr.hpp"
 
-class BPlusTreePage;
-class HTHeaderPage;
-
 class BuffMgr {
 public:
-  BuffMgr(size_t pool_size,
+  BuffMgr(int32_t pool_size,
           DiskMgr& disk_mgr,
           LogMgr& log_mgr);
 
@@ -50,9 +47,9 @@ private:
   Page& page_by_id(PageId page_id);
   void pin_page(Page& page, frame_id_t frame_id);
 
-  size_t pool_size_;
+  int32_t pool_size_;
   vector<Page> pages_;
-  map<uint32_t, frame_id_t> page_table_;
+  map<int32_t, frame_id_t> page_table_;
   MutList<frame_id_t> free_list_;
   ptr<Replacer> replacer_;
 

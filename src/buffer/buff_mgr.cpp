@@ -6,7 +6,7 @@
 #include "page/hash_table_header_page.hpp"
 #include "page/hash_table_block_page.hpp"
 
-BuffMgr::BuffMgr(size_t pool_size,
+BuffMgr::BuffMgr(int32_t pool_size,
                  DiskMgr& disk_mgr,
                  LogMgr& log_mgr)
   : pool_size_ (pool_size),
@@ -20,8 +20,7 @@ BuffMgr::BuffMgr(size_t pool_size,
   // replacer_ = make_unique<LRUReplacer>(pool_size);
 
   for (size_t i = 0; i < pool_size; ++i) {
-    // TODO: Figure out if we need `static_cast` here?
-    free_list_.emplace_back(static_cast<int>(i));
+    free_list_.emplace_back(static_cast<int32_t>(i));
   }
 }
 

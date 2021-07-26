@@ -7,8 +7,8 @@
 #include "common/config.hpp"
 
 #include "index/index_iterator.hpp"
-#include "btree/b_plus_tree_internal_page.hpp"
-#include "btree/b_plus_tree_leaf_page.hpp"
+#include "btree/b_tree_internal_page.hpp"
+#include "btree/b_tree_leaf_page.hpp"
 
 #include "txns/txn.hpp"
 
@@ -22,27 +22,25 @@
  * (4) Implement index iterator for range scan
  */
 
-// https://github.com/Mike-Dai/cmudb/blob/df07d868f2cf52b051392505aa28cff05e11f0c4/src/index/b_plus_tree.cpp
-
-class BPlusTree {
+class BTree {
 public:
   using KeyT    = GenericKey;
   using ValueT  = RID;
   using KeyComp = GenericComp;
 
-  using InternalPage = BPlusTreeInternalPage<KeyT,
-                                             page_id_t, KeyComp>;
-  using LeafPage     = BPlusTreeLeafPage<KeyT, ValueT, KeyComp>;
+  using InternalPage = BTreeInternalPage<KeyT,
+                                         ValueT, KeyComp>;
+  using LeafPage     = BTreeLeafPage<KeyT, ValueT, KeyComp>;
   using MappingT     = pair<KeyT, ValueT>;
 
   static constexpr int LEAF_PAGE_SIZE =
     (PAGE_SIZE - LEAF_PAGE_HEADER_SIZE) / sizeof(MappingT);
 
-  BPlusTree(const string name,
-            const BuffMgr& buff_mgr,
-            const KeyComp& comparator,
-            int leaf_size     = LeafPage::LEAF_PAGE_SIZE,
-            int internal_size = InternalPage::INTERNAL_PAGE_SIZE);
+  BTree(const string name,
+        const BuffMgr& buff_mgr,
+        const KeyComp& comparator,
+        int leaf_size     = LeafPage::LEAF_PAGE_SIZE,
+        int internal_size = InternalPage::INTERNAL_PAGE_SIZE);
 
   // Returns true if this B+ tree has no keys and values.
   bool is_empty() const;
@@ -50,15 +48,15 @@ public:
   // Insert a key-value pair into this B+ tree.
   bool insert(const KeyT& key,
               const ValueT& value,
-              OptRef<Txn> txn = std::nullopt);
+              Txn* txn = nullptr);
 
   // Remove a key and its value from this B+ tree.
   void remove(const KeyT& key,
-              OptRef<Txn> txn = std::nullopt);
+              Txn* txn = nullptr);
 
   // return the value associated with a given key
   vector<ValueT> find_values(const KeyT& key,
-                             OptRef<Txn> txn = std::nullopt);
+                             Txn* txn = nullptr);
 
   // index iterator
   IndexIterator begin();
@@ -67,7 +65,7 @@ public:
 
   void print(UNUSED BuffMgr& bpm) {
     // TODO: Fix this
-    // to_string(reinterpret_cast<BPlusTreePage *>(bpm.fetch_page(root_page_id_)->data()), bpm);
+    // to_string(reinterpret_cast<BTreePage *>(bpm.fetch_page(root_page_id_)->data()), bpm);
   }
 
   void draw(UNUSED const BuffMgr& bpm,
@@ -75,7 +73,7 @@ public:
     std::ofstream out(outf);
     out << "digraph G {" << std::endl;
     // TODO: Fix this
-    // to_graph(reinterpret_cast<BPlusTreePage *>(bpm.fetch_page(root_page_id_)->data()), bpm, out);
+    // to_graph(reinterpret_cast<BTreePage *>(bpm.fetch_page(root_page_id_)->data()), bpm, out);
     out << "}" << std::endl;
     out.close();
   }
@@ -96,10 +94,10 @@ public:
                         const ValueT& value,
                         Txn *txn = nullptr);
 
-  void insert_into_parent(BPlusTreePage& old_node,
+  void insert_into_parent(BTreePage& old_node,
                           const KeyT& key,
                           // NOTE: This might actually be an out-parameter?
-                          BPlusTreePage& new_node,
+                          BTreePage& new_node,
                           Txn *txn = nullptr);
 
   // TODO: Figure out the appropriate return signature for this. I am almost certain this
@@ -107,29 +105,26 @@ public:
   template <typename N>
   N *split(N *node);
 
-  // NOTE: Don't worry too much about this interface. I think a much better
-  // interface is available here:
-  // https://github.com/yixuaz/CMU-15445/blob/master/project2B/b_plus_tree.cpp
   template <typename N>
   bool CoalesceOrRedistribute(N *node, Txn *txn = nullptr);
 
   template <typename N>
   bool Coalesce(N **neighbor_node,
                 N **node,
-                BPlusTreeInternalPage<KeyT, page_id_t, KeyComp> **parent,
+                BTreeInternalPage<KeyT, page_id_t, KeyComp> **parent,
                 int index,
                 Txn *txn = nullptr);
 
   template <typename N>
-  void Redistribute(N *neighbor_node, N *node, int index);
+  void redistribute(N *neighbor_node, N *node, int index);
 
-  bool AdjustRoot(BPlusTreePage *node);
+  bool AdjustRoot(BTreePage *node);
 
   void UpdateRootpage_id_t(int insert_record = 0);
 
   /* Debug Routines for FREE!! */
-  void to_graph(BPlusTreePage *page, const BuffMgr& bpm, std::ofstream &out) const;
-  void to_string(BPlusTreePage *page, const BuffMgr& bpm) const;
+  void to_graph(BTreePage *page, const BuffMgr& bpm, std::ofstream &out) const;
+  void to_string(BTreePage *page, const BuffMgr& bpm) const;
 
   // member variable
   string index_name_;

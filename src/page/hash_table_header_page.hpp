@@ -13,6 +13,8 @@
  * -------------------------------------------------------------
  */
 
+// TODO: Move to `/hash`
+
 class HTHeaderPage : public PageLayout {
 public:
   HTHeaderPage(Page* page)
@@ -27,7 +29,7 @@ public:
   void set_lsn(lsn_t lsn);
   void add_block_page_id(PageId page_id);
   PageId block_page_id(size_t index);
-  size_t num_blocks() const ;
+  size_t num_blocks() const;
   void reset_block_index();
 
 private:

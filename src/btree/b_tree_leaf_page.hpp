@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "common/config.hpp"
-#include "btree/b_plus_tree_page.hpp"
+#include "btree/b_tree_page.hpp"
 
 /**
  * Store indexed key and record id (record id = page id combined with slot id,
@@ -21,16 +21,16 @@
  * | PageType (4) | lsn_t (4) | CurrentSize (4) | MaxSize (4) |
  *  ---------------------------------------------------------------------
  *  -----------------------------------------------
- * | Parentpage_id_t (4) | page_id_t (4) | Nextpage_id_t (4)
+ * | parent_page_id (4) | page_id (4) | next_page_id (4)
  *  -----------------------------------------------
  */
 
-// TODO: Remove the word "Plus" from BPlusTreeLeafPage
+// TODO: Remove the word "Plus" from BTreeLeafPage
 // It's already too many words!
 // I can write somewhere that I have decided to shorten the name
 // to BTree for brevity.
 template <typename KeyT, typename ValueT, typename KeyComp>
-class BPlusTreeLeafPage : public BPlusTreePage {
+class BTreeLeafPage : public BTreePage {
 public:
   using MappingT = pair<KeyT, ValueT>;
 
@@ -56,10 +56,10 @@ public:
   int remove_and_delete_record(const KeyT& key, const KeyComp& comparator);
 
   // Split and Merge utility methods
-  void move_half_to(BPlusTreeLeafPage& recipient);
-  void move_all_to(BPlusTreeLeafPage& recipient);
-  void move_first_to_end_of(BPlusTreeLeafPage& recipient);
-  void move_last_to_front_of(BPlusTreeLeafPage& recipient);
+  void move_half_to(BTreeLeafPage& recipient);
+  void move_all_to(BTreeLeafPage& recipient);
+  void move_first_to_end_of(BTreeLeafPage& recipient);
+  void move_last_to_front_of(BTreeLeafPage& recipient);
 
 private:
   void copy_n_from(const vector<MappingT>& items, int size);
