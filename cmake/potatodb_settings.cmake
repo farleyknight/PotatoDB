@@ -63,6 +63,7 @@ set(parser_sources
 
 set(main_sources
   "src/btree/b_tree.cpp"
+  "src/btree/b_tree_page.cpp"
   "src/buffer/buff_mgr.cpp"
   "src/buffer/buffer.cpp"
   "src/buffer/clock_replacer.cpp"

@@ -15,7 +15,9 @@ public:
     page_ = page;
   }
 
-  void reset_memory();
+  Page* page_ptr() {
+    return page_;
+  }
 
   void rlatch() {
     page_->rlatch();

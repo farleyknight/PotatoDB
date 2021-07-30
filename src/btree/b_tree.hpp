@@ -24,23 +24,19 @@
 
 class BTree {
 public:
-  using KeyT    = GenericKey;
-  using ValueT  = RID;
-  using KeyComp = GenericComp;
+  using KeyT          = GenericKey;
+  using ValueT        = RID;
+  using KeyComp       = GenericComp;
+  using MappingT      = pair<KeyT, ValueT>;
 
-  using InternalPage = BTreeInternalPage<KeyT,
-                                         ValueT, KeyComp>;
-  using LeafPage     = BTreeLeafPage<KeyT, ValueT, KeyComp>;
-  using MappingT     = pair<KeyT, ValueT>;
-
-  static constexpr int LEAF_PAGE_SIZE =
-    (PAGE_SIZE - LEAF_PAGE_HEADER_SIZE) / sizeof(MappingT);
+  using InternalPageT = BTreeInternalPage<KeyT, ValueT, KeyComp>;
+  using LeafPageT     = BTreeLeafPage<KeyT, ValueT, KeyComp>;
 
   BTree(const string name,
-        const BuffMgr& buff_mgr,
+        BuffMgr& buff_mgr,
         const KeyComp& comparator,
-        int leaf_size     = LeafPage::LEAF_PAGE_SIZE,
-        int internal_size = InternalPage::INTERNAL_PAGE_SIZE);
+        int32_t leaf_size     = LeafPageT::LEAF_PAGE_SIZE,
+        int32_t internal_size = InternalPageT::INTERNAL_PAGE_SIZE);
 
   // Returns true if this B+ tree has no keys and values.
   bool is_empty() const;
@@ -68,8 +64,7 @@ public:
     // to_string(reinterpret_cast<BTreePage *>(bpm.fetch_page(root_page_id_)->data()), bpm);
   }
 
-  void draw(UNUSED const BuffMgr& bpm,
-            const string& outf) {
+  void draw(const string& outf) {
     std::ofstream out(outf);
     out << "digraph G {" << std::endl;
     // TODO: Fix this
@@ -79,14 +74,20 @@ public:
   }
 
   // read data from file and insert one by one
-  void insert_from_file(const string& file_name, OptRef<Txn> txn);
+  void insert_from_file(const string& file_name, Txn* txn = nullptr);
 
   // read data from file and remove one by one
-  void remove_from_file(const string& file_name, OptRef<Txn> txn);
+  void remove_from_file(const string& file_name, Txn* txn = nullptr);
   // expose for test purpose
-  const Page& find_leaf_page(const KeyT& key, bool leftMost = false);
+  LeafPageT find_leaf_page(const KeyT& key, bool left_most = false);
 
- private:
+  template<typename NodeT>
+  NodeT new_node();
+
+  template<typename NodeT>
+  NodeT new_node(PageId parent_id);
+
+private:
   void start_new_tree(const KeyT& key,
                       const ValueT& value);
 
@@ -100,37 +101,34 @@ public:
                           BTreePage& new_node,
                           Txn *txn = nullptr);
 
-  // TODO: Figure out the appropriate return signature for this. I am almost certain this
-  // does some memory allocations?
-  template <typename N>
-  N *split(N *node);
+  template <typename NodeT>
+  NodeT split(NodeT node);
 
-  template <typename N>
-  bool CoalesceOrRedistribute(N *node, Txn *txn = nullptr);
+  template <typename NodeT>
+  bool coalesce_or_redistribute(NodeT node, Txn *txn = nullptr);
 
-  template <typename N>
-  bool Coalesce(N **neighbor_node,
-                N **node,
-                BTreeInternalPage<KeyT, page_id_t, KeyComp> **parent,
+  template <typename NodeT>
+  bool coalesce(NodeT neighbor,
+                NodeT node,
+                InternalPageT& parent,
                 int index,
                 Txn *txn = nullptr);
 
-  template <typename N>
-  void redistribute(N *neighbor_node, N *node, int index);
+  template <typename NodeT>
+  void redistribute(NodeT neighbor, NodeT node, int index);
 
-  bool AdjustRoot(BTreePage *node);
+  bool adjust_root(BTreePage node);
 
-  void UpdateRootpage_id_t(int insert_record = 0);
+  void update_root_page_id(int32_t insert_record = 0);
 
-  /* Debug Routines for FREE!! */
-  void to_graph(BTreePage *page, const BuffMgr& bpm, std::ofstream &out) const;
-  void to_string(BTreePage *page, const BuffMgr& bpm) const;
+  void to_graph(BTreePage page, const BuffMgr& bpm, std::ofstream &out) const;
+  void to_string(BTreePage page, const BuffMgr& bpm) const;
 
   // member variable
   string index_name_;
   PageId root_page_id_ = PageId::INVALID();
-  const BuffMgr& buff_mgr_;
+  BuffMgr& buff_mgr_;
   KeyComp comp_;
-  int leaf_size_;
-  int internal_size_;
+  int32_t leaf_size_;
+  int32_t internal_size_;
 };

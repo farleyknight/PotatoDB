@@ -54,7 +54,7 @@ public:
   }
 
   friend std::ostream &operator<<(std::ostream &os, const PageId& page_id) {
-    os << to_string();
+    os << page_id.to_string();
     return os;
   }
 

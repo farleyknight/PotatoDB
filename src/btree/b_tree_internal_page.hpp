@@ -2,6 +2,8 @@
 
 #include "btree/b_tree_page.hpp"
 
+// https://github.com/astronaut0131/cmu15-445-2017/blob/d393b2b76c38ef02ad8432f3eb66452219fe6508/src/page/b_plus_tree_internal_page.cpp
+
 /**
  * Store n indexed keys and n+1 child pointers (page_id) within internal page.
  * Pointer PAGE_ID(i) points to a subtree in which all keys K satisfy:
@@ -15,13 +17,17 @@
  * | HEADER | KEY(1)+PAGE_ID(1) | KEY(2)+PAGE_ID(2) | ... | KEY(n)+PAGE_ID(n) |
  *  --------------------------------------------------------------------------
  */
-template <typename KeyT, typename ValueT, typename KeyComparator>
+template <typename KeyT, typename ValueT, typename KeyComp>
 class BTreeInternalPage : public BTreePage {
 public:
   using MappingT = pair<KeyT, ValueT>;
-  static constexpr int PAGE_HEADER_SIZE = 24;
-  static constexpr int INTERNAL_PAGE_SIZE =
+  static constexpr int32_t PAGE_HEADER_SIZE = 24;
+  static constexpr int32_t INTERNAL_PAGE_SIZE =
     ((PAGE_SIZE - PAGE_HEADER_SIZE) / (sizeof(MappingT)));
+
+  BTreeInternalPage(Page* page)
+    : BTreePage (page)
+  {}
 
   // must call initialize method after "create" a new node
   void init(PageId page_id,
@@ -31,10 +37,10 @@ public:
   KeyT key_at(int32_t index) const;
   void set_key_at(int32_t index, const KeyT& key);
   int32_t value_index(const ValueT& value) const;
-  ValueT value_at(int index) const;
+  ValueT value_at(int32_t index) const;
 
   ValueT lookup(const KeyT& key,
-                const KeyComparator& comparator) const;
+                const KeyComp& comparator) const;
 
   void populate_new_root(const ValueT& old_value,
                          const KeyT& new_key,
@@ -64,7 +70,7 @@ public:
 
 private:
   void copy_n_from(const vector<MappingT>& items,
-                   int size,
+                   int32_t size,
                    const BuffMgr& buff_mgr);
 
   void copy_last_from(const MappingT& pair, const BuffMgr& buff_mgr);

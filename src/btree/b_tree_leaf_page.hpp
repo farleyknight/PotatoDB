@@ -25,10 +25,6 @@
  *  -----------------------------------------------
  */
 
-// TODO: Remove the word "Plus" from BTreeLeafPage
-// It's already too many words!
-// I can write somewhere that I have decided to shorten the name
-// to BTree for brevity.
 template <typename KeyT, typename ValueT, typename KeyComp>
 class BTreeLeafPage : public BTreePage {
 public:
@@ -37,6 +33,10 @@ public:
   static constexpr int PAGE_HEADER_SIZE = 28;
   static constexpr int LEAF_PAGE_SIZE =
     (PAGE_SIZE - PAGE_HEADER_SIZE) / sizeof(MappingT);
+
+  BTreeLeafPage(Page* page)
+    : BTreePage (page)
+  {}
 
   // After creating a new leaf page from buffer pool, must call initialize
   // method to set default values
@@ -52,7 +52,7 @@ public:
 
   // insert and delete methods
   int insert(const KeyT& key, const ValueT& value, const KeyComp& comparator);
-  ValueT lookup(const KeyT& key, const KeyComp& comparator) const;
+  bool lookup(const KeyT& key, const ValueT& value, const KeyComp& comparator) const;
   int remove_and_delete_record(const KeyT& key, const KeyComp& comparator);
 
   // Split and Merge utility methods
