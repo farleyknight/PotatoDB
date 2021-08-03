@@ -6,6 +6,13 @@
 #include "exprs/column_def_expr.hpp"
 #include "server/potatodb.hpp"
 
+// TODO:
+// Big refactor needed!
+// We are doing too much SQL in here.
+// We don't need to convert system internal stuff into SQL queries.
+// We should just interface with the buffer pool pages directly.
+// That would make this stuff faster.
+
 class SystemCatalog {
 public:
   enum class ObjectTypes {

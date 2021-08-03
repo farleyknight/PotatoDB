@@ -5,12 +5,10 @@
 #include "index/generic_key.hpp"
 #include "index/generic_comp.hpp"
 
+template<typename KeyT, typename ValueT, typename KeyComp>
 class IndexIterator {
 public:
-  using KeyT      = GenericKey;
-  using ValueT    = RID;
   using MappingT  = pair<KeyT, ValueT>;
-  using KeyComp   = GenericComp;
   using LeafPageT = BTreeLeafPage<KeyT, ValueT, KeyComp>;
 
   IndexIterator(LeafPageT& curr_leaf,

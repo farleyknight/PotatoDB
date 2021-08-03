@@ -2,7 +2,8 @@
 #include <utility> 
 #include "index/index_iterator.hpp"
 
-IndexIterator& IndexIterator::operator++() {
+template<typename KeyT, typename ValueT, typename KeyComp>
+IndexIterator<KeyT, ValueT, KeyComp>& IndexIterator<KeyT, ValueT, KeyComp>::operator++() {
   if (index_ < curr_leaf_.size() - 1) {
     index_++;
   } else if (curr_leaf_.next_page_id() == PageId::INVALID()) {
@@ -17,7 +18,7 @@ IndexIterator& IndexIterator::operator++() {
   return *this;
 }
 
-const IndexIterator::MappingT&
-IndexIterator<KeyT, ValueT, KeyComp>::operator*() {
+template<typename KeyT, typename ValueT, typename KeyComp>
+const pair<KeyT, ValueT>& IndexIterator<KeyT, ValueT, KeyComp>::operator*() {
   return curr_leaf_.item(index_);
 }

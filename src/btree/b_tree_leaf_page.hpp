@@ -45,7 +45,7 @@ public:
             int max_size = LEAF_PAGE_SIZE);
   // helper methods
   PageId next_page_id() const;
-  void set_next_page_id(page_id_t next_page_id);
+  void set_next_page_id(PageId next_page_id);
   KeyT key_at(int index) const;
   int key_index(const KeyT& key, const KeyComp& comparator) const;
   const MappingT& item(int index);

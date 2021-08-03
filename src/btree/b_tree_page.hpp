@@ -43,8 +43,9 @@ public:
 
   bool is_leaf_page() const;
   bool is_root_page() const;
-  void set_page_type(IndexPageType page_type);
 
+  void set_page_type(IndexPageType page_type);
+  IndexPageType page_type() const;
   void increase_size(int amount);
 
   int size() const;

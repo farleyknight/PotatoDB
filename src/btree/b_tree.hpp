@@ -22,19 +22,18 @@
  * (4) Implement index iterator for range scan
  */
 
+template<typename KeyT, typename ValueT, typename KeyComp>
 class BTree {
 public:
-  using KeyT          = GenericKey;
-  using ValueT        = RID;
-  using KeyComp       = GenericComp;
-  using MappingT      = pair<KeyT, ValueT>;
-
-  using InternalPageT = BTreeInternalPage<KeyT, ValueT, KeyComp>;
-  using LeafPageT     = BTreeLeafPage<KeyT, ValueT, KeyComp>;
+  using MappingT       = pair<KeyT, ValueT>;
+  using InternalPageT  = BTreeInternalPage<KeyT, PageId, KeyComp>;
+  using LeafPageT      = BTreeLeafPage<KeyT, ValueT, KeyComp>;
+  using IndexIteratorT = IndexIterator<KeyT, ValueT, KeyComp>;
 
   BTree(const string name,
         BuffMgr& buff_mgr,
         const KeyComp& comparator,
+        file_id_t file_id,
         int32_t leaf_size     = LeafPageT::LEAF_PAGE_SIZE,
         int32_t internal_size = InternalPageT::INTERNAL_PAGE_SIZE);
 
@@ -55,9 +54,9 @@ public:
                              Txn* txn = nullptr);
 
   // index iterator
-  IndexIterator begin();
-  IndexIterator begin(const KeyT& key);
-  IndexIterator end();
+  IndexIteratorT begin();
+  IndexIteratorT begin(const KeyT& key);
+  IndexIteratorT end();
 
   void print(UNUSED BuffMgr& bpm) {
     // TODO: Fix this
@@ -97,38 +96,43 @@ private:
 
   void insert_into_parent(BTreePage& old_node,
                           const KeyT& key,
-                          // NOTE: This might actually be an out-parameter?
+                          // NOTE: This is an out-parameter
                           BTreePage& new_node,
                           Txn *txn = nullptr);
 
   template <typename NodeT>
-  NodeT split(NodeT node);
+  NodeT split(NodeT &node);
 
   template <typename NodeT>
-  bool coalesce_or_redistribute(NodeT node, Txn *txn = nullptr);
+  bool coalesce_or_redistribute(NodeT &node, Txn *txn = nullptr);
 
   template <typename NodeT>
-  bool coalesce(NodeT neighbor,
-                NodeT node,
+  bool coalesce(NodeT &neighbor,
+                NodeT &node,
                 InternalPageT& parent,
                 int index,
                 Txn *txn = nullptr);
 
   template <typename NodeT>
-  void redistribute(NodeT neighbor, NodeT node, int index);
+  void redistribute(NodeT& neighbor,
+                    NodeT& node,
+                    int32_t index,
+                    Txn* txn = nullptr);
 
-  bool adjust_root(BTreePage node);
+  bool adjust_root(BTreePage& node);
 
   void update_root_page_id(int32_t insert_record = 0);
 
-  void to_graph(BTreePage page, const BuffMgr& bpm, std::ofstream &out) const;
-  void to_string(BTreePage page, const BuffMgr& bpm) const;
+  void to_graph(BTreePage& page, const BuffMgr& bpm, std::ofstream &out) const;
+  const string to_string(bool verbose) const;
 
   // member variable
   string index_name_;
   PageId root_page_id_ = PageId::INVALID();
   BuffMgr& buff_mgr_;
   KeyComp comp_;
+  file_id_t file_id_;
   int32_t leaf_size_;
   int32_t internal_size_;
+  int32_t max_block_num_ = 0;
 };

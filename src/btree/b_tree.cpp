@@ -5,7 +5,6 @@
 //    Which types go where?
 // 2) Figure out which types need to be pointers (because of copying or scoping)
 //    and which can stay references
-
 // https://github.com/Mike-Dai/cmudb/blob/df07d868f2cf52b051392505aa28cff05e11f0c4/src/index/b_plus_tree.cpp
 // https://github.com/astronaut0131/cmu15-445-2017/blob/d393b2b76c38ef02ad8432f3eb66452219fe6508/src/index/b_plus_tree.cpp
 
@@ -21,34 +20,38 @@
 // https://www.reddit.com/r/programming/comments/oum0wa/path_hints_for_btrees_can_bring_a_performance/
 
 
-
-BTree::BTree(const string index_name,
-             BuffMgr& buff_mgr,
-             const KeyComp& comp,
-             int32_t leaf_size,
-             int32_t internal_size)
+template<typename KeyT, typename ValueT, typename KeyComp>
+BTree<KeyT, ValueT, KeyComp>::BTree(const string index_name,
+                                    BuffMgr& buff_mgr,
+                                    const KeyComp& comp,
+                                    file_id_t file_id,
+                                    int32_t leaf_size,
+                                    int32_t internal_size)
   : index_name_    (index_name),
     buff_mgr_      (buff_mgr),
     comp_          (comp),
+    file_id_       (file_id),
     leaf_size_     (leaf_size),
     internal_size_ (internal_size)
 {}
 
-
-bool BTree::is_empty() const {
+template<typename KeyT, typename ValueT, typename KeyComp>
+bool BTree<KeyT, ValueT, KeyComp>::is_empty() const {
   return root_page_id_ == PageId::INVALID();
 }
 
-vector<BTree::ValueT>
-BTree::find_values(const BTree::KeyT &key, UNUSED Txn* txn) {
+template<typename KeyT, typename ValueT, typename KeyComp>
+vector<ValueT> BTree<KeyT, ValueT, KeyComp>::find_values(const KeyT &key,
+                                                         UNUSED Txn* txn)
+{
   if (is_empty()) {
-    return vector<BTree::ValueT>();
+    return vector<ValueT>();
   }
 
   auto leaf_node = find_leaf_page(key);
-  BTree::ValueT value;
+  ValueT value;
   bool exist = leaf_node.lookup(key, value, comp_);
-  vector<BTree::ValueT> result;
+  vector<ValueT> result;
   if (exist) {
     result.push_back(value);
   }
@@ -56,9 +59,10 @@ BTree::find_values(const BTree::KeyT &key, UNUSED Txn* txn) {
   return result;
 }
 
-bool BTree::insert(const BTree::KeyT &key,
-                   const BTree::ValueT &value,
-                   UNUSED Txn* txn)
+template<typename KeyT, typename ValueT, typename KeyComp>
+bool BTree<KeyT, ValueT, KeyComp>::insert(const KeyT &key,
+                                          const ValueT &value,
+                                          UNUSED Txn* txn)
 {
   if (is_empty()) {
     start_new_tree(key, value);
@@ -67,11 +71,12 @@ bool BTree::insert(const BTree::KeyT &key,
   return insert_into_leaf(key, value);
 }
 
-void BTree::start_new_tree(const BTree::KeyT &key,
-                           const BTree::ValueT &value)
+template<typename KeyT, typename ValueT, typename KeyComp>
+void BTree<KeyT, ValueT, KeyComp>::start_new_tree(const KeyT &key,
+                                                  const ValueT &value)
 {
   // create new node
-  auto node = new_node<BTreeLeafPage>();
+  auto node = new_node<LeafPageT>();
   // update root_page_id_
   root_page_id_ = node.page_id();
   update_root_page_id(true);
@@ -81,9 +86,10 @@ void BTree::start_new_tree(const BTree::KeyT &key,
   buff_mgr_.unpin(root_page_id_, false);
 }
 
-bool BTree::insert_into_leaf(const BTree::KeyT &key,
-                             const BTree::ValueT &value,
-                             Txn* txn)
+template<typename KeyT, typename ValueT, typename KeyComp>
+bool BTree<KeyT, ValueT, KeyComp>::insert_into_leaf(const KeyT &key,
+                                                    const ValueT &value,
+                                                    Txn* txn)
 {
   auto leaf_node = find_leaf_page(key);
   ValueT new_value;
@@ -100,7 +106,7 @@ bool BTree::insert_into_leaf(const BTree::KeyT &key,
     return true;
   }
 
-  auto new_leaf_node = split<BTreeLeafPage>(leaf_node);
+  auto new_leaf_node = split<LeafPageT>(leaf_node);
   if (comp_(key, new_leaf_node.key_at(0)) < 0) {
     leaf_node.insert(key, value, comp_);
   } else {
@@ -113,23 +119,25 @@ bool BTree::insert_into_leaf(const BTree::KeyT &key,
   return true;
 }
 
-template <typename NodeT>
-NodeT& BTree::split(NodeT &node) {
-  auto recipient = new_node<N>(node.parent_page_id());
+template<typename KeyT, typename ValueT, typename KeyComp>
+template<typename NodeT>
+NodeT BTree<KeyT, ValueT, KeyComp>::split(NodeT &node) {
+  auto recipient = new_node<NodeT>(node.parent_page_id());
   node.move_half_to(recipient, buff_mgr_);
   return recipient;
 }
 
-void BTree::insert_into_parent(BTreePage old_node,
-                               const BTree::KeyT &key,
-                               BTreePage new_node,
-                               Txn* txn)
+template<typename KeyT, typename ValueT, typename KeyComp>
+void BTree<KeyT, ValueT, KeyComp>::insert_into_parent(BTreePage& old_node,
+                                                      const KeyT &key,
+                                                      BTreePage& new_node,
+                                                      UNUSED Txn* txn)
 {
   if (old_node.is_root_page()) {
     // old_node is the root node
     // create a new node containing old_node,key,new_node
     auto parent_node =
-      new_node<BTreeInternalPage<KeyT, PageId, KeyComp>>();
+      BTree::new_node<InternalPageT>();
     parent_node.populate_new_root(old_node.page_id(), key,
                                   new_node.page_id());
 
@@ -147,8 +155,8 @@ void BTree::insert_into_parent(BTreePage old_node,
     return;
   }
 
-  auto parent_page = fetch_page(old_node.parent_page_id());
-  auto parent_node = BTreeInternalPage<KeyT, PageId, KeyComp>(parent_page.data());
+  auto parent_page_ptr = buff_mgr_.fetch_page(old_node.parent_page_id());
+  auto parent_node = BTreeInternalPage<KeyT, PageId, KeyComp>(parent_page_ptr);
 
   if (parent_node.size() < parent_node.max_size()) {
     // parent node is not full
@@ -161,8 +169,7 @@ void BTree::insert_into_parent(BTreePage old_node,
   }
   // parent node is full
   // split parent node
-  auto new_parent_node =
-    split<BTreeInternalPage<BTree::KeyT, PageId, KeyComp>>(parent_node);
+  auto new_parent_node = split<InternalPageT>(parent_node);
   // insert kv
   if (comp_(key, new_parent_node.key_at(1)) == -1) {
     parent_node.insert_node_after(old_node.page_id(), key,
@@ -183,8 +190,9 @@ void BTree::insert_into_parent(BTreePage old_node,
                      new_parent_node);
 }
 
-void BTree::remove(const BTree::KeyT &key,
-                   Txn* txn)
+template<typename KeyT, typename ValueT, typename KeyComp>
+void BTree<KeyT, ValueT, KeyComp>::remove(const KeyT &key,
+                                          Txn* txn)
 {
   if (is_empty()) {
     return;
@@ -198,8 +206,9 @@ void BTree::remove(const BTree::KeyT &key,
   }
 }
 
-template <typename NodeT>
-bool BTree::coalesce_or_redistribute(NodeT& node, Txn* txn)
+template<typename KeyT, typename ValueT, typename KeyComp>
+template<typename NodeT>
+bool BTree<KeyT, ValueT, KeyComp>::coalesce_or_redistribute(NodeT& node, Txn* txn)
 {
   if (node.is_root_page()) {
     return adjust_root(node);
@@ -210,19 +219,20 @@ bool BTree::coalesce_or_redistribute(NodeT& node, Txn* txn)
     return false;
   }
 
-  auto parent_page = fetch_page(node.parent_page_id());
-  auto parent = BTreeInternalPage<BTree::KeyT, PageId, BTree::KeyComp>(parent_page.data());
+  Page* sibling_page_ptr = nullptr;
+  auto parent_page_ptr = buff_mgr_.fetch_page(node.parent_page_id());
+  auto parent = InternalPageT(parent_page_ptr);
   int index = parent.value_index(node.page_id());
 
   if (index == 0) {
     // right sibling if node is the leftmost child
-    sibling_page = fetch_page(parent.value_at(index + 1));
+    sibling_page_ptr = buff_mgr_.fetch_page(parent.value_at(index + 1));
   } else {
     // left sibling if not
-    sibling_page = fetch_page(parent.value_at(index - 1));
+    sibling_page_ptr = buff_mgr_.fetch_page(parent.value_at(index - 1));
   }
 
-  sibling = NodeT(sibling_page.get_data());
+  auto sibling = NodeT(sibling_page_ptr);
   bool deletion;
   if (sibling.size() + node.size() > node.max_size()) {
     // redistribute
@@ -238,7 +248,7 @@ bool BTree::coalesce_or_redistribute(NodeT& node, Txn* txn)
     }
     else {
       // left sibling
-      coalesce(sibling, node, parent, index, transaction);
+      coalesce(sibling, node, parent, index, txn);
       buff_mgr_.unpin(sibling.page_id(), true);
     }
     deletion = true;
@@ -247,11 +257,13 @@ bool BTree::coalesce_or_redistribute(NodeT& node, Txn* txn)
   return deletion;
 }
 
+template<typename KeyT, typename ValueT, typename KeyComp>
 template <typename NodeT>
-bool BTree::coalesce(NodeT &neighbor,
-                     NodeT &node,
-                     BTreeInternalPage<BTree::KeyT, PageId, BTree::KeyComp> &parent,
-                     int32_t index)
+bool BTree<KeyT, ValueT, KeyComp>::coalesce(NodeT& neighbor,
+                                            NodeT& node,
+                                            InternalPageT &parent,
+                                            int32_t index,
+                                            UNUSED Txn* txn)
 {
   node.move_all_to(neighbor, index, buff_mgr_);
   parent.remove(index);
@@ -259,8 +271,13 @@ bool BTree::coalesce(NodeT &neighbor,
   return parent.size() == 0;
 }
 
-template <typename NodeT>
-void BTree::redistribute(NodeT& neighbor, NodeT& node, int32_t index) {
+template<typename KeyT, typename ValueT, typename KeyComp>
+template<typename NodeT>
+void BTree<KeyT, ValueT, KeyComp>::redistribute(NodeT& neighbor,
+                                                NodeT& node,
+                                                int32_t index,
+                                                UNUSED Txn *txn)
+{
   if (index == 0) {
     // neighbor_node is the right sibling of node
     neighbor.move_first_to_end_of(node, buff_mgr_);
@@ -270,12 +287,13 @@ void BTree::redistribute(NodeT& neighbor, NodeT& node, int32_t index) {
   }
 }
 
-bool BTree::adjust_root(BTreePage& old_root) {
+template<typename KeyT, typename ValueT, typename KeyComp>
+bool BTree<KeyT, ValueT, KeyComp>::adjust_root(BTreePage& old_root) {
   if (old_root.is_leaf_page()) {
     if (old_root.size() == 0) {
       // delete root page
       buff_mgr_.delete_page(root_page_id_);
-      root_page_id_ = INVALID_PAGE_ID;
+      root_page_id_ = PageId::INVALID();
       update_root_page_id();
       return true;
     }
@@ -285,26 +303,26 @@ bool BTree::adjust_root(BTreePage& old_root) {
   // old_root_node is a internal node
   if (old_root.size() == 1) {
     // has one last child
-    auto root = BTreeInternalPage<KeyT, PageId, KeyComp>(old_root);
-    auto child_page_id = root.valueAt(0);
+    auto root = InternalPageT(old_root);
+    auto child_page_id = root.value_at(0);
     // delete root page
     buff_mgr_.delete_page(root.page_id());
     // child node becomes the new root
     root_page_id_ = child_page_id;
     update_root_page_id();
-    auto child_page = fetch_page(child_page_id);
+    auto child_page = buff_mgr_.fetch_page(child_page_id);
     auto child = BTreePage(child_page.data());
-    child.set_parent_page_id(INVALID_PAGE_ID);
+    child.set_parent_page_id(PageId::INVALID());
     buff_mgr_.unpin(child.page_id(), true);
     return true;
   }
   return false;
 }
 
-IndexInterator BTree::begin() {
+template<typename KeyT, typename ValueT, typename KeyComp>
+IndexIterator<KeyT, ValueT, KeyComp> BTree<KeyT, ValueT, KeyComp>::begin() {
   KeyT k = {};
-  return IndexIterator<KeyT,ValueT,KeyComp>(find_leaf_page(k, true),
-                                            buff_mgr_, 0);
+  return IndexIteratorT(find_leaf_page(k, true), buff_mgr_, 0);
 }
 
 /*
@@ -313,23 +331,25 @@ IndexInterator BTree::begin() {
  * @return : index iterator
  */
 
-IndexIterator BTree::begin(const KeyT &key) {
+template<typename KeyT, typename ValueT, typename KeyComp>
+IndexIterator<KeyT, ValueT, KeyComp> BTree<KeyT, ValueT, KeyComp>::begin(const KeyT &key) {
   auto leaf_page = find_leaf_page(key);
   return IndexIterator<KeyT, ValueT, KeyComp>(leaf_page,
                                               buff_mgr_,
                                               leaf_page.key_index(key, comp_));
 }
 
-BTree::LeafPageT
-BTree::find_leaf_page(const KeyT &key,
-                      bool left_most)
+template<typename KeyT, typename ValueT, typename KeyComp>
+BTreeLeafPage<KeyT, ValueT, KeyComp>
+BTree<KeyT, ValueT, KeyComp>::find_leaf_page(const KeyT &key,
+                                             bool left_most)
 {
   PageId page_id = root_page_id_;
-  auto page_ptr = fetch_page(page_id);
+  auto page_ptr = buff_mgr_.fetch_page(page_id);
   auto b_tree_page = BTreePage(page_ptr);
 
   while (!b_tree_page.is_leaf_page()) {
-    auto internal_page = BTree::InternalPageT(page_ptr);
+    auto internal_page = InternalPageT(page_ptr);
     if (left_most) {
       page_id = internal_page.value_at(0);
     } else {
@@ -337,34 +357,41 @@ BTree::find_leaf_page(const KeyT &key,
     }
 
     buff_mgr_.unpin(internal_page.page_id(), false);
-    page_ptr = fetch_page(page_id);
+    page_ptr = buff_mgr_.fetch_page(page_id);
     b_tree_page = BTreePage(page_ptr);
   }
 
-  return BTreeLeafPage(page_ptr);
+  return BTree::LeafPageT(page_ptr);
 }
 
-void BTree::update_root_page_id(int32_t insert_record) {
-  auto page = buff_mgr_.fetch_page(HEADER_PAGE_ID);
-  auto header_page = HeaderPage(page);
-  if (insert_record) {
+template<typename KeyT, typename ValueT, typename KeyComp>
+void BTree<KeyT, ValueT, KeyComp>::update_root_page_id(UNUSED int32_t insert_record) {
+  // TODO: This is something that should be handled by SystemCatalog
+  // However, SystemCatalog itself needs a refactor. So holding off on this for now.
+
+  /*
+    auto page = buff_mgr_.fetch_page(HEADER_PAGE_ID);
+    auto header_page = HeaderPage(page);
+    if (insert_record) {
     // create a new record<index_name + root_page_id> in header_page
     header_page.insert_record(index_name_, root_page_id_);
-  } else {
+    } else {
     // update root_page_id in header_page
     header_page.update_record(index_name_, root_page_id_);
-  }
+    }
 
-  buff_mgr_.unpin(HEADER_PAGE_ID, true);
+    buff_mgr_.unpin(HEADER_PAGE_ID, true);
+   */
 }
 
-string BTree::to_string(bool verbose) {
+template<typename KeyT, typename ValueT, typename KeyComp>
+const string BTree<KeyT, ValueT, KeyComp>::to_string(bool verbose) const {
   if (is_empty()) {
     return "Empty Tree";
   }
 
-  queue<BTreePage> queue;
-  auto root_page_ptr = fetch_page(root_page_id_);
+  std::queue<BTreePage> queue;
+  auto root_page_ptr = buff_mgr_.fetch_page(root_page_id_);
   queue.push(BTreePage(root_page_ptr));
   string output;
   int32_t total_size = 1;
@@ -374,12 +401,12 @@ string BTree::to_string(bool verbose) {
       auto front = queue.front();
       queue.pop();
       if (front.is_leaf_page()) {
-        output += "| parent_id(" + std::to_string(front.parent_page_id()) + ") ";
-        output += BTree::LeafPageT(front.page_ptr()).to_string(verbose);
+        output += "| parent_id(" + front.parent_page_id().to_string() + ") ";
+        output += LeafPageT(front.page_ptr()).to_string(verbose);
         output += "| ";
       } else {
-        auto node = BTree::InternalPageT(front.page_ptr());
-        output += "| page_id(" + std::to_string(front.page_id()) + ") ";
+        auto node = InternalPageT(front.page_ptr());
+        output += "| page_id(" + front.page_id().to_string() + ") ";
         output += node.to_string(verbose);
         output += "| ";
         int32_t origin_size = queue.size();
@@ -394,9 +421,11 @@ string BTree::to_string(bool verbose) {
   return output;
 }
 
-void BTree::insert_from_file(const string &file_name, Txn* txn) {
+// TODO: Convert this to use FileHandle
+template<typename KeyT, typename ValueT, typename KeyComp>
+void BTree<KeyT, ValueT, KeyComp>::insert_from_file(const string &file_name, Txn* txn) {
   int64_t key;
-  ifstream input(file_name);
+  fstream input(file_name);
   while (input) {
     input >> key;
     KeyT index_key;
@@ -405,14 +434,14 @@ void BTree::insert_from_file(const string &file_name, Txn* txn) {
     insert(index_key, rid, txn);
   }
 }
-/*
- * This method is used for test only
- * Read data from file and remove one by one
- */
-void BTree::remove_from_file(const string &file_name,
-                             Txn* txn) {
+
+// TODO: Convert this to use FileHandle
+template<typename KeyT, typename ValueT, typename KeyComp>
+void BTree<KeyT, ValueT, KeyComp>::remove_from_file(const string &file_name,
+                                                    Txn* txn)
+{
   int64_t key;
-  ifstream input(file_name);
+  fstream input(file_name);
   while (input) {
     input >> key;
     KeyT index_key;
@@ -421,29 +450,18 @@ void BTree::remove_from_file(const string &file_name,
   }
 }
 
-Page *BTree::fetch_page(PageId page_id) {
-  auto ptr = buff_mgr_.fetch_page(page_id);
-  if (ptr == nullptr)
-    throw std::runtime_error("fail to fetch page");
-  return ptr;
-}
-
-Page *BTree::new_page(page_id_t &page_id) {
-  auto ptr = buff_mgr_.new_page(page_id);
-  if (ptr == nullptr)
-    throw std::runtime_error("run out of memory");
-  return ptr;
-}
-
+template<typename KeyT, typename ValueT, typename KeyComp>
 template<typename NodeT>
-NodeT BTree::new_node() {
+NodeT BTree<KeyT, ValueT, KeyComp>::new_node() {
   return new_node<NodeT>(PageId::INVALID());
 }
 
+template<typename KeyT, typename ValueT, typename KeyComp>
 template<typename NodeT>
-NodeT BTree::new_node(PageId parent_id) {
-  PageId new_page_id;
-  Page *page_ptr = new_page(new_page_id);
+NodeT BTree<KeyT, ValueT, KeyComp>::new_node(PageId parent_id) {
+  PageId new_page_id(file_id_, max_block_num_);
+  max_block_num_++;
+  auto page_ptr = buff_mgr_.fetch_page(new_page_id);
   auto node = NodeT(page_ptr);
   node.init(new_page_id, parent_id);
   return node;
