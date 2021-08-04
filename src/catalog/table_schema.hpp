@@ -16,9 +16,10 @@
 
 class TableSchema : public BaseSchema<TableColumn> {
 public:
+  using column_offset_t = int32_t;
+
   TableSchema(vector<TableColumn> columns,
               const table_name_t& table_name,
-              const string& primary_key,
               table_oid_t table_oid);
 
   // Allow copy
@@ -48,8 +49,20 @@ public:
   }
 
 private:
-  primary_key_t autoincrement_ = 1;
-  string primary_key_;
+  // TODO: This should be a mapping from the column offset to the actual autoincrement value
+  // TODO: Add a mutex around this.
+  map<column_offset_t, int32_t> autoincrement_values_;
+
+  // TODO: This is a list of column offsets. If a column offset exists here, it should be
+  // considered a primary key.
+  // TODO: Add a mutex around this.
+  vector<column_offset_t> primary_keys_;
+
+  // TODO: This is a list of column offsets. If a column offset exists here, it should always
+  // be updating the corresponding autoincrement value.
+  // TODO: Add a mutex around this.
+  vector<column_offset_t> autoincrements_;
+
   table_oid_t table_oid_;
   table_name_t table_name_;
 };

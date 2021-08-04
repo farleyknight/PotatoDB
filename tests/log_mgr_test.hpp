@@ -3,8 +3,6 @@
 #include "recovery/log_mgr.hpp"
 #include "recovery/log_record.hpp"
 
-#include "gtest/gtest.h"
-
 class LogMgrSerialization : public ::testing::Test {
 public:
   LogMgrSerialization()

@@ -14,19 +14,19 @@ void Page::write_lsn(lsn_t lsn) {
   buffer_.write_int32(OFFSET_LSN, lsn);
 }
 
-int32_t Page::read_int32(size_t offset) const {
+int32_t Page::read_int32(buffer_offset_t offset) const {
   return buffer_.read_int32(offset);
 }
 
-void Page::write_int32(size_t offset, int32_t data) {
+void Page::write_int32(buffer_offset_t offset, int32_t data) {
   buffer_.write_int32(offset, data);
 }
 
-PageId Page::read_page_id(size_t offset) const {
+PageId Page::read_page_id(buffer_offset_t offset) const {
   return PageId::from(buffer_.read_int32(offset));
 }
 
-void Page::write_page_id(size_t offset, PageId page_id) {
+void Page::write_page_id(buffer_offset_t offset, PageId page_id) {
   buffer_.write_int32(offset, page_id.as_int32());
 }
 

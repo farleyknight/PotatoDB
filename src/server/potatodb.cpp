@@ -84,7 +84,7 @@ StatementResult PotatoDB::run(const string& statement) {
       logger->debug("[PotatoDB] Returning result set");
       return StatementResult(move(result_set));
     } else if (plan->type() == PlanType::CREATE_TABLE) {
-      // CREATE TABLE``
+      // CREATE TABLE
       auto create_table_plan = dynamic_cast<CreateTablePlan*>(plan.get());
       auto table_name        = create_table_plan->table_name();
       auto column_list       = create_table_plan->column_list().list();

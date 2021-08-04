@@ -132,12 +132,9 @@ public:
   }
 
 private:
-  // Name of the column
   column_name_t name_;
-  // value type of column
   TypeId type_id_ = TypeId::INVALID;
 
-  // IDs for table and column
   table_oid_t table_oid_;
   column_oid_t column_oid_;
 

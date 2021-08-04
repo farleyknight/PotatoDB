@@ -20,13 +20,11 @@
 // https://www.reddit.com/r/programming/comments/oum0wa/path_hints_for_btrees_can_bring_a_performance/
 
 
-template<typename KeyT, typename ValueT, typename KeyComp>
-BTree<KeyT, ValueT, KeyComp>::BTree(const string index_name,
+template<class KeyT, class ValueT, class KeyComp>
+BTree<KeyT, ValueT, KeyComp>::BTree(file_id_t file_id,
+                                    const string index_name,
                                     BuffMgr& buff_mgr,
-                                    const KeyComp& comp,
-                                    file_id_t file_id,
-                                    int32_t leaf_size,
-                                    int32_t internal_size)
+             const KeyComp& comp)
   : index_name_    (index_name),
     buff_mgr_      (buff_mgr),
     comp_          (comp),
@@ -35,12 +33,12 @@ BTree<KeyT, ValueT, KeyComp>::BTree(const string index_name,
     internal_size_ (internal_size)
 {}
 
-template<typename KeyT, typename ValueT, typename KeyComp>
+template<class KeyT, class ValueT, class KeyComp>
 bool BTree<KeyT, ValueT, KeyComp>::is_empty() const {
   return root_page_id_ == PageId::INVALID();
 }
 
-template<typename KeyT, typename ValueT, typename KeyComp>
+template<class KeyT, class ValueT, class KeyComp>
 vector<ValueT> BTree<KeyT, ValueT, KeyComp>::find_values(const KeyT &key,
                                                          UNUSED Txn* txn)
 {
@@ -59,7 +57,7 @@ vector<ValueT> BTree<KeyT, ValueT, KeyComp>::find_values(const KeyT &key,
   return result;
 }
 
-template<typename KeyT, typename ValueT, typename KeyComp>
+template<class KeyT, class ValueT, class KeyComp>
 bool BTree<KeyT, ValueT, KeyComp>::insert(const KeyT &key,
                                           const ValueT &value,
                                           UNUSED Txn* txn)
@@ -71,7 +69,7 @@ bool BTree<KeyT, ValueT, KeyComp>::insert(const KeyT &key,
   return insert_into_leaf(key, value);
 }
 
-template<typename KeyT, typename ValueT, typename KeyComp>
+template<class KeyT, class ValueT, class KeyComp>
 void BTree<KeyT, ValueT, KeyComp>::start_new_tree(const KeyT &key,
                                                   const ValueT &value)
 {
@@ -86,7 +84,7 @@ void BTree<KeyT, ValueT, KeyComp>::start_new_tree(const KeyT &key,
   buff_mgr_.unpin(root_page_id_, false);
 }
 
-template<typename KeyT, typename ValueT, typename KeyComp>
+template<class KeyT, class ValueT, class KeyComp>
 bool BTree<KeyT, ValueT, KeyComp>::insert_into_leaf(const KeyT &key,
                                                     const ValueT &value,
                                                     Txn* txn)
@@ -119,15 +117,15 @@ bool BTree<KeyT, ValueT, KeyComp>::insert_into_leaf(const KeyT &key,
   return true;
 }
 
-template<typename KeyT, typename ValueT, typename KeyComp>
-template<typename NodeT>
+template<class KeyT, class ValueT, class KeyComp>
+template<class NodeT>
 NodeT BTree<KeyT, ValueT, KeyComp>::split(NodeT &node) {
   auto recipient = new_node<NodeT>(node.parent_page_id());
   node.move_half_to(recipient, buff_mgr_);
   return recipient;
 }
 
-template<typename KeyT, typename ValueT, typename KeyComp>
+template<class KeyT, class ValueT, class KeyComp>
 void BTree<KeyT, ValueT, KeyComp>::insert_into_parent(BTreePage& old_node,
                                                       const KeyT &key,
                                                       BTreePage& new_node,
@@ -190,7 +188,7 @@ void BTree<KeyT, ValueT, KeyComp>::insert_into_parent(BTreePage& old_node,
                      new_parent_node);
 }
 
-template<typename KeyT, typename ValueT, typename KeyComp>
+template<class KeyT, class ValueT, class KeyComp>
 void BTree<KeyT, ValueT, KeyComp>::remove(const KeyT &key,
                                           Txn* txn)
 {
@@ -206,8 +204,8 @@ void BTree<KeyT, ValueT, KeyComp>::remove(const KeyT &key,
   }
 }
 
-template<typename KeyT, typename ValueT, typename KeyComp>
-template<typename NodeT>
+template<class KeyT, class ValueT, class KeyComp>
+template<class NodeT>
 bool BTree<KeyT, ValueT, KeyComp>::coalesce_or_redistribute(NodeT& node, Txn* txn)
 {
   if (node.is_root_page()) {
@@ -257,8 +255,8 @@ bool BTree<KeyT, ValueT, KeyComp>::coalesce_or_redistribute(NodeT& node, Txn* tx
   return deletion;
 }
 
-template<typename KeyT, typename ValueT, typename KeyComp>
-template <typename NodeT>
+template<class KeyT, class ValueT, class KeyComp>
+template <class NodeT>
 bool BTree<KeyT, ValueT, KeyComp>::coalesce(NodeT& neighbor,
                                             NodeT& node,
                                             InternalPageT &parent,
@@ -271,8 +269,8 @@ bool BTree<KeyT, ValueT, KeyComp>::coalesce(NodeT& neighbor,
   return parent.size() == 0;
 }
 
-template<typename KeyT, typename ValueT, typename KeyComp>
-template<typename NodeT>
+template<class KeyT, class ValueT, class KeyComp>
+template<class NodeT>
 void BTree<KeyT, ValueT, KeyComp>::redistribute(NodeT& neighbor,
                                                 NodeT& node,
                                                 int32_t index,
@@ -287,7 +285,7 @@ void BTree<KeyT, ValueT, KeyComp>::redistribute(NodeT& neighbor,
   }
 }
 
-template<typename KeyT, typename ValueT, typename KeyComp>
+template<class KeyT, class ValueT, class KeyComp>
 bool BTree<KeyT, ValueT, KeyComp>::adjust_root(BTreePage& old_root) {
   if (old_root.is_leaf_page()) {
     if (old_root.size() == 0) {
@@ -319,7 +317,7 @@ bool BTree<KeyT, ValueT, KeyComp>::adjust_root(BTreePage& old_root) {
   return false;
 }
 
-template<typename KeyT, typename ValueT, typename KeyComp>
+template<class KeyT, class ValueT, class KeyComp>
 IndexIterator<KeyT, ValueT, KeyComp> BTree<KeyT, ValueT, KeyComp>::begin() {
   KeyT k = {};
   return IndexIteratorT(find_leaf_page(k, true), buff_mgr_, 0);
@@ -331,7 +329,7 @@ IndexIterator<KeyT, ValueT, KeyComp> BTree<KeyT, ValueT, KeyComp>::begin() {
  * @return : index iterator
  */
 
-template<typename KeyT, typename ValueT, typename KeyComp>
+template<class KeyT, class ValueT, class KeyComp>
 IndexIterator<KeyT, ValueT, KeyComp> BTree<KeyT, ValueT, KeyComp>::begin(const KeyT &key) {
   auto leaf_page = find_leaf_page(key);
   return IndexIterator<KeyT, ValueT, KeyComp>(leaf_page,
@@ -339,7 +337,7 @@ IndexIterator<KeyT, ValueT, KeyComp> BTree<KeyT, ValueT, KeyComp>::begin(const K
                                               leaf_page.key_index(key, comp_));
 }
 
-template<typename KeyT, typename ValueT, typename KeyComp>
+template<class KeyT, class ValueT, class KeyComp>
 BTreeLeafPage<KeyT, ValueT, KeyComp>
 BTree<KeyT, ValueT, KeyComp>::find_leaf_page(const KeyT &key,
                                              bool left_most)
@@ -364,7 +362,7 @@ BTree<KeyT, ValueT, KeyComp>::find_leaf_page(const KeyT &key,
   return BTree::LeafPageT(page_ptr);
 }
 
-template<typename KeyT, typename ValueT, typename KeyComp>
+template<class KeyT, class ValueT, class KeyComp>
 void BTree<KeyT, ValueT, KeyComp>::update_root_page_id(UNUSED int32_t insert_record) {
   // TODO: This is something that should be handled by SystemCatalog
   // However, SystemCatalog itself needs a refactor. So holding off on this for now.
@@ -384,7 +382,7 @@ void BTree<KeyT, ValueT, KeyComp>::update_root_page_id(UNUSED int32_t insert_rec
    */
 }
 
-template<typename KeyT, typename ValueT, typename KeyComp>
+template<class KeyT, class ValueT, class KeyComp>
 const string BTree<KeyT, ValueT, KeyComp>::to_string(bool verbose) const {
   if (is_empty()) {
     return "Empty Tree";
@@ -422,7 +420,7 @@ const string BTree<KeyT, ValueT, KeyComp>::to_string(bool verbose) const {
 }
 
 // TODO: Convert this to use FileHandle
-template<typename KeyT, typename ValueT, typename KeyComp>
+template<class KeyT, class ValueT, class KeyComp>
 void BTree<KeyT, ValueT, KeyComp>::insert_from_file(const string &file_name, Txn* txn) {
   int64_t key;
   fstream input(file_name);
@@ -436,7 +434,7 @@ void BTree<KeyT, ValueT, KeyComp>::insert_from_file(const string &file_name, Txn
 }
 
 // TODO: Convert this to use FileHandle
-template<typename KeyT, typename ValueT, typename KeyComp>
+template<class KeyT, class ValueT, class KeyComp>
 void BTree<KeyT, ValueT, KeyComp>::remove_from_file(const string &file_name,
                                                     Txn* txn)
 {
@@ -450,14 +448,14 @@ void BTree<KeyT, ValueT, KeyComp>::remove_from_file(const string &file_name,
   }
 }
 
-template<typename KeyT, typename ValueT, typename KeyComp>
-template<typename NodeT>
+template<class KeyT, class ValueT, class KeyComp>
+template<class NodeT>
 NodeT BTree<KeyT, ValueT, KeyComp>::new_node() {
   return new_node<NodeT>(PageId::INVALID());
 }
 
-template<typename KeyT, typename ValueT, typename KeyComp>
-template<typename NodeT>
+template<class KeyT, class ValueT, class KeyComp>
+template<class NodeT>
 NodeT BTree<KeyT, ValueT, KeyComp>::new_node(PageId parent_id) {
   PageId new_page_id(file_id_, max_block_num_);
   max_block_num_++;

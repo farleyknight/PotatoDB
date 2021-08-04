@@ -10,12 +10,13 @@ public:
   // Read the same comment for GenericKey.
   static constexpr int KEY_SIZE = 8;
 
-  GenericComp(const GenericComp& other) : key_schema_{other.key_schema_} {}
+  explicit GenericComp(const QuerySchema& key_schema)
+    : key_schema_ (key_schema)
+  {}
 
-  // constructor
-  // TODO: Eventually create IndexSchema for this case
-  explicit GenericComp(const QuerySchema& key_schema) :
-    key_schema_(key_schema) {}
+  GenericComp(const GenericComp& other)
+    : key_schema_ (other.key_schema_)
+  {}
 
   int operator()(GenericKey lhs, GenericKey rhs) const override {
     uint32_t column_count = key_schema_.column_count();

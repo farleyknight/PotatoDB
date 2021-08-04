@@ -71,34 +71,20 @@ void DiskMgr::setup_log_file() {
   }
 }
 
-file_id_t DiskMgr::create_table_file(const string& table_name) {
-  return file_mgr_.create_file(table_file_for(table_name));
-}
-
-file_id_t DiskMgr::load_table_file(const string& table_name) {
-  return file_mgr_.load_file(table_file_for(table_name));
-}
-
-fs::path DiskMgr::table_file_for(const string& table_name) const {
-  return file_path_for(table_name + ".tbl");
-}
-
 void DiskMgr::setup_db_directory() {
   fs::current_path(home_path());
   fs::create_directory(".potatodb");
   fs::current_path(home_path() / ".potatodb");
 }
 
+// TODO: All of these methods are just delegating to `file_mgr_`
+// Let's just cut out the middle-man here.
 PageId DiskMgr::allocate_page(file_id_t file_id) {
   return file_mgr_.allocate_page(file_id);
 }
 
 PageId DiskMgr::first_page(file_id_t file_id) {
   return file_mgr_.first_page(file_id);
-}
-
-void DiskMgr::deallocate_page(PageId page_id) {
-  file_mgr_.deallocate_page(page_id);
 }
 
 void DiskMgr::write_page(PageId page_id, const Page& page) {

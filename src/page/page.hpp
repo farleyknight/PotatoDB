@@ -6,14 +6,15 @@
 #include "common/config.hpp"
 
 #include "buffer/buffer.hpp"
-
 #include "page/page_id.hpp"
-
 #include "txns/rw_latch.hpp"
 
 class Page {
 public:
-  // TODO: Maybe this constructor can take a `move`-ed chunk of data
+  static constexpr size_t OFFSET_PAGE_START = 0;
+  static constexpr size_t OFFSET_LSN = 4;
+  static constexpr size_t SIZE_PAGE_HEADER = 8;
+
   Page();
 
   // No copy
@@ -33,6 +34,8 @@ public:
 
   void reset_memory();
 
+  // TODO: Remove this.
+  // Replace it with `read/write_tuple` and `read/write_buffer`
   void copy_n_bytes(size_t source_offset,
                     size_t dest_offset,
                     const Buffer& source,
@@ -72,8 +75,8 @@ public:
   lsn_t read_lsn() const;
   void write_lsn(lsn_t lsn);
 
-  int32_t read_int32(size_t offset) const;
-  void write_int32(size_t offset, int32_t data);
+  int32_t read_int32(buffer_offset_t offset) const;
+  void write_int32(buffer_offset_t offset, int32_t data);
 
   void set_dirty(bool dirty) {
     is_dirty_ = dirty;
@@ -83,18 +86,14 @@ public:
     return is_dirty_;
   }
 
-  PageId read_page_id(size_t offset) const;
-  void write_page_id(size_t offset, PageId page_id);
+  PageId read_page_id(buffer_offset_t offset) const;
+  void write_page_id(buffer_offset_t offset, PageId page_id);
 
   void wlatch();
   void wunlatch();
 
   void rlatch();
   void runlatch();
-
-  static constexpr size_t SIZE_PAGE_HEADER = 8;
-  static constexpr size_t OFFSET_PAGE_START = 0;
-  static constexpr size_t OFFSET_LSN = 4;
 
 private:
   PageId  page_id_ = PageId::INVALID();

@@ -29,9 +29,9 @@ static constexpr lsn_t        INVALID_LSN       = -1;
 
 // Pages are 4KB in size, which should be standard for most DBMSs
 static constexpr page_id_t    HEADER_PAGE_ID = 0;
-static constexpr int          PAGE_SIZE = 4096;
-static constexpr int          BUFFER_POOL_SIZE = 10;
-static constexpr int          LOG_BUFFER_SIZE = ((BUFFER_POOL_SIZE + 1) * PAGE_SIZE);
-static constexpr int          LEAF_PAGE_HEADER_SIZE = 28;
+static constexpr int32_t      PAGE_SIZE             = 4096;
+static constexpr int32_t      BUFFER_POOL_SIZE      = 10;
+static constexpr int32_t      LOG_BUFFER_SIZE       = ((BUFFER_POOL_SIZE + 1) * PAGE_SIZE);
+static constexpr int32_t      LEAF_PAGE_HEADER_SIZE = 28;
 
 static constexpr int          MAX_VARCHAR_SIZE = 128;

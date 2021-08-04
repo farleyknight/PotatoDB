@@ -10,14 +10,29 @@
 
 TableSchema::TableSchema(vector<TableColumn> columns,
                          const table_name_t& table_name,
-                         const string& primary_key,
                          table_oid_t table_oid)
   : BaseSchema   (columns),
-    primary_key_ (primary_key),
     table_oid_   (table_oid),
     table_name_  (table_name)
-{}
+{
+  // NOTE: Let's make the constructor arguments as simple as possible
+  // by moving this logic into the constructor instead of expecting
+  // the caller to do it.
 
+  for (int32_t i = 0; i < columns_.size(): ++i) {
+    if (columns_[i].is_primary_key()) {
+      primary_keys_.push_back(i);
+    }
+
+    if (columns_[i].is_autoincrement()) {
+      autoincrements_.push_back(i);
+    }
+  }
+
+  for (const auto offset : autoincrements) {
+    autoincrement_values_[offset] = 0;
+  }
+}
 
 QueryColumn TableSchema::operator[](const column_name_t& col_name) const {
   if (!has_column(col_name)) {
@@ -56,7 +71,7 @@ TableSchema::defaults(const vector<TableColumn>& cols) {
   for (const auto& col : cols) {
     // TODO: The only kind of DEFAULT we handle is PRIMARY KEY AUTOINCREMENT
     // In the future, we should handle all DEFAULTs here..
-    if (col.name() == primary_key_) {
+    if (col.is_autoincrement()) {
       // std::cout << "AUTO INCREMENT value " << autoincrement_ << std::endl;
       auto value = Value::make(static_cast<int32_t>(autoincrement_));
       ++autoincrement_;

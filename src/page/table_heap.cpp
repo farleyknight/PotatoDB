@@ -38,7 +38,9 @@ SlottedTablePage TableHeap::first_page(Txn& txn) {
   return first_page;
 }
 
-void TableHeap::allocate_first_page(Txn& txn) {
+// TODO: Maybe this is too low-level?
+// Maybe put this in FileMgr?
+void TableHeap::DEPRECATED_allocate_first_page(Txn& txn) {
   auto first_page_ptr = buff_mgr_.fetch_page(first_page_id_);
   assert(first_page_ptr != nullptr);
   auto first_page = SlottedTablePage(first_page_ptr, txn, log_mgr_, lock_mgr_);

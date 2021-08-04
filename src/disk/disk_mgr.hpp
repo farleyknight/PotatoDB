@@ -37,40 +37,12 @@ public:
   void deallocate_page(PageId page_id);
 
   void shutdown() {
-    // TODO Close all file handles, not just the log file
+    // TODO Close all file handles, not just the log 
     log_io_.close();
   }
 
-  fs::path file_path_for(const string& file_name) const {
-    return db_directory() / file_name;
-  }
 
   fs::path table_file_for(const string& table_name) const;
-
-  bool file_exists(const string& file_name) const {
-    return file_mgr_.file_exists(file_name);
-  }
-
-  bool table_file_exists(const string& table_name) const {
-    logger->debug("[DiskMgr] Checking if there is a table file for : " + table_name);
-    return file_mgr_.file_exists(table_file_for(table_name));
-  }
-
-  void remove_all_files() {
-    auto iter = fs::directory_iterator(db_directory());
-    for (const auto &entry : iter) {
-      file_mgr_.remove_file(entry.path());
-    }
-  }
-
-  void remove_table_files() {
-    auto iter = fs::directory_iterator(db_directory());
-    for (const auto &entry : iter) {
-      if (entry.path().extension() == ".tbl") {
-        file_mgr_.remove_file(entry.path());
-      }
-    }
-  }
 
   void setup_log_file();
   void setup_db_directory();
@@ -79,26 +51,6 @@ public:
   void truncate_log_file();
 
 private:
-  fs::path main_file_name() const {
-    return db_directory() / "database.db";
-  }
-
-  fs::path config_file_name() const {
-    return db_directory() / "potatodb.yml";
-  }
-
-  fs::path log_file_name() const {
-    return db_directory() / "database.log";
-  }
-
-  fs::path db_directory() const {
-    return home_path() / ".potatodb";
-  }
-
-  fs::path home_path() const {
-    return std::getenv("HOME");
-  }
-
   FileMgr& file_mgr_;
   fstream log_io_;
 

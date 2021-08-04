@@ -19,8 +19,8 @@ BuffMgr::BuffMgr(int32_t pool_size,
   replacer_ = make_unique<ClockReplacer>(pool_size);
   // replacer_ = make_unique<LRUReplacer>(pool_size);
 
-  for (size_t i = 0; i < pool_size; ++i) {
-    free_list_.emplace_back(static_cast<int32_t>(i));
+  for (int32_t i = 0; i < pool_size; ++i) {
+    free_list_.emplace_back(i);
   }
 }
 

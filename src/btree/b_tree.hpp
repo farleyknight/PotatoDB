@@ -22,7 +22,7 @@
  * (4) Implement index iterator for range scan
  */
 
-template<typename KeyT, typename ValueT, typename KeyComp>
+template<class KeyT, class ValueT, class KeyComp>
 class BTree {
 public:
   using MappingT       = pair<KeyT, ValueT>;
@@ -80,10 +80,10 @@ public:
   // expose for test purpose
   LeafPageT find_leaf_page(const KeyT& key, bool left_most = false);
 
-  template<typename NodeT>
+  template<class NodeT>
   NodeT new_node();
 
-  template<typename NodeT>
+  template<class NodeT>
   NodeT new_node(PageId parent_id);
 
 private:
@@ -100,20 +100,20 @@ private:
                           BTreePage& new_node,
                           Txn *txn = nullptr);
 
-  template <typename NodeT>
+  template <class NodeT>
   NodeT split(NodeT &node);
 
-  template <typename NodeT>
+  template <class NodeT>
   bool coalesce_or_redistribute(NodeT &node, Txn *txn = nullptr);
 
-  template <typename NodeT>
+  template <class NodeT>
   bool coalesce(NodeT &neighbor,
                 NodeT &node,
                 InternalPageT& parent,
                 int index,
                 Txn *txn = nullptr);
 
-  template <typename NodeT>
+  template <class NodeT>
   void redistribute(NodeT& neighbor,
                     NodeT& node,
                     int32_t index,

@@ -25,8 +25,6 @@ public:
   // No copy assign
   TableHeap& operator=(const TableHeap&) = delete;
 
-  void allocate_first_page(Txn& txn);
-
   const PageId first_page_id() const {
     return first_page_id_;
   }
@@ -49,7 +47,7 @@ public:
   BuffMgr& buff_mgr() { return buff_mgr_; }
 
   SlottedTablePage first_page(Txn& txn);
-  
+
 private:
   file_id_t file_id_;
   table_oid_t table_oid_;

@@ -1,20 +1,17 @@
 
 
-# Removing `vcpkg`
+# Adding B-Trees
 
-* Delete `vcpkg.json`
-* Delete `vcpkg-manifest-install.log`
-* Remove GitHub action for `vcpkg`
+While working on B-Trees, I'm hitting some other issues:
 
-# Setting up `conan`
+* The metadata for tables is kept in a separate table altogether
+  - This was fine to start, but I'm realizing it's not a good pattern
+  - I don't want to copy this pattern for indexes
+  - NEW DESIGN:
+    - The first block of every table file has the metadata for that table.
+    - Merge TableMgr into FileMgr.
+    - SystemCatalog should NOT use DB queries, but instead hold metadata from table directly.
+    - All stuff about the system catalog is held in memory.
+    - Allowing SQL to query the system catalog is something we need to figure out in time
+    - This should SPEED UP the time it takes to load the system catalog.
 
-* Add `conan` GitHub action.
-* We now "own" `antlr4/conanfile.py`
-  - Came from: https://github.com/Eric-Song-Nop/conan-antlr4
-  - TODO: Give credit to above author.
-  - TODO: Document that this package must be built locally to properly build PotatoDB.
-* We need something similar for `murmurhash3`
-  - There is already `libmurmurhash`
-    - https://github.com/kloetzl/libmurmurhash
-  - TODO: Convert it into a `conanfile.py` using the `Autotools` functionality in conan
-    - https://docs.conan.io/en/1.36/reference/build_helpers/autotools.html

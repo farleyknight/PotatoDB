@@ -36,30 +36,40 @@ void FileMgr::read_buffer(PageId page_id, Buffer& buffer) {
 // 2) keep track of all file_ids
 // 3) on each call to `allocate_path`, increment a counter just for
 //    that particular file_id
-PageId FileMgr::allocate_page(file_id_t file_id) {
+PageId FileMgr::allocate_new_page(file_id_t file_id) {
   // TODO! Implement in "CREATE TABLE"
   // or "CREATE INDEX" context.
 
   if (next_block_ids_.count(file_id) == 0) {
-    next_block_ids_[file_id] = 0;
+    next_block_ids_[file_id] = TABLE_CONTENT_BLOCK_NUM;
   } else {
     next_block_ids_[file_id]++;
   }
 
+  files_[file_id]->grow(next_block_ids_[file_id] * PAGE_SIZE);
+
   return PageId(file_id, next_block_ids_[file_id]);
 }
 
-PageId FileMgr::first_page(file_id_t file_id) {
+PageId FileMgr::first_table_page(file_id_t file_id) {
   assert(next_block_ids_.count(file_id) == 0);
-  next_block_ids_[file_id] = 0;
+  next_block_ids_[file_id] = TABLE_CONTENT_BLOCK_NUM;
   return PageId(file_id, next_block_ids_[file_id]);
 }
 
-void FileMgr::deallocate_page(UNUSED PageId page_id) {
+PageId FileMgr::table_header(file_id_t file_id) {
+  return PageId(file_id, TABLE_HEADER_BLOCK_NUM);
+}
+
+void FileMgr::deallocate_existing_page(file_id_t file_id, PageId page_id) {
   /*
    * Deallocate page (operations like drop index/table)
    * Need bitmap in header page for tracking pages
-   * This does not actually need to do anything for now.
    */
   // TODO! Implement in "DROP TABLE" or "DROP INDEX" context.
+
+  assert(next_block_ids_[file_id] < page_id.block_id());
+  auto new_size = (page_id.block_id() + 1) * PAGE_SIZE;
+
+  files_[file_id]->shrink(new_size);
 }
