@@ -10,12 +10,12 @@
 
 class LogRecovery {
  public:
-  LogRecovery(DiskMgr& disk_mgr,
+  LogRecovery(FileMgr& file_mgr,
               BuffMgr& buff_mgr,
               LogMgr& log_mgr,
               LockMgr& lock_mgr,
               Txn& txn)
-    : disk_mgr_   (disk_mgr),
+    : file_mgr_   (file_mgr),
       buff_mgr_   (buff_mgr),
       log_mgr_    (log_mgr),
       lock_mgr_   (lock_mgr),
@@ -37,7 +37,7 @@ class LogRecovery {
   bool deserialize_log_record(LogRecord& log);
 
 private:
-  DiskMgr& disk_mgr_;
+  FileMgr& file_mgr_;
   BuffMgr& buff_mgr_;
   LogMgr& log_mgr_;
   LockMgr& lock_mgr_;

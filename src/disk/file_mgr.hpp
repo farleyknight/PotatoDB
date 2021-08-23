@@ -3,24 +3,54 @@
 #include <iostream>
 
 #include "disk/file_handle.hpp"
+
 #include "page/page_id.hpp"
+#include "page/page.hpp"
+#include "recovery/log_file_cursor.hpp"
 
 class FileMgr {
 public:
   static constexpr int32_t TABLE_HEADER_BLOCK_NUM = 0;
   static constexpr int32_t TABLE_CONTENT_BLOCK_NUM = 1;
 
-  FileMgr() {}
+  FileMgr() {
+    setup_db_directory();
+    create_log_file();
+  }
 
   void write_buffer(PageId page_id, const Buffer& buffer);
   void read_buffer(PageId page_id, Buffer& buffer);
 
   void deallocate_page(PageId page_id);
   PageId allocate_page(file_id_t file_id);
-  PageId first_table_page(file_id_t file_id);
+
+
+  // NOTE: table_header_page returns a PageId
+  //
+  // This is essentially the first block of the .tbl file
+  //
+  // This is also where we store the schema for the SQL table itself.
+  // We load up the schema into in-memory data structures (maps and vectors)
+  // and do any SQL queries by looking at values in those.
+  //
+  // Therefore, we must read each page once during system start-up.
+  //
+  static PageId table_header_page(file_id_t file_id);
+  static PageId first_table_page(file_id_t file_id);
 
   file_id_t create_table_file(const string& table_name) {
     return create_file(table_file_for(table_name));
+  }
+
+  void setup_db_directory() {
+    fs::current_path(home_path());
+    fs::create_directory(".potatodb");
+    fs::current_path(home_path() / ".potatodb");
+  }
+
+  void shutdown() {
+    // TODO Close all file handles, not just the log 
+    log_file_->close();
   }
 
   file_id_t create_index_file(const string& table_name) {
@@ -70,18 +100,12 @@ public:
     return db_directory() / "database.log";
   }
 
+  void write_log(const Buffer& log_data, buffer_offset_t offset);
+  bool read_log(LogFileCursor& cursor);
+
   bool table_file_exists(const string& table_name) const {
     logger->debug("[DiskMgr] Checking if there is a table file for : " + table_name);
     return file_exists(table_file_for(table_name));
-  }
-
-  void remove_table_files() {
-    auto iter = fs::directory_iterator(db_directory());
-    for (const auto &entry : iter) {
-      if (entry.path().extension() == ".tbl") {
-        remove_file(entry.path());
-      }
-    }
   }
 
   file_id_t create_file(fs::path file_path) {
@@ -90,6 +114,21 @@ public:
     files_.emplace_back(move(handle));
     return file_id;
   }
+
+  void create_log_file() {
+    log_file_ = make_unique<FileHandle>(log_file_name());
+  }
+
+  void remove_table_files();
+
+  void write_page(PageId page_id, const Page& page) {
+    write_buffer(page_id, page.buffer());
+  }
+
+  void read_page(PageId page_id, Page& page) {
+    read_buffer(page_id, page.buffer());
+  }
+
 
   // NOTE: create_file and load_file are identical for now.
   // TODO: At some point, we may combine them?
@@ -109,10 +148,18 @@ public:
     return fs::exists(file_path);
   }
 
+  void setup_log_file();
+  void delete_log_file();
+  void truncate_log_file();
+
 private:
   map<file_id_t, block_id_t> next_block_ids_;
+  ptr<FileHandle> log_file_ {nullptr};
+
   // TODO: Maybe this should be a mapping as well?
   // TODO: Eventually `files_` will have to be persisted to disk
   // It may be easier to store a mapping between file_ids and fs::path
   vector<ptr<FileHandle>> files_;
+
+  std::future<void> *flush_log_func_ {nullptr};
 };

@@ -9,11 +9,9 @@ public:
   // Memory issues will bite you here!
   CreateTablePlan(const table_name_t table_name,
                   bool if_not_exists,
-                  const column_name_t primary_key,
                   ColumnDefListExpr column_list)
     : BasePlan       (PlanType::CREATE_TABLE),
       if_not_exists_ (if_not_exists),
-      primary_key_   (primary_key),
       table_name_    (table_name),
       column_list_   (column_list)
   {}

@@ -14,13 +14,12 @@
 
 TableHeap::TableHeap(file_id_t file_id,
                      table_oid_t table_oid,
-                     PageId first_page_id,
                      BuffMgr& buff_mgr,
                      LockMgr& lock_mgr,
                      LogMgr& log_mgr)
   : file_id_       (file_id),
     table_oid_     (table_oid),
-    first_page_id_ (first_page_id),
+    first_page_id_ (FileMgr::first_table_page(file_id)),
     buff_mgr_      (buff_mgr),
     log_mgr_       (log_mgr),
     lock_mgr_      (lock_mgr)
@@ -38,32 +37,10 @@ SlottedTablePage TableHeap::first_page(Txn& txn) {
   return first_page;
 }
 
-// TODO: Maybe this is too low-level?
-// Maybe put this in FileMgr?
-void TableHeap::DEPRECATED_allocate_first_page(Txn& txn) {
-  auto first_page_ptr = buff_mgr_.fetch_page(first_page_id_);
-  assert(first_page_ptr != nullptr);
-  auto first_page = SlottedTablePage(first_page_ptr, txn, log_mgr_, lock_mgr_);
 
-  first_page.wlatch();
-  // TODO: If `allocate` fails (run out of disk space?) then we
-  // need to abort the transaction.
-  first_page.allocate(first_page_id_,
-                      PageId::STOP_ITERATING(file_id_));
-  first_page.wunlatch();
-
-  auto next_page_id = first_page.next_page_id();
-  logger->debug("[TableHeap] next_page_id: " + next_page_id.to_string());
-  assert(next_page_id == PageId::STOP_ITERATING(file_id_));
-
-  buff_mgr_.unpin(first_page_id_, true);
-}
-
-bool TableHeap::insert_tuple(Tuple& tuple,
-                             Txn& txn)
-{
+bool TableHeap::insert_tuple(Tuple& tuple, Txn& txn) {
   // Tuple Header is 32 bytes I think?
-  if (tuple.size() + 32 > PAGE_SIZE) {  // larger than one page size
+  if (tuple.size() + 32 > PAGE_SIZE) {
     txn.abort_with_reason(AbortReason::TUPLE_TOO_BIG);
     return false;
   }
@@ -74,7 +51,8 @@ bool TableHeap::insert_tuple(Tuple& tuple,
     return false;
   }
 
-  auto curr_page = SlottedTablePage(curr_page_ptr, txn, log_mgr_, lock_mgr_);
+  auto curr_page = SlottedTablePage(curr_page_ptr, txn,
+                                    log_mgr_, lock_mgr_);
 
   // Insert into the first page with enough space.
   // If no such page exists, create a new page and insert into that.

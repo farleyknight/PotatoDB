@@ -16,11 +16,10 @@ PotatoDB potatodb;
 PotatoDB::PotatoDB()
   : server_         (this),
     file_mgr_       (),
-    disk_mgr_       (file_mgr_),
-    buff_mgr_       (pool_size(), disk_mgr_, log_mgr_),
-    log_mgr_        (disk_mgr_),
+    buff_mgr_       (pool_size(), file_mgr_, log_mgr_),
+    log_mgr_        (file_mgr_),
     checkpoint_mgr_ (txn_mgr_, log_mgr_, buff_mgr_),
-    table_mgr_      (disk_mgr_, lock_mgr_, log_mgr_, buff_mgr_),
+    table_mgr_      (file_mgr_, lock_mgr_, log_mgr_, buff_mgr_),
     txn_mgr_        (lock_mgr_, log_mgr_, table_mgr_),
     catalog_        (),
     exec_eng_       (buff_mgr_, txn_mgr_, catalog_)
@@ -29,24 +28,24 @@ PotatoDB::PotatoDB()
 void PotatoDB::reset_installation() {
   log_mgr_.disable_logging();
 
-  disk_mgr_.remove_all_files();
-  disk_mgr_.setup_db_directory();
-  disk_mgr_.setup_log_file();
+  file_mgr_.remove_all_files();
+  file_mgr_.setup_db_directory();
+  file_mgr_.setup_log_file();
 
   build_system_catalog();
 }
 
 void PotatoDB::rebuild_system_catalog() {
-  disk_mgr_.remove_table_files();
+  file_mgr_.remove_table_files();
   build_system_catalog();
 }
 
 bool PotatoDB::file_exists(fs::path file_path) const {
-  return disk_mgr_.file_exists(file_path);
+  return file_mgr_.file_exists(file_path);
 }
 
 fs::path PotatoDB::table_file_for(const string& table_name) {
-  return disk_mgr_.table_file_for(table_name);
+  return file_mgr_.table_file_for(table_name);
 }
 
 ptr<BasePlan> PotatoDB::sql_to_plan(const string& statement) const {
@@ -140,7 +139,7 @@ void PotatoDB::run_create_table(const table_name_t table_name,
 
 void PotatoDB::build_system_catalog() {
   logger->debug("[PotatoDB] Checking if system_catalog table exists");
-  if (disk_mgr().table_file_exists("system_catalog")) {
+  if (file_mgr_.table_file_exists("system_catalog")) {
     logger->debug("[PotatoDB] Begin loading system catalog");
     SystemCatalog::load(*this);
   } else {

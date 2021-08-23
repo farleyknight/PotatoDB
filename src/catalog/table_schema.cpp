@@ -19,18 +19,17 @@ TableSchema::TableSchema(vector<TableColumn> columns,
   // by moving this logic into the constructor instead of expecting
   // the caller to do it.
 
-  for (int32_t i = 0; i < columns_.size(): ++i) {
-    if (columns_[i].is_primary_key()) {
-      primary_keys_.push_back(i);
+  int32_t column_count = columns_.size();
+
+  for (column_offset_t offset = 0; offset < column_count; ++offset) {
+    if (columns_[offset].is_primary_key()) {
+      primary_keys_.push_back(offset);
     }
 
-    if (columns_[i].is_autoincrement()) {
-      autoincrements_.push_back(i);
+    if (columns_[offset].is_autoincrement()) {
+      autoincrement_offsets_.push_back(offset);
+      autoincrement_values_[offset] = 0;
     }
-  }
-
-  for (const auto offset : autoincrements) {
-    autoincrement_values_[offset] = 0;
   }
 }
 
@@ -68,15 +67,13 @@ TableSchema::defaults(const vector<TableColumn>& cols) {
   // std::cout << "***********" << std::endl;
 
   deque<Value> values;
-  for (const auto& col : cols) {
-    // TODO: The only kind of DEFAULT we handle is PRIMARY KEY AUTOINCREMENT
-    // In the future, we should handle all DEFAULTs here..
-    if (col.is_autoincrement()) {
-      // std::cout << "AUTO INCREMENT value " << autoincrement_ << std::endl;
-      auto value = Value::make(static_cast<int32_t>(autoincrement_));
-      ++autoincrement_;
-      values.push_back(value);
-    }
+  for (auto offset : autoincrement_offsets_) {
+    int32_t int_value = autoincrement_values_[offset];
+    // std::cout << "AUTO INCREMENT value " << autoincrement_ << std::endl;
+    auto value = Value::make(int_value);
+    values.push_back(value);
+    // TODO: After increment, these values should be persisted to disk somehow!
+    autoincrement_values_[offset]++;
   }
 
   assert(cols.size() == values.size());

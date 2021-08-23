@@ -16,7 +16,11 @@ enum class PlanType {
   INDEX_JOIN   = 12,
   HASH_JOIN    = 13,
   SORT         = 14,
-  CREATE_TABLE = 15,
-  RESULTS      = 16,
-  COMBINE      = 17
+  RESULTS      = 15,
+  COMBINE      = 16,
+
+
+  CREATE_TABLE   = 100,
+  DESCRIBE_TABLE = 101,
+  SHOW_TABLES    = 102,
 };

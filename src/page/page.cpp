@@ -14,6 +14,14 @@ void Page::write_lsn(lsn_t lsn) {
   buffer_.write_int32(OFFSET_LSN, lsn);
 }
 
+const string Page::read_string(buffer_offset_t offset) const {
+  return buffer_.read_string(offset);
+}
+
+void Page::write_string(buffer_offset_t offset, const string data) {
+  return buffer_.write_string(offset, data);
+}
+
 int32_t Page::read_int32(buffer_offset_t offset) const {
   return buffer_.read_int32(offset);
 }

@@ -19,8 +19,7 @@ public:
     // TODO: Do we need to put any latches around the catalog
     // while we are adding a new table?
 
-    // std::cout << "CREATING TABLE with NAME = " << table_name << std::endl;
-
+    // TODO: This logic can get moved into `create_table`
     if (exec_ctx_.catalog().has_table_named(table_name)) {
       if (plan_->if_not_exists()) {
         throw Exception("Just a WARNING");
@@ -29,16 +28,10 @@ public:
       }
     }
 
-
-    auto table_oid = exec_ctx_.catalog().
-      create_table(exec_ctx_.txn(),
-                   table_name,
-                   primary_key,
-                   plan_->column_list());
-
-    exec_ctx_.table_mgr().
+    // TODO: Handle possible ABORT if txn fails
+    exec_ctx_.catalog().
       create_table(table_name,
-                   table_oid,
+                   plan_->column_list(),
                    exec_ctx_.txn());
   }
 

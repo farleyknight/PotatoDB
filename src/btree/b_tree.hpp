@@ -30,12 +30,10 @@ public:
   using LeafPageT      = BTreeLeafPage<KeyT, ValueT, KeyComp>;
   using IndexIteratorT = IndexIterator<KeyT, ValueT, KeyComp>;
 
-  BTree(const string name,
-        BuffMgr& buff_mgr,
-        const KeyComp& comparator,
+  BTree(const index_name_t name,
         file_id_t file_id,
-        int32_t leaf_size     = LeafPageT::LEAF_PAGE_SIZE,
-        int32_t internal_size = InternalPageT::INTERNAL_PAGE_SIZE);
+        BuffMgr& buff_mgr,
+        const KeyComp& comp);
 
   // Returns true if this B+ tree has no keys and values.
   bool is_empty() const;

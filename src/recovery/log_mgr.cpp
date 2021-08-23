@@ -1,7 +1,7 @@
 #include "recovery/log_mgr.hpp"
 
-LogMgr::LogMgr(DiskMgr& disk_mgr)
-  : disk_mgr_(disk_mgr)
+LogMgr::LogMgr(FileMgr& file_mgr)
+  : file_mgr_(file_mgr)
 {}
 
 // Performs a synchronous flush
@@ -39,7 +39,7 @@ void LogMgr::flush_log_buffer() {
     logger->debug("[LogMgr] Flushing to WAL");
 
     // TODO: Change `disk_mgr_` to a different object
-    disk_mgr_.write_log(flush_buffer_, flush_buffer_length_);
+    file_mgr_.write_log(flush_buffer_, flush_buffer_length_);
     flush_buffer_length_ = 0;
   }
 }

@@ -8,7 +8,8 @@
 #include "recovery/log_record.hpp"
 #include "recovery/log_file_cursor.hpp"
 
-#include "disk/disk_mgr.hpp"
+// TODO: Let's rename `disk/` to `files/`
+#include "disk/file_mgr.hpp"
 
 // REFERENCES:
 // * https://github.com/dentiny/GhostDB/blob/1a58b9e46841fb8a670555f59ddda2d7db1819ce/src/log_manager.cc
@@ -20,7 +21,7 @@
 
 class LogMgr {
 public:
-  LogMgr(DiskMgr& disk_mgr);
+  LogMgr(FileMgr& file_mgr);
 
   ~LogMgr() {
     stop_flush_thread();
@@ -78,7 +79,7 @@ private:
                is_logging_enabled_   {false},
                flush_requested_      {false};
 
-  DiskMgr& disk_mgr_;
+  FileMgr& file_mgr_;
 
   std::chrono::duration<uint64_t> log_timeout_ = std::chrono::seconds(1);
 };

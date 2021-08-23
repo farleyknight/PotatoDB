@@ -1,6 +1,7 @@
 #pragma once
 
 #include "catalog/column_data.hpp"
+#include "catalog/table_schema.hpp"
 
 /*
  *  Table Header Page format (size in bytes):
@@ -8,7 +9,7 @@
  *  Table Metadata:
  *  ===============
  *  table_oid_t     (4)
- *  column_count_t  (4)
+ *  columns_count_t (4)
  *  columns_start_t (4) => Where Schema Columns will start
  *                         To be computed after string w/ length is written
  *  string_length_t (4)
@@ -23,8 +24,9 @@
 
 class TableHeaderPage : public PageLayout {
 public:
-  using columns_start_t = buffer_offset_;
+  using columns_start_t = buffer_offset_t;
   using columns_count_t = int32_t;
+  using string_length_t = int32_t;
 
   static constexpr size_t TABLE_OID_OFFSET     = 0;
   static constexpr size_t COLUMN_COUNT_OFFSET  = 4;
@@ -49,7 +51,7 @@ public:
 
   void write_schema(const TableSchema& schema) {
     auto columns_start = write_header(schema);
-    write_columns(columns_start, schema.cols());
+    write_columns(columns_start, schema.columns());
   }
 
   int32_t write_header(const TableSchema& schema) {
@@ -58,8 +60,8 @@ public:
     write_table_oid(schema.table_oid());
     offset += sizeof(table_oid_t);
 
-    write_column_count(schema.cols().size());
-    offset += sizeof(column_count_t);
+    write_column_count(schema.columns().size());
+    offset += sizeof(columns_count_t);
 
     write_table_name(schema.table_name());
     offset += sizeof(string_length_t) + schema.table_name().size();
@@ -86,11 +88,11 @@ public:
     page_->write_int32(COLUMNS_START_OFFSET, table_oid);
   }
 
-  column_count_t read_column_count() const {
-    return page_->read_int32(COLUMN_COUNT_OFFSET)
+  columns_count_t read_column_count() const {
+    return page_->read_int32(COLUMN_COUNT_OFFSET);
   }
 
-  void write_column_count(column_count_t column_count) {
+  void write_column_count(columns_count_t column_count) {
     return page_->write_int32(COLUMN_COUNT_OFFSET, column_count);
   }
 
@@ -102,7 +104,9 @@ public:
     page_->write_string(TABLE_NAME_OFFSET, table_name);
   }
 
-  vector<TableColumn> read_columns(buffer_offset_t start_offset, int32_t column_count) {
+  vector<TableColumn> read_columns(buffer_offset_t start_offset,
+                                   int32_t column_count) const
+  {
     buffer_offset_t offset = start_offset;
 
     vector<TableColumn> cols;
@@ -111,15 +115,16 @@ public:
       offset += sizeof(int32_t);
 
       auto col_data_buffer = page_->read_buffer(offset, size);
+      // TODO: Use col_data_buffer to create the TableColumn
       offset += size;
     }
 
     return cols;
   }
 
-  void write_columns(buffer_offset_t start_offset, vector<TableColumn>& schema) {
+  void write_columns(buffer_offset_t start_offset, const vector<TableColumn>& columns) {
     buffer_offset_t offset = start_offset;
-    for (const auto col : schema.cols()) {
+    for (const auto &col : columns) {
       auto col_data_buffer = col.data();
       auto size = col_data_buffer.size();
 

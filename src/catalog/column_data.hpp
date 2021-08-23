@@ -1,6 +1,5 @@
 #pragma once
 
-
 class ColumnData {
 public:
   ColumnData(const Buffer& buffer)
@@ -48,10 +47,10 @@ public:
   }
 
 private:
-  const Buffer& buffer_;
+  UNUSED const Buffer& buffer_;
   
   column_name_t name_;
-  column_oid_t column_oid_;
-  TypeId type_id_ = TypeId::INVALID;
-}
+  UNUSED column_oid_t column_oid_;
+  UNUSED TypeId type_id_ = TypeId::INVALID;
+};
 

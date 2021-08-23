@@ -13,7 +13,6 @@ class TableHeap {
 public:
   TableHeap(file_id_t file_id,
             table_oid_t table_oid,
-            PageId first_page_id,
             BuffMgr& buff_mgr,
             LockMgr& lock_mgr,
             LogMgr& log_mgr);

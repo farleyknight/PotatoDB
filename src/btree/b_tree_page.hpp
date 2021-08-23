@@ -6,6 +6,7 @@
 #include <string>
 
 #include "buffer/buff_mgr.hpp"
+#include "page/page_layout.hpp"
 #include "index/generic_key.hpp"
 
 // define page type enum

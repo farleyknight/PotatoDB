@@ -57,7 +57,8 @@ public:
   ~TableColumn() = default;
 
   bool is_inlined()               const { return inlined_; }
-  bool primary_key()              const { return primary_key_; }
+  bool is_primary_key()           const { return primary_key_; }
+  bool is_autoincrement()         const { return autoincrement_; }
   bool is_nullable()              const { return nullable_; }
   TypeId type_id()                const { return type_id_; }
   table_oid_t table_oid()         const { return table_oid_; }
@@ -65,6 +66,11 @@ public:
   int32_t fixed_length()          const { return fixed_length_; }
   string_size_t variable_length() const { return variable_length_; }
   const column_name_t& name()     const { return name_; }
+
+  const Buffer data() const {
+    // TODO: The buffer should be able to serialize & deserialize itself 
+    return Buffer();
+  }
 
   void set_nullable(bool nullable) {
     nullable_ = nullable;

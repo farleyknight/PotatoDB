@@ -48,6 +48,10 @@ public:
     return QuerySchema(cols);
   }
 
+  const string table_name() const {
+    return table_name_;
+  }
+
 private:
   // TODO: This should be a mapping from the column offset to the actual autoincrement value
   // TODO: Add a mutex around this.
@@ -61,7 +65,7 @@ private:
   // TODO: This is a list of column offsets. If a column offset exists here, it should always
   // be updating the corresponding autoincrement value.
   // TODO: Add a mutex around this.
-  vector<column_offset_t> autoincrements_;
+  vector<column_offset_t> autoincrement_offsets_;
 
   table_oid_t table_oid_;
   table_name_t table_name_;

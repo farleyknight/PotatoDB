@@ -59,6 +59,8 @@ public:
 
   StatementResult run(const string& statement);
 
+  // TODO: Remove this? Not sure what we did here, but creating new SQL queries was kind of
+  // a bad idea.. Stick to in-memory data structures.
   void run_create_table(const table_name_t table_name,
                         const vector<ColumnDefExpr> column_list,
                         Txn& txn,
@@ -68,6 +70,10 @@ public:
   void verify_system_files();
 
   fs::path table_file_for(const string& table_name);
+
+  void index_for(const index_name_t index_name) {
+    return catalog_.create_index(index_name);
+  }
 
   ExecEngine& exec_eng() {
     return exec_eng_;
@@ -105,13 +111,9 @@ public:
     return file_mgr_;
   }
 
-  DiskMgr& disk_mgr() {
-    return disk_mgr_;
-  }
-
   LogRecovery log_recovery() {
     auto &txn = txn_mgr_.begin();
-    return LogRecovery(disk_mgr_, buff_mgr_, log_mgr_, lock_mgr_, txn);
+    return LogRecovery(file_mgr_, buff_mgr_, log_mgr_, lock_mgr_, txn);
   }
 
   bool file_exists(fs::path file_path) const;
@@ -127,7 +129,6 @@ private:
   ServerState state_ = ServerState::STARTING_UP;
 
   FileMgr       file_mgr_;
-  DiskMgr       disk_mgr_;
   BuffMgr       buff_mgr_;
   LogMgr        log_mgr_;
   LockMgr       lock_mgr_;

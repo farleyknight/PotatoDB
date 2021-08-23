@@ -21,16 +21,16 @@
 
 
 template<class KeyT, class ValueT, class KeyComp>
-BTree<KeyT, ValueT, KeyComp>::BTree(file_id_t file_id,
-                                    const string index_name,
+BTree<KeyT, ValueT, KeyComp>::BTree(const index_name_t name,
+                                    file_id_t file_id,
                                     BuffMgr& buff_mgr,
-             const KeyComp& comp)
-  : index_name_    (index_name),
+                                    const KeyComp& comp)
+  : index_name_    (name),
     buff_mgr_      (buff_mgr),
-    comp_          (comp),
     file_id_       (file_id),
-    leaf_size_     (leaf_size),
-    internal_size_ (internal_size)
+    comp_          (comp),
+    leaf_size_     (LeafPageT::LEAF_PAGE_SIZE),
+    internal_size_ (InternalPageT::INTERNAL_PAGE_SIZE)
 {}
 
 template<class KeyT, class ValueT, class KeyComp>

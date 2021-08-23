@@ -63,6 +63,7 @@ public:
   void pin() {
     ++pin_count_;
   }
+
   // Decrease the pin count.
   void unpin() {
     --pin_count_;
@@ -77,6 +78,21 @@ public:
 
   int32_t read_int32(buffer_offset_t offset) const;
   void write_int32(buffer_offset_t offset, int32_t data);
+
+  const string read_string(buffer_offset_t offset) const;
+  void write_string(buffer_offset_t offset, const string data);
+
+  const Buffer read_buffer(UNUSED buffer_offset_t offset,
+                           UNUSED buffer_offset_t size)
+  {
+    // TODO: Return a "sub"-buffer of the original
+    return buffer_;
+  }
+
+  void write_buffer(UNUSED buffer_offset_t offset, UNUSED const Buffer buffer) {
+    // TODO: Write the buffer to the specified offset.
+    return;
+  }
 
   void set_dirty(bool dirty) {
     is_dirty_ = dirty;

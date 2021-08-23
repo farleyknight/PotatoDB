@@ -5,20 +5,21 @@
 
 class IndexSchema : BaseSchema<TableColumn> {
 public:
-  IndexSchema(Vec<TableColumn> columns,
-              String index_name,
-              String table_name,
+  IndexSchema(vector<TableColumn> columns,
+              index_name_t index_name,
+              table_name_t table_name,
               index_oid_t index_oid,
               table_oid_t table_oid,
-              // The mapping relation between key schema and tuple schema
-              Vec<column_oid_t> key_attrs,
+              // NOTE: This is the mapping relation between
+              // key schema and tuple schema
+              vector<column_oid_t> key_attrs,
               size_t key_size);
 
-  Ref<String>            index_name() const;
-  Ref<String>            table_name() const;
+  const index_name_t index_name() const;
+  const table_name_t table_name() const;
 
-  Ref<Vec<column_oid_t>> key_attrs() const;
-  String                 to_string() const;
+  const vector<column_oid_t>& key_attrs() const;
+  const string to_string() const;
 
 private:
   String index_name_;

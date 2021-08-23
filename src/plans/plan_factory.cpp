@@ -1,5 +1,9 @@
 #include "plans/plan_factory.hpp"
 
+#include "plans/create_table_plan.hpp"
+#include "plans/describe_table_plan.hpp"
+#include "plans/show_tables_plan.hpp"
+
 ptr<BasePlan>
 PlanFactory::create(const PotatoDB& db,
                     ptr<BaseExpr>&& expr)
@@ -22,16 +26,12 @@ PlanFactory::create(const PotatoDB& db,
     return from_expr(db.catalog(), *insert_expr);
   }
   case ExprType::SHOW_TABLES: {
-    auto object_type = SystemCatalog::table_type();
-    return db.sql_to_plan("SELECT * FROM system_catalog WHERE object_type == " + object_type);
+    auto show_tables_expr = dynamic_cast<ShowTablesExpr*>(expr.get());
+    return from_expr(*show_tables_expr);
   }
   case ExprType::DESCRIBE_TABLE: {
-    auto object_type = SystemCatalog::column_type();
     auto describe_table_expr = dynamic_cast<DescribeTableExpr*>(expr.get());
-    auto table_name = "'" + describe_table_expr->table().name() + "'";
-    auto sql = "SELECT * FROM system_catalog WHERE object_type = " \
-      + object_type + " AND table_name = " + table_name;
-    return db.sql_to_plan(sql);
+    return from_expr(*describe_table_expr);
   }
   case ExprType::UPDATE: {
     auto update_expr = dynamic_cast<UpdateExpr*>(expr.get());
@@ -56,10 +56,19 @@ PlanFactory::from_expr(const CreateTableExpr& expr) {
 
   return make_unique<CreateTablePlan>(table_name,
                                       if_not_exists,
-                                      expr.primary_key(),
                                       column_def_list);
 }
 
+ptr<BasePlan>
+PlanFactory::from_expr(UNUSED const ShowTablesExpr& expr) {
+  return make_unique<ShowTablesPlan>();
+}
+
+ptr<BasePlan>
+PlanFactory::from_expr(const DescribeTableExpr& expr) {
+  auto table_name = expr.table().name();
+  return make_unique<DescribeTablePlan>(table_name);
+}
 
 ptr<BasePlan>
 PlanFactory::from_expr(const Catalog& catalog,

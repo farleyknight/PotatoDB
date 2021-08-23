@@ -17,6 +17,7 @@
 #include "exprs/insert_expr.hpp"
 #include "exprs/show_tables_expr.hpp"
 
+// TODO: This whole class is deprecated!
 class PlanBuilder {
 public:
   PlanBuilder(const Catalog& catalog)

@@ -24,6 +24,10 @@ public:
     handle_.close();
   }
 
+  void resize(std::uintmax_t new_size) {
+    fs::resize_file(file_path_, new_size);
+  }
+
   void open() {
     handle_.open(file_path_, fstream::in | fstream::out | fstream::binary);
   }
@@ -42,6 +46,10 @@ public:
 
   const string file_path() const {
     return file_path_.string();
+  }
+
+  fstream& io() {
+    return handle_;
   }
 
 private:

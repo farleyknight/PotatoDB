@@ -1,10 +1,11 @@
+// TODO: Probably want to move this file to under `catalog/`
+
 #pragma once
 
 #include "common/config.hpp"
 
 #include "catalog/table_schema.hpp"
 #include "exprs/column_def_expr.hpp"
-#include "server/potatodb.hpp"
 
 // TODO:
 // Big refactor needed!
@@ -15,285 +16,76 @@
 
 class SystemCatalog {
 public:
-  enum class ObjectTypes {
-    INVALID = 0,
-    TABLE   = 1,
-    COLUMN  = 2,
-    INDEX   = 3
-  };
+  SystemCatalog() {}
 
-  static int32_t system_catalog_table_oid() {
-    return 1;
+  table_oid_t table_oid_for(const table_name_t& table_name) const {
+    assert(table_oids_.count(table_name) > 0);
+    return table_oids_.at(table_name);
   }
 
-  static const string table_type() {
-    return std::to_string(static_cast<int32_t>(ObjectTypes::TABLE));
+  table_name_t table_name_for(table_oid_t table_oid) const {
+    assert(table_names_.count(table_oid) > 0);
+    return table_names_.at(table_oid);
   }
 
-  static const string column_type() {
-    return std::to_string(static_cast<int32_t>(ObjectTypes::COLUMN));
+  TableSchema& table_schema_for(const table_name_t table_name) {
+    return table_schema_for(table_oid_for(table_name));
   }
 
-  static const string create_table_sql() {
-    return "CREATE TABLE IF NOT EXISTS system_catalog ( "   \
-      "id          INTEGER PRIMARY KEY AUTOINCREMENT, "     \
-      "object_type INTEGER NOT NULL, "                      \
-      // TODO: Allow this to be NULL
-      // "data_type   INTEGER, "
-      "data_type   INTEGER NOT NULL, "                      \
-      // TODO: Allow this to be NULL
-      // "data_size   INTEGER, "
-      "data_size   INTEGER NOT NULL, "                      \
-      "primary_key BOOLEAN NOT NULL, "                      \
-      "object_name VARCHAR(32) NOT NULL, "                  \
-      "table_name  VARCHAR(32) NOT NULL "                   \
-      ");";
+  const TableSchema& table_schema_for(const table_name_t table_name) const {
+    return table_schema_for(table_oid_for(table_name));
   }
 
-  static const string load_tables_sql() {
-    // NOTE: Since we don't include object_type here, this query fails!
-    //
-    // Why? Because, the way I grab data from the Buffer Pool is actually
-    // kind of wrong and also kind of slow.
-    //
-    // I started to think about the diagrams that Pavlo had shown with the
-    // "projection" operator: the operator that takes a full tuple and
-    // only emits those attributes that are necessary for the query.
-    //
-    // Then I realized that BusTub HAS NO projection operator!
-    //
-    // Now I realize that when we grab data from the Buffer Pool, we grab
-    // the whole tuple, even if we don't need it!
-    //
-    // There may be a way to write a "lazy" byte stream, that only reads
-    // from the Buffer Pool exactly those bytes that are necessary.
-    //
-    // Not only that, but some operators do not really need "all" of the tuple.
-    // We can probably use Projection Operators between a Seq Scan Operator
-    // and another operator, like Update or Delete?? This is possibly where
-    // others begin looking for ways to combine and reorder operators to
-    // somehow find the best query plan.
-
-    // NOTE: I've addded "object_type" for a quick fix. In a future fix for
-    // this problem, we need to introduce a new query operator, the Projection
-    // Operator.
-    //
-    // Introducing this operator will allow us to remove QuerySchema completely
-    // and explains why other database systems are not doing something similar.
-    // return "SELECT id, table_name, object_type FROM system_catalog WHERE object_type = 1";
-
-    // NOTE: The old SQL for this query doesn't quite work.. I think it's because
-    // QuerySchema is buggy? Maybe doing the projection operator will fix those bugs?
-
-    // NOTE: Also we are not using column_oids properly. We could get rid of a lot of strings
-    // via column oids I think?
-    return "SELECT * FROM system_catalog WHERE object_type = 1";
+  TableSchema& table_schema_for(table_oid_t table_oid) {
+    assert(table_schemas_.count(table_oid) > 0);
+    return table_schemas_.at(table_oid);
   }
 
-  static TableColumn id_column() {
-    auto col = TableColumn("id",
-                           system_catalog_table_oid(),
-                           1,
-                           TypeId::INTEGER);
-    col.set_primary_key(true);
-    col.set_autoincrement(true);
-    return col;
+  const TableSchema& table_schema_for(table_oid_t table_oid) const {
+    assert(table_schemas_.count(table_oid) > 0);
+    return table_schemas_.at(table_oid);
   }
 
-  static TableColumn object_type_column() {
-    auto col = TableColumn("object_type",
-                           system_catalog_table_oid(),
-                           2,
-                           TypeId::INTEGER);
-    col.set_nullable(false);
-    return col;
-  }
+  bool has_table_named(const table_name_t& table_name) const;
 
-  static TableColumn data_type_column() {
-    auto col = TableColumn("data_type",
-                           system_catalog_table_oid(),
-                           3,
-                           TypeId::INTEGER);
-    // NOTE: Can be null when the object_type != COLUMN
-    // TODO: Allow this to be NULL
-    col.set_nullable(false);
-    return col;
-  }
+  bool table_has_column_named(const table_name_t& table_name,
+                              const column_name_t& column_name) const;
 
-  // TODO: This will be NULL for some columns.
-  // Need to fully implement NULL across the project.
-  static TableColumn data_size_column() {
-    auto col = TableColumn("data_size",
-                           system_catalog_table_oid(),
-                           4,
-                           TypeId::INTEGER);
-    col.set_nullable(false);
-    return col;
-  }
+  table_oid_t create_table(const table_name_t& table_name,
+                           ColumnDefListExpr column_list,
+                           Txn& txn);
 
-  static TableColumn primary_key_column() {
-    auto col = TableColumn("primary_key",
-                           system_catalog_table_oid(),
-                           5,
-                           TypeId::BOOLEAN);
-    col.set_nullable(false);
-    return col;
-  }
+  void create_index(const string table_name,
+                    const string index_name,
+                    Txn& txn);
 
-  static TableColumn object_name_column() {
-    auto col = TableColumn("object_name",
-                           system_catalog_table_oid(),
-                           6,
-                           TypeId::VARCHAR,
-                           32);
-    col.set_nullable(false);
-    return col;
-  }
+  void load_from_query(table_oid_t table_oid,
+                       const table_name_t& table_name,
+                       StatementResult& result);
 
-  static TableColumn table_name_column() {
-    auto col = TableColumn("table_name",
-                           system_catalog_table_oid(),
-                           7,
-                           TypeId::VARCHAR,
-                           32);
-    col.set_nullable(false);
-    return col;
-  }
+  void load_table(table_oid_t table_oid,
+                  const table_name_t& table_name,
+                  const TableSchema& schema);
 
-  static TableSchema schema() {
-    vector<TableColumn> cols;
+private:
 
-    cols.push_back(id_column());
-    cols.push_back(object_type_column());
-    cols.push_back(data_type_column());
-    cols.push_back(data_size_column());
-    cols.push_back(primary_key_column());
-    cols.push_back(object_name_column());
-    cols.push_back(table_name_column());
+  TableSchema make_schema_from(const table_name_t& table_name,
+                               table_oid_t table_oid,
+                               const ColumnDefListExpr& column_list) const;
 
-    return TableSchema(cols, "system_catalog", "id", system_catalog_table_oid());
-  }
+  map<table_name_t, table_oid_t> table_oids_;
+  map<table_oid_t, table_name_t> table_names_;
 
-  static void create(PotatoDB& db) {
-    db.run(create_table_sql());
-  }
+  atomic<table_oid_t> next_table_oid_ = 0;
 
-  static void load(PotatoDB& db) {
-    db.catalog().load_table(system_catalog_table_oid(), "system_catalog", schema());
-    db.table_mgr().load_table("system_catalog", system_catalog_table_oid());
+  map<table_oid_t, TableSchema> table_schemas_;
 
-    assert(db.catalog().has_table_named("system_catalog"));
+  atomic<column_oid_t> next_column_oid_ = 0;
 
-    auto all_tables_sql = load_tables_sql();
-    logger->debug("[SystemCatalog] SQL for LOADING ALL TABLES " + all_tables_sql);
+  map<column_name_t, column_oid_t> column_oids_;
 
-    auto tables      = db.run(all_tables_sql);
-    auto &result_set = tables.set();
-
-    assert(result_set);
-    assert(result_set->size() > 0);
-
-    for (int i = 0; i < result_set->size(); ++i) {
-      auto table_oid  = result_set->value_at<int32_t>("id", i);
-      auto table_name = result_set->value_at<string>("table_name", i);
-      logger->debug("[SystemCatalog] Found table_name " + table_name);
-      if (table_name == "system_catalog") {
-        continue;
-      }
-      auto table_sql = load_table_sql_for(table_name);
-      logger->debug("[SystemCatalog] SQL for LOADING TABLE: " + table_sql);
-      auto result = db.run(table_sql);
-      db.catalog().load_from_query(table_oid, table_name, result);
-      db.table_mgr().load_table(table_name, table_oid);
-    }
-  }
-
-  static const string load_table_sql_for(const table_name_t table_name) {
-    return "SELECT * FROM system_catalog WHERE " \
-      "object_type = 2 AND table_name = '" + table_name + "'";
-  }
-
-  static const string insert_column_sql_for(const table_name_t table_name,
-                                            const ColumnDefExpr& column)
-  {
-    auto data_type   = std::to_string(static_cast<int32_t>(column.type_id()));
-    auto column_size = column.type_length();
-    // TODO: Allow this to be NULL
-    // auto data_size   = (column_size == 0) ? "NULL" : std::to_string(column_size);
-    auto data_size   = std::to_string(column_size);
-
-    auto primary_key = column.is_primary_key() ? "true" : "false";
-    auto column_name = column.name();
-
-    return make_insert_column_sql(data_type, data_size, primary_key, column_name, table_name);
-  }
-
-  static const string insert_column_sql_for(const table_name_t table_name,
-                                            const TableColumn& column)
-  {
-    auto data_type   = std::to_string(static_cast<int32_t>(column.type_id()));
-
-    auto column_size = column.variable_length();
-    // TODO: Allow this to be NULL
-    // auto data_size   = (column_size == 0) ? "NULL" : std::to_string(column_size);
-    auto data_size   = std::to_string(column_size);
-
-    auto primary_key = column.primary_key() ? "true" : "false";
-    auto column_name = column.name();
-
-    return make_insert_column_sql(data_type, data_size, primary_key, column_name, table_name);
-  }
-
-  static const string make_insert_column_sql(const string& data_type,
-                                             const string& data_size,
-                                             const string& primary_key,
-                                             const string& column_name,
-                                             const string& table_name)
-  {
-    auto object_type = SystemCatalog::column_type();
-
-    return "INSERT INTO system_catalog "                                          \
-      "(object_type, data_type, data_size, primary_key, object_name, table_name)" \
-      " VALUES "                                                                  \
-      "("                                                                         \
-      // Object Type: 2 == COLUMN
-      "" + object_type + ","                                                      \
-      // Data Type: Type ID of column
-      "" + data_type + ","                                                        \
-      // Data Size: VARCHAR size or NULL
-      "" + data_size + ","                                                        \
-      // Primary key: boolean
-      "" + primary_key + ","                                                      \
-      // Object name: Name of the column, table, or index
-      "'" + column_name + "',"                                                    \
-      // Table name: The table this object belongs to
-      "'" + table_name + "'"                                                      \
-      ")";
-  }
-
-  static const string insert_table_sql_for(const table_name_t table_name)
-  {
-    auto object_type = SystemCatalog::table_type();
-
-    return "INSERT INTO system_catalog "                                          \
-      "(object_type, data_type, data_size, primary_key, object_name, table_name)" \
-      " VALUES "                                                                  \
-
-      "("                                                                         \
-      // Object Type: 1 == TABLE
-      "" + object_type + ","                                                      \
-      // Data Type: Tables do not have type IDs
-      // TODO: Allow this to be NULL
-      "0,"                                                                        \
-      // Data Size: Tables do not have data size
-      // TODO: Allow this to be NULL
-      "0,"                                                                        \
-      // Primary key: Not valid for tables
-      "false,"                                                                    \
-      // Object name: Same as table name
-      "'" + table_name + "',"                                                     \
-      // Table name
-      "'" + table_name + "'"                                                      \
-      ")";
-  }
+  map<table_name_t,
+    map<index_name_t, index_oid_t>> index_oids_;
+  atomic<index_oid_t> next_index_oid_ = 0;
 };
+

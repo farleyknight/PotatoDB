@@ -5,7 +5,6 @@
 #include "plans/seq_scan_plan.hpp"
 #include "plans/delete_plan.hpp"
 #include "plans/nested_loop_join_plan.hpp"
-#include "plans/create_table_plan.hpp"
 
 #include "plans/plan_builder.hpp"
 
@@ -14,6 +13,9 @@
 #include "exprs/insert_expr.hpp"
 
 #include "server/system_catalog.hpp"
+
+
+// TODO: This whole class is deprecated!
 
 PlanBuilder& PlanBuilder::select(vector<QueryColumn> columns) {
   if (plan_type_ == PlanType::INVALID) {

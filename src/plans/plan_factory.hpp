@@ -64,6 +64,10 @@ public:
 
   static ptr<BasePlan> from_expr(const CreateTableExpr& expr);
 
+  static ptr<BasePlan> from_expr(const ShowTablesExpr& expr);
+
+  static ptr<BasePlan> from_expr(const DescribeTableExpr& expr);
+
   static ptr<BasePlan> from_expr(const Catalog& catalog,
                                  const InsertExpr& expr);
 

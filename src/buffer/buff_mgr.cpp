@@ -7,11 +7,11 @@
 #include "page/hash_table_block_page.hpp"
 
 BuffMgr::BuffMgr(int32_t pool_size,
-                 DiskMgr& disk_mgr,
+                 FileMgr& file_mgr,
                  LogMgr& log_mgr)
   : pool_size_ (pool_size),
     pages_     (vector<Page>(pool_size)),
-    disk_mgr_  (disk_mgr),
+    file_mgr_  (file_mgr),
     log_mgr_   (log_mgr)
 {
   // TODO: Use a configuration file to allow `LRUReplacer`
@@ -53,7 +53,7 @@ bool BuffMgr::flush_page(PageId page_id) {
     return true;
   }
 
-  disk_mgr_.write_page(page_id, page);
+  file_mgr_.write_page(page_id, page);
   page.set_dirty(false);
   return true;
 }
@@ -65,7 +65,6 @@ Page* BuffMgr::fetch_page(PageId page_id) {
       auto frame_id = page_table_[page_id.as_int32()];
       Page& page = pages_[frame_id];
       pin_page(page, frame_id);
-
       return &pages_[frame_id];
     }
 
@@ -76,7 +75,7 @@ Page* BuffMgr::fetch_page(PageId page_id) {
     Page& page = *maybe_page;
 
     logger->debug("[BuffMgr] Page Read - " + page_id.to_string());
-    disk_mgr_.read_page(page_id, page);
+    file_mgr_.read_page(page_id, page);
     page_table_[page_id.as_int32()] = frame_id;
     page.set_id(page_id);
 
@@ -131,7 +130,7 @@ bool BuffMgr::delete_page(PageId page_id) {
     return false;
   }
 
-  disk_mgr_.deallocate_page(page_id);
+  file_mgr_.deallocate_page(page_id);
   page.set_id(PageId::INVALID());
   page.reset_memory();
   free_list_.push_back(frame_id);
@@ -167,7 +166,7 @@ bool BuffMgr::flush_page(Page& page) {
   // TODO: Need to add hook into LogMgr to actually flush the page
   // https://github.com/xiaohuanlin/private-bustub/blob/189c621343e30fc51011edfc29809ed91c5fbd55/src/buffer/buffer_pool_manager.cpp#L108
   if (page.is_dirty()) {
-    disk_mgr_.write_page(page.page_id(), page);
+    file_mgr_.write_page(page.page_id(), page);
     page.set_dirty(false);
     return true;
   }

@@ -4,9 +4,14 @@
 
 #include "common/config.hpp"
 
+#include "buffer/table_mgr.hpp"
+#include "buffer/index_mgr.hpp"
+
 #include "catalog/table_schema.hpp"
 #include "catalog/table_meta.hpp"
 
+#include "exprs/create_table_expr.hpp"
+#include "exprs/create_index_expr.hpp"
 #include "exprs/column_list_expr.hpp"
 #include "exprs/column_def_list_expr.hpp"
 
@@ -16,7 +21,7 @@
 #include "index/index_meta.hpp"
 
 #include "server/statement_result.hpp"
-
+#include "server/system_catalog.hpp"
 
 // TODO:
 // I'm thinking about renaming `Catalog` to `SchemaMgr` since it seems to be
@@ -33,42 +38,57 @@ public:
   Catalog(const Catalog&) = delete;
   // No copy assign
   Catalog& operator=(const Catalog&) = delete;
-  // Default delete
+  // Default deletedd
   ~Catalog() = default;
 
-  TableSchema
-  make_schema_from(const table_name_t& table_name,
-                   table_oid_t table_oid,
-                   const string& primary_key,
-                   const ColumnDefListExpr& column_list) const;
+  bool has_table_named(const table_name_t& table_name) const {
+    return sys_catalog_.has_table_named(table_name);
+  }
 
-  table_oid_t
-  create_table(Txn& txn,
-               const table_name_t& table_name,
-               const column_name_t& primary_key,
-               ColumnDefListExpr column_list);
+  const table_name_t table_name_for(table_oid_t table_oid) const {
+    return sys_catalog_.table_name_for(table_oid);
+  }
+
+  bool table_has_column_named(const table_name_t& table_name,
+                              const column_name_t& column_name) const {
+    return sys_catalog_.table_has_column_named(table_name, column_name);
+  }
+
+  void create_table(const CreateTableExpr& expr, Txn& txn) {
+    auto table_name   = expr.table().name();
+    auto table_oid    = sys_catalog_.create_table_from_expr(expr, txn);
+    auto table_schema = sys_catalog_.table_schema_for(table_oid);
+    // TODO: The `table_mgr_` needs a reference to the new TableSchema
+    // that was made in order to write it to the first block of the file.
+    table_mgr_.create_table(table_name, table_schema, table_oid, txn);
+  }
+
+  void create_index(const CreateIndexExpr expr, Txn& txn) {
+    auto index_schema = sys_catalog_.create_index_from_expr(expr, txn);
+    index_mgr_.create_index(index_name, index_oid, txn)
+    /*
+     *
+     file_id_t file_id = file_mgr_.create_index_file("test_index");
+
+     GenericComp comparator(index_schema);
+
+     BTree<GenericKey, RID, GenericComp> tree(file_id,
+     buff_mgr_,
+     comparator);
+
+     index_mgr_.load_index(index_name, move(tree));
+     */
+  }
+
+  // NOTE: TableSchema can change it's auto-increment value, thus it cannot be
+  // return as a const ref.
+  TableSchema& table_schema_for(table_oid_t table_oid) {
+    return sys_catalog_.table_schema_for(table_oid);
+  }
 
   table_oid_t table_oid_for(const table_name_t& table_name) const {
-    assert(table_oids_.count(table_name) > 0);
-    return table_oids_.at(table_name);
+    return sys_catalog_.table_oid_for(table_name);
   }
-
-  table_name_t table_name_for(table_oid_t table_oid) const {
-    assert(table_names_.count(table_oid) > 0);
-    return table_names_.at(table_oid);
-  }
-
-  TableSchema& table_schema_for(table_oid_t table_oid) {
-    assert(table_schemas_.count(table_oid) > 0);
-    return table_schemas_.at(table_oid);
-  }
-
-  bool
-  has_table_named(const table_name_t& table_name) const;
-
-  bool
-  table_has_column_named(const table_name_t& table_name,
-                         const column_name_t& column_name) const;
 
   QuerySchema
   query_schema_for(const table_name_t& table_name,
@@ -92,10 +112,6 @@ public:
   query_column_for(const vector<table_name_t>& table_names,
                    const column_name_t& column_name) const;
 
-  void create_index(Txn& txn,
-                    const string table_name,
-                    const string index_name);
-
   vector<QueryColumn>
   all_columns_for(const vector<table_name_t>& table_names) const;
 
@@ -105,32 +121,11 @@ public:
   vector<QueryColumn>
   all_columns_for(table_oid_t table_oid) const;
 
-  void load_from_query(table_oid_t table_oid,
-                       const table_name_t& table_name,
-                       StatementResult& result);
-
-  void load_table(table_oid_t table_oid,
-                  const table_name_t& table_name,
-                  const TableSchema& schema);
-
 private:
-  // I'm thinking that these two instance variables should be long to
-  // `SystemCatalog`
-  map<table_name_t, table_oid_t> table_oids_;
-  map<table_oid_t, table_name_t> table_names_;
-
-  atomic<table_oid_t> next_table_oid_ = 0;
-
-  // I'm thinking this instance variable should stay here, in `Catalog`
-  // (or `SchemaMgr` if I rename it)
-  map<table_oid_t, TableSchema> table_schemas_;
-
-  // I'm thinking that these two instance variables should be long to
-  // `SystemCatalog`
-  atomic<column_oid_t> next_column_oid_ = 0;
-  map<column_name_t, column_oid_t> column_oids_;
-
-  map<table_name_t,
-      map<index_name_t, index_oid_t>> index_oids_;
-  atomic<index_oid_t> next_index_oid_ = 0;
+  // Table Heaps
+  TableMgr table_mgr_;
+  // B-Trees
+  IndexMgr index_mgr_;
+  // Table & Index Schemas
+  SystemCatalog sys_catalog_;
 };
