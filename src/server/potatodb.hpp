@@ -71,8 +71,9 @@ public:
 
   fs::path table_file_for(const string& table_name);
 
-  void index_for(const index_name_t index_name) {
-    return catalog_.create_index(index_name);
+  const IndexSchema& index_for(const index_name_t index_name) {
+    // TODO: Return the IndexSchema stored in the SystemCatalog
+    return catalog_.index_schema_for(index_name);
   }
 
   ExecEngine& exec_eng() {

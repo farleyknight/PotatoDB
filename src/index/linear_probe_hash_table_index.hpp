@@ -1,17 +1,16 @@
 #pragma once
 
-#include "index/index_meta.hpp"
 #include "index/base_index.hpp"
 #include "hash/linear_probe_hash_table.hpp"
 
 class LinearProbeHTIndex : public BaseIndex {
 public:
-  using GenericHashFunc = HashFunc<GenericKey>;
+  using IndexHashFunc = HashFunc<IndexKey>;
 
-  LinearProbeHTIndex(const IndexMeta& metadata,
-                     BuffMgr& buff_mgr,
+  LinearProbeHTIndex(BuffMgr& buff_mgr,
+                     IndexSchema schema,
                      size_t num_buckets,
-                     const GenericHashFunc& hash_fn);
+                     const IndexHashFunc& hash_fn);
 
   ~LinearProbeHTIndex() override = default;
 
@@ -22,7 +21,7 @@ public:
   virtual vector<RID> scan_key(const Tuple& key) override;
 
 protected:
-  const IndexMeta& meta_;
-  GenericComp comp_;
-  LinearProbeHT<GenericKey, RID> container_;
+  IndexSchema schema_;
+  IndexComp comp_;
+  LinearProbeHT<IndexKey, RID> container_;
 };

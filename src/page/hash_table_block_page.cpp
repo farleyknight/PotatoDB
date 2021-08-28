@@ -36,4 +36,4 @@ bool HTBlockPage<KeyT, ValueT>::is_readable(UNUSED slot_offset_t bucket_ind) con
   return false;
 }
 
-template class HTBlockPage<GenericKey, RID>;
+template class HTBlockPage<IndexKey, RID>;

@@ -258,4 +258,4 @@ size_t LinearProbeHT<K, V>::block_array_size() {
   return (4 * PAGE_SIZE / (4 * sizeof(MappingT) + 1));
 }
 
-template class LinearProbeHT<GenericKey, RID>;
+template class LinearProbeHT<IndexKey, RID>;

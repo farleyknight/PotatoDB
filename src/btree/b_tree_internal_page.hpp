@@ -30,9 +30,7 @@ public:
   {}
 
   // must call initialize method after "create" a new node
-  void init(PageId page_id,
-            PageId parent_id = PageId::INVALID(),
-            int32_t max_size = INTERNAL_PAGE_SIZE);
+  void allocate(PageId page_id, PageId parent_id = PageId::INVALID());
 
   KeyT key_at(int32_t index) const;
   void set_key_at(int32_t index, const KeyT& key);

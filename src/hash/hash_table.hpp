@@ -3,7 +3,7 @@
 #include "common/config.hpp"
 #include "txns/txn.hpp"
 #include "page/hash_table_block_page.hpp"
-#include "index/generic_key.hpp"
+#include "index/index_key.hpp"
 
 template<class K, class V>
 class HashTable {

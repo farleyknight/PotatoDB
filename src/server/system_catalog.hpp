@@ -5,6 +5,7 @@
 #include "common/config.hpp"
 
 #include "catalog/table_schema.hpp"
+#include "catalog/index_schema.hpp"
 #include "exprs/column_def_expr.hpp"
 
 // TODO:
@@ -21,6 +22,11 @@ public:
   table_oid_t table_oid_for(const table_name_t& table_name) const {
     assert(table_oids_.count(table_name) > 0);
     return table_oids_.at(table_name);
+  }
+
+  index_oid_t index_oid_for(const index_name_t& index_name) const {
+    assert(index_oids_.count(index_name) > 0);
+    return index_oids_.at(index_name);
   }
 
   table_name_t table_name_for(table_oid_t table_oid) const {
@@ -46,18 +52,31 @@ public:
     return table_schemas_.at(table_oid);
   }
 
+  IndexSchema& index_schema_for(index_oid_t index_oid) {
+    assert(index_schemas_.count(index_oid) > 0);
+    return index_schemas_.at(index_oid);
+  }
+
+  const IndexSchema& index_schema_for(index_oid_t index_oid) const {
+    assert(index_schemas_.count(index_oid) > 0);
+    return index_schemas_.at(index_oid);
+  }
+
+  IndexSchema& index_schema_for(const index_name_t index_name) {
+    return index_schema_for(index_oid_for(index_name));
+  }
+
+  const IndexSchema& index_schema_for(const index_name_t index_name) const {
+    return index_schema_for(index_oid_for(index_name));
+  }
+
   bool has_table_named(const table_name_t& table_name) const;
 
   bool table_has_column_named(const table_name_t& table_name,
                               const column_name_t& column_name) const;
 
-  table_oid_t create_table(const table_name_t& table_name,
-                           ColumnDefListExpr column_list,
-                           Txn& txn);
-
-  void create_index(const string table_name,
-                    const string index_name,
-                    Txn& txn);
+  table_oid_t create_table(const CreateTableExpr& expr, Txn& txn);
+  index_oid_t create_index(const CreateIndexExpr& expr, Txn& txn);
 
   void load_from_query(table_oid_t table_oid,
                        const table_name_t& table_name,
@@ -84,8 +103,9 @@ private:
 
   map<column_name_t, column_oid_t> column_oids_;
 
-  map<table_name_t,
-    map<index_name_t, index_oid_t>> index_oids_;
+  map<index_name_t, index_oid_t> index_oids_;
   atomic<index_oid_t> next_index_oid_ = 0;
+
+  map<index_oid_t, IndexSchema> index_schemas_;
 };
 

@@ -18,6 +18,7 @@ enum class ExprType {
   CREATE_TABLE,
   ALTER_TABLE,
   DROP_TABLE,
+  CREATE_INDEX,
 
   // Catalog statements
   SHOW_TABLES,

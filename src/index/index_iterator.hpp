@@ -2,8 +2,8 @@
 
 #include "common/config.hpp"
 #include "btree/b_tree_leaf_page.hpp"
-#include "index/generic_key.hpp"
-#include "index/generic_comp.hpp"
+#include "index/index_key.hpp"
+#include "index/index_comp.hpp"
 
 template<typename KeyT, typename ValueT, typename KeyComp>
 class IndexIterator {

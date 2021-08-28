@@ -1,3 +1,4 @@
+// TODO: Rename this file to btree.cpp
 #include "btree/b_tree.hpp"
 
 // TODO
@@ -14,7 +15,7 @@
 
 
 // NOTE:
-// One possible optimization: Path Hints:
+// One possible optimization -- Path Hints:
 // https://news.ycombinator.com/item?id=28008541
 // https://github.com/tidwall/btree/blob/master/PATH_HINT.md
 // https://www.reddit.com/r/programming/comments/oum0wa/path_hints_for_btrees_can_bring_a_performance/
@@ -23,11 +24,13 @@
 template<class KeyT, class ValueT, class KeyComp>
 BTree<KeyT, ValueT, KeyComp>::BTree(const index_name_t name,
                                     file_id_t file_id,
-                                    BuffMgr& buff_mgr,
-                                    const KeyComp& comp)
+                                    PageId root_page_id,
+                                    const KeyComp& comp,
+                                    BuffMgr& buff_mgr)
   : index_name_    (name),
     buff_mgr_      (buff_mgr),
     file_id_       (file_id),
+    root_page_id_  (root_page_id),
     comp_          (comp),
     leaf_size_     (LeafPageT::LEAF_PAGE_SIZE),
     internal_size_ (InternalPageT::INTERNAL_PAGE_SIZE)
@@ -364,8 +367,15 @@ BTree<KeyT, ValueT, KeyComp>::find_leaf_page(const KeyT &key,
 
 template<class KeyT, class ValueT, class KeyComp>
 void BTree<KeyT, ValueT, KeyComp>::update_root_page_id(UNUSED int32_t insert_record) {
-  // TODO: This is something that should be handled by SystemCatalog
+  // NOTE: This is something that should be handled by SystemCatalog
   // However, SystemCatalog itself needs a refactor. So holding off on this for now.
+
+  // NOTE: While I'm not done with the refactor above, I have made enough progress to
+  // come to this method. The idea will be to use the first block of the .idx block
+  // to hold the root_page_id, along with the IndexSchema, amongst other things.
+
+  // TODO: When updating the root, we should also be updating the header of the .idx file.
+  //
 
   /*
     auto page = buff_mgr_.fetch_page(HEADER_PAGE_ID);

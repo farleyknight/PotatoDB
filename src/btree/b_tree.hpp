@@ -1,3 +1,4 @@
+// TODO: Rename this file to btree.hpp
 #pragma once
 
 #include <queue>
@@ -32,8 +33,9 @@ public:
 
   BTree(const index_name_t name,
         file_id_t file_id,
-        BuffMgr& buff_mgr,
-        const KeyComp& comp);
+        PageId root_page_id,
+        const KeyComp& comp,
+        BuffMgr& buff_mgr);
 
   // Returns true if this B+ tree has no keys and values.
   bool is_empty() const;
@@ -126,7 +128,7 @@ private:
 
   // member variable
   string index_name_;
-  PageId root_page_id_ = PageId::INVALID();
+  PageId root_page_id_;
   BuffMgr& buff_mgr_;
   KeyComp comp_;
   file_id_t file_id_;

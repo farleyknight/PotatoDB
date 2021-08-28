@@ -13,6 +13,9 @@ public:
   static constexpr int32_t TABLE_HEADER_BLOCK_NUM = 0;
   static constexpr int32_t TABLE_CONTENT_BLOCK_NUM = 1;
 
+  static constexpr int32_t INDEX_HEADER_BLOCK_NUM = 0;
+  static constexpr int32_t INDEX_CONTENT_BLOCK_NUM = 1;
+
   FileMgr() {
     setup_db_directory();
     create_log_file();
@@ -37,6 +40,9 @@ public:
   //
   static PageId table_header_page(file_id_t file_id);
   static PageId first_table_page(file_id_t file_id);
+
+  static PageId index_header_page(file_id_t file_id);
+  static PageId first_index_page(file_id_t file_id);
 
   file_id_t create_table_file(const string& table_name) {
     return create_file(table_file_for(table_name));

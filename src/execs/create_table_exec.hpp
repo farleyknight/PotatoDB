@@ -30,9 +30,7 @@ public:
 
     // TODO: Handle possible ABORT if txn fails
     exec_ctx_.catalog().
-      create_table(table_name,
-                   plan_->column_list(),
-                   exec_ctx_.txn());
+      create_table(plan_->expr(), exec_ctx_.txn());
   }
 
   bool has_next() override {

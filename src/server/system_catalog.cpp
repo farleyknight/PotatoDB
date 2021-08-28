@@ -70,8 +70,7 @@ TableSchema SystemCatalog::make_schema_from(const table_name_t& table_name,
 // TODO: We should be attempting to get an
 // exclusive lock on the table, and abort the txn
 // if we cannot get it.
-table_oid_t SystemCatalog::create_table(const table_name_t& table_name,
-                                        ColumnDefListExpr column_list)
+table_oid_t SystemCatalog::create_table(const CreateTableExpr& expr, Txn& txn)
 {
   assert(table_oids_.count(table_name) == 0);
 
@@ -98,9 +97,7 @@ void SystemCatalog::load_table(table_oid_t table_oid,
                       map<index_name_t, index_oid_t>());
 }
 
-void SystemCatalog::create_index(const string index_name,
-                           const string table_name,
-                           UNUSED Txn& txn,)
+index_oid_t SystemCatalog::create_index(const CreateIndexExpr& expr, UNUSED Txn& txn)
 {
   assert(table_oids_.count(table_name) == 1);
   assert(index_oids_.count(table_name) == 1);
@@ -108,4 +105,6 @@ void SystemCatalog::create_index(const string index_name,
 
   index_oid_t index_oid = next_index_oid_++;
   index_oids_[table_name][index_name] = index_oid;
+
+  return index_oid;
 }

@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cstdio>
 
-#include "index/generic_comp.hpp"
+#include "index/index_comp.hpp"
 #include "server/potatodb.hpp"
 
 // External includes

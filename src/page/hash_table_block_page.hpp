@@ -3,8 +3,8 @@
 #include <utility>
 #include "common/config.hpp"
 #include "page/page.hpp"
-#include "index/generic_key.hpp"
-#include "index/generic_comp.hpp"
+#include "index/index_key.hpp"
+#include "index/index_comp.hpp"
 #include "index/int_comp.hpp"
 
 /**

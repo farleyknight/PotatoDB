@@ -48,15 +48,7 @@ PlanFactory::create(const PotatoDB& db,
 
 ptr<BasePlan>
 PlanFactory::from_expr(const CreateTableExpr& expr) {
-  auto table_name = expr.table().name();
-  auto column_def_list = expr.column_defs();
-  auto if_not_exists = expr.if_not_exists();
-
-  // std::cout << "PLAN FACTORY CREATING TABLE " << table_name << std::endl;
-
-  return make_unique<CreateTablePlan>(table_name,
-                                      if_not_exists,
-                                      column_def_list);
+  return make_unique<CreateTablePlan>(expr);
 }
 
 ptr<BasePlan>

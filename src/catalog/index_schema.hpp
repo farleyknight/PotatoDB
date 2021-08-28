@@ -3,7 +3,7 @@
 #include "catalog/table_column.hpp"
 #include "catalog/base_schema.hpp"
 
-class IndexSchema : BaseSchema<TableColumn> {
+class IndexSchema : public BaseSchema<TableColumn> {
 public:
   IndexSchema(vector<TableColumn> columns,
               index_name_t index_name,
@@ -22,10 +22,10 @@ public:
   const string to_string() const;
 
 private:
-  String index_name_;
-  String table_name_;
+  const index_name_t index_name_;
+  const table_name_t table_name_;
   index_oid_t index_oid_;
   table_oid_t table_oid_;
-  Vec<column_oid_t> key_attrs_;
+  vector<column_oid_t> key_attrs_;
 
 };

@@ -139,9 +139,6 @@ PageId FileMgr::index_header_page(file_id_t file_id) {
   return PageId(file_id, INDEX_HEADER_BLOCK_NUM);
 }
 
-PageId FileMgr::first_index_page(file_id_t file_id) {
-  return PageId(file_id, INDEX_CONTENT_BLOCK_NUM);
-}
 void FileMgr::delete_log_file() {
   log_file_->close();
   fs::remove(log_file_name());

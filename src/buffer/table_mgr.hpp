@@ -4,10 +4,10 @@
 
 #include "buffer/buff_mgr.hpp"
 
+#include "catalog/table_schema.hpp"
+
 #include "page/table_heap.hpp"
 #include "page/table_header_page.hpp"
-
-#include "catalog/table_schema.hpp"
 
 class TableMgr {
 public:
@@ -53,6 +53,7 @@ public:
   // TODO: This needs to be passed the TableSchema so it
   // can be written as the first block of the .tbl file.
   void create_table(const table_name_t& table_name,
+                    UNUSED const TableSchema& schema,
                     table_oid_t table_oid,
                     Txn& txn)
   {

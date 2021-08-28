@@ -14,7 +14,7 @@ void TableMgr::allocate_header_and_first_page(file_id_t file_id, Txn& txn) {
   first_page.wunlatch();
 
   auto next_page_id = first_page.next_page_id();
-  logger->debug("[TableHeap] next_page_id: " + next_page_id.to_string());
+  logger->debug("[TableMgr] next_page_id: " + next_page_id.to_string());
   assert(next_page_id == PageId::STOP_ITERATING(file_id));
 
   buff_mgr_.unpin(first_page_id, true);

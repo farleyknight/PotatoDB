@@ -7,7 +7,7 @@
 
 #include "buffer/buff_mgr.hpp"
 #include "page/page_layout.hpp"
-#include "index/generic_key.hpp"
+#include "index/index_key.hpp"
 
 // define page type enum
 enum class IndexPageType {
