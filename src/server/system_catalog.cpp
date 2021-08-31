@@ -122,3 +122,8 @@ SystemCatalog::create_table(const CreateTableExpr& expr)
 
   return table_oid;
 }
+
+void
+SystemCatalog::load_table(table_oid_t table_oid, const TableSchema& schema) {
+  
+}

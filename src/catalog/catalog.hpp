@@ -64,6 +64,10 @@ public:
     return table_oid;
   }
 
+  void load_table(table_oid_t table_oid, const TableSchema& schema) {
+    sys_catalog_.load_table(table_oid, schema);
+  }
+
   index_oid_t
   create_index(const CreateIndexExpr& expr, UNUSED Txn& txn) {
     auto index_name   = expr.table().name();
@@ -73,6 +77,7 @@ public:
     index_mgr_.create_index(index_name, index_schema, index_oid);
     return index_oid;
   }
+
 
   // NOTE: TableSchema can change it's auto-increment value, thus it cannot be
   // return as a const ref.

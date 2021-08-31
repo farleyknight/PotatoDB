@@ -95,8 +95,13 @@ public:
   table_has_column_named(const table_name_t& table_name,
                          const column_name_t& column_name) const;
 
-  table_oid_t create_table(const CreateTableExpr& expr);
-  index_oid_t create_index(const CreateIndexExpr& expr);
+  table_oid_t
+  create_table(const CreateTableExpr& expr);
+  index_oid_t
+  create_index(const CreateIndexExpr& expr);
+
+  void
+  load_table(table_oid_t table_oid, const TableSchema& schema);
 
   TableColumn
   make_column_from(table_oid_t table_oid,
@@ -129,6 +134,7 @@ private:
   // Tables
   map<table_name_t, table_oid_t> table_oids_;
   map<table_oid_t, table_name_t> table_names_; // Reverse mapping
+
   map<table_oid_t, TableSchema> table_schemas_;
   atomic<table_oid_t> next_table_oid_ = 0;
 };

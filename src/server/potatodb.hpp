@@ -137,6 +137,7 @@ private:
   LockMgr       lock_mgr_;
   CheckpointMgr checkpoint_mgr_;
   TableMgr      table_mgr_;
+  IndexMgr      index_mgr_;
   TxnMgr        txn_mgr_;
   Catalog       catalog_;
   ExecEngine    exec_eng_;

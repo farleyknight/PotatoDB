@@ -39,7 +39,9 @@ public:
 
     file_id_t file_id = file_mgr_.load_table_file(table_name);
     assert_header_and_first_page_exist(table_oid, txn);
+
     file_ids_.insert(make_pair(table_oid, file_id));
+    table_oids_.insert(make_pair(file_id, table_oid));
 
     auto heap = make_unique<TableHeap>(file_id,
                                        table_oid,
@@ -60,6 +62,7 @@ public:
     file_id_t file_id = file_mgr_.create_table_file(table_name);
     allocate_header_and_first_page(file_id, txn);
     file_ids_.insert(make_pair(table_oid, file_id));
+    table_oids_.insert(make_pair(file_id, table_oid));
 
     auto heap = make_unique<TableHeap>(file_id,
                                        table_oid,
@@ -71,8 +74,13 @@ public:
   }
 
   TableHeap& table_heap_for(table_oid_t table_oid) {
-    assert(table_heaps_.count(table_oid) == 1);
-    return *table_heaps_.at(table_oid);
+    assert(table_heaps_.contains(table_oid));
+    return *table_heaps_[table_oid];
+  }
+
+  table_oid_t table_oid_for(file_id_t file_id) {
+    assert(table_oids_.contains(file_id));
+    return table_oids_[file_id];
   }
 
 private:
@@ -83,5 +91,7 @@ private:
 
   map<table_oid_t, const table_name_t> table_names_;
   map<table_oid_t, file_id_t> file_ids_;
+  map<file_id_t, table_oid_t> table_oids_; // NOTE: Should be reverse mapping of prev line
+
   map<table_oid_t, ptr<TableHeap>> table_heaps_;
 };
