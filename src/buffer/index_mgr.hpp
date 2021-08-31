@@ -54,8 +54,13 @@ public:
   }
 
   BPlusTree& btree_index_for(index_oid_t index_oid) {
-    assert(btree_indexes_.count(index_oid) == 1);
+    assert(btree_indexes_.contains(index_oid));
     return *btree_indexes_.at(index_oid);
+  }
+
+  index_oid_t index_oid_for(file_id_t file_id) {
+    assert(index_oids_.contains(file_id));
+    return index_oids_[file_id];
   }
 
 private:
@@ -102,6 +107,8 @@ private:
   UNUSED LockMgr& lock_mgr_;
   UNUSED LogMgr& log_mgr_;
   BuffMgr& buff_mgr_;
+
+  map<file_id_t, index_oid_t> index_oids_;
 
   map<index_oid_t, const index_name_t> index_names_;
   map<index_oid_t, ptr<BPlusTree>> btree_indexes_;

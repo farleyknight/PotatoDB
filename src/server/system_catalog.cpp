@@ -87,7 +87,7 @@ SystemCatalog::make_schema_from(table_oid_t table_oid,
 
 void
 SystemCatalog::load_index(index_oid_t index_oid,
-                          const CreateIndexExpr& expr)
+                          const IndexSchema& schema)
 {
   index_schemas_.insert(make_pair(index_oid, schema));
 }
@@ -125,5 +125,5 @@ SystemCatalog::create_table(const CreateTableExpr& expr)
 
 void
 SystemCatalog::load_table(table_oid_t table_oid, const TableSchema& schema) {
-  
+  table_schemas_.insert(make_pair(table_oid, schema));
 }

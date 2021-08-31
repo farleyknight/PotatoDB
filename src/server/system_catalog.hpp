@@ -22,6 +22,14 @@
 // We should just interface with the buffer pool pages directly.
 // That would make this stuff faster.
 
+// TODO: Maybe rename to SchemaMgr?
+// I feel like that fits my general naming conventions.
+// The TableMgr has TableHeaps
+// The IndexMgr has BPlusTrees
+// The TxnMgr has Txns
+// The BuffMgr has Page/Buffer objects
+
+
 class SystemCatalog {
 public:
   SystemCatalog() {}
@@ -40,7 +48,7 @@ public:
 
   table_name_t
   table_name_for(table_oid_t table_oid) const {
-    assert(table_names_.count(table_oid) > 0);
+    assert(table_names_.contains(table_oid));
     return table_names_.at(table_oid);
   }
 
@@ -56,25 +64,25 @@ public:
 
   TableSchema&
   table_schema_for(table_oid_t table_oid) {
-    assert(table_schemas_.count(table_oid) > 0);
+    assert(table_schemas_.contains(table_oid));
     return table_schemas_.at(table_oid);
   }
 
   const TableSchema&
   table_schema_for(table_oid_t table_oid) const {
-    assert(table_schemas_.count(table_oid) > 0);
+    assert(table_schemas_.contains(table_oid));
     return table_schemas_.at(table_oid);
   }
 
   IndexSchema&
   index_schema_for(index_oid_t index_oid) {
-    assert(index_schemas_.count(index_oid) > 0);
+    assert(index_schemas_.contains(index_oid));
     return index_schemas_.at(index_oid);
   }
 
   const IndexSchema&
   index_schema_for(index_oid_t index_oid) const {
-    assert(index_schemas_.count(index_oid) > 0);
+    assert(index_schemas_.contains(index_oid));
     return index_schemas_.at(index_oid);
   }
 
@@ -102,6 +110,9 @@ public:
 
   void
   load_table(table_oid_t table_oid, const TableSchema& schema);
+
+  void
+  load_index(index_oid_t index_oid, const IndexSchema& schema);
 
   TableColumn
   make_column_from(table_oid_t table_oid,
@@ -138,4 +149,3 @@ private:
   map<table_oid_t, TableSchema> table_schemas_;
   atomic<table_oid_t> next_table_oid_ = 0;
 };
-
