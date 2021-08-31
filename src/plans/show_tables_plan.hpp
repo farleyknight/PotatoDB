@@ -8,6 +8,10 @@ public:
     : BasePlan (PlanType::SHOW_TABLES)
   {}
 
+  bool is_query() const {
+    return true;
+  }
+
 private:
   // TODO: Any instance variables?
 };

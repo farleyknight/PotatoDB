@@ -22,7 +22,6 @@ public:
       catalog_  (catalog) {}
 
   ptr<ResultSet> query(ptr<BasePlan>&& plan,
-                       UNUSED const Txn& txn,
                        ExecCtx& exec_ctx) const
   {
     vector<Tuple> tuples;
@@ -43,7 +42,6 @@ public:
   // NOTE: This version does not collect results, hence the inner
   // loop does not do anything with the Tuple & RID
   const string execute(ptr<BasePlan>&& plan,
-                       UNUSED const Txn& txn,
                        ExecCtx& exec_ctx)
   {
     auto exec = ExecFactory::create(exec_ctx, move(plan));

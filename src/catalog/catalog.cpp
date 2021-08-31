@@ -1,8 +1,6 @@
 #include "catalog/catalog.hpp"
 
 
-
-
 QuerySchema
 Catalog::query_schema_for(table_oid_t table_oid) const
 {

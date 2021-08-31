@@ -1,110 +1,124 @@
 #include "server/system_catalog.hpp"
 
+// TODO:
+//
+// We should add methods for each type of "query"
+//
+// DESCRIBE TABLE table_name
+// SHOW TABLES
+//
+// What is the equivalent for indexes?
 
-// TODO: We're no longer putting the SystemCatalog into a .tbl on it's own
-// Instead, the schema for each table lives in the .tbl itself, as block_id=0
-// This choice serves two purposes:
-// 1) SystemCatalog as an in-memory data structure, not as rows in a .tbl
-// 2) It's easier to "query" an in-memory data structure versus going to disk every time.
-// 3) Makes querying against SystemCatalog 10x faster.
-
-void SystemCatalog::create_table(const table_name_t& table_name,
-                                 ColumnDefListExpr columns,
-                                 Txn& txn);
+TableColumn
+SystemCatalog::make_column_from(table_oid_t table_oid,
+                                column_oid_t column_oid,
+                                const ColumnDefExpr& expr) const
 {
-  auto table_oid          = next_table_oid_++;
-  table_oids_[table_name] = table_oid;
-  table_names_[table_oid] = table_name;
-
-  vector<TableColumn> cols;
-
-  for (column_index_t i = 0; i < columns.list().size(); ++i) {
-    // TODO: Make col
-    auto column_oid     = result_set->value_at<int32_t>("id", i);
-    auto data_type      = result_set->value_at<int32_t>("data_type", i);
-
-    auto size           = result_set->value_at<int32_t>("data_size", i);
-    auto column_name    = result_set->value_at<string>("object_name", i);
-    auto is_primary_key = result_set->value_at<bool>("primary_key", i);
-
-    auto type_id = static_cast<TypeId>(data_type);
-    if (type_id == TypeId::VARCHAR) {
-      cols.push_back(TableColumn(column_name, table_oid, column_oid, type_id, size));
-    } else {
-      cols.push_back(TableColumn(column_name, table_oid, column_oid, type_id));
-    }
+  auto name    = expr.name();
+  auto type_id = expr.type_id();
+  if (type_id == TypeId::VARCHAR) {
+    return TableColumn(name,
+                       table_oid,
+                       column_oid,
+                       type_id,
+                       expr.type_length());
+  } else {
+    return TableColumn(name,
+                       table_oid,
+                       column_oid,
+                       type_id);
   }
-
-  auto table_schema = TableSchema(cols, table_name, table_oid);
-
-  table_schemas_.insert(make_pair(table_oid, table_schema));
-
-  load_table(table_oid, table_name, table_schema);
 }
 
-TableSchema SystemCatalog::make_schema_from(const table_name_t& table_name,
-                                            table_oid_t table_oid,
-                                            const ColumnDefListExpr& column_list) const
+column_oid_t
+SystemCatalog::make_column_oid(const table_name_t& table_name,
+                               const column_name_t& column_name)
 {
+  auto full_name   = table_name + "." + column_name;
+  assert(column_oids_.count(full_name) == 0);
+
+  column_oid_t column_oid = next_column_oid_;
+  next_column_oid_++;
+  column_oids_.insert(make_pair(full_name, column_oid));
+
+  return column_oid;
+}
+
+IndexSchema
+SystemCatalog::make_schema_from(index_oid_t index_oid,
+                                const CreateIndexExpr& expr) const
+{
+  auto index_name   = expr.index_name();
+  auto table_name   = expr.table().name();
+  auto table_oid    = table_oid_for(table_name);
+
+  auto column_names = expr.column_names();
+  auto table_schema = table_schema_for(table_name);
+
+  vector<column_oid_t> column_oids;
+  for (const auto &name : column_names) {
+    auto column_oid = table_schema.column_oid_for(name);
+    column_oids.push_back(column_oid);
+  }
+
+  int32_t key_size = 8; // NOTE: Fixed for now.
+                        // Update to be configurable later
+
+  return IndexSchema(index_name,  table_name,
+                     index_oid,   table_oid,
+                     column_oids, key_size);
+}
+
+TableSchema
+SystemCatalog::make_schema_from(table_oid_t table_oid,
+                                const CreateTableExpr& expr)
+{
+  auto table_name  = expr.table().name();
+  auto column_list = expr.column_defs();
+
   vector<TableColumn> columns;
-  for (size_t col_index = 0; col_index < column_list.list().size(); ++col_index) {
-    const auto &column = column_list.list()[col_index];
-    auto type_id = column.type_id();
-    if (type_id == TypeId::VARCHAR) {
-      columns.push_back(TableColumn(column.name(),
-                                    table_oid,
-                                    col_index,
-                                    type_id,
-                                    column.type_length()));
-    } else {
-      columns.push_back(TableColumn(column.name(),
-                                    table_oid,
-                                    col_index,
-                                    type_id));
-    }
+  for (const auto &col : column_list.list()) {
+    auto column_oid = make_column_oid(table_name, col.name());
+    columns.push_back(make_column_from(table_oid, column_oid, col));
   }
 
   return TableSchema(columns, table_name, table_oid);
 }
 
-// TODO: We should be attempting to get an
-// exclusive lock on the table, and abort the txn
-// if we cannot get it.
-table_oid_t SystemCatalog::create_table(const CreateTableExpr& expr, Txn& txn)
+void
+SystemCatalog::load_index(index_oid_t index_oid,
+                          const CreateIndexExpr& expr)
 {
-  assert(table_oids_.count(table_name) == 0);
-
-  table_oid_t table_oid = next_table_oid_++;
-  auto schema = make_schema_from(table_name,
-                                 table_oid,
-                                 primary_key,
-                                 column_list);
-
-  load_table(table_oid, table_name, schema);
-  return table_oid;
+  index_schemas_.insert(make_pair(index_oid, schema));
 }
 
-void SystemCatalog::load_table(table_oid_t table_oid,
-                               const table_name_t& table_name,
-                               const TableSchema& schema)
+index_oid_t
+SystemCatalog::create_index(const CreateIndexExpr& expr)
 {
-  table_schemas_.insert(make_pair(table_oid, schema));
+  auto table_name = expr.table().name();
+  auto index_name = expr.index_name();
 
-  // TODO: This should be sent to a logger.
-  // std::cout << "New table created: " << table_name << std::endl;
-
-  index_oids_.emplace(table_name,
-                      map<index_name_t, index_oid_t>());
-}
-
-index_oid_t SystemCatalog::create_index(const CreateIndexExpr& expr, UNUSED Txn& txn)
-{
   assert(table_oids_.count(table_name) == 1);
-  assert(index_oids_.count(table_name) == 1);
-  assert(index_oids_[table_name].count(index_name) == 0);
+  assert(index_oids_.count(index_name) == 0);
 
-  index_oid_t index_oid = next_index_oid_++;
-  index_oids_[table_name][index_name] = index_oid;
+  auto index_oid = next_index_oid_++;
+  auto schema    = make_schema_from(index_oid, expr);
+  load_index(index_oid, schema);
 
   return index_oid;
+}
+
+table_oid_t
+SystemCatalog::create_table(const CreateTableExpr& expr)
+{
+  auto table_name  = expr.table().name();
+  assert(!table_oids_.contains(table_name));
+
+  auto table_oid = next_table_oid_++;
+  table_oids_.insert(make_pair(table_name, table_oid));
+
+  auto schema = make_schema_from(table_oid, expr);
+  table_schemas_.insert(make_pair(table_oid, schema));
+
+  return table_oid;
 }

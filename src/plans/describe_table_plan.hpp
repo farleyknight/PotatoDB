@@ -9,6 +9,10 @@ public:
       table_name_ (table_name)
   {}
 
+  bool is_query() const {
+    return true;
+  }
+
 private:
   const table_name_t table_name_;
 };

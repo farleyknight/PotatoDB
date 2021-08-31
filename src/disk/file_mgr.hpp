@@ -33,10 +33,13 @@ public:
   // This is essentially the first block of the .tbl file
   //
   // This is also where we store the schema for the SQL table itself.
-  // We load up the schema into in-memory data structures (maps and vectors)
-  // and do any SQL queries by looking at values in those.
+  // We load up the schema into in-memory data structures
+  // (basically maps and vectors)
   //
-  // Therefore, we must read each page once during system start-up.
+  // We should do any SQL queries by looking at values in those structures.
+  //
+  // Therefore, we must read the first page of each file once during
+  // system start-up, to load the proper schema.
   //
   static PageId table_header_page(file_id_t file_id);
   static PageId first_table_page(file_id_t file_id);
@@ -45,7 +48,8 @@ public:
   static PageId first_index_page(file_id_t file_id);
 
   file_id_t create_table_file(const string& table_name) {
-    return create_file(table_file_for(table_name));
+    // TODO: assert file does not already exist!
+    return open_file(table_file_for(table_name));
   }
 
   void setup_db_directory() {
@@ -55,16 +59,18 @@ public:
   }
 
   void shutdown() {
-    // TODO Close all file handles, not just the log 
+    // TODO Close all file handles, not just the log
     log_file_->close();
   }
 
   file_id_t create_index_file(const string& table_name) {
-    return create_file(index_file_for(table_name));
+    // TODO: assert file does not already exist!
+    return open_file(index_file_for(table_name));
   }
 
   file_id_t load_table_file(const string& table_name) {
-    return load_file(table_file_for(table_name));
+    // TODO: assert file already exists!
+    return open_file(table_file_for(table_name));
   }
 
   fs::path file_path_for(const string& file_name) const {
@@ -110,15 +116,9 @@ public:
   bool read_log(LogFileCursor& cursor);
 
   bool table_file_exists(const string& table_name) const {
-    logger->debug("[DiskMgr] Checking if there is a table file for : " + table_name);
+    logger->debug("[DiskMgr] Checking if there is a table file for : "
+                  + table_name);
     return file_exists(table_file_for(table_name));
-  }
-
-  file_id_t create_file(fs::path file_path) {
-    file_id_t file_id = files_.size();
-    auto handle = make_unique<FileHandle>(file_path);
-    files_.emplace_back(move(handle));
-    return file_id;
   }
 
   void create_log_file() {
@@ -135,18 +135,14 @@ public:
     read_buffer(page_id, page.buffer());
   }
 
+  vector<file_id_t> table_file_ids();
+  vector<file_id_t> index_file_ids();
+  file_id_t file_id_for(fs::path file_path);
 
-  // NOTE: create_file and load_file are identical for now.
-  // TODO: At some point, we may combine them?
-  file_id_t load_file(fs::path file_path) {
-    // std::cout << "Creating file " << file_path << std::endl;
-    file_id_t file_id = files_.size();
-    auto handle = make_unique<FileHandle>(file_path);
-    files_.emplace_back(move(handle));
-    return file_id;
-  }
+  file_id_t open_file(fs::path file_path);
 
   void remove_file(fs::path file_path) const {
+    // TODO: Maybe close the FileHandle before removing the file?
     fs::remove(file_path);
   }
 
@@ -159,13 +155,15 @@ public:
   void truncate_log_file();
 
 private:
+  // TODO: This should live in the FileHandle I think?
   map<file_id_t, block_id_t> next_block_ids_;
   ptr<FileHandle> log_file_ {nullptr};
 
-  // TODO: Maybe this should be a mapping as well?
-  // TODO: Eventually `files_` will have to be persisted to disk
-  // It may be easier to store a mapping between file_ids and fs::path
-  vector<ptr<FileHandle>> files_;
+  map<file_id_t, ptr<FileHandle>> file_handles_;
+  // NOTE: string here is just the file_path.string()
+  map<string, file_id_t> file_ids_;
+
+  atomic<file_id_t> next_file_id_ = 0;
 
   std::future<void> *flush_log_func_ {nullptr};
 };

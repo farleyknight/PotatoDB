@@ -64,36 +64,25 @@ ptr<BasePlan> PotatoDB::sql_to_plan(const string& statement) const {
   return PlanFactory::create(*this, move(exprs[0]));
 }
 
-StatementResult PotatoDB::run(const string& statement) {
+StatementResult
+PotatoDB::run(const string& statement) {
   try {
-    auto plan = sql_to_plan(statement);
+    auto plan     = sql_to_plan(statement);
     // Create and run the txn
-    auto &txn = txn_mgr_.begin();
-    ExecCtx exec_ctx(txn,
-                     buff_mgr_,
-                     lock_mgr_,
-                     txn_mgr_,
-                     table_mgr_,
-                     catalog_);
-
+    auto &txn     = txn_mgr_.begin();
+    auto exec_ctx = make_exec_ctx(txn);
+    // TODO: We can remove this `is_query` check if we allow all
+    // SQL to return some kind of result set, even if that's just
+    // a message that the command was successfully executed.
     if (plan->is_query()) {
-      auto result_set = exec_eng_.query(move(plan), txn, exec_ctx);
+      auto result_set = exec_eng_.query(move(plan), exec_ctx);
       txn_mgr_.commit(txn);
       logger->debug("[PotatoDB] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
       logger->debug("[PotatoDB] Returning result set");
       return StatementResult(move(result_set));
-    } else if (plan->type() == PlanType::CREATE_TABLE) {
-      // CREATE TABLE
-      auto create_table_plan = dynamic_cast<CreateTablePlan*>(plan.get());
-      auto table_name        = create_table_plan->table_name();
-      auto column_list       = create_table_plan->column_list().list();
-      auto message           = exec_eng_.execute(move(plan), txn, exec_ctx);
-      run_create_table(table_name, column_list, txn, exec_ctx);
-      txn_mgr_.commit(txn);
-      logger->debug("[PotatoDB] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-      return StatementResult(message);
     } else {
-      auto message = exec_eng_.execute(move(plan), txn, exec_ctx);
+      auto message = exec_eng_.execute(move(plan), exec_ctx);
+      txn_mgr_.commit(txn);
       logger->debug("[PotatoDB] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
       return StatementResult(message);
     }
@@ -105,47 +94,17 @@ StatementResult PotatoDB::run(const string& statement) {
   }
 }
 
-
-// TODO: Move this logic into the SystemCatalog class, likely as a static method
-void PotatoDB::run_create_table(const table_name_t table_name,
-                                const vector<ColumnDefExpr> column_list,
-                                Txn& txn,
-                                ExecCtx& exec_ctx)
-{
-  // TODO:
-  // 1) Run the actual CREATE TABLE plan
-  // 2) Run additional SQL for inserting the table into the `system_catalog`
-  // 3) Run additional SQL for inserting each column from the table into
-  //    the `system_catalog`
-
-  // INSERT INTO system_catalog VALUES (table_name...)
-  auto insert_table_sql  = SystemCatalog::insert_table_sql_for(table_name);
-  auto insert_table_plan = sql_to_plan(insert_table_sql);
-  exec_eng_.execute(move(insert_table_plan), txn, exec_ctx);
-
-  logger->debug("[PotatoDB] %%%%%%%%%%%%%%%%%%%%%%");
-  logger->debug("[PotatoDB] Inserting the columns");
-  logger->debug("[PotatoDB] Column count: " + std::to_string(column_list.size()));
-  logger->debug("[PotatoDB] %%%%%%%%%%%%%%%%%%%%%%");
-
-  for (const auto &col : column_list) {
-    auto insert_column_sql
-      = SystemCatalog::insert_column_sql_for(table_name, col);
-
-    auto insert_column_plan = sql_to_plan(insert_column_sql);
-    exec_eng_.execute(move(insert_column_plan), txn, exec_ctx);
-  }
-}
-
 void PotatoDB::build_system_catalog() {
-  logger->debug("[PotatoDB] Checking if system_catalog table exists");
-  if (file_mgr_.table_file_exists("system_catalog")) {
-    logger->debug("[PotatoDB] Begin loading system catalog");
-    SystemCatalog::load(*this);
-  } else {
-    logger->debug("[PotatoDB] Begin creating system catalog");
-    SystemCatalog::create(*this);
-    buff_mgr_.flush_all();
+  for (const auto &file_id : file_mgr_.table_file_ids()) {
+    auto table_oid    = table_mgr_.table_oid_for(file_id);
+    auto table_schema = table_mgr_.read_table_schema(file_id);
+    catalog_.load_table(table_oid, table_schema);
+  }
+
+  for (const auto &file_id : file_mgr_.index_file_ids()) {
+    auto index_oid    = index_mgr_.index_oid_for(file_id);
+    auto index_schema = index_mgr_.read_index_schema(file_id);
+    catalog_.load_index(index_oid, index_schema);
   }
 }
 
@@ -190,6 +149,18 @@ void PotatoDB::verify_system_files() {
   // 3) and that every file has it's own table. (or is the log file)
   //
   // Write a method to verify everything is lined up correctly.
+  //
+  // TODO: This method should also
+  // 1) Read the first 4 bytes and confirm that in hexadecimal they spell:
+  //    B07A70DB
+  //    POTATODB
+  // 2) Read the file_name_t off of the file header block
+  //    It should be the same as the file's actual name
+  // 3) We should have a file dedicated to just holding metadata
+  //    about the file_ids for each file.
+  //    Call it "files.sys"
+  //    Store metadata about files here
+  // 4) ???
 }
 
 bool PotatoDB::is_logging_enabled() const {
@@ -209,7 +180,9 @@ void PotatoDB::startup() {
     build_system_catalog();
     logger->debug("[PotatoDB] Verifying system files");
     verify_system_files();
+
   } catch (std::exception &e) {
-    logger->debug("[PotatoDB] An error occurred during startup() : " + std::string(e.what()));
+    logger->debug("[PotatoDB] An error occurred during startup() : "
+                  + std::string(e.what()));
   }
 }

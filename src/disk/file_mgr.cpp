@@ -1,34 +1,82 @@
 #include "disk/file_mgr.hpp"
 
-
-// TODO: Let's move the DiskMgr::write_log stuff into this class?
-
 void FileMgr::write_buffer(PageId page_id, const Buffer& buffer) {
-  file_id_t file_id = page_id.file_id();
-  buffer_offset_t offset = page_id.block_id() * buffer.size();
-  assert(files_.size() > file_id);
+  auto file_id = page_id.file_id();
+  auto offset  = page_id.block_id() * buffer.size();
+  assert(file_handles_.contains(file_id));
 
-  logger->debug("[FileMgr] Writing buffer to file_id " + std::to_string(file_id));
-  logger->debug("[FileMgr] Buffer offset " + std::to_string(offset));
-  logger->debug("[FileMgr] File name: " + files_[file_id]->file_path());
-  logger->debug("[FileMgr] File size: " + std::to_string(files_[file_id]->size()));
+  logger->debug("[FileMgr] Writing buffer to file_id " +
+                std::to_string(file_id));
+  logger->debug("[FileMgr] Buffer offset " +
+                std::to_string(offset));
+  logger->debug("[FileMgr] File name: " +
+                file_handles_[file_id]->file_path());
+  logger->debug("[FileMgr] File size: " +
+                std::to_string(file_handles_[file_id]->size()));
 
-  files_[file_id]->write_buffer(offset, buffer);
+  file_handles_[file_id]->write_buffer(offset, buffer);
+}
+
+vector<file_id_t> FileMgr::table_file_ids() {
+  vector<file_id_t> file_ids;
+  auto dir_iter = fs::directory_iterator(db_directory());
+  for (const auto &entry : dir_iter) {
+    if (entry.path().extension() == ".tbl") {
+      file_ids.push_back(file_id_for(entry.path()));
+    }
+  }
+
+  return file_ids;
+}
+
+vector<file_id_t> FileMgr::index_file_ids() {
+  vector<file_id_t> file_ids;
+  auto dir_iter = fs::directory_iterator(db_directory());
+  for (const auto &entry : dir_iter) {
+    if (entry.path().extension() == ".idx") {
+      file_ids.push_back(file_id_for(entry.path()));
+    }
+  }
+
+  return file_ids;
+}
+
+file_id_t FileMgr::file_id_for(fs::path file_path) {
+  auto path_as_string = file_path.c_str();
+  assert(file_ids_.contains(path_as_string));
+  return file_ids_[path_as_string];
+}
+
+file_id_t FileMgr::open_file(fs::path file_path) {
+  auto path_as_string = file_path.c_str();
+
+  auto file_id = next_file_id_++;
+  file_ids_.insert(make_pair(path_as_string, file_id));
+
+  auto handle         = make_unique<FileHandle>(file_path);
+  file_handles_.insert(make_pair(file_id, move(handle)));
+
+  return file_id;
 }
 
 void FileMgr::read_buffer(PageId page_id, Buffer& buffer) {
   file_id_t file_id = page_id.file_id();
   buffer_offset_t offset = page_id.block_id() * buffer.size();
-  assert(files_.size() > file_id);
+  assert(file_handles_.contains(file_id));
 
-  logger->debug("[FileMgr] Reading buffer at file_id " + std::to_string(file_id));
-  logger->debug("[FileMgr] Reading block_id " + std::to_string(page_id.block_id()));
+  logger->debug("[FileMgr] Reading buffer at file_id " +
+                std::to_string(file_id));
+  logger->debug("[FileMgr] Reading block_id " +
+                std::to_string(page_id.block_id()));
 
-  logger->debug("[FileMgr] Buffer offset " + std::to_string(offset));
-  logger->debug("[FileMgr] File name: " + files_[file_id]->file_path());
-  logger->debug("[FileMgr] File size: " + std::to_string(files_[file_id]->size()));
+  logger->debug("[FileMgr] Buffer offset " +
+                std::to_string(offset));
+  logger->debug("[FileMgr] File name: " +
+                file_handles_[file_id]->file_path());
+  logger->debug("[FileMgr] File size: " +
+                std::to_string(file_handles_[file_id]->size()));
 
-  files_[file_id]->read_buffer(offset, buffer);
+  file_handles_[file_id]->read_buffer(offset, buffer);
 }
 
 void FileMgr::remove_table_files() {
@@ -62,7 +110,8 @@ bool FileMgr::read_log(LogFileCursor& cursor) {
     int32_t read_count = log_io.gcount();
     if (read_count < amount_to_read) {
       log_io.clear();
-      std::memset(cursor.buffer().ptr(read_count), 0, amount_to_read - read_count);
+      std::memset(cursor.buffer().ptr(read_count),
+                  0, amount_to_read - read_count);
       logger->debug("[DiskMgr] Read too few bytes. Zeroing out what we did read.");
       return false;
     }
@@ -112,13 +161,13 @@ PageId FileMgr::allocate_page(file_id_t file_id) {
   // TODO! Implement in "CREATE TABLE"
   // or "CREATE INDEX" context.
 
-  if (next_block_ids_.count(file_id) == 0) {
+  if (next_block_ids_.contains(file_id)) {
     next_block_ids_[file_id] = TABLE_CONTENT_BLOCK_NUM;
   } else {
     next_block_ids_[file_id]++;
   }
 
-  files_[file_id]->resize(next_block_ids_[file_id] * PAGE_SIZE);
+  file_handles_[file_id]->resize(next_block_ids_[file_id] * PAGE_SIZE);
 
   return PageId(file_id, next_block_ids_[file_id]);
 }
@@ -159,5 +208,5 @@ void FileMgr::deallocate_page(PageId page_id) {
   assert(next_block_ids_[file_id] < page_id.block_id());
   auto new_size = (page_id.block_id() - 1) * PAGE_SIZE;
 
-  files_[file_id]->resize(new_size);
+  file_handles_[file_id]->resize(new_size);
 }

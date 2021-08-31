@@ -4,6 +4,9 @@
 #include "plans/describe_table_plan.hpp"
 #include "plans/show_tables_plan.hpp"
 
+#include "exprs/create_table_expr.hpp"
+#include "exprs/show_tables_expr.hpp"
+
 ptr<BasePlan>
 PlanFactory::create(const PotatoDB& db,
                     ptr<BaseExpr>&& expr)

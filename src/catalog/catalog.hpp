@@ -53,9 +53,10 @@ public:
     return sys_catalog_.table_has_column_named(table_name, column_name);
   }
 
-  table_oid_t create_table(const CreateTableExpr& expr, Txn& txn) {
+  table_oid_t
+  create_table(const CreateTableExpr& expr, UNUSED Txn& txn) {
     auto table_name   = expr.table().name();
-    auto table_oid    = sys_catalog_.create_table(expr, txn);
+    auto table_oid    = sys_catalog_.create_table(expr);
     auto table_schema = sys_catalog_.table_schema_for(table_oid);
     // TODO: The `table_mgr_` needs a reference to the new TableSchema
     // that was made in order to write it to the first block of the file.
@@ -63,55 +64,50 @@ public:
     return table_oid;
   }
 
-  index_oid_t create_index(const CreateIndexExpr expr, Txn& txn) {
+  index_oid_t
+  create_index(const CreateIndexExpr& expr, UNUSED Txn& txn) {
     auto index_name   = expr.table().name();
-    auto index_oid    = sys_catalog_.create_index(expr, txn);
+    auto index_oid    = sys_catalog_.create_index(expr);
     auto index_schema = sys_catalog_.index_schema_for(index_oid);
 
     index_mgr_.create_index(index_name, index_schema, index_oid);
-
     return index_oid;
-    /*
-     *
-     file_id_t file_id = file_mgr_.create_index_file("test_index");
-
-     GenericComp comparator(index_schema);
-
-     BTree<GenericKey, RID, GenericComp> tree(file_id,
-     buff_mgr_,
-     comparator);
-
-     index_mgr_.load_index(index_name, move(tree));
-     */
   }
 
   // NOTE: TableSchema can change it's auto-increment value, thus it cannot be
   // return as a const ref.
-  TableSchema& table_schema_for(table_oid_t table_oid) {
+  TableSchema&
+  table_schema_for(table_oid_t table_oid) {
     return sys_catalog_.table_schema_for(table_oid);
   }
 
-  const TableSchema& table_schema_for(table_oid_t table_oid) const {
+  const TableSchema&
+  table_schema_for(table_oid_t table_oid) const {
     return sys_catalog_.table_schema_for(table_oid);
   }
 
-  table_oid_t table_oid_for(const table_name_t& table_name) const {
+  table_oid_t
+  table_oid_for(const table_name_t& table_name) const {
     return sys_catalog_.table_oid_for(table_name);
   }
 
-  IndexSchema& index_schema_for(index_oid_t index_oid) {
+  IndexSchema&
+  index_schema_for(index_oid_t index_oid) {
     return sys_catalog_.index_schema_for(index_oid);
   }
 
-  const IndexSchema& index_schema_for(index_oid_t index_oid) const {
+  const IndexSchema&
+  index_schema_for(index_oid_t index_oid) const {
     return sys_catalog_.index_schema_for(index_oid);
   }
 
-  IndexSchema& index_schema_for(const index_name_t& index_name) {
+  IndexSchema&
+  index_schema_for(const index_name_t& index_name) {
     return sys_catalog_.index_schema_for(index_name);
   }
 
-  const IndexSchema& index_schema_for(const index_name_t& index_name) const {
+  const IndexSchema&
+  index_schema_for(const index_name_t& index_name) const {
     return sys_catalog_.index_schema_for(index_name);
   }
 

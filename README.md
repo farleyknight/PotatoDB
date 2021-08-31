@@ -4,7 +4,19 @@ A personal project to learn database internals and writing performant C++ code.
 
 ## Build System
 
-Currently using CMake to generate our build scripts. However, while traditionally CMake has been used alongside the command `make`, I've switched to using `ninja` instead. What does this mean for someone just using the project? Here's the commands you'll run.
+The build system currently uses
+
+* conan
+* CMake
+* Ninja
+
+Here's the commands you'll run.
+
+To install `conan`
+
+```bash
+$ conan install .
+```
 
 To generate the build scripts:
 

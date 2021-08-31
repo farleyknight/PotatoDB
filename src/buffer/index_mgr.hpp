@@ -26,6 +26,15 @@ public:
       buff_mgr_ (buff_mgr)
   {}
 
+  IndexSchema read_index_schema(file_id_t file_id) {
+    auto page_id           = file_mgr_.index_header_page(file_id);
+    auto page_ptr          = buff_mgr_.fetch_page(page_id);
+    assert(page_ptr);
+    auto index_header_page = IndexHeaderPage(page_ptr);
+
+    return index_header_page.read_schema();
+  }
+
   void create_index(const index_name_t& index_name,
                     const IndexSchema index_schema,
                     index_oid_t index_oid)

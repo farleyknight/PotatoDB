@@ -5,7 +5,7 @@
 
 class IndexSchema : public BaseSchema<TableColumn> {
 public:
-  IndexSchema(vector<TableColumn> columns,
+  IndexSchema(
               index_name_t index_name,
               table_name_t table_name,
               index_oid_t index_oid,
@@ -13,7 +13,7 @@ public:
               // NOTE: This is the mapping relation between
               // key schema and tuple schema
               vector<column_oid_t> key_attrs,
-              size_t key_size);
+              int32_t key_size);
 
   const index_name_t index_name() const;
   const table_name_t table_name() const;
@@ -27,5 +27,4 @@ private:
   index_oid_t index_oid_;
   table_oid_t table_oid_;
   vector<column_oid_t> key_attrs_;
-
 };

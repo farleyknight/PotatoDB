@@ -17,11 +17,20 @@ public:
     return table_;
   }
 
+  // TODO: Create IndexExpr
+  const string index_name() const {
+    return index_name_;
+  }
+
+  const vector<string> column_names() const {
+    return column_names_;
+  }
+
 protected:
+  // TODO: Create IndexExpr, rename this to index_
   string index_name_;
 
-  // TODO: Eventually we should allow for more columns
-  string index_column_;
+  vector<string> column_names_;
 
   TableExpr table_;
   bool if_not_exists_ = false;

@@ -3,6 +3,9 @@
 #include "catalog/column_data.hpp"
 #include "catalog/table_schema.hpp"
 
+// TODO: Each table & index file should have a FileHeaderPage
+// The TableHeaderPage should be a subclass of FileHeaderPage
+
 /*
  *  Table Header Page format (size in bytes):
  *
@@ -13,13 +16,16 @@
  *  columns_start_t (4) => Where Schema Columns will start
  *                         To be computed after string w/ length is written
  *  string_length_t (4)
- *  table_name_t (var)
+ *  index_name_t (var)
  *
  *  Schema Columns:
  *  ===============
  *  column_size_t (4)
- *  ColumnData (var) [Based on column_size_t]
- *
+ *  vector<column_oid_t> (var) => These are the column OIDs for each
+ *                                column we are indexing. At the moment
+ *                                we only support indexing one table
+ *                                but in the future, we will likely
+ *                                support more.
  */
 
 class TableHeaderPage : public PageLayout {

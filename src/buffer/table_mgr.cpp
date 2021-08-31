@@ -22,13 +22,11 @@ void TableMgr::allocate_header_and_first_page(file_id_t file_id, Txn& txn) {
 
 // NOTE: This should be called on every table during start-up, to load the
 // schema into in-memory data structures.
-TableSchema TableMgr::read_table_schema(table_oid_t table_oid) {
-  assert(file_ids_.count(table_oid) > 0);
-  auto file_id           = file_ids_.at(table_oid);
+TableSchema TableMgr::read_table_schema(file_id_t file_id) {
   auto page_id           = file_mgr_.table_header_page(file_id);
-  auto page              = buff_mgr_.fetch_page(page_id);
-  auto table_header_page = TableHeaderPage(page);
+  auto page_ptr          = buff_mgr_.fetch_page(page_id);
+  assert(page_ptr);
+  auto table_header_page = TableHeaderPage(page_ptr);
 
   return table_header_page.read_schema();
 }
-

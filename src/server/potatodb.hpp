@@ -44,15 +44,6 @@ public:
 
   ptr<BasePlan> sql_to_plan(const string& statement) const;
 
-  ptr<ExecCtx> make_exec_ctx(Txn& txn) {
-    return make_unique<ExecCtx>(txn,
-                                buff_mgr_,
-                                lock_mgr_,
-                                txn_mgr_,
-                                table_mgr_,
-                                catalog_);
-  }
-
   int pool_size() {
     return 100;
   }
@@ -111,6 +102,17 @@ public:
   FileMgr& file_mgr() {
     return file_mgr_;
   }
+
+  ExecCtx
+  make_exec_ctx(Txn& txn) {
+    return ExecCtx(txn,
+                   buff_mgr_,
+                   lock_mgr_,
+                   txn_mgr_,
+                   table_mgr_,
+                   catalog_);
+  }
+
 
   LogRecovery log_recovery() {
     auto &txn = txn_mgr_.begin();

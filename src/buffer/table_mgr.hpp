@@ -27,7 +27,7 @@ public:
   void assert_header_and_first_page_exist(file_id_t file_id,
                                           Txn& txn);
 
-  TableSchema read_table_schema(table_oid_t table_oid);
+  TableSchema read_table_schema(file_id_t file_id);
 
   // TODO: I'm thinking this class is where we can make
   // TableCursor objects?
