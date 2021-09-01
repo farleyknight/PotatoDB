@@ -16,16 +16,13 @@
  *  columns_start_t (4) => Where Schema Columns will start
  *                         To be computed after string w/ length is written
  *  string_length_t (4)
- *  index_name_t (var)
+ *  table_name_t (var)
  *
  *  Schema Columns:
  *  ===============
  *  column_size_t (4)
- *  vector<column_oid_t> (var) => These are the column OIDs for each
- *                                column we are indexing. At the moment
- *                                we only support indexing one table
- *                                but in the future, we will likely
- *                                support more.
+ *  ColumnData (var) [Based on column_size_t]
+ *
  */
 
 class TableHeaderPage : public PageLayout {
@@ -56,11 +53,11 @@ public:
   }
 
   void write_schema(const TableSchema& schema) {
-    auto columns_start = write_header(schema);
+    auto columns_start = write_metadata(schema);
     write_columns(columns_start, schema.columns());
   }
 
-  int32_t write_header(const TableSchema& schema) {
+  int32_t write_metadata(const TableSchema& schema) {
     buffer_offset_t offset = 0;
 
     write_table_oid(schema.table_oid());
@@ -128,7 +125,9 @@ public:
     return cols;
   }
 
-  void write_columns(buffer_offset_t start_offset, const vector<TableColumn>& columns) {
+  void write_columns(buffer_offset_t start_offset,
+                     const vector<TableColumn>& columns)
+  {
     buffer_offset_t offset = start_offset;
     for (const auto &col : columns) {
       auto col_data_buffer = col.data();

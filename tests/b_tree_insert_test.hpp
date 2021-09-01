@@ -34,10 +34,10 @@ TEST_F(BTreeInsert, InsertTestAscending) {
   db.run("CREATE INDEX test_index ON test_table (a)");
 
   db.run("INSERT INTO test_table (a) VALUES (0), (1), (2), (3), (4), (5)");
-  auto result_set = db.run("SELECT * FROM test_table");
+  auto results = db.run("SELECT * FROM test_table");
 
-  for (int32_t i = 0; i < result_set.size(); ++i) {
-    auto int_value = result_set.value_at<int32_t>('a', i);
+  for (int32_t i = 0; i < results.set()->size(); ++i) {
+    auto int_value = results.set()->value_at<int32_t>('a', i);
     EXPECT_EQ(int_value, i);
   }
 }
@@ -47,10 +47,10 @@ TEST_F(BTreeInsert, InsertTestDescending) {
   db.run("CREATE INDEX test_index ON test_table (a)");
 
   db.run("INSERT INTO test_table (a) VALUES (0), (1), (2), (3), (4), (5)");
-  auto result_set = db.run("SELECT * FROM test_table");
+  auto results = db.run("SELECT * FROM test_table");
 
-  for (int32_t i = 0; i < result_set.size(); ++i) {
-    auto int_value = result_set.value_at<int32_t>('a', i);
+  for (int32_t i = 0; i < results.set()->size(); ++i) {
+    auto int_value = results.set()->value_at<int32_t>('a', i);
     EXPECT_EQ(int_value, i);
   }
 }

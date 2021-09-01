@@ -56,15 +56,20 @@ SystemCatalog::make_schema_from(index_oid_t index_oid,
   auto table_schema = table_schema_for(table_name);
 
   vector<column_oid_t> column_oids;
+  vector<TableColumn> columns;
   for (const auto &name : column_names) {
     auto column_oid = table_schema.column_oid_for(name);
     column_oids.push_back(column_oid);
+
+    auto column = table_schema.by_name(name);
+    columns.push_back(column);
   }
 
   int32_t key_size = 8; // NOTE: Fixed for now.
                         // Update to be configurable later
 
-  return IndexSchema(index_name,  table_name,
+  return IndexSchema(columns,
+                     index_name,  table_name,
                      index_oid,   table_oid,
                      column_oids, key_size);
 }
