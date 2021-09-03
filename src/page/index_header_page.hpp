@@ -3,6 +3,8 @@
 #include "catalog/column_data.hpp"
 #include "catalog/index_schema.hpp"
 
+#include "page/page_layout.hpp"
+
 // TODO: Each table & index file should have a FileHeaderPage
 // The IndexHeaderPage should be a subclass of FileHeaderPage
 
@@ -18,15 +20,16 @@
  *                       actual page ID.
  *                       In reality, we only need the block_id
  *
- *  column_oids_start (4 bytes, int32_t)
- *                      => Where Schema Column OIDS will start
- *                         To be computed after string w/ length is written
- *  string_length     (4 bytes, int32_t)
- *  index_name_t      (var, string chars based on prev value)
+ *  column_oids_count    (4 bytes, int32_t)
+ *  column_oids_start    (4 bytes, int32_t)
+ *                    => Where Schema Column OIDS will start
+ *                       To be computed after string w/ length is written
+ *  string_length        (4 bytes, int32_t)
+ *  index_name_t         (var, string chars based on prev value)
  *
  *  Schema Columns:
  *  ===============
- *  column_size_t     (4 bytes, int32_t)
+ *  column_size_t        (4 bytes, int32_t)
  *  vector<column_oid_t> (var, vector of int32_t's based on prev value)
  *
  *                 NOTE: These are the column OIDs for each
@@ -41,6 +44,17 @@ class Catalog;
 
 class IndexHeaderPage : public PageLayout {
 public:
+  using column_oids_start_t = buffer_offset_t;
+  using column_oids_count_t = int32_t;
+  using string_length_t     = int32_t;
+
+  static constexpr size_t INDEX_OID_OFFSET         = 0;
+  static constexpr size_t TABLE_OID_OFFSET         = 4;
+  static constexpr size_t ROOT_PAGE_ID_OFFSET      = 8;
+  static constexpr size_t COLUMN_OIDS_COUNT_OFFSET = 12;
+  static constexpr size_t COLUMN_OIDS_START_OFFSET = 16;
+  static constexpr size_t INDEX_NAME_OFFSET        = 20;
+
   IndexHeaderPage(Page* page)
     : PageLayout (page)
   {}
@@ -49,23 +63,54 @@ public:
     // TODO
   }
 
-  // NOTE: We will need the catalog object because we need to transform
-  // the column_oids into TableColumn objects.
-  IndexSchema read_schema(const Catalog& catalog) {
-    auto index_oid         = read_index_oid();
-    auto table_oid         = read_table_oid();
-    auto root_page_id      = read_root_page_id();
+  IndexSchema read_schema(Catalog& catalog);
 
-    auto column_oids_start = read_column_oids_start();
-    auto column_oids       = read_table_oids(column_oids_start);
+  vector<column_oid_t> read_column_oids(buffer_offset_t start_offset,
+                                        int32_t column_oid_count) const
+  {
+    buffer_offset_t offset = start_offset;
 
-    auto table_name        = catalog.table_name_for(table_oid);
-    auto columns           = catalog.columns_for(column_oids);
+    vector<column_oid_t> column_oids;
+    for (int32_t i = 0; i < column_oid_count; ++i) {
+      auto column_oid = page_->read_int32(offset);
+      column_oids.push_back(column_oid);
+      offset += sizeof(column_oid);
+    }
+    return column_oids;
+  }
 
-    return IndexSchema(columns,
-                       index_name,   table_name,
-                       index_oid,    table_oid,
-                       column_oids_, key_size);
+  void write_column_oids(buffer_offset_t column_oids_start,
+                         const vector<column_oid_t> column_oids)
+  {
+    buffer_offset_t offset = column_oids_start;
+    for (auto column_oid : column_oids) {
+      page_->write_int32(offset, column_oid);
+      offset += sizeof(column_oid);
+    }
+  }
+
+  buffer_offset_t read_column_oids_start() const {
+    return page_->read_int32(COLUMN_OIDS_START_OFFSET);
+  }
+
+  void write_column_oids_start(column_oids_start_t column_oids_start) {
+    page_->write_int32(COLUMN_OIDS_START_OFFSET, column_oids_start);
+  }
+
+  buffer_offset_t read_column_oids_count() const {
+    return page_->read_int32(COLUMN_OIDS_COUNT_OFFSET);
+  }
+
+  void write_column_oids_count(column_oids_count_t column_oids_count) {
+    page_->write_int32(COLUMN_OIDS_COUNT_OFFSET, column_oids_count);
+  }
+
+  PageId read_root_page_id() const {
+    return page_->read_page_id(ROOT_PAGE_ID_OFFSET);
+  }
+
+  void write_root_page_id(PageId page_id) {
+    page_->write_int32(ROOT_PAGE_ID_OFFSET, page_id.as_int32());
   }
 
   index_oid_t read_index_oid() const {
@@ -74,6 +119,22 @@ public:
 
   void write_index_oid(index_oid_t index_oid) {
     page_->write_int32(INDEX_OID_OFFSET, index_oid);
+  }
+
+  table_oid_t read_table_oid() const {
+    return page_->read_int32(TABLE_OID_OFFSET);
+  }
+
+  void write_table_oid(table_oid_t table_oid) {
+    page_->write_int32(TABLE_OID_OFFSET, table_oid);
+  }
+
+  index_name_t read_index_name() const {
+    return page_->read_string(INDEX_NAME_OFFSET);
+  }
+
+  void write_index_name(index_name_t index_name) {
+    page_->write_string(INDEX_NAME_OFFSET, index_name);
   }
 
   int32_t write_metadata(const IndexSchema& schema) {
@@ -100,6 +161,6 @@ public:
 
   void write_schema(const IndexSchema& schema) {
     auto column_oids_start = write_metadata(schema);
-    write_column_oids(column_oids_start, schema.columns());
+    write_column_oids(column_oids_start, schema.column_oids());
   }
 };

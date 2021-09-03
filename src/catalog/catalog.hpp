@@ -23,15 +23,22 @@
 #include "server/system_catalog.hpp"
 
 // TODO:
-// I'm thinking about renaming `Catalog` to `SchemaMgr` since it seems to be
-// handling a lot of details related to the schema objects.
+// I'm thinking about renaming `Catalog` to `SchemaMgr` since it
+// seems to be handling a lot of details related to the schema objects.
 //
 // If that does happen, then we would have to figure out what exactly
 // `SystemCatalog` is responsible for.
 //
 class Catalog {
 public:
-  Catalog();
+  Catalog(FileMgr& file_mgr,
+          LockMgr& lock_mgr,
+          LogMgr& log_mgr,
+          BuffMgr& buff_mgr)
+    : table_mgr_   (file_mgr, lock_mgr, log_mgr, buff_mgr),
+      index_mgr_   (file_mgr, lock_mgr, log_mgr, buff_mgr),
+      sys_catalog_ (table_mgr_)
+  {}
 
   // No copy
   Catalog(const Catalog&) = delete;
@@ -39,6 +46,15 @@ public:
   Catalog& operator=(const Catalog&) = delete;
   // Default deletedd
   ~Catalog() = default;
+
+  vector<TableColumn>
+  table_columns_for(vector<column_oid_t> column_oids) {
+    vector<TableColumn> columns;
+    for (const auto oid : column_oids) {
+      columns.push_back(table_column_for(oid));
+    }
+    return columns;
+  }
 
   bool has_table_named(const table_name_t& table_name) const {
     return sys_catalog_.has_table_named(table_name);
@@ -97,6 +113,11 @@ public:
   table_oid_t
   table_oid_for(const table_name_t& table_name) const {
     return sys_catalog_.table_oid_for(table_name);
+  }
+
+  TableColumn
+  table_column_for(column_oid_t column_oid) {
+    return sys_catalog_.table_column_for(column_oid);
   }
 
   IndexSchema&

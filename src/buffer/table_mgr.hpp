@@ -61,6 +61,7 @@ public:
   {
     file_id_t file_id = file_mgr_.create_table_file(table_name);
     allocate_header_and_first_page(file_id, txn);
+
     file_ids_.insert(make_pair(table_oid, file_id));
     table_oids_.insert(make_pair(file_id, table_oid));
 
@@ -83,6 +84,11 @@ public:
     return table_oids_[file_id];
   }
 
+  file_id_t file_id_for(table_oid_t table_oid) {
+    assert(file_ids_.contains(table_oid));
+    return file_ids_[table_oid];
+  }
+
 private:
   FileMgr& file_mgr_;
   LockMgr& lock_mgr_;
@@ -91,7 +97,8 @@ private:
 
   map<table_oid_t, const table_name_t> table_names_;
   map<table_oid_t, file_id_t> file_ids_;
-  map<file_id_t, table_oid_t> table_oids_; // NOTE: Should be reverse mapping of prev line
+  // NOTE: Should be reverse mapping of prev line
+  map<file_id_t, table_oid_t> table_oids_;
 
   map<table_oid_t, ptr<TableHeap>> table_heaps_;
 };

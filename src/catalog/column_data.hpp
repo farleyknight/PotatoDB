@@ -1,5 +1,8 @@
 #pragma once
 
+#include "buffer/buffer.hpp"
+#include "types/type.hpp"
+
 class ColumnData {
 public:
   ColumnData(const Buffer& buffer)

@@ -210,3 +210,54 @@ void FileMgr::deallocate_page(PageId page_id) {
 
   file_handles_[file_id]->resize(new_size);
 }
+
+void FileMgr::setup_log_file() {
+  auto handle = make_unique<FileHandle>(log_file_name());
+  log_file_ = move(handle);
+}
+
+/*
+ *
+
+void FileMgr::setup_log_file() {
+  log_io_.exceptions(std::ios::goodbit);
+  log_io_.clear();
+  log_io_.open(log_file_name(),
+               std::ios::binary |
+               std::ios::in |
+               std::ios::app |
+               std::ios::out);
+
+  // directory or file does not exist
+  if (!log_io_.is_open()) {
+    log_io_.clear();
+    // create a new file
+    log_io_.open(log_file_name(),
+                 std::ios::binary |
+                 std::ios::trunc |
+                 std::ios::app |
+                 std::ios::out);
+    log_io_.close();
+    // reopen with original mode
+    log_io_.open(log_file_name(),
+                 std::ios::binary |
+                 std::ios::in |
+                 std::ios::app |
+                 std::ios::out);
+   if (!log_io_.is_open()) {
+      throw Exception(ExceptionType::BAD_FILE,
+                      "Can't open DB log file");
+    }
+  }
+
+  try {
+    log_io_.clear();
+    log_io_.exceptions(std::ios::failbit);
+  } catch (std::ios_base::failure& e) {
+    logger->debug("[FileMgr] Log file setup failed! :(");
+    logger->debug("[FileMgr] Failure was " + std::string(e.what()));
+  }
+}
+
+
+ */

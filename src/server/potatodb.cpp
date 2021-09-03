@@ -15,7 +15,7 @@ PotatoDB potatodb;
 
 PotatoDB::PotatoDB()
   : server_         (this),
-    file_mgr_       (),
+    file_mgr_       (), // TODO: We should pass in the DB config here
     buff_mgr_       (pool_size(), file_mgr_, log_mgr_),
     log_mgr_        (file_mgr_),
     checkpoint_mgr_ (txn_mgr_, log_mgr_, buff_mgr_),
@@ -24,7 +24,7 @@ PotatoDB::PotatoDB()
     // TODO: Need to add model_mgr_ here when I get around to
     // doing CREATE MODEL
     txn_mgr_        (lock_mgr_, log_mgr_, table_mgr_),
-    catalog_        (),
+    catalog_        (file_mgr_, lock_mgr_, log_mgr_, buff_mgr_),
     exec_eng_       (buff_mgr_, txn_mgr_, catalog_)
 {}
 
@@ -98,15 +98,15 @@ PotatoDB::run(const string& statement) {
 }
 
 void PotatoDB::build_system_catalog() {
-  for (const auto &file_id : file_mgr_.table_file_ids()) {
+  for (const auto file_id : file_mgr_.table_file_ids()) {
     auto table_oid    = table_mgr_.table_oid_for(file_id);
     auto table_schema = table_mgr_.read_table_schema(file_id);
     catalog_.load_table(table_oid, table_schema);
   }
 
-  for (const auto &file_id : file_mgr_.index_file_ids()) {
+  for (const auto file_id : file_mgr_.index_file_ids()) {
     auto index_oid    = index_mgr_.index_oid_for(file_id);
-    auto index_schema = index_mgr_.read_index_schema(file_id);
+    auto index_schema = index_mgr_.read_index_schema(catalog_, file_id);
     catalog_.load_index(index_oid, index_schema);
   }
 }

@@ -29,7 +29,8 @@ public:
   }
 
   void open() {
-    handle_.open(file_path_, fstream::in | fstream::out | fstream::binary);
+    handle_.open(file_path_,
+                 fstream::in | fstream::out | fstream::binary);
   }
 
   void close() {

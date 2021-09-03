@@ -6,26 +6,24 @@
 class LogMgrSerialization : public ::testing::Test {
 public:
   LogMgrSerialization()
-    : disk_mgr  (file_mgr),
-      log_mgr   (disk_mgr),
+    : log_mgr   (file_mgr),
       txn_mgr   (lock_mgr, log_mgr, table_mgr),
       buff_mgr  (10, disk_mgr, log_mgr),
-      table_mgr (disk_mgr, lock_mgr, log_mgr, buff_mgr)
+      table_mgr (file_mgr, lock_mgr, log_mgr, buff_mgr)
   {}
 
   void SetUp() override {
     ::testing::Test::SetUp();
-    disk_mgr.truncate_log_file();
+    file_mgr.truncate_log_file();
   }
 
   void TearDown() override {
     ::testing::Test::TearDown();
-    disk_mgr.delete_log_file();
+    file_mgr.delete_log_file();
   }
 
   FileMgr file_mgr;
   LockMgr lock_mgr;
-  DiskMgr disk_mgr;
   LogMgr log_mgr;
   TxnMgr txn_mgr;
   BuffMgr buff_mgr;

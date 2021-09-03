@@ -64,9 +64,7 @@ public:
     auto &txn = txn_mgr().begin();
     auto exec_ctx = db_.make_exec_ctx(txn);
 
-    auto result_set = exec_eng().query(move(plan),
-                                       txn,
-                                       *exec_ctx);
+    auto result_set = exec_eng().query(move(plan), exec_ctx);
     txn_mgr().commit(txn);
     return result_set;
   }
@@ -75,9 +73,7 @@ public:
     auto &txn = txn_mgr().begin();
     auto exec_ctx = db_.make_exec_ctx(txn);
 
-    auto message = exec_eng().execute(move(plan),
-                                      txn,
-                                      *exec_ctx);
+    auto message = exec_eng().execute(move(plan), exec_ctx);
 
     // TODO: If status == false, likely we should abort the txn.
     txn_mgr().commit(txn);

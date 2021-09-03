@@ -35,7 +35,7 @@ SystemCatalog::make_column_oid(const table_name_t& table_name,
                                const column_name_t& column_name)
 {
   auto full_name   = table_name + "." + column_name;
-  assert(column_oids_.count(full_name) == 0);
+  assert(column_oids_.contains(full_name));
 
   column_oid_t column_oid = next_column_oid_;
   next_column_oid_++;
@@ -68,10 +68,13 @@ SystemCatalog::make_schema_from(index_oid_t index_oid,
   int32_t key_size = 8; // NOTE: Fixed for now.
                         // Update to be configurable later
 
+  auto root_page_id = default_root_page_id(table_oid);
+
   return IndexSchema(columns,
-                     index_name,  table_name,
                      index_oid,   table_oid,
-                     column_oids, key_size);
+                     index_name,  table_name,
+                     column_oids, key_size,
+                     root_page_id);
 }
 
 TableSchema
@@ -82,9 +85,14 @@ SystemCatalog::make_schema_from(table_oid_t table_oid,
   auto column_list = expr.column_defs();
 
   vector<TableColumn> columns;
-  for (const auto &col : column_list.list()) {
-    auto column_oid = make_column_oid(table_name, col.name());
-    columns.push_back(make_column_from(table_oid, column_oid, col));
+  for (const auto &col_expr : column_list.list()) {
+    auto oid = make_column_oid(table_name, col_expr.name());
+
+    assert(!columns_.contains(oid));
+    auto col = make_column_from(table_oid, oid, col_expr);
+    columns_[oid] = col;
+
+    columns.push_back(col);
   }
 
   return TableSchema(columns, table_name, table_oid);

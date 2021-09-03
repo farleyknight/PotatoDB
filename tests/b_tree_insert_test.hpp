@@ -37,7 +37,7 @@ TEST_F(BTreeInsert, InsertTestAscending) {
   auto results = db.run("SELECT * FROM test_table");
 
   for (int32_t i = 0; i < results.set()->size(); ++i) {
-    auto int_value = results.set()->value_at<int32_t>('a', i);
+    auto int_value = results.set()->value_at<int32_t>("a", i);
     EXPECT_EQ(int_value, i);
   }
 }
@@ -50,7 +50,7 @@ TEST_F(BTreeInsert, InsertTestDescending) {
   auto results = db.run("SELECT * FROM test_table");
 
   for (int32_t i = 0; i < results.set()->size(); ++i) {
-    auto int_value = results.set()->value_at<int32_t>('a', i);
+    auto int_value = results.set()->value_at<int32_t>("a", i);
     EXPECT_EQ(int_value, i);
   }
 }

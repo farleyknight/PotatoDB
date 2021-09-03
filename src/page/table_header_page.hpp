@@ -31,10 +31,10 @@ public:
   using columns_count_t = int32_t;
   using string_length_t = int32_t;
 
-  static constexpr size_t TABLE_OID_OFFSET     = 0;
-  static constexpr size_t COLUMN_COUNT_OFFSET  = 4;
-  static constexpr size_t COLUMNS_START_OFFSET = 8;
-  static constexpr size_t TABLE_NAME_OFFSET    = 12;
+  static constexpr buffer_offset_t TABLE_OID_OFFSET     = 0;
+  static constexpr buffer_offset_t COLUMN_COUNT_OFFSET  = 4;
+  static constexpr buffer_offset_t COLUMNS_START_OFFSET = 8;
+  static constexpr buffer_offset_t TABLE_NAME_OFFSET    = 12;
 
   TableHeaderPage(Page* page)
     : PageLayout (page)
@@ -61,10 +61,10 @@ public:
     buffer_offset_t offset = 0;
 
     write_table_oid(schema.table_oid());
-    offset += sizeof(table_oid_t);
+    offset += sizeof(schema.table_oid());
 
     write_column_count(schema.columns().size());
-    offset += sizeof(columns_count_t);
+    offset += sizeof(schema.columns().size());
 
     write_table_name(schema.table_name());
     offset += sizeof(string_length_t) + schema.table_name().size();
@@ -87,8 +87,8 @@ public:
     return page_->read_int32(COLUMNS_START_OFFSET);
   }
 
-  void write_columns_start(columns_start_t table_oid) {
-    page_->write_int32(COLUMNS_START_OFFSET, table_oid);
+  void write_columns_start(columns_start_t columns_start) {
+    page_->write_int32(COLUMNS_START_OFFSET, columns_start);
   }
 
   columns_count_t read_column_count() const {
@@ -115,7 +115,7 @@ public:
     vector<TableColumn> cols;
     for (int32_t i = 0; i < column_count; ++i) {
       auto size = page_->read_int32(offset);
-      offset += sizeof(int32_t);
+      offset += sizeof(size);
 
       auto col_data_buffer = page_->read_buffer(offset, size);
       // TODO: Use col_data_buffer to create the TableColumn
@@ -125,16 +125,16 @@ public:
     return cols;
   }
 
-  void write_columns(buffer_offset_t start_offset,
+  void write_columns(buffer_offset_t columns_start,
                      const vector<TableColumn>& columns)
   {
-    buffer_offset_t offset = start_offset;
+    buffer_offset_t offset = columns_start;
     for (const auto &col : columns) {
       auto col_data_buffer = col.data();
       auto size = col_data_buffer.size();
 
       page_->write_int32(offset, size);
-      offset += sizeof(int32_t);
+      offset += sizeof(size);
 
       page_->write_buffer(offset, col_data_buffer);
       offset += size;

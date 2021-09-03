@@ -13,6 +13,8 @@
 
 #include "server/statement_result.hpp"
 
+#include "buffer/table_mgr.hpp"
+
 #include "txns/txn.hpp"
 
 // TODO:
@@ -32,7 +34,9 @@
 
 class SystemCatalog {
 public:
-  SystemCatalog() {}
+  SystemCatalog(TableMgr& table_mgr)
+    : table_mgr_ (table_mgr)
+  {}
 
   table_oid_t
   table_oid_for(const table_name_t& table_name) const {
@@ -131,9 +135,21 @@ public:
   make_schema_from(index_oid_t index_oid,
                    const CreateIndexExpr& expr) const;
 
+  TableColumn
+  table_column_for(column_oid_t column_oid) {
+    return columns_[column_oid];
+  }
+
+  PageId
+  default_root_page_id(table_oid_t table_oid) const {
+    auto file_id = table_mgr_.file_id_for(table_oid);
+    return PageId(file_id, FileMgr::INDEX_CONTENT_BLOCK_NUM);
+  }
+
 private:
   // Columns
   map<column_name_t, column_oid_t> column_oids_;
+  map<column_oid_t, TableColumn> columns_;
   // TODO: Maybe we should store TableColumns in a `map`?
   atomic<column_oid_t> next_column_oid_ = 0;
 
@@ -148,4 +164,6 @@ private:
 
   map<table_oid_t, TableSchema> table_schemas_;
   atomic<table_oid_t> next_table_oid_ = 0;
+
+  TableMgr& table_mgr_;
 };
