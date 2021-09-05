@@ -14,6 +14,7 @@
 #include "server/statement_result.hpp"
 
 #include "buffer/table_mgr.hpp"
+#include "buffer/index_mgr.hpp"
 
 #include "txns/txn.hpp"
 
@@ -31,11 +32,12 @@
 // The TxnMgr has Txns
 // The BuffMgr has Page/Buffer objects
 
-
 class SystemCatalog {
 public:
-  SystemCatalog(TableMgr& table_mgr)
-    : table_mgr_ (table_mgr)
+  SystemCatalog(TableMgr& table_mgr,
+                IndexMgr& index_mgr)
+    : table_mgr_ (table_mgr),
+      index_mgr_ (index_mgr)
   {}
 
   table_oid_t
@@ -101,11 +103,16 @@ public:
   }
 
   bool
-  has_table_named(const table_name_t& table_name) const;
+  has_table_named(const table_name_t& table_name) const {
+    return table_oids_.contains(table_name);
+  }
 
   bool
   table_has_column_named(const table_name_t& table_name,
-                         const column_name_t& column_name) const;
+                         const column_name_t& column_name) const {
+    auto full_name = table_name + "." + column_name;
+    return column_oids_.contains(full_name);
+  }
 
   table_oid_t
   create_table(const CreateTableExpr& expr);
@@ -166,4 +173,5 @@ private:
   atomic<table_oid_t> next_table_oid_ = 0;
 
   TableMgr& table_mgr_;
+  UNUSED IndexMgr& index_mgr_;
 };

@@ -1,4 +1,3 @@
-
 #include "parser/eval_parse_visitor.hpp"
 
 Any EvalParseVisitor::visitDescribe_table_stmt(DescribeTableStmtContext *ctx) {
@@ -13,13 +12,41 @@ Any EvalParseVisitor::visitDescribe_table_stmt(DescribeTableStmtContext *ctx) {
   return visitChildren(ctx);
 }
 
+Any EvalParseVisitor::visitCreate_index_stmt(CreateIndexStmtContext *ctx) {
+  CreateIndexExpr create_index;
+
+  assert(ctx->index_name());
+  auto index_name = ctx->index_name()->getText();
+  create_index.set_index(IndexExpr(index_name));
+
+  assert(ctx->table_name());
+  auto table_name = ctx->table_name()->getText();
+  create_index.set_table(TableExpr(table_name));
+
+  vector<column_name_t> indexed_columns;
+
+  for (auto &col_index_ctx : ctx->indexed_column()) {
+    indexed_columns.push_back(col_index_ctx->getText());
+  }
+  create_index.set_indexed_columns(indexed_columns);
+
+  if (ctx->K_EXISTS()) {
+    create_index.set_if_not_exists(true);
+  } else {
+    create_index.set_if_not_exists(false);
+  }
+
+  exprs_.emplace_back(make_unique<CreateIndexExpr>(create_index));
+
+  return visitChildren(ctx);
+}
+
 Any EvalParseVisitor::visitCreate_table_stmt(CreateTableStmtContext *ctx) {
   CreateTableExpr create_table;
   assert(ctx->table_name());
 
   auto table_name = ctx->table_name()->getText();
-  TableExpr table(table_name);
-  create_table.set_table(table);
+  create_table.set_table(TableExpr(table_name));
 
   ColumnDefListExpr def_list;
 

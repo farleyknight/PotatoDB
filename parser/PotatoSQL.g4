@@ -32,7 +32,7 @@ sql_stmt
                                       | create_virtual_table_stmt
                                       | delete_stmt
                                       | delete_stmt_limited
-                                      | describe_table_stmt 
+                                      | describe_table_stmt
                                       | detach_stmt
                                       | drop_index_stmt
                                       | drop_table_stmt

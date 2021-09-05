@@ -48,8 +48,8 @@ public:
   }
 
 protected:
-  // TODO: We probably shouldn't have the primary key as a string because it's
-  // legal SQL to have multiple primary keys.
+  // TODO: We probably shouldn't have the primary key as a string
+  // because it is legal SQL to have multiple primary keys.
   string primary_key_;
   TableExpr table_;
   ColumnDefListExpr column_defs_;

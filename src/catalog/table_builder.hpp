@@ -23,7 +23,10 @@ public:
     return *this;
   }
 
-  TableBuilder& column(column_name_t name, TypeId type_id, length_t length) {
+  TableBuilder& column(column_name_t name,
+                       TypeId type_id,
+                       length_t length)
+  {
     column_defs_.push_back(ColumnDefExpr(name, type_id, length));
     return *this;
   }
@@ -45,10 +48,13 @@ public:
   }
 
   ptr<BasePlan> to_plan() {
-    return make_unique<CreateTablePlan>(table_name_,
-                                        true,
-                                        primary_key_,
-                                        ColumnDefListExpr(column_defs_));
+    auto expr = CreateTableExpr();
+    expr.set_table(TableExpr(table_name_));
+    expr.set_primary_key(primary_key_);
+    expr.set_column_defs(ColumnDefListExpr(column_defs_));
+    expr.set_if_not_exists(true);
+
+    return make_unique<CreateTablePlan>(expr);
   }
 
 private:

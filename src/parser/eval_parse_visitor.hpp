@@ -11,6 +11,7 @@
 #include "exprs/compound_select_expr.hpp"
 #include "exprs/where_clause_expr.hpp"
 #include "exprs/create_table_expr.hpp"
+#include "exprs/create_index_expr.hpp"
 #include "exprs/update_expr.hpp"
 #include "exprs/delete_from_expr.hpp"
 #include "exprs/comp_expr.hpp"
@@ -21,6 +22,7 @@ using antlrcpp::Any;
 // TODO: Rename these! Not a fan of underscores in class names
 using SelectStmtContext         = PotatoSQLParser::Select_stmtContext;
 using CreateTableStmtContext    = PotatoSQLParser::Create_table_stmtContext;
+using CreateIndexStmtContext    = PotatoSQLParser::Create_index_stmtContext;
 using ShowTablesStmtContext     = PotatoSQLParser::Show_tables_stmtContext;
 using DescribeTableStmtContext  = PotatoSQLParser::Describe_table_stmtContext;
 using InsertStmtContext         = PotatoSQLParser::Insert_stmtContext;
@@ -116,6 +118,7 @@ public:
 
   Any visitDescribe_table_stmt(DescribeTableStmtContext *ctx) override;
   Any visitCreate_table_stmt(CreateTableStmtContext *ctx) override;
+  Any visitCreate_index_stmt(CreateIndexStmtContext *ctx) override;
   Any visitInsert_stmt(InsertStmtContext *ctx) override;
   Any visitCompound_select_stmt(CompoundSelectStmtContext *ctx) override;
   Any visitFactored_select_stmt(FactoredSelectStmtContext *ctx) override;

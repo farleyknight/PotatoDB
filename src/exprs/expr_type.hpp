@@ -9,16 +9,18 @@ enum class ExprType {
   COLUMN_DEF_LIST,
   TABLE,
   TABLE_LIST,
+  INDEX,
   VALUE,
   TUPLE,
   TUPLE_LIST,
-
+  
   // DDL statement types
   // Data Definition Language
   CREATE_TABLE,
   ALTER_TABLE,
   DROP_TABLE,
   CREATE_INDEX,
+  INDEXED_COLUMN_LIST,
 
   // Catalog statements
   SHOW_TABLES,

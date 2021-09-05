@@ -8,7 +8,7 @@ public:
   LogMgrSerialization()
     : log_mgr   (file_mgr),
       txn_mgr   (lock_mgr, log_mgr, table_mgr),
-      buff_mgr  (10, disk_mgr, log_mgr),
+      buff_mgr  (10, file_mgr, log_mgr),
       table_mgr (file_mgr, lock_mgr, log_mgr, buff_mgr)
   {}
 
@@ -59,7 +59,7 @@ TEST_F(LogMgrSerialization, InsertTupleTest) {
   LogRecord copy;
 
   auto &txn = txn_mgr.begin();
-  LogRecovery recovery(disk_mgr, buff_mgr, log_mgr, lock_mgr, txn);
+  LogRecovery recovery(file_mgr, buff_mgr, log_mgr, lock_mgr, txn);
   auto log_cursor = recovery.log_cursor();
   log_cursor.deserialize_log_record(copy);
 

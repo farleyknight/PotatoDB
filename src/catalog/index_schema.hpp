@@ -32,16 +32,43 @@ public:
       root_page_id_ (root_page_id)
   {}
 
-  index_oid_t index_oid() const;
-  table_oid_t table_oid() const;
+  ~IndexSchema() {
+    
+  }
 
-  const index_name_t index_name() const;
-  const table_name_t table_name() const;
+  index_oid_t index_oid() const {
+    return index_oid_;
+  }
 
-  const vector<column_oid_t>& column_oids() const;
-  const string to_string() const;
+  table_oid_t table_oid() const {
+    return table_oid_;
+  }
 
-  const PageId root_page_id() const;
+  const index_name_t index_name() const {
+    return index_name_;
+  }
+
+  const table_name_t table_name() const {
+    return table_name_;
+  }
+
+  const vector<column_oid_t>& column_oids() const {
+    return column_oids_;
+  }
+
+  const string to_string() const {
+    return "TODO";
+  }
+
+  // TODO: This should be update-able, and should trigger a write to the
+  // header page of the file.
+  const PageId root_page_id() const {
+    return root_page_id_;
+  }
+
+  int32_t key_size() const {
+    return key_size_;
+  }
 
 private:
   index_oid_t index_oid_;

@@ -2,6 +2,8 @@
 
 #include "exprs/base_expr.hpp"
 #include "exprs/table_expr.hpp"
+#include "exprs/index_expr.hpp"
+#include "exprs/indexed_column_list_expr.hpp"
 
 class CreateIndexExpr : public BaseExpr {
 public:
@@ -17,20 +19,34 @@ public:
     return table_;
   }
 
-  // TODO: Create IndexExpr
-  const string index_name() const {
-    return index_name_;
+  void set_index(IndexExpr index) {
+    index_ = index;
   }
 
-  const vector<string> column_names() const {
-    return column_names_;
+  const IndexExpr& index() const {
+    return index_;
+  }
+
+  void set_indexed_columns(IndexedColumnListExpr indexed_columns) {
+    indexed_columns_ = indexed_columns;
+  }
+
+  const IndexedColumnListExpr indexed_columns() const {
+    return indexed_columns_;
+  }
+
+  virtual const string to_string() const override {
+    return "CREATE INDEX " + index_.to_string() + " ON " +
+      table_.to_string() + " (" + indexed_columns_.to_string() + ")";
+  }
+
+  void set_if_not_exists(bool if_not_exists) {
+    if_not_exists_ = if_not_exists;
   }
 
 protected:
-  // TODO: Create IndexExpr, rename this to index_
-  string index_name_;
-
-  vector<string> column_names_;
+  IndexExpr index_;
+  IndexedColumnListExpr indexed_columns_;
 
   TableExpr table_;
   bool if_not_exists_ = false;

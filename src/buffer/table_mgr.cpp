@@ -30,3 +30,40 @@ TableSchema TableMgr::read_table_schema(file_id_t file_id) {
 
   return table_header_page.read_schema();
 }
+
+
+void TableMgr::create_table_file(const table_name_t& table_name,
+                                 const TableSchema& schema,
+                                 table_oid_t table_oid,
+                                 Txn& txn)
+{
+  file_id_t file_id = file_mgr_.create_table_file(table_name);
+  allocate_header_and_first_page(file_id, txn);
+
+  load_table(file_id, table_oid, table_name);
+
+  write_table_schema(file_id, schema);
+}
+
+void TableMgr::write_table_schema(UNUSED file_id_t file_id,
+                                  UNUSED TableSchema schema)
+{
+  // TODO
+}
+
+void TableMgr::load_table(file_id_t file_id,
+                          table_oid_t table_oid,
+                          const table_name_t& table_name)
+{
+  file_ids_[table_oid]    = file_id;
+  table_oids_[file_id]    = table_oid;
+  table_names_[table_oid] = table_name;
+
+  auto heap = make_unique<TableHeap>(file_id,
+                                     table_oid,
+                                     buff_mgr_,
+                                     lock_mgr_,
+                                     log_mgr_);
+
+  table_heaps_.emplace(table_oid, move(heap));
+}

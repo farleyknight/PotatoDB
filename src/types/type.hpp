@@ -113,6 +113,8 @@ public:
       return TypeId::TIMESTAMP;
     } else if (name == "SMALLINT") {
       return TypeId::SMALLINT;
+    } else if (name == "BIGINT") {
+      return TypeId::BIGINT;
     } else {
       throw Exception("Type not handled! " + name);
     }

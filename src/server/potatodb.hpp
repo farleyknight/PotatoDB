@@ -103,8 +103,7 @@ public:
     return file_mgr_;
   }
 
-  ExecCtx
-  make_exec_ctx(Txn& txn) {
+  ExecCtx make_exec_ctx(Txn& txn) {
     return ExecCtx(txn,
                    buff_mgr_,
                    lock_mgr_,
@@ -112,7 +111,6 @@ public:
                    table_mgr_,
                    catalog_);
   }
-
 
   LogRecovery log_recovery() {
     auto &txn = txn_mgr_.begin();
@@ -133,13 +131,21 @@ private:
 
   FileMgr       file_mgr_;
   BuffMgr       buff_mgr_;
+
+  //
   LogMgr        log_mgr_;
-  LockMgr       lock_mgr_;
   CheckpointMgr checkpoint_mgr_;
+
+  LockMgr       lock_mgr_;
+
+  //
   TableMgr      table_mgr_;
   IndexMgr      index_mgr_;
-  TxnMgr        txn_mgr_;
+  SystemCatalog sys_catalog_;
   Catalog       catalog_;
+
+  //
+  TxnMgr        txn_mgr_;
   ExecEngine    exec_eng_;
 };
 

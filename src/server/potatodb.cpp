@@ -15,16 +15,23 @@ PotatoDB potatodb;
 
 PotatoDB::PotatoDB()
   : server_         (this),
+    //
     file_mgr_       (), // TODO: We should pass in the DB config here
     buff_mgr_       (pool_size(), file_mgr_, log_mgr_),
+    //
     log_mgr_        (file_mgr_),
     checkpoint_mgr_ (txn_mgr_, log_mgr_, buff_mgr_),
+
+    //
     table_mgr_      (file_mgr_, lock_mgr_, log_mgr_, buff_mgr_),
     index_mgr_      (file_mgr_, lock_mgr_, log_mgr_, buff_mgr_),
     // TODO: Need to add model_mgr_ here when I get around to
     // doing CREATE MODEL
+    sys_catalog_    (table_mgr_, index_mgr_),
+    catalog_        (table_mgr_, index_mgr_, sys_catalog_),
+
+    //
     txn_mgr_        (lock_mgr_, log_mgr_, table_mgr_),
-    catalog_        (file_mgr_, lock_mgr_, log_mgr_, buff_mgr_),
     exec_eng_       (buff_mgr_, txn_mgr_, catalog_)
 {}
 

@@ -31,13 +31,12 @@
 //
 class Catalog {
 public:
-  Catalog(FileMgr& file_mgr,
-          LockMgr& lock_mgr,
-          LogMgr& log_mgr,
-          BuffMgr& buff_mgr)
-    : table_mgr_   (file_mgr, lock_mgr, log_mgr, buff_mgr),
-      index_mgr_   (file_mgr, lock_mgr, log_mgr, buff_mgr),
-      sys_catalog_ (table_mgr_)
+  Catalog(TableMgr& table_mgr,
+          IndexMgr& index_mgr,
+          SystemCatalog& sys_catalog)
+    : table_mgr_   (table_mgr),
+      index_mgr_   (index_mgr),
+      sys_catalog_ (sys_catalog)
   {}
 
   // No copy
@@ -98,8 +97,8 @@ public:
     return index_oid;
   }
 
-  // NOTE: TableSchema can change it's auto-increment value, thus it cannot be
-  // return as a const ref.
+  // NOTE: TableSchema can change it's auto-increment value,
+  // thus it cannot be return as a const ref.
   TableSchema&
   table_schema_for(table_oid_t table_oid) {
     return sys_catalog_.table_schema_for(table_oid);
@@ -173,9 +172,9 @@ public:
 
 private:
   // Table Heaps
-  TableMgr table_mgr_;
+  TableMgr& table_mgr_;
   // B-Trees
-  IndexMgr index_mgr_;
+  IndexMgr& index_mgr_;
   // Table & Index Schemas
-  SystemCatalog sys_catalog_;
+  SystemCatalog& sys_catalog_;
 };

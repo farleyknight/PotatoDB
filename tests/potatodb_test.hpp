@@ -114,12 +114,9 @@ TEST(PotatoDBTest, CreateTableTest) {
 
   db.run("CREATE TABLE foo_bar ( colA INTEGER, colB INTEGER )");
 
-  EXPECT_TRUE(db.disk_mgr().table_file_exists("foo_bar"));
+  EXPECT_TRUE(db.file_mgr().table_file_exists("foo_bar"));
 
-  auto object_type = SystemCatalog::table_type();
-  auto sql = "SELECT * FROM system_catalog WHERE table_name == 'foo_bar' AND object_type == " + object_type;
-
-  auto result = db.run(sql);
+  auto result = db.run("SHOW TABLES");
   auto &result_set = result.set();
 
   EXPECT_EQ(result_set->size(), 1);

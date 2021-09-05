@@ -14,7 +14,8 @@ public:
 
   ColumnDefListExpr(vector<ColumnDefExpr> def_list)
     : BaseExpr (ExprType::COLUMN_DEF_LIST),
-      ListExpr (def_list) {}
+      ListExpr (def_list)
+  {}
 
   const string to_string() const override {
     return ListExpr<ColumnDefExpr>::to_string();

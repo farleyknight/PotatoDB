@@ -2,7 +2,7 @@
 
 #include "buffer_rw_test.hpp"
 
-#include "b_tree_insert_test.hpp"
+// #include "b_tree_insert_test.hpp"
 
 #include "executor_test.hpp"
 

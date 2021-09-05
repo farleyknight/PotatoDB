@@ -2,6 +2,9 @@
 
 #include "exprs/base_expr.hpp"
 
+// TODO: Maybe we can create a new class called NameExpr<T>
+// that would abstract the commonality between this class
+// and the IndexExpr class.
 class TableExpr : public BaseExpr {
 public:
   TableExpr()
@@ -33,5 +36,6 @@ public:
 
 protected:
   table_name_t name_;
+  // TODO: Is this used anywhere?
   table_oid_t table_oid_ = INVALID_TABLE_OID;
 };

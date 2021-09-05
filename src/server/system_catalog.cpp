@@ -35,7 +35,7 @@ SystemCatalog::make_column_oid(const table_name_t& table_name,
                                const column_name_t& column_name)
 {
   auto full_name   = table_name + "." + column_name;
-  assert(column_oids_.contains(full_name));
+  assert(!column_oids_.contains(full_name));
 
   column_oid_t column_oid = next_column_oid_;
   next_column_oid_++;
@@ -48,11 +48,11 @@ IndexSchema
 SystemCatalog::make_schema_from(index_oid_t index_oid,
                                 const CreateIndexExpr& expr) const
 {
-  auto index_name   = expr.index_name();
+  auto index_name   = expr.index().name();
   auto table_name   = expr.table().name();
   auto table_oid    = table_oid_for(table_name);
 
-  auto column_names = expr.column_names();
+  auto column_names = expr.indexed_columns().list();
   auto table_schema = table_schema_for(table_name);
 
   vector<column_oid_t> column_oids;
@@ -109,7 +109,7 @@ index_oid_t
 SystemCatalog::create_index(const CreateIndexExpr& expr)
 {
   auto table_name = expr.table().name();
-  auto index_name = expr.index_name();
+  auto index_name = expr.index().name();
 
   assert(table_oids_.count(table_name) == 1);
   assert(index_oids_.count(index_name) == 0);
@@ -124,7 +124,7 @@ SystemCatalog::create_index(const CreateIndexExpr& expr)
 table_oid_t
 SystemCatalog::create_table(const CreateTableExpr& expr)
 {
-  auto table_name  = expr.table().name();
+  auto table_name = expr.table().name();
   assert(!table_oids_.contains(table_name));
 
   auto table_oid = next_table_oid_++;
