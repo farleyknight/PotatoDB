@@ -35,9 +35,9 @@ public:
     return index_header_page.read_schema(catalog);
   }
 
-  void create_index(const index_name_t& index_name,
-                    const IndexSchema index_schema,
-                    index_oid_t index_oid)
+  void create_index_file(const index_name_t& index_name,
+                         const IndexSchema index_schema,
+                         index_oid_t index_oid)
   {
     file_id_t file_id = file_mgr_.create_index_file(index_name);
     allocate_header_and_first_page(file_id);
@@ -50,7 +50,7 @@ public:
                                         comp,
                                         buff_mgr_);
 
-    btree_indexes_.insert(make_pair(index_oid, move(btree)));
+    btree_indexes_.emplace(index_oid, move(btree));
   }
 
   BPlusTree& btree_index_for(index_oid_t index_oid) {

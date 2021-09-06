@@ -71,11 +71,11 @@ public:
   table_oid_t
   create_table(const CreateTableExpr& expr, UNUSED Txn& txn) {
     auto table_name   = expr.table().name();
-    auto table_oid    = sys_catalog_.create_table(expr);
+    auto table_oid    = sys_catalog_.create_table_schema(expr);
     auto table_schema = sys_catalog_.table_schema_for(table_oid);
     // TODO: The `table_mgr_` needs a reference to the new TableSchema
     // that was made in order to write it to the first block of the file.
-    table_mgr_.create_table(table_name, table_schema, table_oid, txn);
+    table_mgr_.create_table_file(table_name, table_schema, table_oid, txn);
     return table_oid;
   }
 
@@ -90,10 +90,10 @@ public:
   index_oid_t
   create_index(const CreateIndexExpr& expr, UNUSED Txn& txn) {
     auto index_name   = expr.table().name();
-    auto index_oid    = sys_catalog_.create_index(expr);
+    auto index_oid    = sys_catalog_.create_index_schema(expr);
     auto index_schema = sys_catalog_.index_schema_for(index_oid);
 
-    index_mgr_.create_index(index_name, index_schema, index_oid);
+    index_mgr_.create_index_file(index_name, index_schema, index_oid);
     return index_oid;
   }
 

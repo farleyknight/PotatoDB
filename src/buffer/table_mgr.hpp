@@ -32,10 +32,10 @@ public:
   TableSchema read_table_schema(file_id_t file_id);
   void write_table_schema(file_id_t file_id, TableSchema schema);
 
-  void create_table(const table_name_t& table_name,
-                    const TableSchema& schema,
-                    table_oid_t table_oid,
-                    Txn& txn);
+  void create_table_file(const table_name_t& table_name,
+                         const TableSchema& schema,
+                         table_oid_t table_oid,
+                         Txn& txn);
 
   // TODO: I'm thinking this class is where we can make
   // TableCursor objects?
@@ -79,24 +79,9 @@ public:
   }
 
 private:
-
-  void load_table(file_id_t file_id, table_oid_t table_oid,
-                  const table_name_t file_name)
-  {
-    file_ids_[table_oid]    = file_id;
-    table_oids_[file_id]    = table_oid;
-    table_names_[table_oid] = table_name;
-
-    auto heap = make_unique<TableHeap>(file_id,
-                                       table_oid,
-                                       buff_mgr_,
-                                       lock_mgr_,
-                                       log_mgr_);
-
-    table_heaps_.emplace(table_oid, move(heap));
-  }
-
-
+  void load_table(file_id_t file_id,
+                  table_oid_t table_oid,
+                  const table_name_t& table_name);
 
   FileMgr& file_mgr_;
   LockMgr& lock_mgr_;

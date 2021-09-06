@@ -115,9 +115,9 @@ public:
   }
 
   table_oid_t
-  create_table(const CreateTableExpr& expr);
+  create_table_schema(const CreateTableExpr& expr);
   index_oid_t
-  create_index(const CreateIndexExpr& expr);
+  create_index_schema(const CreateIndexExpr& expr);
 
   void
   load_table(table_oid_t table_oid, const TableSchema& schema);

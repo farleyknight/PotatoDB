@@ -106,7 +106,7 @@ SystemCatalog::load_index(index_oid_t index_oid,
 }
 
 index_oid_t
-SystemCatalog::create_index(const CreateIndexExpr& expr)
+SystemCatalog::create_index_schema(const CreateIndexExpr& expr)
 {
   auto table_name = expr.table().name();
   auto index_name = expr.index().name();
@@ -122,16 +122,20 @@ SystemCatalog::create_index(const CreateIndexExpr& expr)
 }
 
 table_oid_t
-SystemCatalog::create_table(const CreateTableExpr& expr)
+SystemCatalog::create_table_schema(const CreateTableExpr& expr)
 {
   auto table_name = expr.table().name();
   assert(!table_oids_.contains(table_name));
 
   auto table_oid = next_table_oid_++;
-  table_oids_.insert(make_pair(table_name, table_oid));
 
+
+  assert(!table_schemas_.contains(table_oid));
   auto schema = make_schema_from(table_oid, expr);
-  table_schemas_.insert(make_pair(table_oid, schema));
+
+  table_oids_[table_name] = table_oid;
+  table_schemas_.emplace(table_oid, schema);
+  assert(table_schemas_.contains(table_oid));
 
   return table_oid;
 }
