@@ -108,9 +108,7 @@ using SPtr      = const std::shared_ptr<T>;
 template<class T>
 using MutSPtr   = std::shared_ptr<T>;
 
-// NOTE: WPtr means weak_ptr
-template<class T>
-using WPtr     = std::weak_ptr<T>;
+using std::weak_ptr;
 
 
 using std::vector;

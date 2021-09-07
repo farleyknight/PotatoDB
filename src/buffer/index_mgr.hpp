@@ -9,6 +9,7 @@
 
 #include "index/index_key.hpp"
 #include "index/index_comp.hpp"
+#include "exprs/create_index_expr.hpp"
 
 #include "page/index_header_page.hpp"
 
@@ -26,18 +27,81 @@ public:
       buff_mgr_ (buff_mgr)
   {}
 
-  IndexSchema read_index_schema(Catalog& catalog, file_id_t file_id) {
+  void
+  load_index(index_oid_t index_oid,
+             index_name_t index_name,
+             const IndexSchema schema)
+  {
+    index_oids_[index_name] = index_oid;
+    index_names_[index_oid] = index_name;
+    index_schemas_.emplace(index_oid, schema);
+    assert(index_schemas_.contains(table_oid));
+  }
+
+  IndexSchema
+  make_schema_from(index_oid_t index_oid,
+                   const CreateIndexExpr& expr) const
+  {
+    auto index_name   = expr.index().name();
+    auto table_name   = expr.table().name();
+    auto table_oid    = table_oid_for(table_name);
+
+    auto column_names = expr.indexed_columns().list();
+    auto table_schema = table_schema_for(table_name);
+
+    vector<column_oid_t> column_oids;
+    vector<TableColumn> columns;
+    for (const auto &name : column_names) {
+      auto column_oid = table_schema.column_oid_for(name);
+      column_oids.push_back(column_oid);
+
+      auto column = table_schema.by_name(name);
+      columns.push_back(column);
+    }
+
+    int32_t key_size = 8; // NOTE: Fixed for now.
+    // Update to be configurable later
+
+    auto root_page_id = default_root_page_id(table_oid);
+
+    return IndexSchema(columns,
+                       index_oid,   table_oid,
+                       index_name,  table_name,
+                       column_oids, key_size,
+                       root_page_id);
+  }
+
+  index_oid_t
+  create_index_schema(const CreateIndexExpr& expr)
+  {
+    auto table_name = expr.table().name();
+    auto index_name = expr.index().name();
+
+    assert(table_oids_.count(table_name) == 1);
+    assert(index_oids_.count(index_name) == 0);
+
+    auto index_oid = next_index_oid_;
+    next_index_oid_++;
+    auto schema    = make_schema_from(index_oid, expr);
+    load_index(index_oid, schema);
+
+    return index_oid;
+  }
+
+  IndexSchema
+  read_index_schema(file_id_t file_id) {
     auto page_id           = file_mgr_.index_header_page(file_id);
     auto page_ptr          = buff_mgr_.fetch_page(page_id);
     assert(page_ptr);
     auto index_header_page = IndexHeaderPage(page_ptr);
 
-    return index_header_page.read_schema(catalog);
+    return index_header_page.read_schema();
   }
 
-  void create_index_file(const index_name_t& index_name,
-                         const IndexSchema index_schema,
-                         index_oid_t index_oid)
+  void
+  create_index_file(const index_name_t& index_name,
+                    const IndexSchema index_schema,
+                    index_oid_t index_oid)
   {
     file_id_t file_id = file_mgr_.create_index_file(index_name);
     allocate_header_and_first_page(file_id);
@@ -53,18 +117,21 @@ public:
     btree_indexes_.emplace(index_oid, move(btree));
   }
 
-  BPlusTree& btree_index_for(index_oid_t index_oid) {
+  BPlusTree&
+  btree_index_for(index_oid_t index_oid) {
     assert(btree_indexes_.contains(index_oid));
     return *btree_indexes_.at(index_oid);
   }
 
-  index_oid_t index_oid_for(file_id_t file_id) {
+  index_oid_t
+  index_oid_for(file_id_t file_id) {
     assert(index_oids_.contains(file_id));
     return index_oids_[file_id];
   }
 
 private:
-  void allocate_header_and_first_page(file_id_t file_id) {
+  void
+  allocate_header_and_first_page(file_id_t file_id) {
     auto header_page_id = FileMgr::index_header_page(file_id);
     // NOTE: By default, root page ID is the first page ID
     auto root_page_id   = FileMgr::first_index_page(file_id);

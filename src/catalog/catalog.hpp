@@ -79,12 +79,19 @@ public:
     return table_oid;
   }
 
-  void load_table(table_oid_t table_oid, const TableSchema& schema) {
-    sys_catalog_.load_table(table_oid, schema);
+  void load_table(file_id_t file_id,
+                  table_oid_t table_oid,
+                  table_name_t table_name,
+                  const TableSchema& schema)
+  {
+    sys_catalog_.load_table(file_id, table_oid, table_name, schema);
   }
 
-  void load_index(index_oid_t index_oid, const IndexSchema& schema) {
-    sys_catalog_.load_index(index_oid, schema);
+  void load_index(index_oid_t index_oid,
+                  index_name_t index_name,
+                  const IndexSchema& schema)
+  {
+    sys_catalog_.load_index(index_oid, index_name, schema);
   }
 
   index_oid_t

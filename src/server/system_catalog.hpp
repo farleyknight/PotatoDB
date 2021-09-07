@@ -34,16 +34,20 @@
 
 class SystemCatalog {
 public:
-  SystemCatalog(TableMgr& table_mgr,
+  SystemCatalog(FileMgr& file_mgr,
+                TableMgr& table_mgr,
                 IndexMgr& index_mgr)
-    : table_mgr_ (table_mgr),
+    // TODO: Maybe we can be constructing table_mgr and index_mgr in here?
+    // I think that might be a better approach than having PotatoDB own table_mgr
+    // and index_mgr.
+    : file_mgr_  (file_mgr),
+      table_mgr_ (table_mgr),
       index_mgr_ (index_mgr)
   {}
 
   table_oid_t
   table_oid_for(const table_name_t& table_name) const {
-    assert(table_oids_.count(table_name) > 0);
-    return table_oids_.at(table_name);
+    return table_mgr_.table_oid_for(table_name);
   }
 
   index_oid_t
@@ -54,8 +58,7 @@ public:
 
   table_name_t
   table_name_for(table_oid_t table_oid) const {
-    assert(table_names_.contains(table_oid));
-    return table_names_.at(table_oid);
+    return table_mgr_.table_name_for(table_oid);
   }
 
   TableSchema&
@@ -70,14 +73,12 @@ public:
 
   TableSchema&
   table_schema_for(table_oid_t table_oid) {
-    assert(table_schemas_.contains(table_oid));
-    return table_schemas_.at(table_oid);
+    return table_mgr_.table_schema_for(table_oid);
   }
 
   const TableSchema&
   table_schema_for(table_oid_t table_oid) const {
-    assert(table_schemas_.contains(table_oid));
-    return table_schemas_.at(table_oid);
+    return table_mgr_.table_schema_for(table_oid);
   }
 
   IndexSchema&
@@ -104,26 +105,28 @@ public:
 
   bool
   has_table_named(const table_name_t& table_name) const {
-    return table_oids_.contains(table_name);
+    return table_mgr_.has_table_named(table_name);
   }
 
   bool
   table_has_column_named(const table_name_t& table_name,
                          const column_name_t& column_name) const {
-    auto full_name = table_name + "." + column_name;
-    return column_oids_.contains(full_name);
+    return table_mgr_.table_has_column_named(table_name, column_name);
   }
 
-  table_oid_t
-  create_table_schema(const CreateTableExpr& expr);
-  index_oid_t
-  create_index_schema(const CreateIndexExpr& expr);
+  void
+  load_table(file_id_t file_id,
+             table_oid_t table_oid,
+             const table_name_t table_name,
+             const TableSchema schema)
+  {
+    table_mgr_.load_table(file_id, table_oid, table_name, schema);
+  }
 
   void
-  load_table(table_oid_t table_oid, const TableSchema& schema);
-
-  void
-  load_index(index_oid_t index_oid, const IndexSchema& schema);
+  load_index(index_oid_t index_oid,
+             index_name_t index_name,
+             const IndexSchema& schema);
 
   TableColumn
   make_column_from(table_oid_t table_oid,
@@ -142,9 +145,14 @@ public:
   make_schema_from(index_oid_t index_oid,
                    const CreateIndexExpr& expr) const;
 
+  table_oid_t
+  create_table_schema(const CreateTableExpr& expr);
+  index_oid_t
+  create_index_schema(const CreateIndexExpr& expr);
+
   TableColumn
   table_column_for(column_oid_t column_oid) {
-    return columns_[column_oid];
+    return table_mgr_.column_for(column_oid);
   }
 
   PageId
@@ -153,25 +161,29 @@ public:
     return PageId(file_id, FileMgr::INDEX_CONTENT_BLOCK_NUM);
   }
 
+  void build_system_catalog() {
+    for (const auto file_id : file_mgr_.table_file_ids()) {
+      auto table_oid    = table_mgr_.table_oid_for(file_id);
+      auto table_name   = table_mgr_.table_name_for(table_oid);
+      auto table_schema = table_mgr_.read_table_schema(file_id);
+      table_mgr_.load_table(file_id, table_oid, table_name, table_schema);
+    }
+
+    for (const auto file_id : file_mgr_.index_file_ids()) {
+      auto index_oid    = index_mgr_.index_oid_for(file_id);
+      auto index_schema = index_mgr_.read_index_schema(file_id);
+      index_mgr_.load_index(index_oid, index_schema);
+    }
+  }
+
 private:
-  // Columns
-  map<column_name_t, column_oid_t> column_oids_;
-  map<column_oid_t, TableColumn> columns_;
-  // TODO: Maybe we should store TableColumns in a `map`?
-  atomic<column_oid_t> next_column_oid_ = 0;
 
   // Indexes
   map<index_name_t, index_oid_t> index_oids_;
   map<index_oid_t, IndexSchema> index_schemas_;
-  atomic<index_oid_t> next_index_oid_ = 0;
+  atomic<index_oid_t> next_index_oid_ = FIRST_INDEX_OID;
 
-  // Tables
-  map<table_name_t, table_oid_t> table_oids_;
-  map<table_oid_t, table_name_t> table_names_; // Reverse mapping
-
-  map<table_oid_t, TableSchema> table_schemas_;
-  atomic<table_oid_t> next_table_oid_ = 0;
-
+  FileMgr& file_mgr_;
   TableMgr& table_mgr_;
   UNUSED IndexMgr& index_mgr_;
 };

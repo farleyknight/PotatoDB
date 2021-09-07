@@ -80,7 +80,6 @@ public:
     return message;
   }
 
-private:
   static constexpr uint32_t MAX_VARCHAR_SIZE = 128;
   PotatoDB db_;
 };
@@ -100,6 +99,11 @@ TEST_F(ExecTest, SimpleSeqScanTest) {
     to_plan();
 
   execute(move(create_table_plan));
+
+  auto test_1_oid = db_.table_oid_for("test_1");
+  assert(test_1_oid);
+  auto test_1_name = db_.table_name_for(test_1_oid);
+  assert(test_1_name == "test_1");
 
   auto test_1 = QueryBuilder(catalog()).table("test_1");
 

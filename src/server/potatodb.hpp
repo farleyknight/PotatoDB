@@ -118,6 +118,9 @@ public:
   }
 
   bool file_exists(fs::path file_path) const;
+  table_oid_t table_oid_for(table_name_t table_name) const;
+  table_name_t table_name_for(table_oid_t table_oid) const;
+
   bool is_logging_enabled() const;
   void run_flush_thread();
   void rebuild_system_catalog();

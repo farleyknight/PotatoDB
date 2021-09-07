@@ -105,18 +105,9 @@ PotatoDB::run(const string& statement) {
 }
 
 void PotatoDB::build_system_catalog() {
-  for (const auto file_id : file_mgr_.table_file_ids()) {
-    auto table_oid    = table_mgr_.table_oid_for(file_id);
-    auto table_schema = table_mgr_.read_table_schema(file_id);
-    catalog_.load_table(table_oid, table_schema);
-  }
-
-  for (const auto file_id : file_mgr_.index_file_ids()) {
-    auto index_oid    = index_mgr_.index_oid_for(file_id);
-    auto index_schema = index_mgr_.read_index_schema(catalog_, file_id);
-    catalog_.load_index(index_oid, index_schema);
-  }
+  sys_catalog_.build_system_catalog();
 }
+
 
 // TODO: During testing, we sometimes want to delete all database files.
 // Write a method here to delete them.
@@ -127,7 +118,7 @@ void PotatoDB::start_server() {
   // TODO: Add logging for this line
   logger->debug("[PotatoDB] Start PotatoDB Server (0.1.0)");
   server_.set_port(port_);
-  server_.on_read([&](WPtr<ClientSocket> socket_ptr) {
+  server_.on_read([&](weak_ptr<ClientSocket> socket_ptr) {
     if (auto client = socket_ptr.lock()) {
       auto statement = client->read();
       logger->debug("[PotatoDB] Client Socket got query " + statement);
@@ -179,6 +170,16 @@ bool PotatoDB::is_logging_enabled() const {
 
 void PotatoDB::run_flush_thread() {
   log_mgr_.run_flush_thread();
+}
+
+table_oid_t
+PotatoDB::table_oid_for(table_name_t table_name) const {
+  return sys_catalog_.table_oid_for(table_name);
+}
+
+table_name_t
+PotatoDB::table_name_for(table_oid_t table_oid) const {
+  return sys_catalog_.table_name_for(table_oid);
 }
 
 void PotatoDB::startup() {
