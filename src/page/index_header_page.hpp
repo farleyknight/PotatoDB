@@ -63,7 +63,7 @@ public:
     // TODO
   }
 
-  IndexSchema read_schema();
+  IndexSchema read_schema() const;
 
   vector<column_oid_t> read_column_oids(buffer_offset_t start_offset,
                                         int32_t column_oid_count) const

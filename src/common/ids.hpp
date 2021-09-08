@@ -48,3 +48,6 @@ using length_t        = std::uint32_t;
 
 // Integer primary key type
 using primary_key_t   = std::uint32_t;
+
+// Used when we need to convert fs::path to string
+using file_path_t     = std::string;

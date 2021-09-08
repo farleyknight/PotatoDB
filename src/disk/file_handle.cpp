@@ -1,8 +1,9 @@
 
 #include "disk/file_handle.hpp"
 
-FileHandle::FileHandle(fs::path file_path)
-  : file_path_ (file_path)
+FileHandle::FileHandle(file_id_t file_id, fs::path file_path)
+  : file_id_   (file_id),
+    file_path_ (file_path)
 {
   if (!fs::exists(file_path)) {
     logger->debug("[FileHandle] Creating file " + file_path.string());
@@ -61,6 +62,7 @@ void FileHandle::print_status() const {
 void FileHandle::read_buffer(buffer_offset_t offset,
                              Buffer& buffer)
 {
+  // TODO: Clean up all of the debugging lines.
   logger->debug("[FileHandle] Reading: " + file_path());
   logger->debug("[FileHandle] Before seekg, what is file status?");
   print_status();
@@ -71,12 +73,6 @@ void FileHandle::read_buffer(buffer_offset_t offset,
   logger->debug("[FileHandle] Before read, what is file status?");
   print_status();
 
-  auto min_size = (1 + offset) * buffer.size();
-
-  if (size() < min_size) {
-    fs::resize_file(file_path_, min_size);
-  }
-
   handle_.read(buffer.char_ptr(), buffer.size());
 
   logger->debug("[FileHandle] File size is " + std::to_string(size()));
@@ -85,4 +81,22 @@ void FileHandle::read_buffer(buffer_offset_t offset,
   print_status();
   logger->debug("[FileHandle] Read: " + file_path());
   logger->flush();
+}
+
+bool
+FileHandle::allocate_block(block_id_t block_id) {
+  assert(block_id >= next_block_id_);
+  next_block_id_ = block_id;
+
+  auto new_size = next_block_id_ * PAGE_SIZE;
+  return resize(new_size);
+}
+
+bool
+FileHandle::deallocate_block(block_id_t block_id) {
+  assert(block_id < next_block_id_);
+  next_block_id_ = block_id;
+
+  auto new_size = next_block_id_ * PAGE_SIZE;
+  return resize(new_size);
 }

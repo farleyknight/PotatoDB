@@ -22,12 +22,9 @@ PotatoDB::PotatoDB()
     log_mgr_        (file_mgr_),
     checkpoint_mgr_ (txn_mgr_, log_mgr_, buff_mgr_),
 
-    //
-    table_mgr_      (file_mgr_, lock_mgr_, log_mgr_, buff_mgr_),
-    index_mgr_      (file_mgr_, lock_mgr_, log_mgr_, buff_mgr_),
     // TODO: Need to add model_mgr_ here when I get around to
     // doing CREATE MODEL
-    sys_catalog_    (table_mgr_, index_mgr_),
+    sys_catalog_    (file_mgr_, lock_mgr_, log_mgr_, buff_mgr_),
     catalog_        (table_mgr_, index_mgr_, sys_catalog_),
 
     //

@@ -11,7 +11,7 @@ public:
   make_column_oid(const table_name_t& table_name,
                   const column_name_t& column_name)
   {
-    auto full_name   = table_name + "." + column_name;
+    auto full_name = table_name + "." + column_name;
     assert(!column_oids_.contains(full_name));
 
     column_oid_t column_oid = next_column_oid_;
@@ -19,6 +19,15 @@ public:
     column_oids_[full_name] = column_oid;
 
     return column_oid;
+  }
+
+  column_oid_t
+  column_oid_for(const table_name_t& table_name,
+                 const column_name_t& column_name) const
+  {
+    auto full_name = table_name + "." + column_name;
+    assert(column_oids_.contains(full_name));
+    return column_oids_.at(full_name);
   }
 
   vector<TableColumn> make_columns(table_oid_t table_oid,

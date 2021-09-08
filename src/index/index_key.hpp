@@ -4,7 +4,7 @@
 
 #include "tuple/tuple.hpp"
 #include "value/value.hpp"
-#include "catalog/index_schema.hpp"
+#include "catalog/table_schema.hpp"
 
 class IndexKey {
 public:
@@ -39,7 +39,9 @@ public:
     data_.write_int64(0, key);
   }
 
-  Value to_value(const IndexSchema& schema, column_index_t index) const {
+  Value to_value(const TableSchema& schema,
+                 column_index_t index) const
+  {
     size_t offset = 0;
     const auto &col = schema.by_column_index(index);
     const TypeId column_type = col.type_id();
@@ -56,7 +58,9 @@ public:
     return Value::deserialize_from(offset, data_, column_type);
   }
 
-  Value to_value(const QuerySchema& schema, column_index_t index) const {
+  Value to_value(const QuerySchema& schema,
+                 column_index_t index) const
+  {
     size_t offset = 0;
     const auto &col = schema.by_column_index(index);
     const TypeId column_type = col.type_id();

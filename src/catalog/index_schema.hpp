@@ -3,10 +3,9 @@
 #include "catalog/table_column.hpp"
 #include "catalog/base_schema.hpp"
 
-class IndexSchema : public BaseSchema<TableColumn> {
+class IndexSchema {
 public:
-  IndexSchema(vector<TableColumn> columns,
-              index_oid_t index_oid,
+  IndexSchema(index_oid_t index_oid,
               table_oid_t table_oid,
               index_name_t index_name,
               table_name_t table_name,
@@ -22,8 +21,7 @@ public:
               vector<column_oid_t> column_oids,
               int32_t key_size,
               PageId root_page_id)
-    : BaseSchema    (columns),
-      index_oid_    (index_oid),
+    : index_oid_    (index_oid),
       table_oid_    (table_oid),
       index_name_   (index_name),
       table_name_   (table_name),
@@ -31,10 +29,6 @@ public:
       key_size_     (key_size),
       root_page_id_ (root_page_id)
   {}
-
-  ~IndexSchema() {
-    
-  }
 
   index_oid_t index_oid() const {
     return index_oid_;
@@ -71,6 +65,9 @@ public:
   }
 
 private:
+  // NOTE: We should NOT store `TableColumn`s in this object, because that creates
+  // a dependency on the TableSchema. Instead, let's keep this class separate,
+  // and only hold `column_oid_t`s
   index_oid_t index_oid_;
   table_oid_t table_oid_;
 

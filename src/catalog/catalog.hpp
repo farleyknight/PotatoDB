@@ -31,12 +31,12 @@
 //
 class Catalog {
 public:
-  Catalog(TableMgr& table_mgr,
-          IndexMgr& index_mgr,
-          SystemCatalog& sys_catalog)
-    : table_mgr_   (table_mgr),
-      index_mgr_   (index_mgr),
-      sys_catalog_ (sys_catalog)
+
+  Catalog(FileMgr& file_mgr,
+          LockMgr& lock_mgr,
+          LogMgr& log_mgr,
+          BuffMgr& buff_mgr)
+    : table_mgr_ (file_mgr, lock_mgr, log_mgr, buff_mgr)
   {}
 
   // No copy
@@ -70,37 +70,16 @@ public:
 
   table_oid_t
   create_table(const CreateTableExpr& expr, UNUSED Txn& txn) {
-    auto table_name   = expr.table().name();
-    auto table_oid    = sys_catalog_.create_table_schema(expr);
-    auto table_schema = sys_catalog_.table_schema_for(table_oid);
-    // TODO: The `table_mgr_` needs a reference to the new TableSchema
-    // that was made in order to write it to the first block of the file.
-    table_mgr_.create_table_file(table_name, table_schema, table_oid, txn);
-    return table_oid;
-  }
-
-  void load_table(file_id_t file_id,
-                  table_oid_t table_oid,
-                  table_name_t table_name,
-                  const TableSchema& schema)
-  {
-    sys_catalog_.load_table(file_id, table_oid, table_name, schema);
-  }
-
-  void load_index(index_oid_t index_oid,
-                  index_name_t index_name,
-                  const IndexSchema& schema)
-  {
-    sys_catalog_.load_index(index_oid, index_name, schema);
+    return sys_catalog_.create_table(expr);
   }
 
   index_oid_t
-  create_index(const CreateIndexExpr& expr, UNUSED Txn& txn) {
+  create_index(file_id_t file_id, const CreateIndexExpr& expr, UNUSED Txn& txn) {
     auto index_name   = expr.table().name();
-    auto index_oid    = sys_catalog_.create_index_schema(expr);
+    auto index_oid    = sys_catalog_.create_index_schema(file_id, expr);
     auto index_schema = sys_catalog_.index_schema_for(index_oid);
 
-    index_mgr_.create_index_file(index_name, index_schema, index_oid);
+    index_mgr_.create_index_file(file_id, index_name, index_schema, index_oid);
     return index_oid;
   }
 
@@ -178,10 +157,5 @@ public:
   all_columns_for(table_oid_t table_oid) const;
 
 private:
-  // Table Heaps
-  TableMgr& table_mgr_;
-  // B-Trees
-  IndexMgr& index_mgr_;
-  // Table & Index Schemas
-  SystemCatalog& sys_catalog_;
+  SystemCatalog sys_catalog_;
 };

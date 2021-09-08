@@ -9,5 +9,3 @@
 //
 // What is the equivalent for indexes?
 
-
-

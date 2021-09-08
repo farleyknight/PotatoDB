@@ -1,6 +1,6 @@
-// TODO: Probably want to move this file to under `catalog/`
-
 #pragma once
+
+// TODO: Probably want to move this file to under `catalog/`
 
 #include "common/config.hpp"
 
@@ -35,14 +35,11 @@
 class SystemCatalog {
 public:
   SystemCatalog(FileMgr& file_mgr,
-                TableMgr& table_mgr,
-                IndexMgr& index_mgr)
-    // TODO: Maybe we can be constructing table_mgr and index_mgr in here?
-    // I think that might be a better approach than having PotatoDB own table_mgr
-    // and index_mgr.
-    : file_mgr_  (file_mgr),
-      table_mgr_ (table_mgr),
-      index_mgr_ (index_mgr)
+                LockMgr& lock_mgr,
+                LogMgr& log_mgr,
+                BuffMgr& buff_mgr)
+    : table_mgr_ (file_mgr, lock_mgr, log_mgr, buff_mgr),
+      index_mgr_ (file_mgr, lock_mgr, log_mgr, buff_mgr)
   {}
 
   table_oid_t
@@ -52,8 +49,7 @@ public:
 
   index_oid_t
   index_oid_for(const index_name_t& index_name) const {
-    assert(index_oids_.count(index_name) > 0);
-    return index_oids_.at(index_name);
+    return index_mgr_.index_oid_for(index_name);
   }
 
   table_name_t
@@ -83,14 +79,12 @@ public:
 
   IndexSchema&
   index_schema_for(index_oid_t index_oid) {
-    assert(index_schemas_.contains(index_oid));
-    return index_schemas_.at(index_oid);
+    return index_mgr_.index_schema_for(index_oid);
   }
 
   const IndexSchema&
   index_schema_for(index_oid_t index_oid) const {
-    assert(index_schemas_.contains(index_oid));
-    return index_schemas_.at(index_oid);
+    return index_mgr_.index_schema_for(index_oid);
   }
 
   IndexSchema&
@@ -124,66 +118,69 @@ public:
   }
 
   void
-  load_index(index_oid_t index_oid,
-             index_name_t index_name,
-             const IndexSchema& schema);
+  load_index(file_id_t file_id,
+             index_oid_t index_oid,
+             const index_name_t& index_name,
+             const IndexSchema& schema)
+  {
+    index_mgr_.load_index(file_id, index_oid, index_name, schema);
+  }
 
   TableColumn
   make_column_from(table_oid_t table_oid,
                    column_oid_t column_oid,
-                   const ColumnDefExpr& expr) const;
+                   const ColumnDefExpr& expr) const
+  {
+    return table_mgr_.make_column_from(table_oid, column_oid, expr);
+  }
 
   column_oid_t
   make_column_oid(const table_name_t& table_name,
-                  const column_name_t& column_name);
+                  const column_name_t& column_name)
+  {
+    return table_mgr_.make_column_oid(table_name, column_name);
+  }
 
   TableSchema
   make_schema_from(table_oid_t table_oid,
-                   const CreateTableExpr& expr);
-
-  IndexSchema
-  make_schema_from(index_oid_t index_oid,
-                   const CreateIndexExpr& expr) const;
+                   const CreateTableExpr& expr)
+  {
+    return table_mgr_.make_schema_from(table_oid, expr);
+  }
 
   table_oid_t
-  create_table_schema(const CreateTableExpr& expr);
+  create_table_schema(const CreateTableExpr& expr) {
+    return table_mgr_.create_table_schema(expr);
+  }
+
   index_oid_t
-  create_index_schema(const CreateIndexExpr& expr);
+  create_index_schema(file_id_t file_id,
+                      const CreateIndexExpr& expr)
+  {
+    auto table_name   = expr.table().name();
+    auto table_oid    = table_oid_for(table_name);
+
+    auto column_names = expr.indexed_columns().list();
+    vector<column_oid_t> column_oids;
+    for (const auto& column_name : column_names) {
+      auto column_oid = table_mgr_.column_oid_for(table_name, column_name);
+      column_oids.push_back(column_oid);
+    }
+
+    return index_mgr_.create_index_schema(file_id, table_oid, column_oids, expr);
+  }
 
   TableColumn
   table_column_for(column_oid_t column_oid) {
     return table_mgr_.column_for(column_oid);
   }
 
-  PageId
-  default_root_page_id(table_oid_t table_oid) const {
-    auto file_id = table_mgr_.file_id_for(table_oid);
-    return PageId(file_id, FileMgr::INDEX_CONTENT_BLOCK_NUM);
-  }
-
   void build_system_catalog() {
-    for (const auto file_id : file_mgr_.table_file_ids()) {
-      auto table_oid    = table_mgr_.table_oid_for(file_id);
-      auto table_name   = table_mgr_.table_name_for(table_oid);
-      auto table_schema = table_mgr_.read_table_schema(file_id);
-      table_mgr_.load_table(file_id, table_oid, table_name, table_schema);
-    }
-
-    for (const auto file_id : file_mgr_.index_file_ids()) {
-      auto index_oid    = index_mgr_.index_oid_for(file_id);
-      auto index_schema = index_mgr_.read_index_schema(file_id);
-      index_mgr_.load_index(index_oid, index_schema);
-    }
+    table_mgr_.load_all_tables();
+    index_mgr_.load_all_indexes();
   }
 
 private:
-
-  // Indexes
-  map<index_name_t, index_oid_t> index_oids_;
-  map<index_oid_t, IndexSchema> index_schemas_;
-  atomic<index_oid_t> next_index_oid_ = FIRST_INDEX_OID;
-
-  FileMgr& file_mgr_;
-  TableMgr& table_mgr_;
-  UNUSED IndexMgr& index_mgr_;
+  TableMgr table_mgr_;
+  IndexMgr index_mgr_;
 };

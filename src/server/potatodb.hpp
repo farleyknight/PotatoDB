@@ -142,8 +142,6 @@ private:
   LockMgr       lock_mgr_;
 
   //
-  TableMgr      table_mgr_;
-  IndexMgr      index_mgr_;
   SystemCatalog sys_catalog_;
   Catalog       catalog_;
 

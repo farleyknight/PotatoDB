@@ -5,16 +5,22 @@
 #include "disk/disk_mgr.hpp"
 #include "common/exceptions.hpp"
 
-DiskMgr::DiskMgr(FileMgr& file_mgr)
-  : file_mgr_    (file_mgr)
-{
+file_id_t
+DiskMgr::file_id_for(fs::path file_path) {
+  auto path_as_string = file_path.c_str();
+  assert(file_ids_.contains(path_as_string));
+  return file_ids_[path_as_string];
 }
 
+file_id_t
+DiskMgr::open_table_file(fs::path file_path) {
+  auto path_as_string = file_path.c_str();
 
-// TODO: All of these methods are just delegating to `file_mgr_`
-// Let's just cut out the middle-man here.
-// TODO: Slowly move away from using DiskMgr. Use FileMgr instead.
-PageId DiskMgr::allocate_page(file_id_t file_id) {
-  return file_mgr_.allocate_page(file_id);
+  // file_ids should live in DiskMgr
+  auto file_id = next_file_id_++;
+  file_ids_[path_as_string] = file_id;
+
+  table_file_mgr_.open_file(file_id, file_path);
+
+  return file_id;
 }
-

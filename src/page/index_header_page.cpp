@@ -3,7 +3,7 @@
 
 // NOTE: We will need the catalog object because we need to transform
 // the column_oids into TableColumn objects.
-IndexSchema IndexHeaderPage::read_schema() {
+IndexSchema IndexHeaderPage::read_schema() const {
   auto index_oid         = read_index_oid();
   auto table_oid         = read_table_oid();
   auto root_page_id      = read_root_page_id();
