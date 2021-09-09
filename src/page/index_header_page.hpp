@@ -27,6 +27,9 @@
  *  string_length        (4 bytes, int32_t)
  *  index_name_t         (var, string chars based on prev value)
  *
+ *  string_length        (4 bytes, int32_t)
+ *  table_name_t         (var, string chars based on prev value)
+ *
  *  Schema Columns:
  *  ===============
  *  column_size_t        (4 bytes, int32_t)
@@ -65,8 +68,9 @@ public:
 
   IndexSchema read_schema() const;
 
-  vector<column_oid_t> read_column_oids(buffer_offset_t start_offset,
-                                        int32_t column_oid_count) const
+  vector<column_oid_t>
+  read_column_oids(buffer_offset_t start_offset,
+                   int32_t column_oid_count) const
   {
     buffer_offset_t offset = start_offset;
 
@@ -79,8 +83,9 @@ public:
     return column_oids;
   }
 
-  void write_column_oids(buffer_offset_t column_oids_start,
-                         const vector<column_oid_t> column_oids)
+  void
+  write_column_oids(buffer_offset_t column_oids_start,
+                    const vector<column_oid_t> column_oids)
   {
     buffer_offset_t offset = column_oids_start;
     for (auto column_oid : column_oids) {
@@ -89,7 +94,8 @@ public:
     }
   }
 
-  buffer_offset_t read_column_oids_start() const {
+  buffer_offset_t
+  read_column_oids_start() const {
     return page_->read_int32(COLUMN_OIDS_START_OFFSET);
   }
 

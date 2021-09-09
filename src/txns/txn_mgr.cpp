@@ -30,7 +30,7 @@ void TxnMgr::commit(Txn& txn) {
 
     if (item.is_delete()) {
       logger->debug("[TxnMgr] APPLY DELETE " + item.rid().to_string());
-      auto &table_heap = table_mgr_.table_heap_for(item.table_oid());
+      auto &table_heap = catalog_.table_heap_for(item.table_oid());
       // Note that this also releases the lock when
       // holding the page latch.
       table_heap.apply_delete(item.rid(), txn);
@@ -77,7 +77,7 @@ void TxnMgr::abort(Txn& txn) {
 
   while (!write_set.empty()) {
     auto &item = write_set.back();
-    auto &table_heap = table_mgr_.table_heap_for(item.table_oid());
+    auto &table_heap = catalog_.table_heap_for(item.table_oid());
 
     switch (item.wtype()) {
     case WType::DELETE:

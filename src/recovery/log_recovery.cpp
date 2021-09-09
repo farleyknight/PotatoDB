@@ -97,7 +97,7 @@ void LogRecovery::redo() {
 
   int32_t deserialize_failures = 0;
 
-  auto read_status = file_mgr_.read_log(log_cursor_);
+  auto read_status = disk_mgr_.read_log(log_cursor_);
   while (read_status) {
     LogRecord log;
     auto deserialize_status = log_cursor_.deserialize_log_record(log);
@@ -113,12 +113,12 @@ void LogRecovery::redo() {
       logger->debug("[LogRecovery] Too many deserialize failures! Returning early..");
       return;
     }
-    read_status = file_mgr_.read_log(log_cursor_);
+    read_status = disk_mgr_.read_log(log_cursor_);
   }
 }
 
 LogFileCursor& LogRecovery::log_cursor() {
-  file_mgr_.read_log(log_cursor_);
+  disk_mgr_.read_log(log_cursor_);
   return log_cursor_;
 }
 
@@ -133,7 +133,7 @@ void LogRecovery::undo() {
     while (lsn != INVALID_LSN) {
       auto file_offset = lsn_mapping_[lsn];
       log_cursor_.set_file_offset(file_offset);
-      file_mgr_.read_log(log_cursor_);
+      disk_mgr_.read_log(log_cursor_);
 
       LogRecord log;
       assert(log_cursor_.deserialize_log_record(log));
@@ -152,7 +152,7 @@ void LogRecovery::undo() {
 
       if (log.record_type() == LogRecordType::NEW_PAGE) {
         if (!buff_mgr_.delete_page(log.page_id())) {
-          file_mgr_.deallocate_page(log.page_id());
+          disk_mgr_.deallocate_page(log.page_id());
         }
 
         if (log.prev_page_id() != PageId::INVALID()) {

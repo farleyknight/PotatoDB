@@ -114,7 +114,7 @@ TEST(PotatoDBTest, CreateTableTest) {
 
   db.run("CREATE TABLE foo_bar ( colA INTEGER, colB INTEGER )");
 
-  EXPECT_TRUE(db.file_mgr().table_file_exists("foo_bar"));
+  EXPECT_TRUE(db.table_oid_for("foo_bar"));
 
   auto result = db.run("SHOW TABLES");
   auto &result_set = result.set();

@@ -6,29 +6,30 @@
 class LogMgrSerialization : public ::testing::Test {
 public:
   LogMgrSerialization()
-    : log_mgr   (file_mgr),
-      txn_mgr   (lock_mgr, log_mgr, table_mgr),
-      buff_mgr  (10, file_mgr, log_mgr),
-      table_mgr (file_mgr, lock_mgr, log_mgr, buff_mgr)
+    : log_mgr   (disk_mgr),
+      txn_mgr   (lock_mgr, log_mgr, catalog),
+      buff_mgr  (10, disk_mgr, log_mgr),
+      catalog   (disk_mgr, lock_mgr, log_mgr, buff_mgr)
   {}
 
   void SetUp() override {
     ::testing::Test::SetUp();
-    file_mgr.truncate_log_file();
+    disk_mgr.truncate_log_file();
   }
 
   void TearDown() override {
     ::testing::Test::TearDown();
-    file_mgr.delete_log_file();
+    disk_mgr.delete_log_file();
   }
 
-  FileMgr file_mgr;
+  DiskMgr disk_mgr;
   LockMgr lock_mgr;
   LogMgr log_mgr;
   TxnMgr txn_mgr;
   BuffMgr buff_mgr;
-  TableMgr table_mgr;
+  Catalog catalog;
 };
+
 
 // NOTE: We should NOT need a schema anywhere in these tests!
 // We can easily use a Tuple with a fixed Buffer
@@ -59,7 +60,7 @@ TEST_F(LogMgrSerialization, InsertTupleTest) {
   LogRecord copy;
 
   auto &txn = txn_mgr.begin();
-  LogRecovery recovery(file_mgr, buff_mgr, log_mgr, lock_mgr, txn);
+  LogRecovery recovery(disk_mgr, buff_mgr, log_mgr, lock_mgr, txn);
   auto log_cursor = recovery.log_cursor();
   log_cursor.deserialize_log_record(copy);
 

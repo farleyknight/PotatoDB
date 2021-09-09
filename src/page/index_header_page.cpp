@@ -8,7 +8,6 @@ IndexSchema IndexHeaderPage::read_schema() const {
   auto table_oid         = read_table_oid();
   auto root_page_id      = read_root_page_id();
   auto index_name        = read_index_name();
-  auto table_name        = read_table_name();
 
   auto column_oids_count = read_column_oids_count();
   auto column_oids_start = read_column_oids_start();
@@ -17,8 +16,7 @@ IndexSchema IndexHeaderPage::read_schema() const {
 
   int32_t key_size = 8; // Constant for now
 
-  return IndexSchema(index_oid,   table_oid,
-                     index_name,  table_name,
-                     column_oids, key_size,
-                     root_page_id);
+  return IndexSchema(index_oid,  table_oid,
+                     index_name, column_oids,
+                     key_size,   root_page_id);
 }

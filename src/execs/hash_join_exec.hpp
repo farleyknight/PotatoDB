@@ -23,7 +23,7 @@ public:
 private:
   hash_t compute_hash(const Tuple& tuple,
                       const QuerySchema& schema,
-                      Vec<BaseQuery> nodes);
+                      vector<BaseQuery> nodes);
 
   bool match_found(const Tuple& left,
                    const Tuple& right);

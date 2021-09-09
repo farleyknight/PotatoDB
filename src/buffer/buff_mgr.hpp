@@ -6,14 +6,14 @@
 #include "buffer/clock_replacer.hpp"
 
 #include "page/page.hpp"
-#include "disk/file_mgr.hpp"
+#include "disk/disk_mgr.hpp"
 
 #include "recovery/log_mgr.hpp"
 
 class BuffMgr {
 public:
   BuffMgr(int32_t pool_size,
-          FileMgr& file_mgr,
+          DiskMgr& disk_mgr,
           LogMgr& log_mgr);
 
   // No copy
@@ -52,6 +52,6 @@ private:
   MutList<frame_id_t> free_list_;
   ptr<Replacer> replacer_;
 
-  FileMgr& file_mgr_;
+  DiskMgr& disk_mgr_;
   LogMgr& log_mgr_;
 };

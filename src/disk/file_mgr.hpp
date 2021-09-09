@@ -14,12 +14,6 @@ public:
   static constexpr int32_t INDEX_HEADER_BLOCK_NUM = 0;
   static constexpr int32_t INDEX_CONTENT_BLOCK_NUM = 1;
 
-  void write_buffer(PageId page_id, const Buffer& buffer);
-  void read_buffer(PageId page_id, Buffer& buffer);
-
-  void deallocate_page(PageId page_id);
-  PageId allocate_page(file_id_t file_id);
-
   void remove_all_files() {
     auto iter = fs::directory_iterator(db_directory());
     for (const auto &entry : iter) {
@@ -50,16 +44,6 @@ public:
   fs::path
   config_file_name() const {
     return db_directory() / "potatodb.yml";
-  }
-
-  void
-  write_page(PageId page_id, const Page& page) {
-    write_buffer(page_id, page.buffer());
-  }
-
-  void
-  read_page(PageId page_id, Page& page) {
-    read_buffer(page_id, page.buffer());
   }
 
   file_id_t file_id_for(fs::path file_path);

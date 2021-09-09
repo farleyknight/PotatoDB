@@ -34,12 +34,12 @@
 
 class SystemCatalog {
 public:
-  SystemCatalog(FileMgr& file_mgr,
+  SystemCatalog(DiskMgr& disk_mgr,
                 LockMgr& lock_mgr,
                 LogMgr& log_mgr,
                 BuffMgr& buff_mgr)
-    : table_mgr_ (file_mgr, lock_mgr, log_mgr, buff_mgr),
-      index_mgr_ (file_mgr, lock_mgr, log_mgr, buff_mgr)
+    : table_mgr_ (disk_mgr, lock_mgr, log_mgr, buff_mgr),
+      index_mgr_ (disk_mgr, buff_mgr)
   {}
 
   table_oid_t
@@ -105,25 +105,8 @@ public:
   bool
   table_has_column_named(const table_name_t& table_name,
                          const column_name_t& column_name) const {
-    return table_mgr_.table_has_column_named(table_name, column_name);
-  }
-
-  void
-  load_table(file_id_t file_id,
-             table_oid_t table_oid,
-             const table_name_t table_name,
-             const TableSchema schema)
-  {
-    table_mgr_.load_table(file_id, table_oid, table_name, schema);
-  }
-
-  void
-  load_index(file_id_t file_id,
-             index_oid_t index_oid,
-             const index_name_t& index_name,
-             const IndexSchema& schema)
-  {
-    index_mgr_.load_index(file_id, index_oid, index_name, schema);
+    return table_mgr_.table_has_column_named(table_name,
+                                             column_name);
   }
 
   TableColumn
@@ -149,14 +132,12 @@ public:
   }
 
   table_oid_t
-  create_table_schema(const CreateTableExpr& expr) {
-    return table_mgr_.create_table_schema(expr);
+  create_table(const CreateTableExpr& expr) {
+    return table_mgr_.create_table(expr);
   }
 
   index_oid_t
-  create_index_schema(file_id_t file_id,
-                      const CreateIndexExpr& expr)
-  {
+  create_index(const CreateIndexExpr& expr) {
     auto table_name   = expr.table().name();
     auto table_oid    = table_oid_for(table_name);
 
@@ -167,7 +148,7 @@ public:
       column_oids.push_back(column_oid);
     }
 
-    return index_mgr_.create_index_schema(file_id, table_oid, column_oids, expr);
+    return index_mgr_.create_index(table_oid, column_oids, expr);
   }
 
   TableColumn
@@ -175,9 +156,15 @@ public:
     return table_mgr_.column_for(column_oid);
   }
 
-  void build_system_catalog() {
-    table_mgr_.load_all_tables();
-    index_mgr_.load_all_indexes();
+  TableHeap&
+  table_heap_for(table_oid_t table_oid) {
+    return table_mgr_.table_heap_for(table_oid);
+  }
+
+  void
+  build_system_catalog() {
+    table_mgr_.open_all_tables();
+    index_mgr_.open_all_indexes();
   }
 
 private:

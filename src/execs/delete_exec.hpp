@@ -32,8 +32,10 @@ public:
     return tuple;
   }
 
-  TableHeap& table_heap() {
-    return exec_ctx_.table_mgr().table_heap_for(plan_->table_oid());
+  TableHeap&
+  table_heap() {
+    auto table_oid = plan_->table_oid();
+    return exec_ctx_.catalog().table_heap_for(table_oid);
   }
 
   const string message_on_completion(size_t result_count) const override {

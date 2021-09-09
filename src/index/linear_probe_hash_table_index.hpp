@@ -9,8 +9,14 @@ public:
 
   LinearProbeHTIndex(BuffMgr& buff_mgr,
                      IndexSchema schema,
+                     IndexComp comp,
                      size_t num_buckets,
-                     const IndexHashFunc& hash_fn);
+                     const IndexHashFunc& hash_fn)
+    : schema_    (schema),
+      comp_      (comp),
+      container_ (schema.index_name(), buff_mgr, comp_, num_buckets, hash_fn)
+  {}
+
 
   ~LinearProbeHTIndex() override = default;
 

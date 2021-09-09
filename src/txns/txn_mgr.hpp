@@ -7,7 +7,7 @@
 
 #include "common/config.hpp"
 
-#include "buffer/table_mgr.hpp"
+#include "catalog/catalog.hpp"
 
 #include "page/table_heap.hpp"
 
@@ -18,10 +18,10 @@ class TxnMgr {
 public:
   explicit TxnMgr(LockMgr& lock_mgr,
                   LogMgr& log_mgr,
-                  TableMgr& table_mgr)
-    : lock_mgr_  (lock_mgr),
-      log_mgr_   (log_mgr),
-      table_mgr_ (table_mgr)
+                  Catalog& catalog)
+    : lock_mgr_ (lock_mgr),
+      log_mgr_  (log_mgr),
+      catalog_  (catalog)
   {}
 
   // No copy
@@ -55,9 +55,9 @@ private:
   atomic<txn_id_t> curr_txn_id_ = 0;
   LockMgr& lock_mgr_;
   UNUSED LogMgr& log_mgr_;
-  TableMgr& table_mgr_;
+  Catalog& catalog_;
 
-  MutMap<txn_id_t, Txn> table_;
+  map<txn_id_t, Txn> table_;
   RWLatch global_txn_latch_;
 };
 

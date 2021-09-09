@@ -62,7 +62,7 @@ public:
                     table_oid_t table_oid,
                     Txn& txn)
   {
-    file_id_t file_id = disk_mgr_.create_table_file(table_name);
+    auto file_id = disk_mgr_.create_table_file(table_name);
     allocate_header_and_first_page(file_id, txn);
 
     load_table(table_oid, table_name, schema);
@@ -89,7 +89,7 @@ public:
   }
 
   table_oid_t
-  create_table_schema(const CreateTableExpr& expr)
+  create_table(const CreateTableExpr& expr)
   {
     auto table_name = expr.table().name();
     assert(!table_oids_.contains(table_name));
@@ -201,17 +201,22 @@ private:
 
   void
   load_table_header(table_oid_t table_oid, Page* page_ptr) {
-    table_headers_.emplace(table_oid, TableHeaderPage(page_ptr));
+    table_headers_.emplace(table_oid,
+                           TableHeaderPage(page_ptr));
   }
 
   void
-  load_table_name(table_oid_t table_oid, table_name_t table_name) {
+  load_table_name(table_oid_t table_oid,
+                  table_name_t table_name)
+  {
     table_names_[table_oid] = table_name;
     table_oids_[table_name] = table_oid;
   }
 
   void
-  load_table_schema(table_oid_t table_oid, const TableSchema& table_schema) {
+  load_table_schema(table_oid_t table_oid,
+                    const TableSchema& table_schema)
+  {
     table_schemas_.emplace(table_oid, table_schema);
   }
 
@@ -221,7 +226,6 @@ private:
              const table_name_t& table_name,
              const TableSchema& schema)
   {
-    load_table_header(table_name);
     load_table_name(table_oid, table_name);
     load_table_schema(table_oid, schema);
     load_table_heap(table_oid);
@@ -232,6 +236,7 @@ private:
     auto file_id = disk_mgr_.file_id_for_table(table_oid);
     auto heap = make_unique<TableHeap>(file_id,
                                        table_oid,
+                                       disk_mgr_,
                                        buff_mgr_,
                                        lock_mgr_,
                                        log_mgr_);

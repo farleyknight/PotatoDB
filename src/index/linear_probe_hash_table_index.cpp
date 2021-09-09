@@ -1,15 +1,6 @@
 
 #include "index/linear_probe_hash_table_index.hpp"
 
-LinearProbeHTIndex::LinearProbeHTIndex(BuffMgr& buff_mgr,
-                                       IndexSchema schema,
-                                       size_t num_buckets,
-                                       const IndexHashFunc& hash_fn)
-  : schema_    (schema),
-    comp_      (schema),
-    container_ (schema.index_name(), buff_mgr, comp_, num_buckets, hash_fn)
-{}
-
 void LinearProbeHTIndex::insert_entry(const Tuple& key,
                                       const RID& rid) {
   // construct insert index key

@@ -9,8 +9,8 @@ public:
               BaseQuery having_clause);
 
   Value eval_agg(const QuerySchema& schema,
-                 const Vec<Value>& group_bys,
-                 const Vec<Value>& aggs) const;
+                 const vector<Value>& group_bys,
+                 const vector<Value>& aggs) const;
 
 private:
   // NOTE: A HavingExpr could contain more than just comparisons.

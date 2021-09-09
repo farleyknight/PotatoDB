@@ -1,9 +1,5 @@
 #include "recovery/log_mgr.hpp"
 
-LogMgr::LogMgr(FileMgr& file_mgr)
-  : file_mgr_(file_mgr)
-{}
-
 // Performs a synchronous flush
 //
 // It blocks the thread it's been run on, and waits until the flush has been completed before resuming.
@@ -39,7 +35,7 @@ void LogMgr::flush_log_buffer() {
     logger->debug("[LogMgr] Flushing to WAL");
 
     // TODO: Change `disk_mgr_` to a different object
-    file_mgr_.write_log(flush_buffer_, flush_buffer_length_);
+    disk_mgr_.write_log(flush_buffer_, flush_buffer_length_);
     flush_buffer_length_ = 0;
   }
 }

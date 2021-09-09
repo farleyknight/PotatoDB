@@ -10,10 +10,8 @@ public:
           BuffMgr&  buff_mgr,
           LockMgr&  lock_mgr,
           TxnMgr&   txn_mgr,
-          TableMgr& table_mgr,
           Catalog&  catalog)
     : txn_       (txn),
-      table_mgr_ (table_mgr),
       catalog_   (catalog),
       buff_mgr_  (buff_mgr),
       txn_mgr_   (txn_mgr),
@@ -28,15 +26,14 @@ public:
   ~ExecCtx() = default;
 
   Txn&      txn()       const { return txn_; }
-  TableMgr& table_mgr()       { return table_mgr_; }
   Catalog&  catalog()         { return catalog_; }
   BuffMgr&  buff_mgr()  const { return buff_mgr_; }
   TxnMgr&   txn_mgr()   const { return txn_mgr_; }
   LockMgr&  lock_mgr()  const { return lock_mgr_; }
 
 private:
+
   Txn&        txn_;
-  TableMgr&   table_mgr_;
   Catalog&    catalog_;
   BuffMgr&    buff_mgr_;
   TxnMgr&     txn_mgr_;

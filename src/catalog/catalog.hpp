@@ -31,12 +31,11 @@
 //
 class Catalog {
 public:
-
-  Catalog(FileMgr& file_mgr,
+  Catalog(DiskMgr& disk_mgr,
           LockMgr& lock_mgr,
-          LogMgr& log_mgr,
+          LogMgr&  log_mgr,
           BuffMgr& buff_mgr)
-    : table_mgr_ (file_mgr, lock_mgr, log_mgr, buff_mgr)
+    : sys_catalog_ (disk_mgr, lock_mgr, log_mgr, buff_mgr)
   {}
 
   // No copy
@@ -45,6 +44,11 @@ public:
   Catalog& operator=(const Catalog&) = delete;
   // Default deletedd
   ~Catalog() = default;
+
+  void
+  build_system_catalog() {
+    sys_catalog_.build_system_catalog();
+  }
 
   vector<TableColumn>
   table_columns_for(vector<column_oid_t> column_oids) {
@@ -59,12 +63,20 @@ public:
     return sys_catalog_.has_table_named(table_name);
   }
 
-  const table_name_t table_name_for(table_oid_t table_oid) const {
+  const table_name_t
+  table_name_for(table_oid_t table_oid) const {
     return sys_catalog_.table_name_for(table_oid);
   }
 
-  bool table_has_column_named(const table_name_t& table_name,
-                              const column_name_t& column_name) const {
+  TableHeap&
+  table_heap_for(table_oid_t table_oid) {
+    return sys_catalog_.table_heap_for(table_oid);
+  }
+
+  bool
+  table_has_column_named(const table_name_t& table_name,
+                         const column_name_t& column_name) const
+  {
     return sys_catalog_.table_has_column_named(table_name, column_name);
   }
 
@@ -74,13 +86,8 @@ public:
   }
 
   index_oid_t
-  create_index(file_id_t file_id, const CreateIndexExpr& expr, UNUSED Txn& txn) {
-    auto index_name   = expr.table().name();
-    auto index_oid    = sys_catalog_.create_index_schema(file_id, expr);
-    auto index_schema = sys_catalog_.index_schema_for(index_oid);
-
-    index_mgr_.create_index_file(file_id, index_name, index_schema, index_oid);
-    return index_oid;
+  create_index(const CreateIndexExpr& expr, UNUSED Txn& txn) {
+    return sys_catalog_.create_index(expr);
   }
 
   // NOTE: TableSchema can change it's auto-increment value,

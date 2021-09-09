@@ -21,6 +21,7 @@ extern sptr<spdlog::logger> logger;
 // TODO: Some of these can be configured
 // during system start-up
 
+// TODO: Move some of these to their respective classes
 static constexpr table_oid_t   INVALID_TABLE_OID  = -1;
 static constexpr column_oid_t  INVALID_COLUMN_OID = -1;
 static constexpr index_oid_t   INVALID_INDEX_OID  = -1;

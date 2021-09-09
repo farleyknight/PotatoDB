@@ -1,7 +1,7 @@
 #include "buffer/table_mgr.hpp"
 
 void TableMgr::allocate_header_and_first_page(file_id_t file_id, Txn& txn) {
-  auto first_page_id  = file_mgr_.first_table_page(file_id);
+  auto first_page_id  = disk_mgr_.first_table_page(file_id);
   auto first_page_ptr = buff_mgr_.fetch_page(first_page_id);
   assert(first_page_ptr != nullptr);
   auto first_page = SlottedTablePage(first_page_ptr, txn, log_mgr_, lock_mgr_);
@@ -32,5 +32,4 @@ table_oid_t
 TableMgr::read_table_oid(file_id_t file_id) const {
   return table_headers_.at(file_id).read_table_oid();
 }
-
 

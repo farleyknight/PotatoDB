@@ -18,8 +18,9 @@ public:
     return child_->has_next();
   }
 
-  Tuple next() override {
-    auto &heap = exec_ctx_.table_mgr().table_heap_for(plan_->table_oid());
+  Tuple
+  next() override {
+    auto &heap = exec_ctx_.catalog().table_heap_for(plan_->table_oid());
     auto tuple = child_->next();
 
     auto &table_schema = exec_ctx_.catalog().table_schema_for(plan_->table_oid());

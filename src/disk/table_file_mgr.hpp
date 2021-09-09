@@ -2,17 +2,6 @@
 
 #include "disk/file_mgr.hpp"
 
-// TODO : New Architecture for handling files:
-
-// * DiskMgr - owns 3 different file mgrs
-//   * TableFileMgr : owns all table files
-//   * IndexFileMgr : owns all index files
-//   * LogFileMgr : owns log file
-//   * FileMgr - Contains several file disk operations, is a superclass for:
-//     * TableFileMgr : public FileMgr
-//     * IndexFileMgr : public FileMgr
-//     * LogFileMgr   : public FileMgr
-
 class TableFileMgr : public FileMgr {
 public:
   const string         FILE_EXTENSION   = ".tbl";
@@ -22,6 +11,11 @@ public:
   TableFileMgr() {}
 
   void
+  close() {
+    // TODO: Close all file handles
+  }
+
+  void
   remove_table_files() {
     for (const auto & [file_path, file_id] : table_file_ids_) {
       remove_file(file_path);
@@ -29,7 +23,7 @@ public:
   }
 
   vector<file_id_t>
-  table_file_ids() {
+  table_file_ids() const {
     vector<file_id_t> file_ids;
     for (const auto & [file_path, file_id] : table_file_ids_) {
       file_ids.push_back(file_id);
@@ -51,6 +45,7 @@ public:
 
   fs::path
   table_file_for(const table_name_t& table_name) const {
+    // TODO: We should probably put all tables under the directory `tables/`
     return file_path_for(table_name + FILE_EXTENSION);
   }
 
@@ -80,39 +75,30 @@ public:
   write_buffer(PageId page_id, const Buffer& buffer) {
     auto file_id = page_id.file_id();
     auto offset  = page_id.block_id() * buffer.size();
-    assert(file_handles_.contains(file_id));
+    assert(table_file_handles_.contains(file_id));
 
-    logger->debug("[FileMgr] Writing buffer to file_id " +
-                  std::to_string(file_id));
-    logger->debug("[FileMgr] Buffer offset " +
-                  std::to_string(offset));
-    logger->debug("[FileMgr] File name: " +
-                  file_handles_[file_id]->file_path());
-    logger->debug("[FileMgr] File size: " +
-                  std::to_string(file_handles_[file_id]->size()));
-
-    file_handles_[file_id]->write_buffer(offset, buffer);
+    table_file_handles_[file_id]->write_buffer(offset, buffer);
   }
 
   void
   read_buffer(PageId page_id, Buffer& buffer) {
     auto file_id = page_id.file_id();
     auto offset  = page_id.block_id() * buffer.size();
-    assert(file_handles_.contains(file_id));
+    assert(table_file_handles_.contains(file_id));
 
-    logger->debug("[FileMgr] Reading buffer at file_id " +
-                  std::to_string(file_id));
-    logger->debug("[FileMgr] Reading block_id " +
-                  std::to_string(page_id.block_id()));
+    table_file_handles_[file_id]->read_buffer(offset, buffer);
+  }
 
-    logger->debug("[FileMgr] Buffer offset " +
-                  std::to_string(offset));
-    logger->debug("[FileMgr] File name: " +
-                  file_handles_[file_id]->file_path());
-    logger->debug("[FileMgr] File size: " +
-                  std::to_string(file_handles_[file_id]->size()));
+  bool
+  is_table_file(file_id_t file_id) {
+    return table_file_handles_.contains(file_id);
+  }
 
-    file_handles_[file_id]->read_buffer(offset, buffer);
+  void
+  deallocate_page(PageId page_id) {
+    auto file_id = page_id.file_id();
+    auto offset  = page_id.block_id() * PAGE_SIZE;
+    table_file_handles_[file_id]->resize(offset);
   }
 
 private:
@@ -121,9 +107,10 @@ private:
   // refactoring it out into a superclass.
   void
   load_file_handle(file_id_t file_id, const file_path_t& file_path) {
-    auto handle = make_unique<FileHandle>(file_path);
+    auto handle
+      = make_unique<FileHandle>(file_id, file_path);
     table_file_ids_.emplace(file_path, file_id);
-    file_handles_.emplace(file_id, move(handle));
+    table_file_handles_.emplace(file_id, move(handle));
   }
 
   void
@@ -136,6 +123,5 @@ private:
   map<file_id_t, table_oid_t> file_id_to_table_oid_;
 
   map<file_path_t, file_id_t> table_file_ids_;
-
-  map<file_id_t, ptr<FileHandle>> file_handles_;
+  map<file_id_t, ptr<FileHandle>> table_file_handles_;
 };

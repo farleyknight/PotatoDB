@@ -11,6 +11,11 @@ public:
   IndexFileMgr() {}
 
   void
+  close() {
+    // TODO: Close all file handles
+  }
+
+  void
   remove_index_files() {
     for (const auto & [file_path, file_id] : index_file_ids_) {
       remove_file(file_path);
@@ -18,7 +23,7 @@ public:
   }
 
   vector<file_id_t>
-  index_file_ids() {
+  index_file_ids() const {
     vector<file_id_t> file_ids;
     for (const auto & [file_path, file_id] : index_file_ids_) {
       file_ids.push_back(file_id);
@@ -69,53 +74,48 @@ public:
   write_buffer(PageId page_id, const Buffer& buffer) {
     auto file_id = page_id.file_id();
     auto offset  = page_id.block_id() * buffer.size();
-    assert(file_handles_.contains(file_id));
+    assert(index_file_handles_.contains(file_id));
 
-    logger->debug("[FileMgr] Writing buffer to file_id " +
-                  std::to_string(file_id));
-    logger->debug("[FileMgr] Buffer offset " +
-                  std::to_string(offset));
-    logger->debug("[FileMgr] File name: " +
-                  file_handles_[file_id]->file_path());
-    logger->debug("[FileMgr] File size: " +
-                  std::to_string(file_handles_[file_id]->size()));
-
-    file_handles_[file_id]->write_buffer(offset, buffer);
+    index_file_handles_[file_id]->write_buffer(offset, buffer);
   }
 
   void
   read_buffer(PageId page_id, Buffer& buffer) {
     auto file_id = page_id.file_id();
     auto offset  = page_id.block_id() * buffer.size();
-    assert(file_handles_.contains(file_id));
+    assert(index_file_handles_.contains(file_id));
 
-    logger->debug("[FileMgr] Reading buffer at file_id " +
-                  std::to_string(file_id));
-    logger->debug("[FileMgr] Reading block_id " +
-                  std::to_string(page_id.block_id()));
+    index_file_handles_[file_id]->read_buffer(offset, buffer);
+  }
 
-    logger->debug("[FileMgr] Buffer offset " +
-                  std::to_string(offset));
-    logger->debug("[FileMgr] File name: " +
-                  file_handles_[file_id]->file_path());
-    logger->debug("[FileMgr] File size: " +
-                  std::to_string(file_handles_[file_id]->size()));
+  bool
+  is_index_file(file_id_t file_id) {
+    return index_file_handles_.contains(file_id);
+  }
 
-    file_handles_[file_id]->read_buffer(offset, buffer);
+  void
+  deallocate_page(PageId page_id) {
+    auto file_id = page_id.file_id();
+    auto offset  = page_id.block_id() * PAGE_SIZE;
+    index_file_handles_[file_id]->resize(offset);
   }
 
 private:
   // TODO: This method is duplicated in TableFileMgr.
-  // We're waiting until we start adding ML capabilities before
-  // refactoring it out into a superclass.
+  // We're waiting until we start adding ML capabilities
+  // before refactoring it out into a superclass.
   void
-  load_file_handle(file_id_t file_id, const file_path_t& file_path) {
-    auto handle = make_unique<FileHandle>(file_path);
-    file_handles_.emplace(file_id, move(handle));
+  load_file_handle(file_id_t file_id,
+                   const file_path_t& file_path)
+  {
+    auto handle = make_unique<FileHandle>(file_id, file_path);
+    index_file_handles_.emplace(file_id, move(handle));
   }
 
   void
-  load_index_oid_to_file_id(index_oid_t index_oid, file_id_t file_id) {
+  load_index_oid_to_file_id(index_oid_t index_oid,
+                            file_id_t file_id)
+  {
     index_oid_to_file_id_[index_oid] = file_id;
     file_id_to_index_oid_[file_id]   = index_oid;
   }
@@ -125,5 +125,5 @@ private:
 
   map<file_path_t, file_id_t> index_file_ids_;
 
-  map<file_id_t, ptr<FileHandle>> file_handles_;
+  map<file_id_t, ptr<FileHandle>> index_file_handles_;
 };

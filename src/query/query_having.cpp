@@ -9,8 +9,8 @@ QueryHaving::QueryHaving(TypeId type_id,
 
 
 Value QueryHaving::eval_agg(const QuerySchema& schema,
-                            UNUSED const Vec<Value>& group_bys,
-                            const Vec<Value>& aggs) const
+                            UNUSED const vector<Value>& group_bys,
+                            const vector<Value>& aggs) const
 {
   // TODO: This should evaluate the having_clause_ predicate on
   // the group_bys tuple? The comparison expression takes a

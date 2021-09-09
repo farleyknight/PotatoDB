@@ -12,7 +12,7 @@ class ClientSocket;
 
 class SocketServer {
 public:
-  using SocketFunc = std::function<void(WPtr<ClientSocket>)>;
+  using SocketFunc = function<void(weak_ptr<ClientSocket>)>;
 
   SocketServer(PotatoDB* instance);
   ~SocketServer();

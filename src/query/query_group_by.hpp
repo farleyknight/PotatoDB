@@ -34,8 +34,8 @@ public:
   }
 
   Value eval_agg(const QuerySchema& schema,
-                 const Vec<Value>& group_bys,
-                 const Vec<Value>&) const;
+                 const vector<Value>& group_bys,
+                 const vector<Value>&) const;
 
 private:
   BaseQuery node_;

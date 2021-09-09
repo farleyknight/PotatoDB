@@ -17,7 +17,7 @@ std::tuple<RID, RID> redo_test_part1() {
 
   auto test_schema      = db.catalog().query_schema_for("test_table");
   auto test_table_oid   = db.catalog().table_oid_for("test_table");
-  auto &test_table_heap = db.table_mgr().table_heap_for(test_table_oid);
+  auto &test_table_heap = db.catalog().table_heap_for(test_table_oid);
 
   auto value_A_1 = Value::make("x");
   auto value_B_1 = Value::make(2);
@@ -48,7 +48,7 @@ void redo_test_part2(const RID& rid1, const RID& rid2) {
   // system catalog on each database start up.
   auto test_schema      = db.catalog().query_schema_for("test_table");
   auto test_table_oid   = db.catalog().table_oid_for("test_table");
-  auto &test_table_heap = db.table_mgr().table_heap_for(test_table_oid);
+  auto &test_table_heap = db.catalog().table_heap_for(test_table_oid);
 
   auto null_tuple1 = test_table_heap.find_tuple(rid1, txn);
   auto null_tuple2 = test_table_heap.find_tuple(rid2, txn);
@@ -65,7 +65,7 @@ void redo_test_part2(const RID& rid1, const RID& rid2) {
   log_recovery.undo();
 
   auto &recovery_txn  = db.txn_mgr().begin();
-  auto &recovery_heap = db.table_mgr().table_heap_for(test_table_oid);
+  auto &recovery_heap = db.catalog().table_heap_for(test_table_oid);
 
   auto tuple1         = recovery_heap.find_tuple(rid1, recovery_txn);
   auto tuple2         = recovery_heap.find_tuple(rid2, recovery_txn);

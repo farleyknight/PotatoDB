@@ -12,8 +12,10 @@ class FileHandle {
 public:
   FileHandle(file_id_t file_id, fs::path file_path);
 
-  void read_buffer(buffer_offset_t offset, Buffer& buffer);
-  void write_buffer(buffer_offset_t offset, const Buffer& buffer);
+  void
+  read_buffer(buffer_offset_t offset, Buffer& buffer);
+  void
+  write_buffer(buffer_offset_t offset, const Buffer& buffer);
 
   void print_status() const;
 
@@ -64,13 +66,18 @@ public:
     return file_path_.string();
   }
 
+  file_id_t
+  file_id() const {
+    return file_id_;
+  }
+
   fstream&
   io() {
     return handle_;
   }
 
 private:
-  UNUSED file_id_t file_id_;
+  file_id_t file_id_;
   fs::path file_path_;
   fstream handle_;
 

@@ -8,7 +8,6 @@ public:
   IndexSchema(index_oid_t index_oid,
               table_oid_t table_oid,
               index_name_t index_name,
-              table_name_t table_name,
               // NOTE: This is the mapping relation between
               // key schema and tuple schema
               // TODO: Provide an example here.
@@ -24,7 +23,6 @@ public:
     : index_oid_    (index_oid),
       table_oid_    (table_oid),
       index_name_   (index_name),
-      table_name_   (table_name),
       column_oids_  (column_oids),
       key_size_     (key_size),
       root_page_id_ (root_page_id)
@@ -42,9 +40,6 @@ public:
     return index_name_;
   }
 
-  const table_name_t table_name() const {
-    return table_name_;
-  }
 
   const vector<column_oid_t>& column_oids() const {
     return column_oids_;
@@ -72,7 +67,6 @@ private:
   table_oid_t table_oid_;
 
   const index_name_t index_name_;
-  const table_name_t table_name_;
 
   vector<column_oid_t> column_oids_;
   const int32_t key_size_;

@@ -16,7 +16,7 @@ std::tuple<RID, RID> undo_test_part1() {
 
   auto test_schema      = db.catalog().query_schema_for("test_table");
   auto test_table_oid   = db.catalog().table_oid_for("test_table");
-  auto &test_table_heap = db.table_mgr().table_heap_for(test_table_oid);
+  auto &test_table_heap = db.catalog().table_heap_for(test_table_oid);
 
   auto value_A_1 = Value::make("x");
   auto value_B_1 = Value::make(2);
@@ -47,7 +47,7 @@ void undo_test_part2(const RID& rid1, const RID& rid2) {
 
   auto &txn             = db.txn_mgr().begin();
   auto test_table_oid   = db.catalog().table_oid_for("test_table");
-  auto &test_table_heap = db.table_mgr().table_heap_for(test_table_oid);
+  auto &test_table_heap = db.catalog().table_heap_for(test_table_oid);
   auto tuple1           = test_table_heap.find_tuple(rid1, txn);
   auto tuple2           = test_table_heap.find_tuple(rid2, txn);
   EXPECT_TRUE(tuple1 == nullptr);

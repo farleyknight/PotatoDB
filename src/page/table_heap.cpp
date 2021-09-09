@@ -7,23 +7,12 @@
 #include "page/slotted_table_page.hpp"
 #include "page/table_iterator.hpp"
 
+#include "disk/disk_mgr.hpp"
+
 #include "txns/txn.hpp"
 
 #include "tuple/rid.hpp"
 #include "tuple/tuple.hpp"
-
-TableHeap::TableHeap(file_id_t file_id,
-                     table_oid_t table_oid,
-                     BuffMgr& buff_mgr,
-                     LockMgr& lock_mgr,
-                     LogMgr& log_mgr)
-  : file_id_       (file_id),
-    table_oid_     (table_oid),
-    first_page_id_ (FileMgr::first_table_page(file_id)),
-    buff_mgr_      (buff_mgr),
-    log_mgr_       (log_mgr),
-    lock_mgr_      (lock_mgr)
-{}
 
 table_oid_t TableHeap::table_oid() const {
   return table_oid_;

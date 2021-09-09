@@ -16,7 +16,7 @@ TEST(RecoveryCheckpointTest, DISABLED_CheckpointTest) {
 
   auto test_schema      = db.catalog().query_schema_for("test_table");
   auto test_table_oid   = db.catalog().table_oid_for("test_table");
-  auto &test_table_heap = db.table_mgr().table_heap_for(test_table_oid);
+  auto &test_table_heap = db.catalog().table_heap_for(test_table_oid);
 
   auto value_A = Value::make("x");
   auto value_B = Value::make(2);
@@ -62,7 +62,7 @@ TEST(RecoveryCheckpointTest, DISABLED_CheckpointTest) {
     auto page_id = page.page_id();
 
     if (page_id.is_valid()) {
-      db.file_mgr().read_buffer(page_id, buffer);
+      db.disk_mgr().read_buffer(page_id, buffer);
 
       if (std::memcmp(buffer.ptr(), page.buffer().const_ptr(), buffer.size()) != 0) {
         all_pages_match = false;

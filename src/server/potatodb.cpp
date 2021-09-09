@@ -16,46 +16,50 @@ PotatoDB potatodb;
 PotatoDB::PotatoDB()
   : server_         (this),
     //
-    file_mgr_       (), // TODO: We should pass in the DB config here
-    buff_mgr_       (pool_size(), file_mgr_, log_mgr_),
+    disk_mgr_       (), // TODO: We should pass in the DB config here
+    buff_mgr_       (pool_size(), disk_mgr_, log_mgr_),
     //
-    log_mgr_        (file_mgr_),
+    log_mgr_        (disk_mgr_),
     checkpoint_mgr_ (txn_mgr_, log_mgr_, buff_mgr_),
 
     // TODO: Need to add model_mgr_ here when I get around to
     // doing CREATE MODEL
-    sys_catalog_    (file_mgr_, lock_mgr_, log_mgr_, buff_mgr_),
-    catalog_        (table_mgr_, index_mgr_, sys_catalog_),
+    catalog_        (disk_mgr_, lock_mgr_, log_mgr_, buff_mgr_),
 
     //
-    txn_mgr_        (lock_mgr_, log_mgr_, table_mgr_),
+    txn_mgr_        (lock_mgr_, log_mgr_, catalog_),
     exec_eng_       (buff_mgr_, txn_mgr_, catalog_)
 {}
 
-void PotatoDB::reset_installation() {
+void
+PotatoDB::reset_installation() {
   log_mgr_.disable_logging();
 
-  file_mgr_.remove_all_files();
-  file_mgr_.setup_db_directory();
-  file_mgr_.setup_log_file();
+  disk_mgr_.remove_all_files();
+  disk_mgr_.setup_db_directory();
+  disk_mgr_.setup_log_file();
 
   build_system_catalog();
 }
 
-void PotatoDB::rebuild_system_catalog() {
-  file_mgr_.remove_table_files();
+void
+PotatoDB::rebuild_system_catalog() {
+  disk_mgr_.remove_all_files();
   build_system_catalog();
 }
 
-bool PotatoDB::file_exists(fs::path file_path) const {
-  return file_mgr_.file_exists(file_path);
+bool
+PotatoDB::file_exists(fs::path file_path) const {
+  return disk_mgr_.file_exists(file_path);
 }
 
-fs::path PotatoDB::table_file_for(const string& table_name) {
-  return file_mgr_.table_file_for(table_name);
+fs::path
+PotatoDB::table_file_for(const table_name_t& table_name) {
+  return disk_mgr_.table_file_for(table_name);
 }
 
-ptr<BasePlan> PotatoDB::sql_to_plan(const string& statement) const {
+ptr<BasePlan>
+PotatoDB::sql_to_plan(const string& statement) const {
   logger->debug("[PotatoDB] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
   logger->debug(statement);
   logger->debug("[PotatoDB] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
@@ -101,15 +105,17 @@ PotatoDB::run(const string& statement) {
   }
 }
 
-void PotatoDB::build_system_catalog() {
-  sys_catalog_.build_system_catalog();
+void
+PotatoDB::build_system_catalog() {
+  catalog_.build_system_catalog();
 }
 
 
 // TODO: During testing, we sometimes want to delete all database files.
 // Write a method here to delete them.
 
-void PotatoDB::start_server() {
+void
+PotatoDB::start_server() {
   state_ = ServerState::RUNNING;
 
   // TODO: Add logging for this line
@@ -140,7 +146,8 @@ void PotatoDB::start_server() {
   server_.accept_connections();
 }
 
-void PotatoDB::verify_system_files() {
+void
+PotatoDB::verify_system_files() {
   // TODO: During system start up, we should be
   // 1) Looking for all existing tables
   // 2) verifying that each table has it's own file
@@ -161,25 +168,28 @@ void PotatoDB::verify_system_files() {
   // 4) ???
 }
 
-bool PotatoDB::is_logging_enabled() const {
+bool
+PotatoDB::is_logging_enabled() const {
   return log_mgr_.is_logging_enabled();
 }
 
-void PotatoDB::run_flush_thread() {
+void
+PotatoDB::run_flush_thread() {
   log_mgr_.run_flush_thread();
 }
 
 table_oid_t
 PotatoDB::table_oid_for(table_name_t table_name) const {
-  return sys_catalog_.table_oid_for(table_name);
+  return catalog_.table_oid_for(table_name);
 }
 
 table_name_t
 PotatoDB::table_name_for(table_oid_t table_oid) const {
-  return sys_catalog_.table_name_for(table_oid);
+  return catalog_.table_name_for(table_oid);
 }
 
-void PotatoDB::startup() {
+void
+PotatoDB::startup() {
   try {
     logger->debug("[PotatoDB] Warming up the PotatoDB server");
     state_ = ServerState::STARTING_UP;

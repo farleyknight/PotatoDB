@@ -46,8 +46,9 @@ public:
   //   return false;
   // }
 
-  const vector<std::pair<txn_id_t, txn_id_t>> edge_list() {
-    return Vec<std::pair<txn_id_t, txn_id_t>>();
+  const vector<pair<txn_id_t, txn_id_t>>
+  edge_list() {
+    return vector<pair<txn_id_t, txn_id_t>>();
   }
 
   void run_cycle_detection();
@@ -91,10 +92,9 @@ private:
   // TODO: Work on the cycle detection!
 
   atomic<bool> enable_cycle_detection_;
-  std::thread *cycle_detection_thread_;
-  std::chrono::milliseconds cycle_detection_interval_ =
-    std::chrono::milliseconds(50);
+  thread *cycle_detection_thread_;
+  milliseconds cycle_detection_interval_ = milliseconds(50);
 
   MutMap<RID, LockRequestQueue> lock_table_;
-  MutMap<txn_id_t, Vec<txn_id_t>> waits_for_;
+  MutMap<txn_id_t, vector<txn_id_t>> waits_for_;
 };

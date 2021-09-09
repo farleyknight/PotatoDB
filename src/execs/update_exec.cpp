@@ -35,8 +35,10 @@ Tuple UpdateExec::next() {
   return new_tuple;
 }
 
-TableHeap& UpdateExec::table_heap() {
-  return exec_ctx_.table_mgr().table_heap_for(plan_->table_oid());
+TableHeap&
+UpdateExec::table_heap() {
+  auto table_oid = plan_->table_oid();
+  return exec_ctx_.catalog().table_heap_for(table_oid);
 }
 
 Tuple UpdateExec::updated_tuple(const Tuple& old_tuple) {

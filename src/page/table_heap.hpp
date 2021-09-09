@@ -11,11 +11,19 @@ class Txn;
 
 class TableHeap {
 public:
-  TableHeap(file_id_t file_id,
+  TableHeap(file_id_t   file_id,
             table_oid_t table_oid,
-            BuffMgr& buff_mgr,
-            LockMgr& lock_mgr,
-            LogMgr& log_mgr);
+            DiskMgr&    disk_mgr,
+            BuffMgr&    buff_mgr,
+            LockMgr&    lock_mgr,
+            LogMgr&     log_mgr)
+    : file_id_       (file_id),
+      table_oid_     (table_oid),
+      first_page_id_ (disk_mgr.first_table_page(file_id)),
+      buff_mgr_      (buff_mgr),
+      log_mgr_       (log_mgr),
+      lock_mgr_      (lock_mgr)
+  {}
 
   ~TableHeap() = default;
 

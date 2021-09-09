@@ -3,26 +3,36 @@
 class LogFileMgr : public FileMgr {
 public:
 
-  void delete_log_file() {
+  void
+  close() {
+    delete_log_file();
+  }
+
+  bool
+  is_log_file(file_id_t file_id) {
+    return log_file_->file_id() == file_id;
+  }
+
+  void
+  truncate_log_file() {
+    fs::resize_file(log_file_name(), 0);
+  }
+
+  void
+  delete_log_file() {
     log_file_->close();
     fs::remove(log_file_name());
   }
 
-  void truncate_log_file() {
-    fs::resize_file(log_file_name(), 0);
-  }
-
-  fs::path log_file_name() const {
+  fs::path
+  log_file_name() const {
     return db_directory() / "database.log";
   }
 
-  void setup_log_file() {
-    auto handle = make_unique<FileHandle>(log_file_name());
-    log_file_ = move(handle);
-  }
-
-  void create_log_file() {
-    log_file_ = make_unique<FileHandle>(log_file_name());
+  void
+  create_log_file(file_id_t file_id) {
+    log_file_ = make_unique<FileHandle>(file_id,
+                                        log_file_name());
   }
 
   void write_log(const Buffer& log_data, buffer_offset_t offset) {
@@ -91,5 +101,5 @@ public:
 
 private:
   ptr<FileHandle> log_file_ {nullptr};
-  std::future<void> *flush_log_func_ {nullptr};
+  future<void> *flush_log_func_ {nullptr};
 };

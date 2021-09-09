@@ -1,4 +1,3 @@
-
 #include "query/query_group_by.hpp"
 #include "catalog/query_schema.hpp"
 
@@ -13,9 +12,8 @@ QueryGroupBy::QueryGroupBy(string column_name)
 
 
 Value QueryGroupBy::eval_agg(const QuerySchema& schema,
-                             const Vec<Value>& group_bys,
-                             UNUSED const Vec<Value>& aggrs)
-  const
+                             const vector<Value>& group_bys,
+                             UNUSED const vector<Value>& aggrs) const
 {
   auto index = schema.column_oid_for(column_name_);
   return group_bys[index];

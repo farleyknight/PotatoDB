@@ -17,7 +17,7 @@ class IndexMgr : public FileMgr {
 public:
   using BPlusTree = BTree<IndexKey, RID, IndexComp>;
 
-  IndexMgr(DiskMgr& file_mgr,
+  IndexMgr(DiskMgr& disk_mgr,
            BuffMgr& buff_mgr)
     : disk_mgr_ (disk_mgr),
       buff_mgr_ (buff_mgr)
@@ -32,7 +32,7 @@ public:
     auto index_name   = expr.index().name();
     auto table_name   = expr.table().name();
 
-    file_id_t file_id = file_mgr_.create_index_file(index_name);
+    file_id_t file_id = disk_mgr_.create_index_file(index_name);
 
     int32_t key_size = 8; // NOTE: Fixed for now.
     // Update to be configurable later
@@ -40,9 +40,8 @@ public:
     auto root_page_id = default_root_page_id(file_id);
 
     return IndexSchema(index_oid,   table_oid,
-                       index_name,  table_name,
-                       column_oids, key_size,
-                       root_page_id);
+                       index_name,  column_oids,
+                       key_size,    root_page_id);
   }
 
   index_oid_t
@@ -51,12 +50,14 @@ public:
                const CreateIndexExpr& expr)
   {
     auto index_name = expr.index().name();
-    index_oid_t index_oid = next_index_oid_;
-    next_index_oid_++;
-    auto schema = make_schema_from(index_oid, table_oid, column_oids, expr);
+    auto index_oid  = next_index_oid_++;
+    auto schema
+      = make_schema_from(index_oid,
+                         table_oid,
+                         column_oids,
+                         expr);
 
-    auto file_id = file_mgr_.file_id_for_index(index_name);
-
+    auto file_id = disk_mgr_.create_index_file(index_name);
     load_index(file_id, index_oid, index_name, schema);
 
     return index_oid;
@@ -73,14 +74,17 @@ public:
                     const IndexSchema& index_schema,
                     const TableSchema& table_schema)
   {
-    file_id_t file_id = file_mgr_.create_index_file(index_name);
+    auto file_id = disk_mgr_.create_index_file(index_name);
     allocate_header_and_first_page(file_id);
 
     auto comp = IndexComp(index_schema, table_schema);
 
+    auto index_header_page =
+      disk_mgr_.index_header_page(file_id);
+
     auto btree = make_unique<BPlusTree>(index_name,
                                         file_id,
-                                        FileMgr::index_header_page(file_id),
+                                        index_header_page,
                                         comp,
                                         buff_mgr_);
 
@@ -113,8 +117,10 @@ public:
 
   void
   open_all_indexes() {
-    // TODO: Move this for-loop into index_mgr_
-    for (const auto file_id : file_mgr_.index_file_ids()) {
+    // TODO: Need to call `open_all_index_files` here first.
+    // Then we can get their file_id
+    // Then all of the other stuff
+    for (const auto file_id : disk_mgr_.index_file_ids()) {
       auto index_oid    = read_index_oid(file_id);
       auto index_name   = read_index_name(file_id);
       auto index_schema = read_index_schema(file_id);
@@ -145,11 +151,14 @@ private:
 
   void
   allocate_header_and_first_page(file_id_t file_id) {
-    auto header_page_id = FileMgr::index_header_page(file_id);
+    auto header_page_id =
+      disk_mgr_.index_header_page(file_id);
     // NOTE: By default, root page ID is the first page ID
-    auto root_page_id   = FileMgr::first_index_page(file_id);
+    auto root_page_id =
+      disk_mgr_.first_index_page(file_id);
 
-    // TODO: We should allocate the block with the following info:
+    // TODO: We should allocate the block with the
+    // following info:
     // * file_id of this file
     // * file_name to associate with the file_id
     //   - This gives us an opportunity to be sure it didn't get moved or renamed
@@ -161,7 +170,8 @@ private:
     //      - Why? BC deleting enough pages forces us to move the root page ID
     // * index_name should be stored in the header page
     // * index_schema (as IndexSchema) should be stored
-    //    - Will probably need it's own custom serialize/deserialize
+    //    - Will probably need it's own custom
+    //     serialize/deserialize
     auto header_page_ptr = buff_mgr_.fetch_page(root_page_id);
     assert(header_page_ptr != nullptr);
     auto header_page = IndexHeaderPage(header_page_ptr);
@@ -174,7 +184,8 @@ private:
     auto root_page = BTreeInternalPage<IndexKey, RID, IndexComp>(root_page_ptr);
     // must call initialize method after "create" a new node
     header_page.wlatch();
-    root_page.allocate(root_page_id, PageId::STOP_ITERATING(file_id));
+    root_page.allocate(root_page_id,
+                       PageId::STOP_ITERATING(file_id));
     header_page.wunlatch();
 
     buff_mgr_.unpin(root_page_id, true);
@@ -192,7 +203,8 @@ private:
   }
 
   void
-  load_index_schema(index_oid_t index_oid, const IndexSchema& schema)
+  load_index_schema(index_oid_t index_oid,
+                    const IndexSchema& schema)
   {
     index_schemas_.emplace(index_oid, schema);
   }
@@ -207,12 +219,14 @@ private:
 
   void
   load_index_header(file_id_t file_id) {
-    auto page_id            = file_mgr_.index_header_page(file_id);
-    auto page_ptr           = buff_mgr_.fetch_page(page_id);
+    auto page_id
+      = disk_mgr_.index_header_page(file_id);
+    auto page_ptr
+      = buff_mgr_.fetch_page(page_id);
     assert(page_ptr);
-    index_headers_.emplace(file_id, IndexHeaderPage(page_ptr));
+    index_headers_.emplace(file_id,
+                           IndexHeaderPage(page_ptr));
   }
-
 
   DiskMgr& disk_mgr_;
   BuffMgr& buff_mgr_;

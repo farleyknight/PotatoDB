@@ -76,7 +76,7 @@ set(main_sources
   "src/catalog/query_schema.cpp"
   "src/catalog/table_schema.cpp"
   "src/common/hash_util.cpp"
-  # TODO: Rename `disk/` to `file/`
+  "src/disk/disk_mgr.cpp"
   "src/disk/file_mgr.cpp"
   "src/disk/file_handle.cpp"
   "src/execs/agg_exec.cpp"

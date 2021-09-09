@@ -17,13 +17,13 @@ HashJoinExec::HashJoinExec(ExecCtx& exec_ctx,
 
 hash_t HashJoinExec::compute_hash(const Tuple& tuple,
                                   const QuerySchema& schema,
-                                  Vec<BaseQuery> nodes)
+                                  vector<BaseQuery> nodes)
 {
   hash_t curr_hash = 0;
   // For every expression,
   for (const auto &node : nodes) {
     // We evaluate the tuple on the expression and schema.
-    Value val = node.eval(tuple, schema);
+    auto val = node.eval(tuple, schema);
     // If this produces a value,
     if (!val.is_null()) {
       // We combine the hash of that value into our current hash.
@@ -60,7 +60,7 @@ void HashJoinExec::init() {
     // 1. We should usually only match 1 left tuple with 1 right tuple.
     // 2. We should have a small number of columns to combine from the
     //    left and right schemas to produce the final output tuple.
-    Vec<Tuple> left_tuples = join_ht_.find_values(hash_value);
+    auto left_tuples = join_ht_.find_values(hash_value);
     for (auto &left_tuple : left_tuples) {
       if (match_found(left_tuple, right_tuple)) {
         vector<Value> values;
