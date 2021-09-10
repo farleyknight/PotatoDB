@@ -6,15 +6,17 @@
 Tuple::Tuple(vector<Value> values, const QuerySchema& schema)
   : source_ (TupleSources::QUERY_SCHEMA)
 {
-  if (values.size() != schema.column_count()) {
+  int32_t values_size = values.size();
+
+  if (values_size != schema.column_count()) {
     std::cout << "values.size() == " << values.size() << std::endl;
     std::cout << "schema.column_count() == " << schema.column_count() << std::endl;
   }
 
-  assert(values.size() == schema.column_count());
+  assert(values_size == schema.column_count());
 
   // 1. Calculate the size of the tuple.
-  uint32_t tuple_length = schema.tuple_length();
+  int32_t tuple_length = schema.tuple_length();
   for (auto &i : schema.unlined_columns()) {
     tuple_length += (values[i].length() + sizeof(string_size_t));
   }
@@ -109,7 +111,7 @@ const string Tuple::to_string(const TableSchema& schema) const {
   stringstream os;
 
   os << "(";
-  for (uint32_t i = 0; i < schema.column_count(); ++i) {
+  for (int32_t i = 0; i < schema.column_count(); ++i) {
     if (i > 0) {
       os << ", ";
     }
@@ -138,7 +140,7 @@ const string Tuple::to_string(const QuerySchema& schema) const {
   stringstream os;
 
   os << "(";
-  for (uint32_t i = 0; i < schema.column_count(); ++i) {
+  for (int32_t i = 0; i < schema.column_count(); ++i) {
     if (i > 0) {
       os << ", ";
     }
@@ -213,7 +215,7 @@ bool Tuple::is_null(const auto& schema,
 
 Tuple Tuple::key_from_tuple(const QuerySchema& schema,
                             const QuerySchema& key_schema,
-                            const vector<uint32_t>& key_attrs) const
+                            const vector<int32_t>& key_attrs) const
 {
   vector<Value> values;
   values.reserve(key_attrs.size());

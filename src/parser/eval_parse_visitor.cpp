@@ -69,7 +69,7 @@ Any EvalParseVisitor::visitCreate_table_stmt(CreateTableStmtContext *ctx) {
 
     for (auto &constraint : col_def_ctx->column_constraint()) {
       if (constraint->not_null()) {
-        col_def.is_not_null(true);
+        col_def.is_nullable(false);
       }
 
       if (constraint->primary_key()) {

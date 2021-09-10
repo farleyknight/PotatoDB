@@ -1,4 +1,3 @@
-
 #include "execs/exec_factory.hpp"
 
 // QUESTION QUESTION QUESTION QUESTION
@@ -28,6 +27,11 @@ ExecFactory::create(ExecCtx& exec_ctx,
     auto scan_plan = cast<SeqScanPlan>(move(plan));
     return make_unique<SeqScanExec>(exec_ctx,
                                     move(scan_plan));
+  }
+
+  case PlanType::SHOW_TABLES: {
+    auto show_tables_plan = cast<ShowTablesPlan>(move(plan));
+    return make_unique<ShowTablesExec>(exec_ctx, move(show_tables_plan));
   }
 
   case PlanType::CREATE_TABLE: {

@@ -1,6 +1,6 @@
 #pragma once
 
-class TypeTests : public ::testing::Test { 
+class TypeTests : public ::testing::Test {
 public:
   template<typename value_t>
   void InstanceTest(TypeId type_id, value_t min, value_t max) {
@@ -9,7 +9,8 @@ public:
     EXPECT_EQ(type_id, type_instance->type_id());
     EXPECT_TRUE(type_instance->is_castable_from(type_id));
 
-    EXPECT_EQ(type_instance->size(), sizeof(value_t));
+    int32_t value_size = sizeof(value_t);
+    EXPECT_EQ(type_instance->size(), value_size);
     EXPECT_EQ(type_instance->min().as<value_t>(), min);
     EXPECT_EQ(type_instance->max().as<value_t>(), max);
   }

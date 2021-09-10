@@ -26,7 +26,7 @@ PotatoDB::PotatoDB()
     // doing CREATE MODEL
     catalog_        (disk_mgr_, lock_mgr_, log_mgr_, buff_mgr_),
 
-    //
+    // TODO: Can we move TxnMgr into ExecMgr?
     txn_mgr_        (lock_mgr_, log_mgr_, catalog_),
     exec_eng_       (buff_mgr_, txn_mgr_, catalog_)
 {}
@@ -59,7 +59,7 @@ PotatoDB::table_file_for(const table_name_t& table_name) {
 }
 
 ptr<BasePlan>
-PotatoDB::sql_to_plan(const string& statement) const {
+PotatoDB::sql_to_plan(const sql_statement_t& statement) const {
   logger->debug("[PotatoDB] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
   logger->debug(statement);
   logger->debug("[PotatoDB] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
@@ -72,7 +72,14 @@ PotatoDB::sql_to_plan(const string& statement) const {
   }
 
   assert(exprs.size() > 0);
-  return PlanFactory::create(*this, move(exprs[0]));
+
+  // TODO: Allow for multiple statements
+  // That means we have to make the entire sequence of commands
+  // into a plan itself. That would mean creating a class
+  // called MultiStatementPlan that would also need a class
+  // MultiStatementExec to run each statement and check if
+  // it did or did not abort.
+  return PlanFactory::create(catalog_, move(exprs[0]));
 }
 
 StatementResult
@@ -109,7 +116,6 @@ void
 PotatoDB::build_system_catalog() {
   catalog_.build_system_catalog();
 }
-
 
 // TODO: During testing, we sometimes want to delete all database files.
 // Write a method here to delete them.

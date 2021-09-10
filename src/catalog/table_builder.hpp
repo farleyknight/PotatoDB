@@ -32,7 +32,7 @@ public:
   }
 
   TableBuilder& not_null() {
-    column_defs_.back().is_not_null();
+    column_defs_.back().is_nullable(false);
     return *this;
   }
 

@@ -215,21 +215,21 @@ public:
   }
 
   void write_rid(buffer_offset_t offset, const RID& rid) {
-    *reinterpret_cast<int64_t*>(ptr(offset)) = rid.as_int64();
+    *reinterpret_cast<uint64_t*>(ptr(offset)) = rid.as_uint64();
   }
 
   RID read_rid(buffer_offset_t offset) const {
-    auto rid_as_int64 = *reinterpret_cast<const int64_t*>(const_ptr(offset));
-    return RID(rid_as_int64);
+    auto rid_as_uint64 = *reinterpret_cast<const uint64_t*>(const_ptr(offset));
+    return RID(rid_as_uint64);
   }
 
   void write_page_id(buffer_offset_t offset, const PageId& page_id) {
-    *reinterpret_cast<int32_t*>(ptr(offset)) = page_id.as_int32();
+    *reinterpret_cast<uint32_t*>(ptr(offset)) = page_id.as_uint32();
   }
 
   PageId read_page_id(buffer_offset_t offset) const {
-    auto page_id_as_int32 = *reinterpret_cast<const int32_t*>(const_ptr(offset));
-    return PageId::from(page_id_as_int32);
+    auto page_id_as_uint32 = *reinterpret_cast<const uint32_t*>(const_ptr(offset));
+    return PageId::from(page_id_as_uint32);
   }
 
   Data data_;

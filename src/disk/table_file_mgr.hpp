@@ -17,7 +17,7 @@ public:
 
   void
   remove_table_files() {
-    for (const auto & [file_path, file_id] : table_file_ids_) {
+    for (const auto &[file_path, file_id] : table_file_ids_) {
       remove_file(file_path);
     }
   }
@@ -25,7 +25,7 @@ public:
   vector<file_id_t>
   table_file_ids() const {
     vector<file_id_t> file_ids;
-    for (const auto & [file_path, file_id] : table_file_ids_) {
+    for (const auto &[file_path, file_id] : table_file_ids_) {
       file_ids.push_back(file_id);
     }
     return file_ids;
@@ -43,22 +43,29 @@ public:
     return table_oid_to_file_id_.at(table_oid);
   }
 
-  fs::path
-  table_file_for(const table_name_t& table_name) const {
-    // TODO: We should probably put all tables under the directory `tables/`
-    return file_path_for(table_name + FILE_EXTENSION);
-  }
-
   void
-  create_table_file(file_id_t file_id, const file_path_t& file_path) {
+  create_table_file(file_id_t file_id,
+                    const table_name_t& table_name)
+  {
+    auto file_path = table_file_for(table_name);
     assert(!file_exists(file_path));
     load_file_handle(file_id, file_path);
+    allocate_header_and_first_page(file_id);
   }
 
   void
-  open_table_file(file_id_t file_id, const file_path_t& file_path) {
+  open_table_file(file_id_t file_id,
+                  const table_name_t& table_name)
+  {
+    auto file_path = table_file_for(table_name);
     assert(file_exists(file_path));
     load_file_handle(file_id, file_path);
+    assert_header_and_first_page(file_id);
+  }
+
+  file_path_t
+  table_file_for(const table_name_t& table_name) {
+    return db_directory() / (table_name + FILE_EXTENSION);
   }
 
   PageId
@@ -102,11 +109,25 @@ public:
   }
 
 private:
+  void
+  allocate_header_and_first_page(file_id_t file_id) {
+    auto block_num = FIRST_BLOCK_NUM + 1;
+    table_file_handles_[file_id]->resize(block_num * PAGE_SIZE);
+  }
+
+  void
+  assert_header_and_first_page(file_id_t file_id) {
+    auto block_num = FIRST_BLOCK_NUM + 1;
+    auto size = table_file_handles_[file_id]->size();
+    assert(size >= block_num * PAGE_SIZE);
+  }
+
   // TODO: This method is duplicated in IndexFileMgr.
   // We're waiting until we start adding ML capabilities before
   // refactoring it out into a superclass.
   void
-  load_file_handle(file_id_t file_id, const file_path_t& file_path) {
+  load_file_handle(file_id_t file_id,
+                   const file_path_t& file_path) {
     auto handle
       = make_unique<FileHandle>(file_id, file_path);
     table_file_ids_.emplace(file_path, file_id);

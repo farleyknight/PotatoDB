@@ -10,14 +10,14 @@ class TableColumn;
 
 class QueryColumn : public BaseQuery {
 public:
-  QueryColumn(TypeId type_id, column_name_t name)
+  explicit QueryColumn(TypeId type_id, column_name_t name)
     : BaseQuery   (QueryNodeType::COLUMN, type_id),
       table_oid_  (INVALID_TABLE_OID),
       column_oid_ (INVALID_COLUMN_OID),
       name_       (name)
   {}
 
-  QueryColumn(column_name_t name)
+  explicit QueryColumn(column_name_t name)
     : BaseQuery   (QueryNodeType::COLUMN, TypeId::INVALID),
       table_oid_  (INVALID_TABLE_OID),
       column_oid_ (INVALID_COLUMN_OID),
@@ -85,8 +85,12 @@ public:
     return 0; // TODO!
   }
 
-  ptr<QueryComp> lt(Value constant);
-  ptr<QueryComp> gt(Value constant);
+  ptr<QueryComp>
+  lt(Value constant);
+
+
+  ptr<QueryComp>
+  gt(Value constant);
 
   bool operator==(const QueryColumn& other) const {
     return name_ == other.name_;

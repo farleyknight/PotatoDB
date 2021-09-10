@@ -36,12 +36,12 @@ public:
     return type_length_;
   }
 
-  bool is_not_null() const {
-    return not_null_;
+  bool is_nullable() const {
+    return nullable_;
   }
 
-  void is_not_null(bool state) {
-    not_null_ = state;
+  void is_nullable(bool state) {
+    nullable_ = state;
   }
 
   bool is_primary_key() const {
@@ -52,7 +52,7 @@ public:
     primary_key_ = primary_key;
   }
 
-  bool auto_increment() {
+  bool auto_increment() const {
     return auto_increment_;
   }
 
@@ -64,7 +64,8 @@ protected:
   column_name_t name_;
   TypeId type_id_;
   length_t type_length_ = 0;
-  bool not_null_ = false,
-    primary_key_ = false,
-    auto_increment_ = false;
+
+  bool nullable_       = true;
+  bool primary_key_    = false;
+  bool auto_increment_ = false;
 };

@@ -30,7 +30,6 @@ public:
   Catalog catalog;
 };
 
-
 // NOTE: We should NOT need a schema anywhere in these tests!
 // We can easily use a Tuple with a fixed Buffer
 

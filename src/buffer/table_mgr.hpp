@@ -12,12 +12,6 @@
 #include "page/table_heap.hpp"
 #include "page/table_header_page.hpp"
 
-// TODO: I created TableMgr because I wanted to have a place to do ALTER TABLE commands,
-// and the like.
-//
-// I would like TableMgr to only be owned by SystemCatalog, however that is not the case
-// at the moment. Once that happens, we can then begin working on file locks, which are
-// a pre-requisite to changing the schema.
 class TableMgr {
 public:
   TableMgr(DiskMgr& disk_mgr,
@@ -29,7 +23,6 @@ public:
       log_mgr_  (log_mgr),
       buff_mgr_ (buff_mgr)
   {
-    std::cout << "Creating an instance of TableMgr" << std::endl;
   }
 
   void
@@ -50,24 +43,11 @@ public:
   read_table_oid(file_id_t file_id) const;
 
   void
-  write_table_schema(file_id_t file_id,
-                     const TableSchema& schema)
+  write_schema(file_id_t file_id,
+               const TableSchema& schema)
   {
+    assert(table_headers_.contains(file_id));
     table_headers_.at(file_id).write_schema(schema);
-  }
-
-  void
-  create_table_file(const table_name_t& table_name,
-                    const TableSchema& schema,
-                    table_oid_t table_oid,
-                    Txn& txn)
-  {
-    auto file_id = disk_mgr_.create_table_file(table_name);
-    allocate_header_and_first_page(file_id, txn);
-
-    load_table(table_oid, table_name, schema);
-
-    write_table_schema(file_id, schema);
   }
 
   TableHeap&
@@ -89,15 +69,17 @@ public:
   }
 
   table_oid_t
-  create_table(const CreateTableExpr& expr)
+  create_table(const CreateTableExpr& expr, Txn& txn)
   {
     auto table_name = expr.table().name();
-    assert(!table_oids_.contains(table_name));
-    auto table_oid = next_table_oid_++;
-    assert(!table_schemas_.contains(table_oid));
-    auto schema = make_schema_from(table_oid, expr);
+    auto table_oid  = next_table_oid_++;
+    auto schema     = make_schema_from(table_oid, expr);
+    auto file_id    = disk_mgr_.create_table_file(table_name);
+    allocate_header_and_first_page(file_id, txn);
 
-    load_table_schema(table_oid, schema);
+    load_table(file_id, table_oid, table_name, schema);
+    write_schema(file_id, schema);
+
     return table_oid;
   }
 
@@ -193,7 +175,7 @@ public:
       auto table_oid    = read_table_oid(file_id);
       auto table_name   = read_table_name(file_id);
       auto table_schema = read_table_schema(file_id);
-      load_table(table_oid, table_name, table_schema);
+      load_table(file_id, table_oid, table_name, table_schema);
     }
   }
 
@@ -222,18 +204,23 @@ private:
 
 
   void
-  load_table(table_oid_t table_oid,
+  load_table(file_id_t file_id,
+             table_oid_t table_oid,
              const table_name_t& table_name,
              const TableSchema& schema)
   {
     load_table_name(table_oid, table_name);
     load_table_schema(table_oid, schema);
-    load_table_heap(table_oid);
+    load_table_heap(file_id, table_oid);
+
+    auto page_id   = disk_mgr_.table_header_page(file_id);
+    auto page_ptr  = buff_mgr_.fetch_page(page_id);
+    assert(page_ptr);
+    load_table_header(table_oid, page_ptr);
   }
 
   void
-  load_table_heap(table_oid_t table_oid) {
-    auto file_id = disk_mgr_.file_id_for_table(table_oid);
+  load_table_heap(file_id_t file_id, table_oid_t table_oid) {
     auto heap = make_unique<TableHeap>(file_id,
                                        table_oid,
                                        disk_mgr_,

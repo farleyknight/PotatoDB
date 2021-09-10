@@ -34,19 +34,19 @@ public:
                                    table_name_t table_name,
                                    const ColumnDefListExpr& expr)
   {
-    vector<TableColumn> columns;
+    vector<TableColumn> result;
 
     for (const auto &column_expr : expr.list()) {
       auto column_oid = make_column_oid(table_name, column_expr.name());
 
       assert(!columns_.contains(column_oid));
       auto col = make_column_from(table_oid, column_oid, column_expr);
-      columns_[column_oid] = col;
+      columns_.emplace(column_oid, col);
 
-      columns.push_back(col);
+      result.push_back(col);
     }
 
-    return columns;
+    return result;
   }
 
   bool
@@ -61,19 +61,15 @@ public:
                    column_oid_t column_oid,
                    const ColumnDefExpr& expr) const
   {
-    auto name    = expr.name();
-    auto type_id = expr.type_id();
-    if (type_id == TypeId::VARCHAR) {
-      return TableColumn(name,
-                         table_oid,
+    if (expr.type_id() == TypeId::VARCHAR) {
+      return TableColumn(table_oid,
                          column_oid,
-                         type_id,
-                         expr.type_length());
+                         expr.type_length(),
+                         expr);
     } else {
-      return TableColumn(name,
-                         table_oid,
+      return TableColumn(table_oid,
                          column_oid,
-                         type_id);
+                         expr);
     }
   }
 

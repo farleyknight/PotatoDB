@@ -9,44 +9,46 @@
 #include "types/type.hpp"
 
 #include "exprs/base_expr.hpp"
+#include "exprs/column_def_expr.hpp"
 
-static constexpr int32_t INVALID_LENGTH = -1;
+static constexpr int32_t INVALID_FIXED_LENGTH    = -1;
+static constexpr int32_t INVALID_VARIABLE_LENGTH = -1;
 
 class TableColumn {
 public:
-  TableColumn()
-    : fixed_length_(INVALID_LENGTH) {}
-
-  TableColumn(const column_name_t name,
-              table_oid_t table_oid,
-              column_oid_t column_oid,
-              TypeId type_id)
-    : name_         (name),
-      type_id_      (type_id),
-      table_oid_    (table_oid),
-      column_oid_   (column_oid),
-      inlined_      (true),
-      fixed_length_ (Type::size_of(type_id))
-  {
-    // "Wrong constructor for VARCHAR type.";
-    assert(type_id != TypeId::VARCHAR);
-  }
-
-  explicit TableColumn(const column_name_t name,
-                       table_oid_t table_oid,
+  explicit TableColumn(table_oid_t table_oid,
                        column_oid_t column_oid,
-                       TypeId type_id,
-                       string_size_t length)
-    : name_            (name),
-      type_id_         (type_id),
+                       string_size_t length,
+                       const ColumnDefExpr& expr)
+    : name_            (expr.name()),
+      type_id_         (expr.type_id()),
       table_oid_       (table_oid),
       column_oid_      (column_oid),
       inlined_         (false),
-      fixed_length_    (Type::size_of(type_id)),
+      nullable_        (expr.is_nullable()),
+      primary_key_     (expr.is_primary_key()),
+      autoincrement_   (expr.auto_increment()),
+      fixed_length_    (INVALID_FIXED_LENGTH),
       variable_length_ (length)
   {
-    // "Wrong constructor for VARCHAR type.";
-    assert(type_id == TypeId::VARCHAR);
+    assert(type_id_ == TypeId::VARCHAR);
+  }
+
+  explicit TableColumn(table_oid_t table_oid,
+                       column_oid_t column_oid,
+                       const ColumnDefExpr& expr)
+    : name_            (expr.name()),
+      type_id_         (expr.type_id()),
+      table_oid_       (table_oid),
+      column_oid_      (column_oid),
+      inlined_         (true),
+      nullable_        (expr.is_nullable()),
+      primary_key_     (expr.is_primary_key()),
+      autoincrement_   (expr.auto_increment()),
+      fixed_length_    (Type::size_of(type_id_)),
+      variable_length_ (INVALID_VARIABLE_LENGTH)
+  {
+    assert(type_id_ != TypeId::VARCHAR);
   }
 
   // Allow copy
@@ -68,7 +70,7 @@ public:
   const column_name_t& name()     const { return name_; }
 
   const Buffer data() const {
-    // TODO: The buffer should be able to serialize & deserialize itself 
+    // TODO: The buffer should be able to serialize & deserialize itself
     return Buffer();
   }
 
@@ -152,6 +154,6 @@ private:
   bool primary_key_ = false;
   // is the column an autoincrement?
   bool autoincrement_ = false;
-  uint32_t fixed_length_ = 0;
-  uint32_t variable_length_ = 0;
+  int32_t fixed_length_    = -1;
+  int32_t variable_length_ = -1;
 };

@@ -39,7 +39,8 @@ const string Buffer::read_string(buffer_offset_t offset) const {
 
   logger->debug("[Buffer] String size: " + std::to_string(size));
 
-  assert(size < data_.size());
+  int32_t data_size = data_.size();
+  assert(size < data_size);
 
   string new_string(size, 0);
   assert(offset + sizeof(string_size_t) < data_.size());

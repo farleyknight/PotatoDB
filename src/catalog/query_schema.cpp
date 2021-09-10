@@ -54,7 +54,7 @@ const string QuerySchema::to_string() const {
     "TupleLength:" << tuple_length_ << "]";
 
   os << " :: (\n";
-  for (size_t i = 0; i < column_count(); i++) {
+  for (int32_t i = 0; i < column_count(); i++) {
     if (i > 0) {
       os << ", \n";
     }

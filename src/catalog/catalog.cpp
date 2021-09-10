@@ -37,7 +37,8 @@ Catalog::query_schema_for(const vector<table_name_t>& table_names,
   return QuerySchema(columns);
 }
 
-vector<QueryColumn> Catalog::all_columns_for(const vector<table_name_t>& table_names) const {
+vector<QueryColumn>
+Catalog::all_columns_for(const vector<table_name_t>& table_names) const {
   vector<QueryColumn> columns;
   for (const auto &table_name : table_names) {
     for (const auto &col : all_columns_for(table_name)) {
@@ -47,18 +48,47 @@ vector<QueryColumn> Catalog::all_columns_for(const vector<table_name_t>& table_n
   return columns;
 }
 
-vector<QueryColumn> Catalog::all_columns_for(const table_name_t& table_name) const {
+vector<QueryColumn>
+Catalog::all_columns_for(const table_name_t& table_name) const {
   auto table_oid = sys_catalog_.table_oid_for(table_name);
   return all_columns_for(table_oid);
 }
 
-vector<QueryColumn> Catalog::all_columns_for(table_oid_t table_oid) const {
+vector<QueryColumn>
+Catalog::all_columns_for(table_oid_t table_oid) const {
   auto table_schema = sys_catalog_.table_schema_for(table_oid);
   vector<QueryColumn> cols;
   for (const auto &col : table_schema.columns()) {
     cols.push_back(QueryColumn::from(col));
   }
   return cols;
+}
+
+QuerySchema
+Catalog::show_tables_schema() const
+{
+  vector<QueryColumn> cols;
+  cols.push_back(QueryColumn(TypeId::VARCHAR, "table_name"));
+  return QuerySchema(cols);
+}
+
+QuerySchema
+Catalog::describe_table_schema() const
+{
+  vector<QueryColumn> cols;
+
+  cols.push_back(QueryColumn(TypeId::VARCHAR, "field_name"));
+  // NOTE Can be "varchar(16)" or "date"
+  cols.push_back(QueryColumn(TypeId::VARCHAR, "type"));
+  // NOTE: Should be "YES" or "NO"
+  cols.push_back(QueryColumn(TypeId::VARCHAR, "nullable"));
+  cols.push_back(QueryColumn(TypeId::VARCHAR, "key"));
+  // NOTE: Can be "NULL"
+  cols.push_back(QueryColumn(TypeId::VARCHAR, "default"));
+  // NOTE: Should include info about "AUTOINCREMENT"
+  cols.push_back(QueryColumn(TypeId::VARCHAR, "extra"));
+
+  return QuerySchema(cols);
 }
 
 QuerySchema
@@ -92,6 +122,7 @@ Catalog::query_column_for(const table_name_t& table_name,
   const auto &col    = schema.by_name(column_name);
   return QueryColumn::from(col);
 }
+
 
 QueryColumn
 Catalog::query_column_for(const vector<table_name_t>& table_names,

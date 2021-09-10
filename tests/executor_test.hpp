@@ -40,27 +40,34 @@ public:
   ExecTest()
     : db_ (PotatoDB()) {}
 
-  void SetUp() override {
+  void
+  SetUp() override {
     ::testing::Test::SetUp();
+    db_.reset_installation();
   }
 
-  void TearDown() override {
+  void
+  TearDown() override {
     ::testing::Test::TearDown();
   };
 
-  ExecEngine& exec_eng() {
+  ExecEngine&
+  exec_eng() {
     return db_.exec_eng();
   }
 
-  TxnMgr& txn_mgr() {
+  TxnMgr&
+  txn_mgr() {
     return db_.txn_mgr();
   }
 
-  Catalog& catalog() {
+  Catalog&
+  catalog() {
     return db_.catalog();
   }
 
-  ptr<ResultSet> query(ptr<BasePlan>&& plan) {
+  ptr<ResultSet>
+  query(ptr<BasePlan>&& plan) {
     auto &txn = txn_mgr().begin();
     auto exec_ctx = db_.make_exec_ctx(txn);
 
@@ -69,7 +76,8 @@ public:
     return result_set;
   }
 
-  const string execute(ptr<BasePlan>&& plan) {
+  const string
+  execute(ptr<BasePlan>&& plan) {
     auto &txn = txn_mgr().begin();
     auto exec_ctx = db_.make_exec_ctx(txn);
 

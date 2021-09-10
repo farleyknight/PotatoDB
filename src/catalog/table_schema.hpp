@@ -40,6 +40,7 @@ public:
     return table_oid_;
   }
 
+  // TODO: Put this in the Catalog
   QuerySchema to_query_schema() const {
     vector<QueryColumn> cols;
     for (const auto &table_col : columns_) {

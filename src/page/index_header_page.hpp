@@ -116,7 +116,7 @@ public:
   }
 
   void write_root_page_id(PageId page_id) {
-    page_->write_int32(ROOT_PAGE_ID_OFFSET, page_id.as_int32());
+    page_->write_uint32(ROOT_PAGE_ID_OFFSET, page_id.as_uint32());
   }
 
   index_oid_t read_index_oid() const {

@@ -20,7 +20,10 @@ void SlottedTablePage::allocate(const PageId page_id, const PageId prev_page_id)
   // Set the previous and next page IDs.
   set_table_page_id(page_id);
   set_prev_page_id(prev_page_id);
-  set_next_page_id(PageId::STOP_ITERATING(page_id.file_id()));
+
+  auto next_page_id = PageId::STOP_ITERATING(page_id.file_id());
+  logger->debug("[SlottedTablePage] next_page_id: " + next_page_id.to_string());
+  set_next_page_id(next_page_id);
 
   set_free_space_pointer(page_->size());
   set_tuple_count(0);

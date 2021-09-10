@@ -18,19 +18,19 @@ class Tuple {
 public:
   Tuple() = default;
 
-  Tuple(int32_t size)
+  explicit Tuple(int32_t size)
     : source_ (TupleSources::TABLE_HEAP),
       buffer_ (size)
   {}
 
-  Tuple(RID rid)
+  explicit Tuple(RID rid)
     : rid_    (rid),
       source_ (TupleSources::TABLE_HEAP)
   {}
 
-  Tuple(vector<Value> values, const QuerySchema& schema);
+  explicit Tuple(vector<Value> values, const QuerySchema& schema);
 
-  Tuple(Buffer buffer)
+  explicit Tuple(Buffer buffer)
     : source_ (TupleSources::LOG_RECOVERY),
       buffer_ (buffer)
   {}
@@ -42,8 +42,9 @@ public:
     return rid_.has_value();
   }
 
-  buffer_offset_t buffer_offset_for(const auto& schema,
-                                    column_index_t index) const;
+  buffer_offset_t
+  buffer_offset_for(const auto& schema,
+                    column_index_t index) const;
 
   void copy_from(const Tuple& tuple) {
     buffer_.copy_from(tuple.buffer_);
@@ -64,11 +65,11 @@ public:
   Value value_by_oid(const auto& schema, column_oid_t oid) const;
 
   bool is_null(const auto& schema,
-               uint32_t column_index) const;
+               column_index_t column_index) const;
 
   Tuple key_from_tuple(const QuerySchema& schema,
                        const QuerySchema& key_schema,
-                       const vector<uint32_t>& key_attrs) const;
+                       const vector<int32_t>& key_attrs) const;
 
   const RID rid()               const { return rid_.value(); }
   void set_rid(RID rid)               { rid_.emplace(rid); }

@@ -79,6 +79,9 @@ public:
   int32_t read_int32(buffer_offset_t offset) const;
   void write_int32(buffer_offset_t offset, int32_t data);
 
+  uint32_t read_uint32(buffer_offset_t offset) const;
+  void write_uint32(buffer_offset_t offset, uint32_t data);
+
   const string read_string(buffer_offset_t offset) const;
   void write_string(buffer_offset_t offset, const string data);
 
@@ -114,7 +117,7 @@ public:
 private:
   PageId  page_id_ = PageId::INVALID();
   Buffer  buffer_;
-  int     pin_count_ = 0;
+  int32_t pin_count_ = 0;
   bool    is_dirty_ = false;
   RWLatch rwlatch_;
 };

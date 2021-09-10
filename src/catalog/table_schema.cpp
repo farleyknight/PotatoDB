@@ -21,7 +21,8 @@ TableSchema::TableSchema(vector<TableColumn> columns,
 
   int32_t column_count = columns_.size();
 
-  for (column_offset_t offset = 0; offset < column_count; ++offset) {
+
+  for (int32_t offset = 0; offset < column_count; ++offset) {
     if (columns_[offset].is_primary_key()) {
       primary_keys_.push_back(offset);
     }
@@ -93,7 +94,7 @@ const string TableSchema::to_string() const {
     "]";
 
   os << " :: (\n";
-  for (size_t i = 0; i < column_count(); i++) {
+  for (int32_t i = 0; i < column_count(); i++) {
     // TODO: Is there a better way to interleave these strings with commas?
     if (i > 0) {
       os << ", \n";

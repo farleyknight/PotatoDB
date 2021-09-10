@@ -55,6 +55,7 @@ void FileHandle::print_status() const {
   }
 
   if (handle_.fail()) {
+    assert(nullptr);
     logger->debug("[FileHandle] >File has failed");
   }
 }

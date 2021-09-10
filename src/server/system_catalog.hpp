@@ -132,8 +132,8 @@ public:
   }
 
   table_oid_t
-  create_table(const CreateTableExpr& expr) {
-    return table_mgr_.create_table(expr);
+  create_table(const CreateTableExpr& expr, Txn& txn) {
+    return table_mgr_.create_table(expr, txn);
   }
 
   index_oid_t

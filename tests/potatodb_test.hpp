@@ -2,7 +2,6 @@
 
 #include "server/potatodb.hpp"
 #include "server/system_catalog.hpp"
-
 #include "gtest/gtest.h"
 
 TEST(PotatoDBTest, CreateInsertSelectTest) {
@@ -100,14 +99,6 @@ TEST(PotatoDBTest, AggegrationTest) {
   EXPECT_EQ(maxA,   size-1);
 }
 
-TEST(PotatoDBTest, SystemCatalogTest) {
-  PotatoDB db;
-  db.reset_installation();
-
-  auto result = db.run("SELECT * FROM system_catalog");
-  EXPECT_TRUE(result.set()->size() > 0);
-}
-
 TEST(PotatoDBTest, CreateTableTest) {
   PotatoDB db;
   db.reset_installation();
@@ -148,9 +139,11 @@ TEST(PotatoDBTest, CreateTableIfNotExistsTest) {
   // NOTE SHOULD NOT FAIL,
   // WARNING INSTEAD
   EXPECT_EQ(result.to_payload(), "Just a WARNING");
+  // TODO: Better messaging here? Likely something for a config file!
+  // TODO: Add a place for error messaging in the YAML config file.
 }
 
-TEST(PotatoDBTest, DISABLED_MissingColumnTest) {
+TEST(PotatoDBTest, MissingColumnTest) {
   PotatoDB db;
   db.reset_installation();
 
@@ -162,15 +155,14 @@ TEST(PotatoDBTest, DISABLED_MissingColumnTest) {
   EXPECT_EQ(result.to_payload(), "Could not find column 'colC' on table 'foo_bar");
 }
 
-TEST(PotatoDBTest, ShowTablesTest) {
+TEST(PotatoDBTest, ShowZeroTablesTest) {
   PotatoDB db;
   db.reset_installation();
 
   auto result = db.run("SHOW TABLES");
   auto &result_set = result.set();
 
-  ASSERT_EQ(result_set->size(), 1);
-  EXPECT_EQ(result_set->value_at<string>("table_name", 0), "system_catalog");
+  ASSERT_EQ(result_set->size(), 0);
 }
 
 TEST(PotatoDBTest, ShowTablesFooBarTest) {
@@ -182,8 +174,7 @@ TEST(PotatoDBTest, ShowTablesFooBarTest) {
   auto result = db.run("SHOW TABLES");
   auto &result_set = result.set();
 
-  ASSERT_EQ(result_set->size(), 2);
-  EXPECT_EQ(result_set->value_at<string>("table_name", 0), "system_catalog");
+  ASSERT_EQ(result_set->size(), 1);
   EXPECT_EQ(result_set->value_at<string>("table_name", 1), "foo_bar");
 }
 
@@ -218,20 +209,11 @@ TEST(PotatoDBTest, LoadSystemCatalogAfterRestartTest) {
   auto &result_set = result.set();
 
   ASSERT_EQ(result_set->size(), 2);
-  EXPECT_EQ(result_set->value_at<string>("object_name", 0), "colA");
-  EXPECT_EQ(result_set->value_at<string>("object_name", 1), "colB");
-}
-
-TEST(PotatoDBTest, SelectOnlySomeColumnsTest) {
-  PotatoDB db;
-  db.reset_installation();
-
-  auto result = db.run("SELECT id, table_name FROM system_catalog WHERE object_type = 1");
-  ASSERT_TRUE(result.set() != nullptr);
-  ASSERT_TRUE(result.set()->size() > 0);
-
-  EXPECT_EQ(result.set()->value_at<int32_t>("id", 0), 1);
-  EXPECT_EQ(result.set()->value_at<string>("table_name", 0), "system_catalog");
+  // TODO: The strings "column_name" here are just made up
+  // It's likely you'll need to format the result set of a `DESCRIBE TABLE` command.
+  // I'm just making a suggestion that we call TableColumn.name() to be "column_name"
+  EXPECT_EQ(result_set->value_at<string>("column_name", 0), "colA");
+  EXPECT_EQ(result_set->value_at<string>("column_name", 1), "colB");
 }
 
 TEST(PotatoDBTest, LoadSchemaAfterRestartTest) {
@@ -252,7 +234,7 @@ TEST(PotatoDBTest, LoadSchemaAfterRestartTest) {
   EXPECT_TRUE(db2.catalog().table_has_column_named("foo_bar", "colB"));
 }
 
-TEST(PotatoDBTest, DISABLED_DropTableTest) {
+TEST(PotatoDBTest, DropTableTest) {
   PotatoDB db;
   db.reset_installation();
 
@@ -262,11 +244,10 @@ TEST(PotatoDBTest, DISABLED_DropTableTest) {
   auto result = db.run("SHOW TABLES");
   auto &result_set = result.set();
 
-  EXPECT_EQ(result_set->size(), 1);
-  EXPECT_EQ(result_set->value_at<string>("table_name", 0), "system_catalog");
+  EXPECT_EQ(result_set->size(), 0);
 }
 
-TEST(PotatoDBTest, DISABLED_TruncateTableTest) {
+TEST(PotatoDBTest, TruncateTableTest) {
   PotatoDB db;
   db.reset_installation();
 
@@ -282,8 +263,16 @@ TEST(PotatoDBTest, DISABLED_TruncateTableTest) {
 
 TEST(PotatoDBTest, DISABLED_AlterTableDropColumnTest) {
   // TODO!
+  // Now that we have the TableFileMgr, we can actually tackle this!
 }
 
 TEST(PotatoDBTest, DISABLED_AlterTableAddColumnTest) {
   // TODO!
+  // Now that we have the TableFileMgr, we can actually tackle this!
 }
+
+TEST(PotatoDBTest, DISABLED_AlterTableRenameColumnTest) {
+  // TODO!
+  // Now that we have the TableFileMgr, we can actually tackle this!
+}
+

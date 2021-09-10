@@ -81,8 +81,8 @@ public:
   }
 
   table_oid_t
-  create_table(const CreateTableExpr& expr, UNUSED Txn& txn) {
-    return sys_catalog_.create_table(expr);
+  create_table(const CreateTableExpr& expr, Txn& txn) {
+    return sys_catalog_.create_table(expr, txn);
   }
 
   index_oid_t
@@ -131,6 +131,12 @@ public:
   index_schema_for(const index_name_t& index_name) const {
     return sys_catalog_.index_schema_for(index_name);
   }
+
+  QuerySchema
+  show_tables_schema() const;
+
+  QuerySchema
+  describe_table_schema() const;
 
   QuerySchema
   query_schema_for(const table_name_t& table_name,

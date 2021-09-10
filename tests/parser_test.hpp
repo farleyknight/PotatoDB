@@ -121,6 +121,6 @@ TEST(ParserTest, CreateTableTest) {
   EXPECT_EQ(name_col.name(), "name");
   EXPECT_EQ(name_col.type_id(), TypeId::VARCHAR);
   EXPECT_EQ(name_col.type_length(), 10u);
-  EXPECT_EQ(name_col.is_not_null(), true);
+  EXPECT_EQ(name_col.is_nullable(), false);
 }
 

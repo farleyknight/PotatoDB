@@ -8,7 +8,7 @@
 #include "exprs/show_tables_expr.hpp"
 
 ptr<BasePlan>
-PlanFactory::create(const PotatoDB& db,
+PlanFactory::create(const Catalog& catalog,
                     ptr<BaseExpr>&& expr)
 {
   switch (expr->expr_type()) {
@@ -18,31 +18,31 @@ PlanFactory::create(const PotatoDB& db,
   }
   case ExprType::SELECT: {
     auto select_expr = dynamic_cast<SelectExpr*>(expr.get());
-    return from_expr(db.catalog(), *select_expr);
+    return from_expr(catalog, *select_expr);
   }
   case ExprType::COMPOUND_SELECT: {
     auto compound_expr = dynamic_cast<CompoundSelectExpr*>(expr.get());
-    return from_expr(db.catalog(), *compound_expr);
+    return from_expr(catalog, *compound_expr);
   }
   case ExprType::INSERT: {
     auto insert_expr = dynamic_cast<InsertExpr*>(expr.get());
-    return from_expr(db.catalog(), *insert_expr);
+    return from_expr(catalog, *insert_expr);
   }
   case ExprType::SHOW_TABLES: {
     auto show_tables_expr = dynamic_cast<ShowTablesExpr*>(expr.get());
-    return from_expr(*show_tables_expr);
+    return from_expr(catalog, *show_tables_expr);
   }
   case ExprType::DESCRIBE_TABLE: {
     auto describe_table_expr = dynamic_cast<DescribeTableExpr*>(expr.get());
-    return from_expr(*describe_table_expr);
+    return from_expr(catalog, *describe_table_expr);
   }
   case ExprType::UPDATE: {
     auto update_expr = dynamic_cast<UpdateExpr*>(expr.get());
-    return from_expr(db.catalog(), *update_expr);
+    return from_expr(catalog, *update_expr);
   }
   case ExprType::DELETE_FROM: {
     auto delete_from_expr = dynamic_cast<DeleteFromExpr*>(expr.get());
-    return from_expr(db.catalog(), *delete_from_expr);
+    return from_expr(catalog, *delete_from_expr);
   }
   default:
     throw NotImplementedException("Not finished :(");
@@ -55,14 +55,18 @@ PlanFactory::from_expr(const CreateTableExpr& expr) {
 }
 
 ptr<BasePlan>
-PlanFactory::from_expr(UNUSED const ShowTablesExpr& expr) {
-  return make_unique<ShowTablesPlan>();
+PlanFactory::from_expr(const Catalog& catalog,
+                       UNUSED const ShowTablesExpr& expr)
+{
+  return make_unique<ShowTablesPlan>(catalog.show_tables_schema());
 }
 
 ptr<BasePlan>
-PlanFactory::from_expr(const DescribeTableExpr& expr) {
-  auto table_name = expr.table().name();
-  return make_unique<DescribeTablePlan>(table_name);
+PlanFactory::from_expr(const Catalog& catalog,
+                       const DescribeTableExpr& expr)
+{
+  return make_unique<DescribeTablePlan>(catalog.describe_table_schema(),
+                                        expr.table().name());
 }
 
 ptr<BasePlan>

@@ -31,11 +31,11 @@ void Page::write_int32(buffer_offset_t offset, int32_t data) {
 }
 
 PageId Page::read_page_id(buffer_offset_t offset) const {
-  return PageId::from(buffer_.read_int32(offset));
+  return PageId::from(buffer_.read_uint32(offset));
 }
 
 void Page::write_page_id(buffer_offset_t offset, PageId page_id) {
-  buffer_.write_int32(offset, page_id.as_int32());
+  buffer_.write_uint32(offset, page_id.as_uint32());
 }
 
 void Page::reset_memory() {
