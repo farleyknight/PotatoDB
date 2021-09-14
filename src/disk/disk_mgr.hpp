@@ -62,32 +62,20 @@ public:
   }
 
   file_id_t
-  create_table_file(const file_path_t& file_path) {
-    auto file_id = next_file_id_++;
-    file_ids_.emplace(file_path, file_id);
-    table_file_mgr_.create_table_file(file_id, file_path);
-    return file_id;
-  }
-
-  file_id_t
-  create_index_file(const file_path_t& file_path) {
-    auto file_id = next_file_id_++;
-    file_ids_.emplace(file_path, file_id);
-    index_file_mgr_.create_index_file(file_id, file_path);
-    return file_id;
-  }
-
-  file_id_t
   open_table_file(const file_path_t& file_path) {
     auto file_id = next_file_id_++;
     file_ids_.emplace(file_path, file_id);
+    std::cout << "opening table file: " << file_path << std::endl;
     table_file_mgr_.open_table_file(file_id, file_path);
     return file_id;
   }
 
-  fs::path
-  table_file_for(const table_name_t& table_name) {
-    return table_file_mgr_.table_file_for(table_name);
+  file_id_t
+  open_index_file(const file_path_t& file_path) {
+    auto file_id = next_file_id_++;
+    file_ids_.emplace(file_path, file_id);
+    index_file_mgr_.open_index_file(file_id, file_path);
+    return file_id;
   }
 
   table_oid_t
@@ -131,6 +119,12 @@ public:
   file_id_t
   open_table_file(fs::path file_path);
 
+  void
+  open_table_files();
+
+  void
+  open_index_files();
+
   file_id_t
   file_id_for_table(table_oid_t table_oid) const {
     return table_file_mgr_.file_id_for(table_oid);
@@ -160,6 +154,7 @@ public:
   write_page(PageId page_id, const Page& page) {
     write_buffer(page_id, page.buffer());
   }
+
   void
   read_page(PageId page_id, Page& page) {
     read_buffer(page_id, page.buffer());
@@ -183,7 +178,45 @@ public:
   void
   deallocate_page(PageId page_id);
 
+  file_id_t
+  create_table(const table_name_t& table_name) {
+    auto file_path = table_file_for(table_name);
+    return create_table_file(file_path);
+  }
+
+  file_id_t
+  create_index(const index_name_t& index_name) {
+    auto file_path = index_file_for(index_name);
+    return create_index_file(file_path);
+  }
+
+  fs::path
+  table_file_for(const table_name_t& table_name) {
+    return table_file_mgr_.table_file_for(table_name);
+  }
+
 private:
+  fs::path
+  index_file_for(const index_name_t& index_name) {
+    return index_file_mgr_.index_file_for(index_name);
+  }
+
+  file_id_t
+  create_table_file(const fs::path file_path) {
+    auto file_id = next_file_id_++;
+    file_ids_.emplace(file_path, file_id);
+    table_file_mgr_.create_table_file(file_id, file_path);
+    return file_id;
+  }
+
+  file_id_t
+  create_index_file(const file_path_t& file_path) {
+    auto file_id = next_file_id_++;
+    file_ids_.emplace(file_path, file_id);
+    index_file_mgr_.create_index_file(file_id, file_path);
+    return file_id;
+  }
+
   TableFileMgr table_file_mgr_;
   IndexFileMgr index_file_mgr_;
   LogFileMgr   log_file_mgr_;

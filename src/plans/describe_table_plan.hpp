@@ -17,6 +17,11 @@ public:
     return true;
   }
 
+  const table_name_t&
+  table_name() const {
+    return table_name_;
+  }
+
 private:
   const table_name_t table_name_;
 };

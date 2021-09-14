@@ -21,20 +21,6 @@
 // https://www.reddit.com/r/programming/comments/oum0wa/path_hints_for_btrees_can_bring_a_performance/
 
 
-template<class KeyT, class ValueT, class KeyComp>
-BTree<KeyT, ValueT, KeyComp>::BTree(const index_name_t name,
-                                    file_id_t file_id,
-                                    PageId root_page_id,
-                                    const KeyComp& comp,
-                                    BuffMgr& buff_mgr)
-  : index_name_    (name),
-    buff_mgr_      (buff_mgr),
-    file_id_       (file_id),
-    root_page_id_  (root_page_id),
-    comp_          (comp),
-    leaf_size_     (LeafPageT::LEAF_PAGE_SIZE),
-    internal_size_ (InternalPageT::INTERNAL_PAGE_SIZE)
-{}
 
 template<class KeyT, class ValueT, class KeyComp>
 bool BTree<KeyT, ValueT, KeyComp>::is_empty() const {

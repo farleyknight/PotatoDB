@@ -119,8 +119,13 @@ Catalog::query_column_for(const table_name_t& table_name,
                           const column_name_t& column_name) const
 {
   const auto &schema = sys_catalog_.table_schema_for(table_name);
-  const auto &col    = schema.by_name(column_name);
-  return QueryColumn::from(col);
+  if (schema.has_column(column_name)) {
+    const auto &col    = schema.by_name(column_name);
+    return QueryColumn::from(col);
+  } else {
+    throw Exception("Could not find column '" + column_name +
+                    "' on table '" + table_name + "'");
+  }
 }
 
 

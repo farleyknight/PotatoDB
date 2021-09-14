@@ -91,7 +91,7 @@ public:
     return SortKey(value);
   }
 
-  const string message_on_completion(size_t result_count) const override {
+  const string message_on_completion(int32_t result_count) const override {
     return "Sorted " + std::to_string(result_count) + " record(s)";
   }
 

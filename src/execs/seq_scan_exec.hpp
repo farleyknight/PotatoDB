@@ -14,12 +14,12 @@ public:
   bool has_next() override;
   Tuple next() override;
 
-  const string message_on_completion(size_t result_count) const override {
-    return "Found " + std::to_string(result_count) + " record(s)";
-  }
-
   const QuerySchema& schema();
   const TableSchema& table_schema();
+
+  const string message_on_completion(int32_t result_count) const override {
+    return "Found " + std::to_string(result_count) + " record(s)";
+  }
 
 private:
   bool match_found(const Tuple& tuple);

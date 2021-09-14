@@ -34,16 +34,19 @@ public:
   AggKey make_key(const Tuple& tuple);
   AggValue make_val(const Tuple& tuple);
 
-  const QuerySchema& schema() const {
+  const QuerySchema&
+  schema() const {
     return dynamic_cast<SchemaPlan*>(plan_.get())->schema();
   }
 
-  const QuerySchema& child_schema() const {
+  const QuerySchema&
+  child_schema() const {
     auto child_exec = dynamic_cast<SeqScanExec*>(child_.get());
     return child_exec->schema();
   }
 
-  const string message_on_completion(size_t result_count) const override {
+  const string
+  message_on_completion(int32_t result_count) const override {
     return "Found " + std::to_string(result_count) + " record(s)";
   }
 

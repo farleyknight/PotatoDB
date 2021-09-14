@@ -22,8 +22,7 @@ public:
       lock_mgr_ (lock_mgr),
       log_mgr_  (log_mgr),
       buff_mgr_ (buff_mgr)
-  {
-  }
+  {}
 
   void
   allocate_header_and_first_page(file_id_t file_id,
@@ -68,41 +67,28 @@ public:
     return table_names_.at(table_oid);
   }
 
-  table_oid_t
-  create_table(const CreateTableExpr& expr, Txn& txn)
-  {
-    auto table_name = expr.table().name();
-    auto table_oid  = next_table_oid_++;
-    auto schema     = make_schema_from(table_oid, expr);
-    auto file_id    = disk_mgr_.create_table_file(table_name);
-    allocate_header_and_first_page(file_id, txn);
-
-    load_table(file_id, table_oid, table_name, schema);
-    write_schema(file_id, schema);
-
-    return table_oid;
+  const vector<TableColumn>&
+  table_columns_for(table_oid_t table_oid) const {
+    assert(table_schemas_.contains(table_oid));
+    return table_schemas_.at(table_oid).all();
   }
+
+  vector<TableColumn>&
+  table_columns_for(table_oid_t table_oid) {
+    assert(table_schemas_.contains(table_oid));
+    return table_schemas_.at(table_oid).all();
+  }
+
+
+  table_oid_t
+  create_table(const CreateTableExpr& expr, Txn& txn);
 
   TableSchema
   make_schema_from(table_oid_t table_oid,
-                   const CreateTableExpr& expr)
-  {
-    auto table_name  = expr.table().name();
-    auto column_list = expr.column_defs();
-
-    auto columns = column_mgr_.make_columns(table_oid, table_name, column_list);
-    return TableSchema(columns, table_name, table_oid);
-  }
+                   const CreateTableExpr& expr);
 
   void
-  open_table_header(const table_name_t& table_name) {
-    auto file_id   = disk_mgr_.open_table_file(table_name);
-    auto table_oid = disk_mgr_.table_oid_for(file_id);
-    auto page_id   = disk_mgr_.table_header_page(file_id);
-    auto page_ptr  = buff_mgr_.fetch_page(page_id);
-    assert(page_ptr);
-    load_table_header(table_oid, page_ptr);
-  }
+  open_table_header(file_id_t file_id);
 
   bool
   table_has_column_named(const table_name_t& table_name,
@@ -170,13 +156,15 @@ public:
   }
 
   void
-  open_all_tables() {
-    for (const auto file_id : disk_mgr_.table_file_ids()) {
-      auto table_oid    = read_table_oid(file_id);
-      auto table_name   = read_table_name(file_id);
-      auto table_schema = read_table_schema(file_id);
-      load_table(file_id, table_oid, table_name, table_schema);
+  open_all_tables();
+
+  vector<table_name_t>
+  table_names() const {
+    vector<table_name_t> names;
+    for (const auto & [table_oid, table_name] : table_names_) {
+      names.push_back(table_name);
     }
+    return names;
   }
 
 private:
@@ -191,6 +179,7 @@ private:
   load_table_name(table_oid_t table_oid,
                   table_name_t table_name)
   {
+    std::cout << "Adding table_oid " << table_oid << " with table_name " << table_name << std::endl;
     table_names_[table_oid] = table_name;
     table_oids_[table_name] = table_oid;
   }
@@ -202,34 +191,15 @@ private:
     table_schemas_.emplace(table_oid, table_schema);
   }
 
-
   void
   load_table(file_id_t file_id,
              table_oid_t table_oid,
              const table_name_t& table_name,
-             const TableSchema& schema)
-  {
-    load_table_name(table_oid, table_name);
-    load_table_schema(table_oid, schema);
-    load_table_heap(file_id, table_oid);
-
-    auto page_id   = disk_mgr_.table_header_page(file_id);
-    auto page_ptr  = buff_mgr_.fetch_page(page_id);
-    assert(page_ptr);
-    load_table_header(table_oid, page_ptr);
-  }
+             const TableSchema& schema);
 
   void
-  load_table_heap(file_id_t file_id, table_oid_t table_oid) {
-    auto heap = make_unique<TableHeap>(file_id,
-                                       table_oid,
-                                       disk_mgr_,
-                                       buff_mgr_,
-                                       lock_mgr_,
-                                       log_mgr_);
-
-    table_heaps_.emplace(table_oid, move(heap));
-  }
+  load_table_heap(file_id_t file_id,
+                  table_oid_t table_oid);
 
   DiskMgr& disk_mgr_;
   LockMgr& lock_mgr_;
@@ -238,10 +208,11 @@ private:
 
   ColumnMgr column_mgr_;
 
+  map<file_id_t, TableHeaderPage> table_headers_;
+
   map<table_oid_t, table_name_t> table_names_;
   map<table_name_t, table_oid_t> table_oids_;
 
-  map<table_oid_t, TableHeaderPage> table_headers_;
   map<table_oid_t, TableSchema> table_schemas_;
   map<table_oid_t, ptr<TableHeap>> table_heaps_;
 

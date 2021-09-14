@@ -16,6 +16,7 @@
 #include "plans/nested_loop_join_plan.hpp"
 #include "plans/projection_plan.hpp"
 #include "plans/show_tables_plan.hpp"
+#include "plans/describe_table_plan.hpp"
 
 #include "execs/base_exec.hpp"
 #include "execs/agg_exec.hpp"
@@ -30,6 +31,7 @@
 #include "execs/seq_scan_exec.hpp"
 #include "execs/update_exec.hpp"
 #include "execs/show_tables_exec.hpp"
+#include "execs/describe_table_exec.hpp"
 #include "execs/exec_ctx.hpp"
 
 class ExecFactory {

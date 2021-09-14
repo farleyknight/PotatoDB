@@ -10,6 +10,10 @@ public:
 
   IndexFileMgr() {}
 
+  const string file_extension() const {
+    return FILE_EXTENSION;
+  }
+
   void
   close() {
     // TODO: Close all file handles
@@ -50,9 +54,12 @@ public:
   }
 
   void
-  open_index_file(file_id_t file_id, const file_path_t& file_path) {
-    assert(file_exists(file_path));
+  open_index_file(file_id_t file_id,
+                  const fs::path file_path)
+  {
+    assert(fs::exists(file_path));
     load_file_handle(file_id, file_path);
+    // assert_header_and_first_page(file_id);
   }
 
   fs::path

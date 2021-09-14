@@ -38,6 +38,8 @@ public:
   const ColT& by_name(const column_name_t& name) const;
 
   const vector<column_index_t>& unlined_columns() const;
+
+  vector<ColT>& all();
   const vector<ColT>& all() const;
   const vector<ColT>& columns() const;
 

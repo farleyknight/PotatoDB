@@ -1,5 +1,8 @@
 #pragma once
 
+#include "exprs/base_expr.hpp"
+#include "exprs/list_expr.hpp"
+
 class IndexedColumnListExpr : public BaseExpr,
                               public ListExpr<column_name_t>
 {

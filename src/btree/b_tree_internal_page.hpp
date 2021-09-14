@@ -1,6 +1,7 @@
 #pragma once
 
 #include "btree/b_tree_page.hpp"
+#include "index/index_comp.hpp"
 
 // https://github.com/astronaut0131/cmu15-445-2017/blob/d393b2b76c38ef02ad8432f3eb66452219fe6508/src/page/b_plus_tree_internal_page.cpp
 
@@ -30,7 +31,10 @@ public:
   {}
 
   // must call initialize method after "create" a new node
-  void allocate(PageId page_id, PageId parent_id = PageId::INVALID());
+  void allocate(UNUSED PageId page_id,
+                UNUSED PageId parent_id = PageId::INVALID()) {
+    
+  }
 
   KeyT key_at(int32_t index) const;
   void set_key_at(int32_t index, const KeyT& key);
@@ -74,3 +78,5 @@ private:
   void copy_last_from(const MappingT& pair, const BuffMgr& buff_mgr);
   void copy_first_from(const MappingT& pair, const BuffMgr& buff_mgr);
 };
+
+template class BTreeInternalPage<IndexKey, RID, IndexComp>;

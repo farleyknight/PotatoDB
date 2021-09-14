@@ -112,6 +112,16 @@ public:
     return sys_catalog_.table_column_for(column_oid);
   }
 
+  vector<TableColumn>&
+  table_columns_for(const table_name_t& table_name) {
+    return sys_catalog_.table_columns_for(table_name);
+  }
+
+  const vector<TableColumn>&
+  table_columns_for(const table_name_t& table_name) const {
+    return sys_catalog_.table_columns_for(table_name);
+  }
+
   IndexSchema&
   index_schema_for(index_oid_t index_oid) {
     return sys_catalog_.index_schema_for(index_oid);
@@ -130,6 +140,11 @@ public:
   const IndexSchema&
   index_schema_for(const index_name_t& index_name) const {
     return sys_catalog_.index_schema_for(index_name);
+  }
+
+  vector<table_name_t>
+  table_names() const {
+    return sys_catalog_.table_names();
   }
 
   QuerySchema

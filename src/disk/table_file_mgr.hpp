@@ -10,6 +10,10 @@ public:
 
   TableFileMgr() {}
 
+  const string file_extension() const {
+    return FILE_EXTENSION;
+  }
+
   void
   close() {
     // TODO: Close all file handles
@@ -45,20 +49,18 @@ public:
 
   void
   create_table_file(file_id_t file_id,
-                    const table_name_t& table_name)
+                    const fs::path file_path)
   {
-    auto file_path = table_file_for(table_name);
-    assert(!file_exists(file_path));
+    assert(!fs::exists(file_path));
     load_file_handle(file_id, file_path);
     allocate_header_and_first_page(file_id);
   }
 
   void
   open_table_file(file_id_t file_id,
-                  const table_name_t& table_name)
+                  const fs::path file_path)
   {
-    auto file_path = table_file_for(table_name);
-    assert(file_exists(file_path));
+    assert(fs::exists(file_path));
     load_file_handle(file_id, file_path);
     assert_header_and_first_page(file_id);
   }

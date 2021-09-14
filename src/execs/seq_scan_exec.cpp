@@ -48,7 +48,7 @@
 // whether it actually makes sense to forward every tuple
 // along. Also, how would you represent joins?
 //
-// Perhaps joins 
+// Perhaps joins
 // You can't
 // think of them in terms of 
 

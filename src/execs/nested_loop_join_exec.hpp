@@ -55,7 +55,7 @@ public:
 
     auto &pred = plan_->pred();
 
-    auto left_schema = plan_->left_schema();
+    auto left_schema  = plan_->left_schema();
     auto right_schema = plan_->right_schema();
 
     Value match
@@ -87,7 +87,7 @@ public:
     return Tuple(move(values), schema);
   }
 
-  const string message_on_completion(size_t result_count) const override {
+  const string message_on_completion(int32_t result_count) const override {
     return "Found " + std::to_string(result_count) + " record(s)";
   }
 

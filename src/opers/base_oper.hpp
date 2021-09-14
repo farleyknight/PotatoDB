@@ -35,7 +35,7 @@ public:
   }
 
   virtual const string
-  message_on_completion(size_t result_count) const = 0;
+  message_on_completion(int32_t result_count) const = 0;
 
   virtual bool is_query() const = 0;
 

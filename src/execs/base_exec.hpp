@@ -27,7 +27,7 @@ public:
     return exec_ctx_.catalog();
   }
 
-  virtual const string message_on_completion(size_t result_count) const = 0;
+  virtual const string message_on_completion(int32_t result_count) const = 0;
 
 protected:
   ExecCtx& exec_ctx_;

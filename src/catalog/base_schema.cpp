@@ -146,6 +146,11 @@ const vector<ColT>& BaseSchema<ColT>::all() const {
 }
 
 template<class ColT>
+vector<ColT>& BaseSchema<ColT>::all() {
+  return columns_;
+}
+
+template<class ColT>
 const vector<ColT>& BaseSchema<ColT>::columns() const {
   return columns_;
 }

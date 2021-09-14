@@ -77,6 +77,26 @@ public:
     return table_mgr_.table_schema_for(table_oid);
   }
 
+  vector<TableColumn>&
+  table_columns_for(const table_name_t& table_name) {
+    return table_columns_for(table_oid_for(table_name));
+  }
+
+  const vector<TableColumn>&
+  table_columns_for(const table_name_t& table_name) const {
+    return table_columns_for(table_oid_for(table_name));
+  }
+
+  vector<TableColumn>&
+  table_columns_for(table_oid_t table_oid) {
+    return table_mgr_.table_columns_for(table_oid);
+  }
+
+  const vector<TableColumn>&
+  table_columns_for(table_oid_t table_oid) const {
+    return table_mgr_.table_columns_for(table_oid);
+  }
+
   IndexSchema&
   index_schema_for(index_oid_t index_oid) {
     return index_mgr_.index_schema_for(index_oid);
@@ -134,6 +154,11 @@ public:
   table_oid_t
   create_table(const CreateTableExpr& expr, Txn& txn) {
     return table_mgr_.create_table(expr, txn);
+  }
+
+  vector<table_name_t>
+  table_names() const {
+    return table_mgr_.table_names();
   }
 
   index_oid_t

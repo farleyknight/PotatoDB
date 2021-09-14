@@ -34,6 +34,11 @@ ExecFactory::create(ExecCtx& exec_ctx,
     return make_unique<ShowTablesExec>(exec_ctx, move(show_tables_plan));
   }
 
+  case PlanType::DESCRIBE_TABLE: {
+    auto describe_table_plan = cast<DescribeTablePlan>(move(plan));
+    return make_unique<DescribeTableExec>(exec_ctx, move(describe_table_plan));
+  }
+
   case PlanType::CREATE_TABLE: {
     auto create_plan = cast<CreateTablePlan>(move(plan));
     return make_unique<CreateTableExec>(exec_ctx, move(create_plan));

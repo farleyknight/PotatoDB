@@ -34,8 +34,16 @@ public:
   BTree(const index_name_t name,
         file_id_t file_id,
         PageId root_page_id,
-        const KeyComp& comp,
-        BuffMgr& buff_mgr);
+        const KeyComp comp,
+        BuffMgr& buff_mgr)
+    : index_name_    (name),
+      root_page_id_  (root_page_id),
+      buff_mgr_      (buff_mgr),
+      comp_          (comp),
+      file_id_       (file_id),
+      leaf_size_     (LeafPageT::LEAF_PAGE_SIZE),
+      internal_size_ (InternalPageT::INTERNAL_PAGE_SIZE)
+  {}
 
   // Returns true if this B+ tree has no keys and values.
   bool is_empty() const;
@@ -86,6 +94,20 @@ public:
   template<class NodeT>
   NodeT new_node(PageId parent_id);
 
+  static ptr<BTree<KeyT, ValueT, KeyComp>>
+  make_unique(const index_name_t index_name,
+              file_id_t file_id,
+              PageId root_page_id,
+              const KeyComp comp,
+              BuffMgr& buff_mgr)
+  {
+    return make_unique<BTree<KeyT, ValueT, KeyComp>>(index_name,
+                                                     file_id,
+                                                     root_page_id,
+                                                     comp,
+                                                     buff_mgr);
+  }
+
 private:
   void start_new_tree(const KeyT& key,
                       const ValueT& value);
@@ -130,9 +152,11 @@ private:
   string index_name_;
   PageId root_page_id_;
   BuffMgr& buff_mgr_;
-  KeyComp comp_;
+  const KeyComp comp_;
   file_id_t file_id_;
   int32_t leaf_size_;
   int32_t internal_size_;
   int32_t max_block_num_ = 0;
 };
+
+template class BTree<IndexKey, RID, IndexComp>;

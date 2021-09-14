@@ -204,7 +204,7 @@ PlanFactory::make_projection_schema(const Catalog& catalog,
   // And only at the end will we bother with exposing only
   // those columns the user asked for.
 
-  // TODO: TO implement a proper Projection operator,
+  // TODO: To implement a proper Projection operator,
   // you'll need to wrap almost every plan in PlanFactory with
   // a ProjectionPlan, if the SELECT is not "*".
   // Which could be a lot!

@@ -152,7 +152,7 @@ TEST(PotatoDBTest, MissingColumnTest) {
   auto result = db.run("SELECT colC FROM foo_bar");
 
   EXPECT_TRUE(result.set() == nullptr);
-  EXPECT_EQ(result.to_payload(), "Could not find column 'colC' on table 'foo_bar");
+  EXPECT_EQ(result.to_payload(), "Could not find column 'colC' on table 'foo_bar'");
 }
 
 TEST(PotatoDBTest, ShowZeroTablesTest) {
@@ -175,7 +175,7 @@ TEST(PotatoDBTest, ShowTablesFooBarTest) {
   auto &result_set = result.set();
 
   ASSERT_EQ(result_set->size(), 1);
-  EXPECT_EQ(result_set->value_at<string>("table_name", 1), "foo_bar");
+  EXPECT_EQ(result_set->value_at<string>("table_name", 0), "foo_bar");
 }
 
 TEST(PotatoDBTest, DescribeTableTest) {
@@ -185,10 +185,13 @@ TEST(PotatoDBTest, DescribeTableTest) {
   db.run("CREATE TABLE foo_bar ( colA INTEGER, colB INTEGER )");
   auto result = db.run("DESCRIBE TABLE foo_bar");
   auto &result_set = result.set();
+  assert(result_set != nullptr);
 
   ASSERT_EQ(result_set->size(), 2);
-  EXPECT_EQ(result_set->value_at<string>("object_name", 0), "colA");
-  EXPECT_EQ(result_set->value_at<string>("object_name", 1), "colB");
+  EXPECT_EQ(result_set->value_at<string>("field_name", 0), "colA");
+  EXPECT_EQ(result_set->value_at<string>("field_name", 1), "colB");
+
+  // TODO: Add expectations for `type`, `nullable`, `key`, `default`, and `extra`
 }
 
 TEST(PotatoDBTest, LoadSystemCatalogAfterRestartTest) {
@@ -203,6 +206,7 @@ TEST(PotatoDBTest, LoadSystemCatalogAfterRestartTest) {
   PotatoDB db2;
   // NOTE: startup() should NOT start the server!
   // Otherwise it will block all other tests!
+  std::cout << "Restarting DB" << std::endl;
   db2.startup();
 
   auto result = db2.run("DESCRIBE TABLE foo_bar");
