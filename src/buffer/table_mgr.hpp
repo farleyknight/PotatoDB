@@ -32,22 +32,26 @@ public:
   assert_header_and_first_page_exist(file_id_t file_id,
                                      Txn& txn);
 
-  TableSchema
-  read_table_schema(file_id_t file_id) const;
+  table_oid_t
+  read_table_oid(file_id_t file_id) const;
 
   table_name_t
   read_table_name(file_id_t file_id) const;
 
-  table_oid_t
-  read_table_oid(file_id_t file_id) const;
+  TableSchema
+  read_table_schema(file_id_t file_id) const;
 
   void
-  write_schema(file_id_t file_id,
-               const TableSchema& schema)
-  {
-    assert(table_headers_.contains(file_id));
-    table_headers_.at(file_id).write_schema(schema);
-  }
+  write_table_oid(file_id_t file_id,
+                  table_oid_t table_oid);
+
+  void
+  write_table_name(file_id_t file_id,
+                   const table_name_t& table_name);
+
+  void
+  write_table_schema(file_id_t file_id,
+                     const TableSchema& schema);
 
   TableHeap&
   table_heap_for(table_oid_t table_oid) const {
@@ -139,7 +143,7 @@ public:
 
   column_oid_t
   column_oid_for(const table_name_t& table_name,
-                 const column_name_t& column_name)
+                 const column_name_t& column_name) const
   {
     return column_mgr_.column_oid_for(table_name, column_name);
   }
@@ -156,18 +160,24 @@ public:
   }
 
   void
+  load_table_name(table_oid_t table_oid,
+                  table_name_t table_name);
+
+  void
   open_all_tables();
 
   vector<table_name_t>
-  table_names() const {
-    vector<table_name_t> names;
-    for (const auto & [table_oid, table_name] : table_names_) {
-      names.push_back(table_name);
-    }
-    return names;
-  }
+  table_names() const;
 
 private:
+  void
+  flush_header_page(file_id_t file_id);
+
+  void
+  write_table(file_id_t file_id,
+              table_oid_t table_oid,
+              const table_name_t& table_name,
+              const TableSchema& schema);
 
   void
   load_table_header(table_oid_t table_oid, Page* page_ptr) {
@@ -176,20 +186,15 @@ private:
   }
 
   void
-  load_table_name(table_oid_t table_oid,
-                  table_name_t table_name)
-  {
-    std::cout << "Adding table_oid " << table_oid << " with table_name " << table_name << std::endl;
-    table_names_[table_oid] = table_name;
-    table_oids_[table_name] = table_oid;
-  }
-
-  void
   load_table_schema(table_oid_t table_oid,
                     const TableSchema& table_schema)
   {
     table_schemas_.emplace(table_oid, table_schema);
   }
+
+  void
+  load_table_columns(const table_name_t& table_name,
+                     const vector<TableColumn>& table_columns);
 
   void
   load_table(file_id_t file_id,

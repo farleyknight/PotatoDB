@@ -20,7 +20,7 @@ public:
     // while we are adding a new table?
 
     // TODO: This logic can get moved into `create_table`
-    if (exec_ctx_.catalog().has_table_named(table_name)) {
+    if (exec_ctx_.schema_mgr().has_table_named(table_name)) {
       if (plan_->if_not_exists()) {
         throw Exception("Just a WARNING");
       } else {
@@ -29,7 +29,7 @@ public:
     }
 
     // TODO: Handle possible ABORT if txn fails
-    exec_ctx_.catalog().
+    exec_ctx_.schema_mgr().
       create_table(plan_->expr(), exec_ctx_.txn());
   }
 
@@ -38,10 +38,13 @@ public:
   }
 
   Tuple next() override {
-    throw NotImplementedException("next is not implemented for CreateTableExec!");
+    auto message = "next is not implemented for CreateTableExec!";
+    throw NotImplementedException(message);
   }
 
-  const string message_on_completion(UNUSED int32_t result_count) const override {
+  const string
+  message_on_completion(UNUSED int32_t result_count) const override
+  {
     return "Created table " + plan_->table_name();
   }
 

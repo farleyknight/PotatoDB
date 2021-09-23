@@ -1,5 +1,4 @@
 #include "page/index_header_page.hpp"
-#include "catalog/catalog.hpp"
 
 // NOTE: We will need the catalog object because we need to transform
 // the column_oids into TableColumn objects.

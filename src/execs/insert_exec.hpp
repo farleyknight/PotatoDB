@@ -20,10 +20,10 @@ public:
 
   Tuple
   next() override {
-    auto &heap = exec_ctx_.catalog().table_heap_for(plan_->table_oid());
+    auto &heap = exec_ctx_.schema_mgr().table_heap_for(plan_->table_oid());
     auto tuple = child_->next();
 
-    auto &table_schema = exec_ctx_.catalog().table_schema_for(plan_->table_oid());
+    auto &table_schema = exec_ctx_.schema_mgr().table_schema_for(plan_->table_oid());
     auto query_schema  = plan_->schema();
 
     // TODO: Refactor this at some point?
@@ -40,7 +40,7 @@ public:
     // the table schema.
     // Hence we need to pass in the table schema.
 
-    auto table_name = exec_ctx_.catalog().table_name_for(plan_->table_oid());
+    auto table_name = exec_ctx_.schema_mgr().table_name_for(plan_->table_oid());
     logger->debug("Inserting tuple into table: " + table_name);
     heap.insert_tuple(new_tuple, txn());
 

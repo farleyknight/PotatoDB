@@ -23,11 +23,12 @@ public:
     return exec_ctx_.txn();
   }
 
-  const Catalog& catalog() const {
-    return exec_ctx_.catalog();
+  const SchemaMgr& schema_mgr() const {
+    return exec_ctx_.schema_mgr();
   }
 
-  virtual const string message_on_completion(int32_t result_count) const = 0;
+  virtual const string
+  message_on_completion(int32_t result_count) const = 0;
 
 protected:
   ExecCtx& exec_ctx_;

@@ -12,6 +12,8 @@ class UpdatePlan : public BasePlan,
                    public HasChildPlan
 {
 public:
+  // TODO: Break out this map<...> structure into a proper
+  // class called UpdateValues.
   using UpdateValues = map<column_oid_t, ptr<BaseQuery>>;
 
   UpdatePlan(QuerySchema schema,

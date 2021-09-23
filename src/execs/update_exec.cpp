@@ -26,7 +26,13 @@ Tuple UpdateExec::next() {
   auto tuple = child_->next();
   auto rid   = tuple.rid();
 
+  logger->debug("[UpdateExec] Preparing to update our next tuple: " +
+                tuple.to_string(schema()));
+
   auto new_tuple = updated_tuple(tuple);
+
+  logger->debug("[UpdateExec] Our tuple has been updated to now be: " +
+                new_tuple.to_string(schema()));
 
   table_heap().update_tuple(new_tuple,
                             rid,
@@ -38,14 +44,16 @@ Tuple UpdateExec::next() {
 TableHeap&
 UpdateExec::table_heap() {
   auto table_oid = plan_->table_oid();
-  return exec_ctx_.catalog().table_heap_for(table_oid);
+  return exec_ctx_.schema_mgr().table_heap_for(table_oid);
 }
 
 Tuple UpdateExec::updated_tuple(const Tuple& old_tuple) {
   auto &update_values = plan_->update_values();
-  uint32_t col_count = schema().column_count();
+  int32_t col_count = schema().column_count();
   vector<Value> values;
-  for (uint32_t index = 0; index < col_count; index++) {
+  for (int32_t index = 0; index < col_count; ++index) {
+    std::cout << "Index: " << index << std::endl;
+
     if (update_values.find(index) == update_values.end()) {
       values.emplace_back(old_tuple.value(schema(), index));
     } else {

@@ -219,7 +219,8 @@ public:
   }
 
   RID read_rid(buffer_offset_t offset) const {
-    auto rid_as_uint64 = *reinterpret_cast<const uint64_t*>(const_ptr(offset));
+    auto rid_as_uint64 =
+      *reinterpret_cast<const uint64_t*>(const_ptr(offset));
     return RID(rid_as_uint64);
   }
 
@@ -228,7 +229,8 @@ public:
   }
 
   PageId read_page_id(buffer_offset_t offset) const {
-    auto page_id_as_uint32 = *reinterpret_cast<const uint32_t*>(const_ptr(offset));
+    auto page_id_as_uint32 =
+      *reinterpret_cast<const uint32_t*>(const_ptr(offset));
     return PageId::from(page_id_as_uint32);
   }
 

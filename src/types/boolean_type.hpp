@@ -95,6 +95,7 @@ public:
     case TypeId::BOOLEAN:
       return value;
     default:
+      assert(false);
       throw Exception("Not implemented yet for BooleanType into " + Type::as_string(type_id));
     }
   }

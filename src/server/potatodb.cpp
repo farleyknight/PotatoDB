@@ -22,13 +22,11 @@ PotatoDB::PotatoDB()
     log_mgr_        (disk_mgr_),
     checkpoint_mgr_ (txn_mgr_, log_mgr_, buff_mgr_),
 
-    // TODO: Need to add model_mgr_ here when I get around to
-    // doing CREATE MODEL
-    catalog_        (disk_mgr_, lock_mgr_, log_mgr_, buff_mgr_),
+    schema_mgr_     (disk_mgr_, lock_mgr_, log_mgr_, buff_mgr_),
 
     // TODO: Can we move TxnMgr into ExecMgr?
-    txn_mgr_        (lock_mgr_, log_mgr_, catalog_),
-    exec_eng_       (buff_mgr_, txn_mgr_, catalog_)
+    txn_mgr_        (lock_mgr_, log_mgr_, schema_mgr_),
+    exec_eng_       (buff_mgr_, txn_mgr_, schema_mgr_)
 {}
 
 void
@@ -79,7 +77,7 @@ PotatoDB::sql_to_plan(const sql_statement_t& statement) const {
   // called MultiStatementPlan that would also need a class
   // MultiStatementExec to run each statement and check if
   // it did or did not abort.
-  return PlanFactory::create(catalog_, move(exprs[0]));
+  return PlanFactory::create(schema_mgr_, move(exprs[0]));
 }
 
 StatementResult
@@ -114,7 +112,7 @@ PotatoDB::run(const string& statement) {
 
 void
 PotatoDB::build_system_catalog() {
-  catalog_.build_system_catalog();
+  schema_mgr_.build_system_catalog();
 }
 
 // TODO: During testing, we sometimes want to delete all database files.
@@ -186,12 +184,12 @@ PotatoDB::run_flush_thread() {
 
 table_oid_t
 PotatoDB::table_oid_for(table_name_t table_name) const {
-  return catalog_.table_oid_for(table_name);
+  return schema_mgr_.table_oid_for(table_name);
 }
 
 table_name_t
 PotatoDB::table_name_for(table_oid_t table_oid) const {
-  return catalog_.table_name_for(table_oid);
+  return schema_mgr_.table_name_for(table_oid);
 }
 
 void

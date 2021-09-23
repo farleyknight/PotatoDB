@@ -7,7 +7,7 @@
 
 #include "common/config.hpp"
 
-#include "catalog/catalog.hpp"
+#include "catalog/schema_mgr.hpp"
 
 #include "page/table_heap.hpp"
 
@@ -18,10 +18,10 @@ class TxnMgr {
 public:
   explicit TxnMgr(LockMgr& lock_mgr,
                   LogMgr& log_mgr,
-                  Catalog& catalog)
-    : lock_mgr_ (lock_mgr),
-      log_mgr_  (log_mgr),
-      catalog_  (catalog)
+                  SchemaMgr& schema_mgr)
+    : lock_mgr_   (lock_mgr),
+      log_mgr_    (log_mgr),
+      schema_mgr_ (schema_mgr)
   {}
 
   // No copy
@@ -36,8 +36,8 @@ public:
   void abort(Txn& txn);
 
   const Txn& find(txn_id_t txn_id) {
-    assert(table_.find(txn_id) != table_.end());
-    return table_.at(txn_id);
+    assert(txn_table_.find(txn_id) != txn_table_.end());
+    return txn_table_.at(txn_id);
   }
 
   void block_all_txns() {
@@ -55,9 +55,9 @@ private:
   atomic<txn_id_t> curr_txn_id_ = 0;
   LockMgr& lock_mgr_;
   UNUSED LogMgr& log_mgr_;
-  Catalog& catalog_;
+  SchemaMgr& schema_mgr_;
 
-  map<txn_id_t, Txn> table_;
+  map<txn_id_t, Txn> txn_table_;
   RWLatch global_txn_latch_;
 };
 

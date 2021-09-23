@@ -36,58 +36,104 @@ public:
     throw NotImplementedException("to_string not implemented!");
   }
 
-  static buffer_offset_t size_of(TypeId type_id) {
+  static buffer_offset_t
+  size_of(TypeId type_id) {
     return Type::instance(type_id)->size();
   }
 
-  virtual bool eq(const Value& left,
-                  const Value& right) const = 0;
+  virtual bool
+  eq(const Value& left,
+     const Value& right) const = 0;
 
-  virtual bool ne(UNUSED const Value& left,
-                  UNUSED const Value& right) const {
+  virtual bool
+  ne(UNUSED const Value& left,
+     UNUSED const Value& right) const {
     throw NotImplementedException("ne not implemented!");
   }
 
-  virtual bool lt(UNUSED const Value& left,
-                  UNUSED const Value& right) const {
+  virtual bool
+  lt(UNUSED const Value& left,
+     UNUSED const Value& right) const {
     throw NotImplementedException("lt not implemented!");
   }
 
-  virtual bool gt(UNUSED const Value& left,
-                  UNUSED const Value& right) const {
+  virtual bool
+  gt(UNUSED const Value& left,
+     UNUSED const Value& right) const {
     throw NotImplementedException("gt not implemented!");
   }
 
-  virtual bool lte(UNUSED const Value& left,
-                   UNUSED const Value& right) const {
+  virtual bool
+  lte(UNUSED const Value& left,
+      UNUSED const Value& right) const {
     throw NotImplementedException("lte not implemented!");
   }
 
-  virtual bool gte(UNUSED const Value& left,
-                   UNUSED const Value& right) const {
+  virtual bool
+  gte(UNUSED const Value& left,
+      UNUSED const Value& right) const {
     throw NotImplementedException("gte not implemented!");
   }
 
-  virtual Value cast_as(const Value& value, TypeId type_id) const = 0;
+  virtual Value
+  cast_as(const Value& value, TypeId type_id) const = 0;
 
-  virtual bool copy(UNUSED const Value& val) const {
+  virtual bool
+  copy(UNUSED const Value& val) const {
     throw NotImplementedException("copy not implemented!");
   }
 
-  virtual bool operate_null(UNUSED const Value& val,
-                            UNUSED const Value& right) const {
+  virtual bool
+  operate_null(UNUSED const Value& val,
+               UNUSED const Value& right) const {
     throw NotImplementedException("operate_null not implemented!");
   }
 
-  virtual bool is_zero(UNUSED const Value& val) const {
+  virtual bool
+  is_zero(UNUSED const Value& val) const {
     throw NotImplementedException("is_zero not implemented!");
   }
 
-  bool is_coercible_from(UNUSED const TypeId type_id) const {
+  bool
+  is_coercible_from(UNUSED const TypeId type_id) const {
     throw NotImplementedException("max not implemented!");
   }
 
-  static const string as_string(const TypeId type_id) {
+  static int32_t
+  as_int32(const TypeId type_id) {
+    switch (type_id) {
+    case TypeId::INVALID:   return 0;
+    case TypeId::BOOLEAN:   return 1;
+    case TypeId::TINYINT:   return 2;
+    case TypeId::SMALLINT:  return 3;
+    case TypeId::INTEGER:   return 4;
+    case TypeId::BIGINT:    return 5;
+    case TypeId::DECIMAL:   return 6;
+    case TypeId::TIMESTAMP: return 7;
+    case TypeId::VARCHAR:   return 8;
+    default:                return 0;
+    }
+  }
+
+  static TypeId
+  from_int32(int32_t value) {
+    switch (value) {
+    case 0:  return TypeId::INVALID;
+    case 1:  return TypeId::BOOLEAN;
+    case 2:  return TypeId::TINYINT;
+    case 3:  return TypeId::SMALLINT;
+    case 4:  return TypeId::INTEGER;
+    case 5:  return TypeId::BIGINT;
+    case 6:  return TypeId::DECIMAL;
+    case 7:  return TypeId::TIMESTAMP;
+    case 8:  return TypeId::VARCHAR;
+    default: return TypeId::INVALID;
+    }
+  }
+
+
+  static const string
+  as_string(const TypeId type_id) {
     switch (type_id) {
     case TypeId::INVALID:   return "INVALID";
     case TypeId::BOOLEAN:   return "BOOLEAN";
@@ -102,7 +148,8 @@ public:
     }
   }
 
-  static TypeId type_id_for(const string& name) {
+  static TypeId
+  type_id_for(const string& name) {
     if (name == "INTEGER") {
       return TypeId::INTEGER;
     } else if (name == "VARCHAR") {

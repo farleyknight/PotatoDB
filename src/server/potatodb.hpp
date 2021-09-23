@@ -62,21 +62,22 @@ public:
 
   fs::path table_file_for(const string& table_name);
 
-  const IndexSchema& index_for(const index_name_t index_name) {
-    // TODO: Return the IndexSchema stored in the SystemCatalog
-    return catalog_.index_schema_for(index_name);
+  const IndexSchema&
+  index_for(const index_name_t index_name) const
+  {
+    return schema_mgr_.index_schema_for(index_name);
   }
 
   ExecEngine& exec_eng() {
     return exec_eng_;
   }
 
-  Catalog& catalog() {
-    return catalog_;
+  SchemaMgr& schema_mgr() {
+    return schema_mgr_;
   }
 
-  const Catalog& catalog() const {
-    return catalog_;
+  const SchemaMgr& schema_mgr() const {
+    return schema_mgr_;
   }
 
   TxnMgr& txn_mgr() {
@@ -104,7 +105,7 @@ public:
                    buff_mgr_,
                    lock_mgr_,
                    txn_mgr_,
-                   catalog_);
+                   schema_mgr_);
   }
 
   LogRecovery log_recovery() {
@@ -132,7 +133,7 @@ private:
   LogMgr        log_mgr_;
   CheckpointMgr checkpoint_mgr_;
   LockMgr       lock_mgr_;
-  Catalog       catalog_;
+  SchemaMgr     schema_mgr_;
 
   TxnMgr        txn_mgr_;
   ExecEngine    exec_eng_;

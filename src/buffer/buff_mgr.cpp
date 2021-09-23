@@ -43,7 +43,8 @@ BuffMgr::pick_or_evict_page() {
   }
 }
 
-bool BuffMgr::flush_page(PageId page_id) {
+bool
+BuffMgr::flush_page(PageId page_id) {
   if (!contains_page(page_id)) {
     return false;
   }
@@ -58,7 +59,8 @@ bool BuffMgr::flush_page(PageId page_id) {
   return true;
 }
 
-Page* BuffMgr::fetch_page(PageId page_id) {
+Page*
+BuffMgr::fetch_page(PageId page_id) {
   try {
     assert(page_id.is_valid());
     if (contains_page(page_id)) {
@@ -98,7 +100,8 @@ Page* BuffMgr::fetch_page(PageId page_id) {
   return nullptr;
 }
 
-bool BuffMgr::unpin(PageId page_id, bool is_dirty) {
+bool
+BuffMgr::unpin(PageId page_id, bool is_dirty) {
   if (!contains_page(page_id)) {
     return false;
   }
@@ -119,7 +122,8 @@ bool BuffMgr::unpin(PageId page_id, bool is_dirty) {
   return true;
 }
 
-bool BuffMgr::delete_page(PageId page_id) {
+bool
+BuffMgr::delete_page(PageId page_id) {
   if (!contains_page(page_id)) {
     return true;
   }
@@ -139,7 +143,8 @@ bool BuffMgr::delete_page(PageId page_id) {
   return true;
 }
 
-void BuffMgr::flush_all() {
+void
+BuffMgr::flush_all() {
   for (auto& page : pages_) {
     flush_page(page);
   }
@@ -148,21 +153,25 @@ void BuffMgr::flush_all() {
   replacer_->reset();
 }
 
-bool BuffMgr::contains_page(PageId page_id) {
+bool
+BuffMgr::contains_page(PageId page_id) {
   assert(page_id.is_valid());
   return page_table_.count(page_id.as_uint32()) > 0;
 }
 
-Page& BuffMgr::page_by_id(PageId page_id) {
+Page&
+BuffMgr::page_by_id(PageId page_id) {
   return pages_[page_table_[page_id.as_uint32()]];
 }
 
-void BuffMgr::pin_page(Page& page, frame_id_t frame_id) {
+void
+BuffMgr::pin_page(Page& page, frame_id_t frame_id) {
   page.pin();
   replacer_->pin(frame_id);
 }
 
-bool BuffMgr::flush_page(Page& page) {
+bool
+BuffMgr::flush_page(Page& page) {
   // TODO: Need to add hook into LogMgr to actually flush the page
   // https://github.com/xiaohuanlin/private-bustub/blob/189c621343e30fc51011edfc29809ed91c5fbd55/src/buffer/buffer_pool_manager.cpp#L108
   if (page.is_dirty()) {

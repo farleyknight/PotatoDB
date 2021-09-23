@@ -161,6 +161,13 @@ public:
     return table_mgr_.table_names();
   }
 
+  column_oid_t
+  column_oid_for(const table_name_t& table_name,
+                 const column_name_t& column_name) const
+  {
+    return table_mgr_.column_oid_for(table_name, column_name);
+  }
+
   index_oid_t
   create_index(const CreateIndexExpr& expr) {
     auto table_name   = expr.table().name();

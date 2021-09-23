@@ -26,55 +26,30 @@ public:
   deallocate_block(block_id_t block_id);
 
   void
-  create() {
-    handle_.open(file_path_, fstream::out);
-    handle_ << "";
-    handle_.close();
-  }
+  create();
 
   bool
-  resize(std::uintmax_t new_size) {
-    std::error_code error;
-    std::error_condition ok;
-    fs::resize_file(file_path_, new_size, error);
-
-    return (error == ok);
-  }
+  resize(std::uintmax_t new_size);
 
   void
-  open() {
-    handle_.open(file_path_,
-                 fstream::in | fstream::out | fstream::binary);
-  }
+  open();
 
   void
-  close() {
-    handle_.close();
-  }
+  close();
 
-  ~FileHandle() {
-    close();
-  }
+  ~FileHandle();
 
   buffer_offset_t
-  size() const {
-    return fs::file_size(file_path_);
-  }
+  size() const;
 
   const string
-  file_path() const {
-    return file_path_.string();
-  }
+  file_path() const;
 
   file_id_t
-  file_id() const {
-    return file_id_;
-  }
+  file_id() const;
 
   fstream&
-  io() {
-    return handle_;
-  }
+  io();
 
 private:
   file_id_t file_id_;

@@ -69,16 +69,16 @@ Any EvalParseVisitor::visitCreate_table_stmt(CreateTableStmtContext *ctx) {
 
     for (auto &constraint : col_def_ctx->column_constraint()) {
       if (constraint->not_null()) {
-        col_def.is_nullable(false);
+        col_def.set_nullable(false);
       }
 
       if (constraint->primary_key()) {
-        col_def.is_primary_key(true);
+        col_def.set_primary_key(true);
         create_table.set_primary_key(col_def.name());
       }
 
       if (constraint->autoincrement()) {
-        col_def.is_auto_increment(true);
+        col_def.set_autoincrement(true);
       }
     }
   }

@@ -41,15 +41,17 @@ public:
   // Default destructor
   virtual ~BaseQuery() = default;
 
-  virtual Value eval_join(UNUSED const Tuple& lt, UNUSED const QuerySchema& ls,
-                          UNUSED const Tuple& rt, UNUSED const QuerySchema& rs) const
+  virtual Value
+  eval_join(UNUSED const Tuple& lt, UNUSED const QuerySchema& ls,
+            UNUSED const Tuple& rt, UNUSED const QuerySchema& rs) const
   {
     throw NotImplementedException("eval_join not implemented");
   }
 
-  virtual Value eval_agg(UNUSED const QuerySchema& schema,
-                         UNUSED const vector<Value>& group_bys,
-                         UNUSED const vector<Value>& aggregates) const
+  virtual Value
+  eval_agg(UNUSED const QuerySchema& schema,
+           UNUSED const vector<Value>& group_bys,
+           UNUSED const vector<Value>& aggregates) const
   {
     throw NotImplementedException("eval_agg not implemented");
   }

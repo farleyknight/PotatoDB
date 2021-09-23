@@ -1,7 +1,8 @@
 #pragma once
 
 #include "buffer/buff_mgr.hpp"
-#include "catalog/catalog.hpp"
+
+#include "catalog/schema_mgr.hpp"
 
 #include "execs/exec_factory.hpp"
 
@@ -16,53 +17,24 @@ class ExecEngine {
 public:
   ExecEngine(const BuffMgr& buff_mgr,
              const TxnMgr& txn_mgr,
-             const Catalog& catalog)
-    : buff_mgr_ (buff_mgr),
-      txn_mgr_  (txn_mgr),
-      catalog_  (catalog) {}
+             const SchemaMgr& schema_mgr)
+    : buff_mgr_   (buff_mgr),
+      txn_mgr_    (txn_mgr),
+      schema_mgr_ (schema_mgr) {}
 
-  ptr<ResultSet> query(ptr<BasePlan>&& plan,
-                       ExecCtx& exec_ctx) const
-  {
-    vector<Tuple> tuples;
+  // Queries should NOT have to write to the execution engine.
+  // TODO: At some point we should try making some of the
+  // parameters const, such as `plan` or `exec_ctx`
+  ptr<ResultSet>
+  query(ptr<BasePlan>&& plan,
+        ExecCtx& exec_ctx) const;
 
-    // TODO: We should verify that plan has SchemaPlan here
-    auto schema = dynamic_cast<SchemaPlan*>(plan.get())->schema();
-    auto exec = ExecFactory::create(exec_ctx, move(plan));
-
-    exec->init();
-
-    while (exec->has_next()) {
-      tuples.push_back(exec->next());
-    }
-
-    return make_unique<ResultSet>(move(tuples), schema);
-  }
-
-  // NOTE: This version does not collect results, hence the inner
-  // loop does not do anything with the Tuple & RID
-  const string execute(ptr<BasePlan>&& plan,
-                       ExecCtx& exec_ctx)
-  {
-    auto exec = ExecFactory::create(exec_ctx, move(plan));
-
-    int result_count = 0;
-    exec->init();
-
-    try {
-      while (exec->has_next()) {
-        exec->next();
-        ++result_count;
-      }
-    } catch (Exception &e) {
-      return 0;
-    }
-
-    return exec->message_on_completion(result_count);
-  }
+  const string
+  execute(ptr<BasePlan>&& plan,
+          ExecCtx& exec_ctx);
 
 private:
   UNUSED const BuffMgr& buff_mgr_;
   UNUSED const TxnMgr& txn_mgr_;
-  UNUSED const Catalog& catalog_;
+  UNUSED const SchemaMgr& schema_mgr_;
 };

@@ -8,12 +8,13 @@
 #include "buffer/buffer.hpp"
 #include "page/page_id.hpp"
 #include "txns/rw_latch.hpp"
+#include "types/type_id.hpp"
 
 class Page {
 public:
   static constexpr size_t OFFSET_PAGE_START = 0;
-  static constexpr size_t OFFSET_LSN = 4;
-  static constexpr size_t SIZE_PAGE_HEADER = 8;
+  static constexpr size_t OFFSET_LSN        = 4;
+  static constexpr size_t SIZE_PAGE_HEADER  = 8;
 
   Page();
 
@@ -92,7 +93,8 @@ public:
     return buffer_;
   }
 
-  void write_buffer(UNUSED buffer_offset_t offset, UNUSED const Buffer buffer) {
+  void write_buffer(UNUSED buffer_offset_t offset,
+                    UNUSED const Buffer buffer) {
     // TODO: Write the buffer to the specified offset.
     return;
   }
@@ -107,6 +109,12 @@ public:
 
   PageId read_page_id(buffer_offset_t offset) const;
   void write_page_id(buffer_offset_t offset, PageId page_id);
+
+  TypeId read_type_id(buffer_offset_t offset) const;
+  void write_type_id(buffer_offset_t offset, TypeId type_id);
+
+  bool read_bool(buffer_offset_t offset) const;
+  void write_bool(buffer_offset_t offset, bool value);
 
   void wlatch();
   void wunlatch();

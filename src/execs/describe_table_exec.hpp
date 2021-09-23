@@ -65,12 +65,12 @@ private:
 
   vector<TableColumn>&
   load_table_columns() {
-    return exec_ctx_.catalog().table_columns_for(table_name());
+    return exec_ctx_.schema_mgr().table_columns_for(table_name());
   }
 
   const vector<TableColumn>&
   load_table_columns() const {
-    return exec_ctx_.catalog().table_columns_for(table_name());
+    return exec_ctx_.schema_mgr().table_columns_for(table_name());
   }
 
   ptr<DescribeTablePlan> plan_;

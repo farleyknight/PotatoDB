@@ -1,4 +1,3 @@
-
 #include "disk/file_handle.hpp"
 
 FileHandle::FileHandle(file_id_t file_id, fs::path file_path)
@@ -17,8 +16,62 @@ FileHandle::FileHandle(file_id_t file_id, fs::path file_path)
   print_status();
 }
 
-void FileHandle::write_buffer(buffer_offset_t offset,
-                              const Buffer& buffer)
+void
+FileHandle::create() {
+  handle_.open(file_path_, fstream::out);
+  handle_ << "";
+  handle_.close();
+}
+
+bool
+FileHandle::resize(std::uintmax_t new_size) {
+  std::error_code error;
+  std::error_condition ok;
+  fs::resize_file(file_path_, new_size, error);
+
+  return (error == ok);
+}
+
+void
+FileHandle::open() {
+  handle_.open(file_path_,
+               fstream::in | fstream::out | fstream::binary);
+}
+
+void
+FileHandle::close() {
+  handle_.close();
+}
+
+FileHandle::~FileHandle() {
+  if (handle_.is_open()) {
+    close();
+  }
+}
+
+buffer_offset_t
+FileHandle::size() const {
+  return fs::file_size(file_path_);
+}
+
+file_id_t
+FileHandle::file_id() const {
+  return file_id_;
+}
+
+fstream&
+FileHandle::io() {
+  return handle_;
+}
+
+const string
+FileHandle::file_path() const {
+  return file_path_.string();
+}
+
+void
+FileHandle::write_buffer(buffer_offset_t offset,
+                         const Buffer& buffer)
 {
   logger->debug("[FileHandle] Writing: " + file_path());
   logger->debug("[FileHandle] Before seekp, what is file status?");

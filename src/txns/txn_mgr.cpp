@@ -13,13 +13,13 @@ Txn& TxnMgr::begin(IsolationLevel level =
   // TODO: This shit is so ugly, it needs it's own method..!
   txn_id_t txn_id = curr_txn_id_;
   // https://en.cppreference.com/w/cpp/utility/tuple/forward_as_tuple
-  table_.emplace(std::piecewise_construct,
-                 std::forward_as_tuple(txn_id),
-                 std::forward_as_tuple(txn_id, level));
+  txn_table_.emplace(std::piecewise_construct,
+                     std::forward_as_tuple(txn_id),
+                     std::forward_as_tuple(txn_id, level));
 
-  curr_txn_id_ = txn_id + 1;
+  curr_txn_id_ = txn_id++;
 
-  return table_.at(txn_id);
+  return txn_table_.at(txn_id);
 }
 
 void TxnMgr::commit(Txn& txn) {
@@ -30,7 +30,7 @@ void TxnMgr::commit(Txn& txn) {
 
     if (item.is_delete()) {
       logger->debug("[TxnMgr] APPLY DELETE " + item.rid().to_string());
-      auto &table_heap = catalog_.table_heap_for(item.table_oid());
+      auto &table_heap = schema_mgr_.table_heap_for(item.table_oid());
       // Note that this also releases the lock when
       // holding the page latch.
       table_heap.apply_delete(item.rid(), txn);
@@ -77,7 +77,7 @@ void TxnMgr::abort(Txn& txn) {
 
   while (!write_set.empty()) {
     auto &item = write_set.back();
-    auto &table_heap = catalog_.table_heap_for(item.table_oid());
+    auto &table_heap = schema_mgr_.table_heap_for(item.table_oid());
 
     switch (item.wtype()) {
     case WType::DELETE:

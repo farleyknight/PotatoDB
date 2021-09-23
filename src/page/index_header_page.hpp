@@ -43,8 +43,6 @@
  *
  */
 
-class Catalog;
-
 class IndexHeaderPage : public PageLayout {
 public:
   using column_oids_start_t = buffer_offset_t;

@@ -108,7 +108,7 @@ Tuple SeqScanExec::next() {
 
 TableHeap& SeqScanExec::table_heap() {
   auto table_oid = plan_->table_oid();
-  return exec_ctx_.catalog().table_heap_for(table_oid);
+  return exec_ctx_.schema_mgr().table_heap_for(table_oid);
 }
 
 void SeqScanExec::init() {
@@ -121,5 +121,5 @@ const QuerySchema& SeqScanExec::schema() {
 
 const TableSchema& SeqScanExec::table_schema() {
   auto table_oid = plan_->table_oid();
-  return exec_ctx_.catalog().table_schema_for(table_oid);
+  return exec_ctx_.schema_mgr().table_schema_for(table_oid);
 }

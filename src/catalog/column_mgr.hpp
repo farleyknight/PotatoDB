@@ -11,14 +11,23 @@ public:
   make_column_oid(const table_name_t& table_name,
                   const column_name_t& column_name)
   {
-    auto full_name = table_name + "." + column_name;
-    assert(!column_oids_.contains(full_name));
-
-    column_oid_t column_oid = next_column_oid_;
-    next_column_oid_++;
-    column_oids_[full_name] = column_oid;
+    auto column_oid = next_column_oid_++;
+    load_column_oid(column_oid, table_name, column_name);
 
     return column_oid;
+  }
+
+  void
+  load_column_oid(column_oid_t column_oid,
+                  const table_name_t& table_name,
+                  const column_name_t& column_name)
+  {
+    auto full_name = table_name + "." + column_name;
+    if (column_oids_.contains(full_name)) {
+      return;
+    }
+
+    column_oids_[full_name] = column_oid;
   }
 
   column_oid_t
@@ -30,11 +39,12 @@ public:
     return column_oids_.at(full_name);
   }
 
-  vector<TableColumn> make_columns(table_oid_t table_oid,
-                                   table_name_t table_name,
-                                   const ColumnDefListExpr& expr)
+  vector<TableColumn>
+  make_columns(table_oid_t table_oid,
+               table_name_t table_name,
+               const ColumnDefListExpr& expr)
   {
-    vector<TableColumn> result;
+    vector<TableColumn> table_columns;
 
     for (const auto &column_expr : expr.list()) {
       auto column_oid = make_column_oid(table_name, column_expr.name());
@@ -43,10 +53,10 @@ public:
       auto col = make_column_from(table_oid, column_oid, column_expr);
       columns_.emplace(column_oid, col);
 
-      result.push_back(col);
+      table_columns.push_back(col);
     }
 
-    return result;
+    return table_columns;
   }
 
   bool
@@ -82,6 +92,7 @@ public:
   column_for(column_oid_t column_oid) const {
     return columns_.at(column_oid);
   }
+
 
 private:
 

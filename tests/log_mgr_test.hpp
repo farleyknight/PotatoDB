@@ -2,14 +2,17 @@
 
 #include "recovery/log_mgr.hpp"
 #include "recovery/log_record.hpp"
+#include "txns/lock_mgr.hpp"
+#include "txns/txn_mgr.hpp"
+#include "recovery/log_recovery.hpp"
 
 class LogMgrSerialization : public ::testing::Test {
 public:
   LogMgrSerialization()
-    : log_mgr   (disk_mgr),
-      txn_mgr   (lock_mgr, log_mgr, catalog),
-      buff_mgr  (10, disk_mgr, log_mgr),
-      catalog   (disk_mgr, lock_mgr, log_mgr, buff_mgr)
+    : log_mgr     (disk_mgr),
+      txn_mgr     (lock_mgr, log_mgr, schema_mgr),
+      buff_mgr    (10, disk_mgr, log_mgr),
+      schema_mgr  (disk_mgr, lock_mgr, log_mgr, buff_mgr)
   {}
 
   void SetUp() override {
@@ -27,7 +30,7 @@ public:
   LogMgr log_mgr;
   TxnMgr txn_mgr;
   BuffMgr buff_mgr;
-  Catalog catalog;
+  SchemaMgr schema_mgr;
 };
 
 // NOTE: We should NOT need a schema anywhere in these tests!

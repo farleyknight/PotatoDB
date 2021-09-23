@@ -10,7 +10,7 @@ public:
 
   void
   init() override {
-    table_names_ = exec_ctx_.catalog().table_names();
+    table_names_ = exec_ctx_.schema_mgr().table_names();
     table_names_iter_ = table_names_.begin();
   }
 

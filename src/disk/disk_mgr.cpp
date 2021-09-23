@@ -72,9 +72,7 @@ void
 DiskMgr::open_table_files() {
   auto iter = fs::directory_iterator(db_directory());
   for (const auto &entry : iter) {
-    std::cout << "Checking " << entry.path() << std::endl;
     if (entry.path().extension() == table_file_mgr_.file_extension()) {
-      std::cout << "Opening " << entry.path() << std::endl;
       open_table_file(entry);
     }
   }

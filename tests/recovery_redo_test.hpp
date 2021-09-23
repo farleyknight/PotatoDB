@@ -15,9 +15,9 @@ std::tuple<RID, RID> redo_test_part1() {
 
   db.run("CREATE TABLE test_table ( a VARCHAR(20), b INTEGER ) ");
 
-  auto test_schema      = db.catalog().query_schema_for("test_table");
-  auto test_table_oid   = db.catalog().table_oid_for("test_table");
-  auto &test_table_heap = db.catalog().table_heap_for(test_table_oid);
+  auto test_schema      = db.schema_mgr().query_schema_for("test_table");
+  auto test_table_oid   = db.schema_mgr().table_oid_for("test_table");
+  auto &test_table_heap = db.schema_mgr().table_heap_for(test_table_oid);
 
   auto value_A_1 = Value::make("x");
   auto value_B_1 = Value::make(2);

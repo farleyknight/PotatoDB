@@ -19,6 +19,10 @@ public:
     return page_;
   }
 
+  void set_dirty(bool dirty) {
+    page_->set_dirty(dirty);
+  }
+
   void rlatch() {
     page_->rlatch();
   }

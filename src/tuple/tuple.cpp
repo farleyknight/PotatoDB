@@ -13,7 +13,13 @@ Tuple::Tuple(vector<Value> values, const QuerySchema& schema)
     std::cout << "schema.column_count() == " << schema.column_count() << std::endl;
   }
 
+  // 0. Verify the values align with the schema
+  // TODO: Write proper error handling should be a good next step towards being
+  // a robust database.
   assert(values_size == schema.column_count());
+  for (int32_t i = 0; i < values_size; ++i) {
+    assert(values[i].type_id() == schema.by_column_index(i).type_id());
+  }
 
   // 1. Calculate the size of the tuple.
   int32_t tuple_length = schema.tuple_length();
@@ -27,8 +33,8 @@ Tuple::Tuple(vector<Value> values, const QuerySchema& schema)
   assert(buffer_.size() == tuple_length);
 
   // 3. Serialize each attribute based on the input value.
-  column_index_t column_count = schema.column_count();
-  buffer_offset_t offset = schema.tuple_length();
+  auto column_count = schema.column_count();
+  auto offset = schema.tuple_length();
 
   for (column_index_t i = 0; i < column_count; i++) {
     const auto &col = schema.by_column_index(i);

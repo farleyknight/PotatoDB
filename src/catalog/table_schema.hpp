@@ -31,10 +31,14 @@ public:
 
   const string to_string() const;
 
-  QueryColumn operator[](const column_name_t& name) const;
+  QueryColumn
+  operator[](const column_name_t& name) const;
 
-  vector<TableColumn> missing_columns(const QuerySchema& query_schema) const;
-  deque<Value> defaults(const vector<TableColumn>& cols);
+  vector<TableColumn>
+  missing_columns(const QuerySchema& query_schema) const;
+
+  deque<Value>
+  defaults(const vector<TableColumn>& cols);
 
   table_oid_t table_oid() const {
     return table_oid_;

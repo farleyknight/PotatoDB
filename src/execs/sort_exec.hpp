@@ -15,9 +15,10 @@ public:
       table_riter_ (table_.rbegin())
   {}
 
-  const TableSchema& table_schema() const {
+  const TableSchema&
+  table_schema() const {
     auto table_oid = child_schema().table_oid();
-    return exec_ctx_.catalog().table_schema_for(table_oid);
+    return exec_ctx_.schema_mgr().table_schema_for(table_oid);
   }
 
   void init() override {

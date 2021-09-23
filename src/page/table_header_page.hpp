@@ -2,6 +2,7 @@
 
 #include "catalog/column_data.hpp"
 #include "catalog/table_schema.hpp"
+#include "page/page_layout.hpp"
 
 // TODO: Each table & index file should have a FileHeaderPage
 // The TableHeaderPage should be a subclass of FileHeaderPage
@@ -40,7 +41,8 @@ public:
     : PageLayout (page)
   {}
 
-  TableSchema read_schema() const {
+  TableSchema
+  read_schema() const {
     auto table_oid     = read_table_oid();
     auto column_count  = read_column_count();
     auto columns_start = read_columns_start();
@@ -52,92 +54,60 @@ public:
                        table_oid);
   }
 
-  void write_schema(const TableSchema& schema) {
+  void
+  write_schema(const TableSchema& schema) {
     auto columns_start = write_metadata(schema);
     write_columns(columns_start, schema.columns());
   }
 
-  int32_t write_metadata(const TableSchema& schema) {
-    buffer_offset_t offset = 0;
+  int32_t
+  write_metadata(const TableSchema& schema);
 
-    write_table_oid(schema.table_oid());
-    offset += sizeof(schema.table_oid());
-
-    write_column_count(schema.columns().size());
-    offset += sizeof(schema.columns().size());
-
-    write_table_name(schema.table_name());
-    offset += sizeof(string_length_t) + schema.table_name().size();
-
-    auto columns_start = offset + sizeof(buffer_offset_t);
-    write_columns_start(offset);
-
-    return columns_start;
-  }
-
-  table_oid_t read_table_oid() const {
+  table_oid_t
+  read_table_oid() const {
     return page_->read_int32(TABLE_OID_OFFSET);
   }
 
-  void write_table_oid(table_oid_t table_oid) {
+  void
+  write_table_oid(table_oid_t table_oid) {
     page_->write_int32(TABLE_OID_OFFSET, table_oid);
   }
 
-  buffer_offset_t read_columns_start() const {
+  buffer_offset_t
+  read_columns_start() const {
     return page_->read_int32(COLUMNS_START_OFFSET);
   }
 
-  void write_columns_start(columns_start_t columns_start) {
+  void
+  write_columns_start(columns_start_t columns_start) {
     page_->write_int32(COLUMNS_START_OFFSET, columns_start);
   }
 
-  columns_count_t read_column_count() const {
+  columns_count_t
+  read_column_count() const {
     return page_->read_int32(COLUMN_COUNT_OFFSET);
   }
 
-  void write_column_count(columns_count_t column_count) {
+  void
+  write_column_count(columns_count_t column_count) {
     return page_->write_int32(COLUMN_COUNT_OFFSET, column_count);
   }
 
-  table_name_t read_table_name() const {
+  table_name_t
+  read_table_name() const {
     return page_->read_string(TABLE_NAME_OFFSET);
   }
 
-  void write_table_name(table_name_t table_name) {
+  void
+  write_table_name(table_name_t table_name) {
     page_->write_string(TABLE_NAME_OFFSET, table_name);
   }
 
-  vector<TableColumn> read_columns(buffer_offset_t start_offset,
-                                   int32_t column_count) const
-  {
-    buffer_offset_t offset = start_offset;
+  vector<TableColumn>
+  read_columns(buffer_offset_t columns_start,
+               int32_t column_count) const;
 
-    vector<TableColumn> cols;
-    for (int32_t i = 0; i < column_count; ++i) {
-      auto size = page_->read_int32(offset);
-      offset += sizeof(size);
-
-      auto col_data_buffer = page_->read_buffer(offset, size);
-      // TODO: Use col_data_buffer to create the TableColumn
-      offset += size;
-    }
-
-    return cols;
-  }
-
-  void write_columns(buffer_offset_t columns_start,
-                     const vector<TableColumn>& columns)
-  {
-    buffer_offset_t offset = columns_start;
-    for (const auto &col : columns) {
-      auto col_data_buffer = col.data();
-      auto size = col_data_buffer.size();
-
-      page_->write_int32(offset, size);
-      offset += sizeof(size);
-
-      page_->write_buffer(offset, col_data_buffer);
-      offset += size;
-    }
-  }
+  void
+  write_columns(buffer_offset_t columns_start,
+                const vector<TableColumn>& columns);
 };

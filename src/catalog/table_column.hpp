@@ -18,7 +18,50 @@ class TableColumn {
 public:
   explicit TableColumn(table_oid_t table_oid,
                        column_oid_t column_oid,
-                       string_size_t length,
+                       const column_name_t column_name,
+                       TypeId type_id,
+                       bool nullable,
+                       bool primary_key,
+                       bool autoincrement)
+    : name_            (column_name),
+      type_id_         (type_id),
+      table_oid_       (table_oid),
+      column_oid_      (column_oid),
+      inlined_         (true),
+      nullable_        (nullable),
+      primary_key_     (primary_key),
+      autoincrement_   (autoincrement),
+      fixed_length_    (Type::size_of(type_id_)),
+      variable_length_ (INVALID_VARIABLE_LENGTH)
+  {
+    assert(type_id_ != TypeId::VARCHAR);
+  }
+
+  explicit TableColumn(table_oid_t table_oid,
+                       column_oid_t column_oid,
+                       const column_name_t column_name,
+                       length_t length,
+                       TypeId type_id,
+                       bool nullable,
+                       bool primary_key,
+                       bool autoincrement)
+    : name_            (column_name),
+      type_id_         (type_id),
+      table_oid_       (table_oid),
+      column_oid_      (column_oid),
+      inlined_         (false),
+      nullable_        (nullable),
+      primary_key_     (primary_key),
+      autoincrement_   (autoincrement),
+      fixed_length_    (INVALID_FIXED_LENGTH),
+      variable_length_ (length)
+  {
+    assert(type_id_ == TypeId::VARCHAR);
+  }
+
+  explicit TableColumn(table_oid_t table_oid,
+                       column_oid_t column_oid,
+                       length_t length,
                        const ColumnDefExpr& expr)
     : name_            (expr.name()),
       type_id_         (expr.type_id()),
@@ -27,7 +70,7 @@ public:
       inlined_         (false),
       nullable_        (expr.is_nullable()),
       primary_key_     (expr.is_primary_key()),
-      autoincrement_   (expr.auto_increment()),
+      autoincrement_   (expr.is_autoincrement()),
       fixed_length_    (INVALID_FIXED_LENGTH),
       variable_length_ (length)
   {
@@ -44,7 +87,7 @@ public:
       inlined_         (true),
       nullable_        (expr.is_nullable()),
       primary_key_     (expr.is_primary_key()),
-      autoincrement_   (expr.auto_increment()),
+      autoincrement_   (expr.is_autoincrement()),
       fixed_length_    (Type::size_of(type_id_)),
       variable_length_ (INVALID_VARIABLE_LENGTH)
   {
@@ -58,21 +101,18 @@ public:
   // Default destructor
   ~TableColumn() = default;
 
+  const column_name_t& name()     const { return name_; }
+
+  TypeId type_id()                const { return type_id_; }
+  table_oid_t table_oid()         const { return table_oid_; }
+  column_oid_t column_oid()       const { return column_oid_; }
+  length_t fixed_length()         const { return fixed_length_; }
+  string_size_t variable_length() const { return variable_length_; }
+
   bool is_inlined()               const { return inlined_; }
   bool is_primary_key()           const { return primary_key_; }
   bool is_autoincrement()         const { return autoincrement_; }
   bool is_nullable()              const { return nullable_; }
-  TypeId type_id()                const { return type_id_; }
-  table_oid_t table_oid()         const { return table_oid_; }
-  column_oid_t column_oid()       const { return column_oid_; }
-  int32_t fixed_length()          const { return fixed_length_; }
-  string_size_t variable_length() const { return variable_length_; }
-  const column_name_t& name()     const { return name_; }
-
-  const Buffer data() const {
-    // TODO: The buffer should be able to serialize & deserialize itself
-    return Buffer();
-  }
 
   void set_nullable(bool nullable) {
     nullable_ = nullable;

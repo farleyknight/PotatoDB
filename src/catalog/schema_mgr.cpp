@@ -1,21 +1,26 @@
-#include "catalog/catalog.hpp"
+#include "catalog/schema_mgr.hpp"
 
+// TODO: A lot of these are just returning QuerySchema in some
+// form or another.
+//
+// Instead we should probably put all of these methods into a
+// QuerySchemaMgr object.
 
 QuerySchema
-Catalog::query_schema_for(table_oid_t table_oid) const
+SchemaMgr::query_schema_for(table_oid_t table_oid) const
 {
   return QuerySchema(all_columns_for(table_oid));
 }
 
 QuerySchema
-Catalog::query_schema_for(const table_name_t& table_name) const
+SchemaMgr::query_schema_for(const table_name_t& table_name) const
 {
   return QuerySchema(all_columns_for(table_name));
 }
 
 QuerySchema
-Catalog::query_schema_for(const vector<table_name_t>& table_names,
-                          const ColumnListExpr& column_list) const
+SchemaMgr::query_schema_for(const vector<table_name_t>& table_names,
+                            const ColumnListExpr& column_list) const
 {
   vector<QueryColumn> columns;
   for (const auto &column : column_list.list()) {
@@ -38,7 +43,7 @@ Catalog::query_schema_for(const vector<table_name_t>& table_names,
 }
 
 vector<QueryColumn>
-Catalog::all_columns_for(const vector<table_name_t>& table_names) const {
+SchemaMgr::all_columns_for(const vector<table_name_t>& table_names) const {
   vector<QueryColumn> columns;
   for (const auto &table_name : table_names) {
     for (const auto &col : all_columns_for(table_name)) {
@@ -49,13 +54,13 @@ Catalog::all_columns_for(const vector<table_name_t>& table_names) const {
 }
 
 vector<QueryColumn>
-Catalog::all_columns_for(const table_name_t& table_name) const {
+SchemaMgr::all_columns_for(const table_name_t& table_name) const {
   auto table_oid = sys_catalog_.table_oid_for(table_name);
   return all_columns_for(table_oid);
 }
 
 vector<QueryColumn>
-Catalog::all_columns_for(table_oid_t table_oid) const {
+SchemaMgr::all_columns_for(table_oid_t table_oid) const {
   auto table_schema = sys_catalog_.table_schema_for(table_oid);
   vector<QueryColumn> cols;
   for (const auto &col : table_schema.columns()) {
@@ -65,7 +70,7 @@ Catalog::all_columns_for(table_oid_t table_oid) const {
 }
 
 QuerySchema
-Catalog::show_tables_schema() const
+SchemaMgr::show_tables_schema() const
 {
   vector<QueryColumn> cols;
   cols.push_back(QueryColumn(TypeId::VARCHAR, "table_name"));
@@ -73,7 +78,7 @@ Catalog::show_tables_schema() const
 }
 
 QuerySchema
-Catalog::describe_table_schema() const
+SchemaMgr::describe_table_schema() const
 {
   vector<QueryColumn> cols;
 
@@ -92,7 +97,7 @@ Catalog::describe_table_schema() const
 }
 
 QuerySchema
-Catalog::query_schema_for(const table_name_t& table_name,
+SchemaMgr::query_schema_for(const table_name_t& table_name,
                           const ColumnListExpr& column_list) const
 {
   if (column_list.list().size() == 0) {
@@ -115,8 +120,8 @@ Catalog::query_schema_for(const table_name_t& table_name,
 }
 
 QueryColumn
-Catalog::query_column_for(const table_name_t& table_name,
-                          const column_name_t& column_name) const
+SchemaMgr::query_column_for(const table_name_t& table_name,
+                            const column_name_t& column_name) const
 {
   const auto &schema = sys_catalog_.table_schema_for(table_name);
   if (schema.has_column(column_name)) {
@@ -127,11 +132,9 @@ Catalog::query_column_for(const table_name_t& table_name,
                     "' on table '" + table_name + "'");
   }
 }
-
-
 QueryColumn
-Catalog::query_column_for(const vector<table_name_t>& table_names,
-                          const column_name_t& column_name) const
+SchemaMgr::query_column_for(const vector<table_name_t>& table_names,
+                            const column_name_t& column_name) const
 {
   vector<QueryColumn> candidates;
   for (const auto &table_name : table_names) {
@@ -153,4 +156,3 @@ Catalog::query_column_for(const vector<table_name_t>& table_names,
     return candidates[0];
   }
 }
-
