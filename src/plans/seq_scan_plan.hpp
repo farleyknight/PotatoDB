@@ -8,7 +8,7 @@
 
 class SeqScanPlan : public BasePlan,
                     public TablePlan,
-                    public SchemaPlan,
+                    public QuerySchemaPlan,
                     // TODO: If we need a custom schema,
                     // use the Projection plan to emit
                     // only those columns the query is
@@ -19,10 +19,10 @@ public:
   SeqScanPlan(QuerySchema schema,
               table_oid_t table_oid,
               ptr<QueryWhere>&& pred)
-    : BasePlan      (PlanType::TABLE_SCAN),
-      TablePlan     (table_oid),
-      SchemaPlan    (schema),
-      MaybePredPlan (move(pred))
+    : BasePlan        (PlanType::TABLE_SCAN),
+      TablePlan       (table_oid),
+      QuerySchemaPlan (schema),
+      MaybePredPlan   (move(pred))
   {}
 
   bool is_query() const {

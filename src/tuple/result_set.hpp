@@ -4,11 +4,8 @@
 
 class ResultSet {
 public:
-  ResultSet()
-    : schema_ (QuerySchema::empty())
-  {}
-
-  ResultSet(vector<Tuple>&& results, QuerySchema schema)
+  ResultSet(const vector<Tuple>&& results,
+            QuerySchema schema)
     : schema_  (schema),
       results_ (move(results)) {}
 
@@ -17,10 +14,6 @@ public:
   // No copy assign
   ResultSet& operator=(const ResultSet&) = delete;
   ~ResultSet() = default;
-
-  static ptr<ResultSet> empty() {
-    return make_unique<ResultSet>();
-  }
 
   template<typename T>
   T value(const string name, const Tuple& tuple) {
@@ -34,19 +27,23 @@ public:
                                  schema_.column_index_for(name)).as<T>();
   }
 
-  const vector<Tuple>& results() {
+  const vector<Tuple>&
+  results() {
     return results_;
   }
 
-  int32_t size() {
+  int32_t
+  size() {
     return results_.size();
   }
 
-  const Tuple& operator[](uint32_t i) const {
+  const Tuple&
+  operator[](uint32_t i) const {
     return results_[i];
   }
 
-  const QuerySchema& schema() const {
+  const QuerySchema&
+  schema() const {
     return schema_;
   }
 
@@ -70,5 +67,5 @@ public:
 
 private:
   QuerySchema schema_;
-  vector<Tuple> results_;
+  const vector<Tuple> results_;
 };

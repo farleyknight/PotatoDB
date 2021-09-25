@@ -21,7 +21,7 @@ private:
   Tuple updated_tuple(const Tuple& old_tuple);
   TableHeap& table_heap();
 
-  const QuerySchema& schema();
+  const TableSchema& schema();
   ptr<UpdatePlan> plan_;
   ptr<BaseExec> child_;
 };

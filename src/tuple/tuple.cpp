@@ -1,54 +1,32 @@
 #include "tuple/tuple.hpp"
 #include "catalog/table_schema.hpp"
+#include "txns/txn.hpp"
 
 // Constructor for creating a new tuple based on input value
 // TODO: It does not look like nulls are supported. Add a null bitmap?
-Tuple::Tuple(vector<Value> values, const QuerySchema& schema)
+Tuple::Tuple(const vector<Value>& values,
+             const TupleLayout& layout,
+             Txn& txn)
   : source_ (TupleSources::QUERY_SCHEMA)
 {
-  int32_t values_size = values.size();
-
-  if (values_size != schema.column_count()) {
-    std::cout << "values.size() == " << values.size() << std::endl;
-    std::cout << "schema.column_count() == " << schema.column_count() << std::endl;
+  // Validate the values against the schema
+  auto is_valid = layout.validate(values);
+  if (!is_valid) {
+    txn.abort_with_reason(AbortReason::TUPLE_SCHEMA_MISMATCH);
+    return;
   }
 
-  // 0. Verify the values align with the schema
-  // TODO: Write proper error handling should be a good next step towards being
-  // a robust database.
-  assert(values_size == schema.column_count());
-  for (int32_t i = 0; i < values_size; ++i) {
-    assert(values[i].type_id() == schema.by_column_index(i).type_id());
-  }
+  buffer_.resize(layout.tuple_length(values));
+  layout.write_values(values, buffer_);
+}
 
-  // 1. Calculate the size of the tuple.
-  int32_t tuple_length = schema.tuple_length();
-  for (auto &i : schema.unlined_columns()) {
-    tuple_length += (values[i].length() + sizeof(string_size_t));
-  }
-
+void
+Tuple::resize_buffer(tuple_length_t tuple_length)
+{
   logger->debug("[Tuple] Resizing tuple " + std::to_string(tuple_length));
-
+  // Then resize the underlying buffer.
   buffer_.resize(tuple_length);
   assert(buffer_.size() == tuple_length);
-
-  // 3. Serialize each attribute based on the input value.
-  auto column_count = schema.column_count();
-  auto offset = schema.tuple_length();
-
-  for (column_index_t i = 0; i < column_count; i++) {
-    const auto &col = schema.by_column_index(i);
-    auto col_offset = schema.buffer_offset_for(i);
-
-    if (col.is_inlined()) {
-      values[i].cast_as(col.type_id()).serialize_to(col_offset, buffer_);
-    } else {
-      buffer_.write_uint32(col_offset, offset);
-      auto value = values[i].cast_as(col.type_id());
-      value.serialize_to(offset, buffer_);
-      offset += (values[i].length() + sizeof(buffer_offset_t));
-    }
-  }
 }
 
 buffer_offset_t
@@ -82,7 +60,8 @@ Tuple::to_values(const QuerySchema& schema) const
 Tuple
 Tuple::add_defaults(deque<Value>& defaults,
                     const TableSchema& table_schema,
-                    const QuerySchema& query_schema) const
+                    const QuerySchema& query_schema,
+                    Txn& txn) const
 {
   logger->debug("[Tuple] Query Schema is: " + query_schema.to_string());
 
@@ -108,7 +87,7 @@ Tuple::add_defaults(deque<Value>& defaults,
 
   auto schema = table_schema.to_query_schema();
   assert(table_schema.column_count() == schema.column_count());
-  return Tuple(new_values, schema);
+  return Tuple(new_values, schema.layout(), txn);
 }
 
 const string Tuple::to_string(const TableSchema& schema) const {
@@ -136,7 +115,8 @@ const string Tuple::to_string(const TableSchema& schema) const {
   return os.str();
 }
 
-const string Tuple::to_string(const QuerySchema& schema) const {
+const string
+Tuple::to_string(const QuerySchema& schema) const {
   // TODO: Figure out a way to hold a schema object on an operator
   // without saying if it's a QuerySchema or TableSchema..
   // Is that possible?
@@ -170,7 +150,8 @@ const string Tuple::to_string(const QuerySchema& schema) const {
 // Which means quoting strings, rendering boolean types to 'true'/'false'
 //
 // Likely more to this, but this explains the difference.
-const string Tuple::to_payload(const QuerySchema& schema) const {
+const string
+Tuple::to_payload(const QuerySchema& schema) const {
   stringstream os;
 
   os << "(";
@@ -206,12 +187,30 @@ Value Tuple::value(const auto& schema,
   return Value::deserialize_from(offset, buffer_, type_id);
 }
 
-Value Tuple::value_by_name(const QuerySchema& schema,
-                           const column_name_t& name) const
+Value
+Tuple::value_by_name(const QuerySchema& schema,
+                     const column_name_t& name) const
 {
   auto index = schema.column_index_for(name);
   return value(schema, index);
 }
+
+Value
+Tuple::value_by_oid(const QuerySchema& schema,
+                    column_oid_t oid) const
+{
+  auto index = schema.column_index_for(oid);
+  return value(schema, index);
+}
+
+Value
+Tuple::value_by_oid(const TableSchema& schema,
+                    column_oid_t oid) const
+{
+  auto index = schema.column_index_for(oid);
+  return value(schema, index);
+}
+
 
 bool Tuple::is_null(const auto& schema,
                     column_index_t column_index) const
@@ -221,17 +220,21 @@ bool Tuple::is_null(const auto& schema,
 
 Tuple Tuple::key_from_tuple(const QuerySchema& schema,
                             const QuerySchema& key_schema,
-                            const vector<int32_t>& key_attrs) const
+                            const vector<int32_t>& key_attrs,
+                            Txn& txn) const
 {
   vector<Value> values;
   values.reserve(key_attrs.size());
   for (auto i : key_attrs) {
     values.emplace_back(value(schema, i));
   }
-  return Tuple(values, key_schema);
+  return Tuple(values, key_schema.layout(), txn);
 }
 
-Tuple Tuple::random_from(const QuerySchema& schema) {
+Tuple
+Tuple::random_from(const QuerySchema& schema,
+                   Txn& txn)
+{
   vector<Value> values;
   for (const auto &col : schema.all()) {
     switch (col.type_id()) {
@@ -255,5 +258,5 @@ Tuple Tuple::random_from(const QuerySchema& schema) {
     }
   }
 
-  return Tuple(values, schema);
+  return Tuple(values, schema.layout(), txn);
 }

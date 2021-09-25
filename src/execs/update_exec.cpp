@@ -1,4 +1,3 @@
-
 #include "execs/update_exec.hpp"
 
 UpdateExec::UpdateExec(ExecCtx& exec_ctx,
@@ -10,7 +9,7 @@ UpdateExec::UpdateExec(ExecCtx& exec_ctx,
 {}
 
 
-const QuerySchema& UpdateExec::schema() {
+const TableSchema& UpdateExec::schema() {
   return plan_->schema();
 }
 
@@ -47,20 +46,28 @@ UpdateExec::table_heap() {
   return exec_ctx_.schema_mgr().table_heap_for(table_oid);
 }
 
-Tuple UpdateExec::updated_tuple(const Tuple& old_tuple) {
-  auto &update_values = plan_->update_values();
-  int32_t col_count = schema().column_count();
-  vector<Value> values;
-  for (int32_t index = 0; index < col_count; ++index) {
-    std::cout << "Index: " << index << std::endl;
+Tuple
+UpdateExec::updated_tuple(const Tuple& old_tuple)
+{
+  const auto table_oid      = plan_->table_oid();
+  const auto &update_values = plan_->update_values();
+  const auto &query_schema  =
+    exec_ctx_.schema_mgr().query_schema_for(table_oid);
 
-    if (update_values.find(index) == update_values.end()) {
-      values.emplace_back(old_tuple.value(schema(), index));
+  vector<Value> values;
+  for (const auto oid : schema().column_oids()) {
+    if (update_values.contains(oid)) {
+      Value new_value =
+        update_values.at(oid)->eval(old_tuple, query_schema);
+      values.emplace_back(new_value);
     } else {
-      Value new_value = update_values.at(index)->eval(old_tuple, schema());
+      Value new_value =
+        old_tuple.value_by_oid(query_schema, oid);
       values.emplace_back(new_value);
     }
   }
 
-  return Tuple(values, schema());
+  auto &layout = schema().layout();
+
+  return Tuple(values, layout, exec_ctx().txn());
 }

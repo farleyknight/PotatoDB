@@ -4,11 +4,11 @@
 #include <functional>
 
 #include "common/exceptions.hpp"
-
 #include "value/value.hpp"
 
 class Tuple;
 class QuerySchema;
+class TableSchema;
 
 enum class QueryNodeType {
   BASE     = 0,
@@ -56,8 +56,16 @@ public:
     throw NotImplementedException("eval_agg not implemented");
   }
 
-  virtual Value eval(UNUSED const Tuple& tuple,
-                     UNUSED const QuerySchema& schema) const
+  virtual Value
+  eval(UNUSED const Tuple& tuple,
+       UNUSED const QuerySchema& schema) const
+  {
+    throw NotImplementedException("eval not implemented");
+  }
+
+  virtual Value
+  eval(UNUSED const Tuple& tuple,
+       UNUSED const TableSchema& schema) const
   {
     throw NotImplementedException("eval not implemented");
   }

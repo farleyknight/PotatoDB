@@ -57,7 +57,7 @@ PotatoDB::table_file_for(const table_name_t& table_name) {
 }
 
 ptr<BasePlan>
-PotatoDB::sql_to_plan(const sql_statement_t& statement) const {
+PotatoDB::sql_to_plan(const sql_statement_t& statement) {
   logger->debug("[PotatoDB] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
   logger->debug(statement);
   logger->debug("[PotatoDB] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");

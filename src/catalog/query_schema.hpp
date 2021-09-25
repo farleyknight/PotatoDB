@@ -19,8 +19,7 @@ public:
   // Default destructor
   ~QuerySchema() = default;
 
-  static QuerySchema empty();
-
+  // TODO Remove copy, slice, merge
   static QuerySchema copy(const TableSchema& original);
   static QuerySchema copy(const QuerySchema& original);
 

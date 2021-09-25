@@ -87,7 +87,7 @@ bool TableHeap::insert_tuple(Tuple& tuple, Txn& txn) {
 
   txn.write_set().emplace_back(tuple.rid(),
                                WType::INSERT,
-                               Tuple(),
+                               Tuple(TupleSources::TABLE_HEAP),
                                table_oid_);
   return true;
 }
@@ -113,7 +113,7 @@ bool TableHeap::mark_delete(const RID& rid, Txn& txn) {
 
   txn.write_set().emplace_back(rid,
                                WType::DELETE,
-                               Tuple(),
+                               Tuple(TupleSources::TABLE_HEAP),
                                table_oid_);
   return true;
 }
@@ -131,8 +131,7 @@ bool TableHeap::update_tuple(Tuple& new_tuple,
 
   auto page = SlottedTablePage(page_ptr, txn, log_mgr_, lock_mgr_);
   // Update the tuple; but first save the old value for rollbacks.
-  Tuple old_tuple;
-  old_tuple.reset(new_tuple.size());
+  auto old_tuple = Tuple(new_tuple.size());
   page.wlatch();
   bool is_updated = page.update_tuple(new_tuple, old_tuple, rid);
   page.wunlatch();

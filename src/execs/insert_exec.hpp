@@ -1,5 +1,8 @@
 #pragma once
 
+#include "plans/insert_plan.hpp"
+#include "execs/base_exec.hpp"
+
 class InsertExec : public BaseExec {
 public:
   InsertExec(ExecCtx& exec_ctx,
@@ -19,33 +22,7 @@ public:
   }
 
   Tuple
-  next() override {
-    auto &heap = exec_ctx_.schema_mgr().table_heap_for(plan_->table_oid());
-    auto tuple = child_->next();
-
-    auto &table_schema = exec_ctx_.schema_mgr().table_schema_for(plan_->table_oid());
-    auto query_schema  = plan_->schema();
-
-    // TODO: Refactor this at some point?
-    auto missing_columns = table_schema.missing_columns(query_schema);
-    auto defaults        = table_schema.defaults(missing_columns);
-
-    assert(defaults.size() == missing_columns.size());
-
-    auto new_tuple = tuple.add_defaults(defaults,
-                                        table_schema,
-                                        query_schema);
-
-    // NOTE: At this point, the tuple should include all columns from
-    // the table schema.
-    // Hence we need to pass in the table schema.
-
-    auto table_name = exec_ctx_.schema_mgr().table_name_for(plan_->table_oid());
-    logger->debug("Inserting tuple into table: " + table_name);
-    heap.insert_tuple(new_tuple, txn());
-
-    return tuple;
-  }
+  next() override;
 
   const string message_on_completion(int32_t result_count) const override {
     return "Inserted " + std::to_string(result_count) + " record(s)";

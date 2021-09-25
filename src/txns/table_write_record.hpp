@@ -2,8 +2,8 @@
 
 #include <deque>
 
-#include "tuple/tuple.hpp"
 #include "tuple/rid.hpp"
+#include "tuple/tuple.hpp"
 
 enum class WType {
   INSERT = 0,
@@ -21,10 +21,12 @@ public:
     : rid_       (rid),
       wtype_     (wtype),
       tuple_     (tuple),
-      table_oid_ (table_oid) {}
+      table_oid_ (table_oid)
+  {}
 
-  static MutList<TableWriteRecord> make_list() {
-    return MutList<TableWriteRecord>();
+  static list<TableWriteRecord>
+  make_list() {
+    return list<TableWriteRecord>();
   }
 
   bool is_delete() {
@@ -62,6 +64,6 @@ public:
 private:
   RID rid_;
   WType wtype_;
-  Tuple tuple_;
-  table_oid_t table_oid_;
+  Tuple tuple_= Tuple(TupleSources::LOG_RECOVERY);
+  table_oid_t table_oid_ = INVALID_TABLE_OID;
 };

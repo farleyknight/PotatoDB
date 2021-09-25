@@ -47,7 +47,9 @@ public:
     // Extra - Includes autoincrement
     values.push_back(Value::make(column.is_autoincrement() ? "AUTOINCREMENT" : ""));
 
-    return Tuple(move(values), plan_->schema());
+    return Tuple(move(values),
+                 plan_->schema().layout(),
+                 exec_ctx().txn());
   }
 
   const string

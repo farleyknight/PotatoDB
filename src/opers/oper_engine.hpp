@@ -117,7 +117,7 @@ public:
     }
 
 
-    return results; 
+    return results;
   }
 
   ptr<ResultSet> query(OperProgram& program,
@@ -137,8 +137,7 @@ public:
       tuples.push_back(apply(program, curr->child_index(), tuple))
     }
 
-    // TODO: We should verify that plan has SchemaPlan here
-    auto schema = dynamic_cast<SchemaPlan*>(plan.get())->schema();
+    auto schema = dynamic_cast<QuerySchemaPlan*>(plan.get())->schema();
     auto exec = ExecFactory::create(exec_ctx, move(plan));
 
     exec->init();

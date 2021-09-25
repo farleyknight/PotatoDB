@@ -2,11 +2,13 @@
 
 #include "query/base_query.hpp"
 #include "catalog/query_schema.hpp"
+#include "txns/txn.hpp"
 
 class QueryHaving : public BaseQuery {
 public:
   QueryHaving(TypeId type_id,
-              BaseQuery having_clause);
+              BaseQuery having_clause,
+              Txn& txn);
 
   Value eval_agg(const QuerySchema& schema,
                  const vector<Value>& group_bys,
@@ -33,4 +35,5 @@ private:
   // way that types can be cast and converted to one another is
   // a really big issue for our database!
   BaseQuery having_clause_;
+  Txn& txn_;
 };

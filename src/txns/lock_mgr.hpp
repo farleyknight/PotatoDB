@@ -77,7 +77,7 @@ private:
                              Txn& txn,
                              const RID& rid);
 
-  bool remove_request(MutList<LockRequest>::iterator it,
+  bool remove_request(list<LockRequest>::iterator it,
                       LockRequestQueue& queue,
                       Txn& txn,
                       const RID& rid) const;
@@ -95,6 +95,6 @@ private:
   thread *cycle_detection_thread_;
   milliseconds cycle_detection_interval_ = milliseconds(50);
 
-  MutMap<RID, LockRequestQueue> lock_table_;
-  MutMap<txn_id_t, vector<txn_id_t>> waits_for_;
+  map<RID, LockRequestQueue> lock_table_;
+  map<txn_id_t, vector<txn_id_t>> waits_for_;
 };

@@ -32,7 +32,7 @@ ExecEngine::query(ptr<BasePlan>&& plan,
   vector<Tuple> tuples;
 
   // TODO: We should verify that plan has SchemaPlan here
-  auto schema = dynamic_cast<SchemaPlan*>(plan.get())->schema();
+  auto schema = dynamic_cast<QuerySchemaPlan*>(plan.get())->schema();
   auto exec = ExecFactory::create(exec_ctx, move(plan));
 
   exec->init();

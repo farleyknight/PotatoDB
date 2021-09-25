@@ -33,7 +33,9 @@ public:
     //  std::cout << "Building new tuple with value " << value.to_string() << std::endl;
     // }
 
-    auto tuple = Tuple(iter_.values(), plan_->schema());
+    auto tuple = Tuple(iter_.values(),
+                       plan_->schema().layout(),
+                       exec_ctx().txn());
     // std::cout << "Next Tuple " << tuple.to_string(plan_->schema()) << std::endl;
 
     ++iter_;

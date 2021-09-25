@@ -106,14 +106,16 @@ bool SlottedTablePage::insert_tuple(Tuple& tuple) {
   return true;
 }
 
-bool SlottedTablePage::mark_delete(const RID& rid) {
-  int32_t slot_id = rid.slot_id();
+bool
+SlottedTablePage::mark_delete(const RID& rid)
+{
+  auto slot_id = rid.slot_id();
   // If the slot number is invalid, abort the txn.
   if (slot_id >= tuple_count()) {
     return false;
   }
 
-  int32_t tuple_size = tuple_size_at(slot_id);
+  auto tuple_size = tuple_size_at(slot_id);
   // If the tuple is already deleted, abort the txn.
   if (is_deleted(tuple_size)) {
     return false;
@@ -130,13 +132,13 @@ bool SlottedTablePage::mark_delete(const RID& rid) {
                !lock_mgr_.lock_exclusive(txn_, rid)) {
       return false;
     }
-    Tuple dummy_tuple;
+    auto dummy_tuple = Tuple(TupleSources::LOG_RECOVERY);
     LogRecord log_record(txn_.id(),
                          txn_.prev_lsn(),
                          LogRecordType::MARK_DELETE,
                          rid,
                          dummy_tuple);
-    lsn_t lsn = log_mgr_.append(log_record);
+    auto lsn = log_mgr_.append(log_record);
     set_lsn(lsn);
     txn_.set_prev_lsn(lsn);
   }
@@ -150,11 +152,13 @@ bool SlottedTablePage::mark_delete(const RID& rid) {
   return true;
 }
 
-void SlottedTablePage::rollback_delete(const RID& rid) {
+void
+SlottedTablePage::rollback_delete(const RID& rid)
+{
   // Log the rollback.
   if (log_mgr_.is_logging_enabled()) {
     assert(txn_.is_exclusive_locked(rid));
-    Tuple dummy_tuple;
+    auto dummy_tuple = Tuple(TupleSources::LOG_RECOVERY);
     auto log_record = LogRecord(txn_.id(),
                                 txn_.prev_lsn(),
                                 LogRecordType::ROLLBACK_DELETE,
@@ -180,13 +184,13 @@ bool SlottedTablePage::update_tuple(const Tuple& new_tuple,
                                     Tuple& old_tuple,
                                     const RID& rid)
 {
-  slot_id_t slot_id = rid.slot_id();
+  auto slot_id = rid.slot_id();
 
   if (slot_id >= tuple_count()) {
     return false;
   }
 
-  int32_t tuple_size = tuple_size_at(slot_id);
+  auto tuple_size = tuple_size_at(slot_id);
   if (is_deleted(tuple_size)) {
     return false;
   }
@@ -201,10 +205,10 @@ bool SlottedTablePage::update_tuple(const Tuple& new_tuple,
 }
 
 bool SlottedTablePage::apply_delete(const RID& rid) {
-  int32_t slot_id = rid.slot_id();
+  auto slot_id = rid.slot_id();
 
-  int32_t tuple_offset = tuple_offset_at_slot(slot_id);
-  int32_t tuple_size = tuple_size_at(slot_id);
+  auto tuple_offset = tuple_offset_at_slot(slot_id);
+  auto tuple_size = tuple_size_at(slot_id);
   // Check if this is a delete operation, i.e. commit a delete.
   if (is_deleted(tuple_size)) {
     tuple_size = unset_deleted_flag(tuple_size);
@@ -212,7 +216,7 @@ bool SlottedTablePage::apply_delete(const RID& rid) {
   // Otherwise we are rolling back an insert.
 
 
-  Tuple delete_tuple(tuple_size);
+  auto delete_tuple = Tuple(tuple_size);
   // TODO: Rename delete_tuple.copy_n_bytes to
   // page->write_tuple(delete_tuple, tuple_offset, tuple_size)
   delete_tuple.copy_n_bytes(tuple_offset, // Source offset
@@ -232,12 +236,12 @@ bool SlottedTablePage::apply_delete(const RID& rid) {
                          rid,
                          delete_tuple);
 
-    lsn_t lsn = log_mgr_.append(log_record);
+    auto lsn = log_mgr_.append(log_record);
     set_lsn(lsn);
     txn_.set_prev_lsn(lsn);
   }
 
-  int32_t pointer = free_space_pointer();
+  auto pointer = free_space_pointer();
 
   page_->copy_n_bytes(pointer, // Source offset
                       pointer + tuple_size, // Destination offset
@@ -250,7 +254,7 @@ bool SlottedTablePage::apply_delete(const RID& rid) {
 
   // Update all tuple offsets.
   for (int32_t i = 0; i < tuple_count(); ++i) {
-    int32_t tuple_offset_i = tuple_offset_at_slot(i);
+    auto tuple_offset_i = tuple_offset_at_slot(i);
     if (tuple_size_at(i) != 0 && tuple_offset_i < tuple_offset) {
       set_tuple_offset_at_slot(i, tuple_offset_i + tuple_size);
     }
@@ -259,7 +263,8 @@ bool SlottedTablePage::apply_delete(const RID& rid) {
   return true;
 }
 
-ptr<Tuple> SlottedTablePage::find_tuple(const RID& rid) {
+ptr<Tuple>
+SlottedTablePage::find_tuple(const RID& rid) {
   // Get the current slot number.
   int32_t slot_id = rid.slot_id();
   // If somehow we have more slots than tuples, abort the txn.

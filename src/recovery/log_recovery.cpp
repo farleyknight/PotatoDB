@@ -181,7 +181,7 @@ void LogRecovery::undo() {
         break;
       }
       case LogRecordType::UPDATE: {
-        Tuple tuple;
+        auto tuple = Tuple(TupleSources::LOG_RECOVERY);
         page.update_tuple(log.old_tuple(), tuple, log.update_rid());
         assert(tuple.eq(log.new_tuple()));
         break;

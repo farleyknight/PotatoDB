@@ -61,5 +61,5 @@ private:
   }
 
   size_t capacity_;
-  vector<MutList<KVPair>> table_;
+  vector<list<KVPair>> table_;
 };

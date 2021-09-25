@@ -16,11 +16,11 @@ public:
     return requests.back();
   }
 
-  MutList<LockRequest>::iterator begin() {
+  list<LockRequest>::iterator begin() {
     return requests.begin();
   }
 
-  MutList<LockRequest>::iterator end() {
+  list<LockRequest>::iterator end() {
     return requests.end();
   }
 
@@ -29,8 +29,8 @@ public:
     requests.push_back(request);
   }
 
-  MutList<LockRequest> requests;
-  CondVar cond;  // for notifying blocked txns on this rid
+  list<LockRequest> requests;
+  cond_var cond;  // for notifying blocked txns on this rid
 
   // NOTE: This `upgrading` flag is something that bugged me for several
   // hours one day.

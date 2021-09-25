@@ -36,7 +36,7 @@ public:
 
   const QuerySchema&
   schema() const {
-    return dynamic_cast<SchemaPlan*>(plan_.get())->schema();
+    return dynamic_cast<QuerySchemaPlan*>(plan_.get())->schema();
   }
 
   const QuerySchema&

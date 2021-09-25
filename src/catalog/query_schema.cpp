@@ -41,19 +41,13 @@ QuerySchema QuerySchema::copy(const TableSchema& original) {
   return QuerySchema(cols);
 }
 
-QuerySchema QuerySchema::empty() {
-  return QuerySchema(vector<QueryColumn>());
-}
-
-const string QuerySchema::to_string() const {
+const string
+QuerySchema::to_string() const {
   stringstream os;
 
-  os << "QuerySchema[" <<
-    "NumColumns:" << column_count() << ", " <<
-    "IsInlined:" << all_tuples_inlined_ << ", " <<
-    "TupleLength:" << tuple_length_ << "]";
-
+  os << "QuerySchema[" << tuple_layout_.to_string() << "]";
   os << " :: (\n";
+
   for (int32_t i = 0; i < column_count(); i++) {
     if (i > 0) {
       os << ", \n";

@@ -5,7 +5,7 @@
 #include "plans/maybe_pred_plan.hpp"
 
 class HashJoinPlan : public BasePlan,
-                     public SchemaPlan,
+                     public QuerySchemaPlan,
                      public MaybePredPlan
 {
 public:
@@ -14,7 +14,7 @@ public:
                vector<BaseQuery>&& left_hash_keys,
                vector<BaseQuery>&& right_hash_keys)
     : BasePlan         (PlanType::HASH_JOIN),
-      SchemaPlan       (schema),
+      QuerySchemaPlan  (schema),
       MaybePredPlan    (move(pred)),
       // TODO: Instead of providing a Vec<BaseQuery> maybe provice a key schema?
       // A key schema might need to reference the parent schema?
@@ -25,8 +25,10 @@ public:
   }
 
   // NOTE: These arrays are used to create the key schemas.
-  const vector<BaseQuery>& left_keys()  { return left_hash_keys_; }
-  const vector<BaseQuery>& right_keys() { return right_hash_keys_; }
+  const vector<BaseQuery>&
+  left_keys()  { return left_hash_keys_; }
+  const vector<BaseQuery>&
+  right_keys() { return right_hash_keys_; }
 
 private:
   const vector<BaseQuery> left_hash_keys_, right_hash_keys_;

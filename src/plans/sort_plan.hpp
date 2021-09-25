@@ -11,17 +11,17 @@ enum class SortDirection {
 };
 
 class SortPlan : public BasePlan,
-                 public SchemaPlan,
+                 public QuerySchemaPlan,
                  public HasChildPlan
 {
 public:
   SortPlan(QuerySchema schema,
            OrderByExpr order_by,
            ptr<BasePlan>&& child)
-    : BasePlan     (PlanType::SORT),
-      SchemaPlan   (schema),
-      HasChildPlan (move(child)),
-      order_by_    (order_by)
+    : BasePlan        (PlanType::SORT),
+      QuerySchemaPlan (schema),
+      HasChildPlan    (move(child)),
+      order_by_       (order_by)
   {}
 
   bool is_query() const {

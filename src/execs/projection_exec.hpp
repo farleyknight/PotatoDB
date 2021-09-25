@@ -43,7 +43,7 @@ public:
                                          col.name()));
     }
 
-    return Tuple(vals, new_schema);
+    return Tuple(vals, new_schema.layout(), exec_ctx().txn());
   }
 
   const string message_on_completion(int32_t result_count) const override {

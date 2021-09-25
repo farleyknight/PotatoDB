@@ -6,15 +6,15 @@
 #include "plans/schema_plan.hpp"
 
 class ProjectionPlan : public BasePlan,
-                       public SchemaPlan,
+                       public QuerySchemaPlan,
                        public HasChildPlan
 {
 public:
   ProjectionPlan(QuerySchema schema,
                  ptr<BasePlan>&& child)
-    : BasePlan     (PlanType::PROJECT),
-      SchemaPlan   (schema),
-      HasChildPlan (move(child))
+    : BasePlan        (PlanType::PROJECT),
+      QuerySchemaPlan (schema),
+      HasChildPlan    (move(child))
   {}
 
   bool is_query() const {

@@ -312,7 +312,7 @@ void LockMgr::run_cycle_detection() {
   }
 }
 
-bool LockMgr::remove_request(MutList<LockRequest>::iterator it,
+bool LockMgr::remove_request(list<LockRequest>::iterator it,
                              LockRequestQueue& queue,
                              Txn& txn,
                              const RID& rid) const

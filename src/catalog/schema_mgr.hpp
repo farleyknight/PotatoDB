@@ -98,11 +98,6 @@ public:
     return sys_catalog_.table_schema_for(table_oid);
   }
 
-  const TableSchema&
-  table_schema_for(table_oid_t table_oid) const {
-    return sys_catalog_.table_schema_for(table_oid);
-  }
-
   table_oid_t
   table_oid_for(const table_name_t& table_name) const {
     return sys_catalog_.table_oid_for(table_name);

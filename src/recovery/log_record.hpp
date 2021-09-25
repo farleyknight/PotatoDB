@@ -219,15 +219,17 @@ private:
 
   // NOTE: Case 1: Delete operation
   optional<RID> delete_rid_;
-  Tuple delete_tuple_;
+  Tuple delete_tuple_ = Tuple(TupleSources::LOG_RECOVERY);
 
   // NOTE: Case 2: Insert operation
   optional<RID> insert_rid_;
-  Tuple insert_tuple_;
+  Tuple insert_tuple_ = Tuple(TupleSources::LOG_RECOVERY);
 
   // NOTE: Case 3: Update operation
   optional<RID> update_rid_;
-  Tuple old_tuple_, new_tuple_;
+  Tuple
+    old_tuple_ = Tuple(TupleSources::LOG_RECOVERY),
+    new_tuple_ = Tuple(TupleSources::LOG_RECOVERY);
 
   // NOTE Case 4: for new page operation
   PageId page_id_ = PageId::INVALID(),

@@ -11,14 +11,13 @@ Txn& TxnMgr::begin(IsolationLevel level =
   global_txn_latch_.rlock();
 
   // TODO: This shit is so ugly, it needs it's own method..!
-  txn_id_t txn_id = curr_txn_id_;
+  txn_id_t txn_id = curr_txn_id_++;
   // https://en.cppreference.com/w/cpp/utility/tuple/forward_as_tuple
   txn_table_.emplace(std::piecewise_construct,
                      std::forward_as_tuple(txn_id),
                      std::forward_as_tuple(txn_id, level));
 
-  curr_txn_id_ = txn_id++;
-
+  assert(txn_table_.contains(txn_id));
   return txn_table_.at(txn_id);
 }
 
@@ -101,7 +100,7 @@ void TxnMgr::abort(Txn& txn) {
     log_mgr_.sync_flush(false);
   }
 
-  MutSet<RID> lock_set;
+  set<RID> lock_set;
   for (auto item : txn.shared_lock_set()) {
     lock_set.emplace(item);
   }
@@ -114,7 +113,7 @@ void TxnMgr::abort(Txn& txn) {
 }
 
 void TxnMgr::release_locks(Txn& txn) const {
-  MutSet<RID> lock_set;
+  set<RID> lock_set;
   for (auto item : txn.exclusive_lock_set()) {
     lock_set.emplace(item);
   }

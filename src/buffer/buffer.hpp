@@ -76,7 +76,8 @@ public:
                 n_bytes);
   }
 
-  const Tuple read_tuple(buffer_offset_t offset);
+  const Tuple
+  read_tuple(buffer_offset_t offset);
 
   void write_tuple(buffer_offset_t offset, const Tuple& tuple);
 

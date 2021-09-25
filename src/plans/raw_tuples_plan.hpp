@@ -5,13 +5,14 @@
 #include "plans/schema_plan.hpp"
 
 class RawTuplesPlan : public BasePlan,
-                      public SchemaPlan
+                      public QuerySchemaPlan
 {
 public:
-  RawTuplesPlan(QuerySchema schema, RawTuples raw_tuples)
-    : BasePlan    (PlanType::RAW_TUPLES),
-      SchemaPlan  (schema),
-      raw_tuples_ (raw_tuples)
+  RawTuplesPlan(QuerySchema schema,
+                RawTuples raw_tuples)
+    : BasePlan        (PlanType::RAW_TUPLES),
+      QuerySchemaPlan (schema),
+      raw_tuples_     (raw_tuples)
   {
     // std::cout << "Raw Tuples " << raw_tuples.to_string() << std::endl;
   }

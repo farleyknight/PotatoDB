@@ -16,7 +16,7 @@
 
 class AggPlan : public BasePlan,
                 public HasChildPlan,
-                public SchemaPlan
+                public QuerySchemaPlan
 {
 public:
   /**********************************************

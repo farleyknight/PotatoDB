@@ -209,8 +209,8 @@ void SocketServer::accept_connections() {
 }
 
 void SocketServer::finish_tasks() {
-  std::for_each(tasks_.begin(), tasks_.end(), [](const Task& task) {
-    task.wait();
+  std::for_each(tasks_.begin(), tasks_.end(), [](const task& server_task) {
+    server_task.wait();
   });
   tasks_.clear();
 }

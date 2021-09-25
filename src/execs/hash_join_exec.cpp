@@ -68,7 +68,9 @@ void HashJoinExec::init() {
           values.push_back(make_value_at(col_index,
                                          left_tuple, right_tuple));
         }
-        output_tuples_.emplace_back(values, schema());
+        output_tuples_.emplace_back(values,
+                                    schema().layout(),
+                                    exec_ctx().txn());
       }
     }
   }
@@ -104,9 +106,9 @@ const QuerySchema& HashJoinExec::schema() {
 }
 
 const QuerySchema& HashJoinExec::left_schema()  {
-  return dynamic_cast<SchemaPlan*>(left_.get())->schema();
+  return dynamic_cast<QuerySchemaPlan*>(left_.get())->schema();
 }
 
 const QuerySchema& HashJoinExec::right_schema() {
-  return dynamic_cast<SchemaPlan*>(right_.get())->schema();
+  return dynamic_cast<QuerySchemaPlan*>(right_.get())->schema();
 }

@@ -59,7 +59,7 @@
 class PlanFactory {
 public:
   static ptr<BasePlan>
-  create(const SchemaMgr& schema_mgr,
+  create(SchemaMgr& schema_mgr,
          ptr<BaseExpr>&& expr);
 
   static ptr<BasePlan>
@@ -74,15 +74,15 @@ public:
             const DescribeTableExpr& expr);
 
   static ptr<BasePlan>
-  from_expr(const SchemaMgr& schema_mgr,
+  from_expr(SchemaMgr& schema_mgr,
             const InsertExpr& expr);
 
   static ptr<BasePlan>
-  from_expr(const SchemaMgr& schema_mgr,
+  from_expr(SchemaMgr& schema_mgr,
             const UpdateExpr& expr);
 
   static ptr<BasePlan>
-  from_expr(const SchemaMgr& schema_mgr,
+  from_expr(SchemaMgr& schema_mgr,
             const DeleteFromExpr& expr);
 
   static ptr<BasePlan>

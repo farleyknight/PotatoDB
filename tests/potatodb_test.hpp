@@ -22,6 +22,7 @@ TEST_F(PotatoDBTest, ShowZeroTablesTest) {
   auto result = db.run("SHOW TABLES");
   auto &result_set = result.set();
 
+  ASSERT_TRUE(result_set != nullptr);
   ASSERT_EQ(result_set->size(), 0);
 }
 
@@ -42,7 +43,7 @@ TEST_F(PotatoDBTest, CreateInsertSelectAutoIncrementTest) {
   db.run("INSERT INTO test_table (name) VALUES ('hello, world')");
   db.run("INSERT INTO test_table (name) VALUES ('another string')");
 
-  auto result = db.run("SELECT * FROM foo_bar");
+  auto result = db.run("SELECT * FROM test_table");
 
   EXPECT_TRUE(result.set() != nullptr);
   EXPECT_EQ(result.set()->size(), 2);

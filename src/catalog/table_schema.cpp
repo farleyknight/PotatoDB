@@ -83,17 +83,13 @@ TableSchema::defaults(const vector<TableColumn>& cols) {
   return values;
 }
 
-const string TableSchema::to_string() const {
-  std::ostringstream os;
+const string
+TableSchema::to_string() const {
+  stringstream os;
 
-  os <<
-    "TableSchema[" <<
-    "NumColumns:" << column_count() << ", " <<
-    "IsInlined:" << all_tuples_inlined_ << ", " <<
-    "TupleLength:" << tuple_length_ <<
-    "]";
-
+  os << "TableSchema[" << tuple_layout_.to_string() << "]";
   os << " :: (\n";
+
   for (int32_t i = 0; i < column_count(); i++) {
     // TODO: Is there a better way to interleave these strings with commas?
     if (i > 0) {

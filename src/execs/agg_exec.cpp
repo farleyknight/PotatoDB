@@ -48,7 +48,8 @@ bool AggExec::match_found() {
   return result;
 }
 
-Tuple AggExec::next() {
+Tuple
+AggExec::next() {
   // create tuple according to output schema
   auto key = table_iter_.key();
   auto value = table_iter_.val();
@@ -63,7 +64,9 @@ Tuple AggExec::next() {
 
   ++table_iter_;
 
-  return Tuple(tuple_values, schema());
+  auto &layout = schema().layout();
+
+  return Tuple(tuple_values, layout, exec_ctx().txn());
 }
 
 AggKey AggExec::make_key(const Tuple& tuple) {

@@ -3,12 +3,12 @@
 #include "plans/base_plan.hpp"
 
 class ShowTablesPlan : public BasePlan,
-                       public SchemaPlan
+                       public QuerySchemaPlan
 {
 public:
   ShowTablesPlan(QuerySchema schema)
-    : BasePlan   (PlanType::SHOW_TABLES),
-      SchemaPlan (schema)
+    : BasePlan        (PlanType::SHOW_TABLES),
+      QuerySchemaPlan (schema)
   {}
 
   bool is_query() const {

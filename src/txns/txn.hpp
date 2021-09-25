@@ -19,13 +19,12 @@
 
 enum class IsolationLevel {
   READ_UNCOMMITTED = 0,
-  REPEATABLE_READ = 1,
-  READ_COMMITTED = 2
+  REPEATABLE_READ  = 1,
+  READ_COMMITTED   = 2
 };
 
 class Txn {
 public:
-
   explicit Txn(txn_id_t id,
                IsolationLevel level =
                IsolationLevel::REPEATABLE_READ)
@@ -47,7 +46,7 @@ public:
     return other_txn_id < id_;
   }
 
-  MutList<TableWriteRecord>& write_set() {
+  list<TableWriteRecord>& write_set() {
     return table_write_set_;
   }
 
@@ -59,11 +58,11 @@ public:
     deleted_page_set_.insert(page_id);
   }
 
-  MutSet<RID>& shared_lock_set() {
+  set<RID>& shared_lock_set() {
     return shared_lock_set_;
   }
 
-  MutSet<RID>& exclusive_lock_set() {
+  set<RID>& exclusive_lock_set() {
     return exclusive_lock_set_;
   }
 
@@ -130,14 +129,14 @@ private:
   // normal operation of the txn. However, these actions are
   // perform outside the ctx of the txn itself.
 
-  MutList<TableWriteRecord> table_write_set_;
+  list<TableWriteRecord> table_write_set_;
 
   // TODO: There were methods to allow these instance variables to be
   // accessed. I removed them for now but they should be replaced when
   // we do the work for concurrent indexes.
-  MutDeque<RefWrap<Page>> page_set_;
-  MutSet<PageId> deleted_page_set_;
+  deque<ref_wrap<Page>> page_set_;
+  set<PageId> deleted_page_set_;
 
-  MutSet<RID> shared_lock_set_;
-  MutSet<RID> exclusive_lock_set_;
+  set<RID> shared_lock_set_;
+  set<RID> exclusive_lock_set_;
 };

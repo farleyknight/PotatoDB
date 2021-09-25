@@ -25,7 +25,9 @@ public:
     table_names_iter_++;
     vector<Value> values;
     values.push_back(Value::make(table_name));
-    return Tuple(move(values), plan_->schema());
+    return Tuple(move(values),
+                 plan_->schema().layout(),
+                 exec_ctx().txn());
   }
 
   const string

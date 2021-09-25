@@ -3,9 +3,12 @@
 #include "tuple/tuple.hpp"
 
 QueryHaving::QueryHaving(TypeId type_id,
-                         BaseQuery having_clause)
+                         BaseQuery having_clause,
+                         Txn& txn)
   : BaseQuery      (QueryNodeType::HAVING, type_id),
-    having_clause_ (having_clause) {}
+    having_clause_ (having_clause),
+    txn_           (txn)
+{}
 
 
 Value QueryHaving::eval_agg(const QuerySchema& schema,
@@ -20,5 +23,6 @@ Value QueryHaving::eval_agg(const QuerySchema& schema,
     values.emplace_back(agg_value);
   }
 
-  return having_clause_.eval(Tuple(values, schema), schema);
+  auto tuple = Tuple(values, schema.layout(), txn_);
+  return having_clause_.eval(tuple, schema);
 }

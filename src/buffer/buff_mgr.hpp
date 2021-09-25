@@ -50,7 +50,7 @@ private:
   vector<Page> pages_;
   // NOTE: page_id_t is PageId but as a uint32_t
   map<page_id_t, frame_id_t> page_table_;
-  MutList<frame_id_t> free_list_;
+  list<frame_id_t> free_list_;
   ptr<Replacer> replacer_;
 
   DiskMgr& disk_mgr_;

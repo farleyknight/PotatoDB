@@ -5,6 +5,7 @@
 #include "common/config.hpp"
 #include "catalog/base_column.hpp"
 #include "catalog/table_column.hpp"
+#include "tuple/tuple_layout.hpp"
 
 template<class ColT>
 class BaseSchema {
@@ -18,60 +19,86 @@ public:
   // Default destructor
   ~BaseSchema() = default;
 
-  column_index_t column_count() const;
-  buffer_offset_t tuple_length() const;
+  column_index_t
+  column_count() const;
 
-  bool has_column(const column_name_t& name) const;
+  tuple_length_t
+  inlined_tuple_length() const;
 
-  // TODO: For now column_index and column_oid are the same thing
-  // But eventually column_oid should actaully be the PRIMARY KEY
-  // used in the `system_catalog`
-  column_index_t column_index_for(const column_name_t& name) const;
+  tuple_length_t
+  tuple_length(const vector<Value>& values) const;
 
-  column_oid_t   column_oid_for(const column_name_t& name) const;
-  column_oid_t   column_oid_for(column_index_t index) const;
+  buffer_offset_t
+  inline_tuple_length() const;
 
-  buffer_offset_t buffer_offset_for(column_index_t index) const;
-  buffer_offset_t buffer_offset_for(const column_name_t& name) const;
+  bool
+  has_column(const column_name_t& name) const;
 
-  const ColT& by_column_index(column_index_t index) const;
-  const ColT& by_name(const column_name_t& name) const;
+  column_index_t
+  column_index_for(const column_name_t& name) const;
+  column_index_t
+  column_index_for(column_oid_t oid) const;
 
-  const vector<column_index_t>& unlined_columns() const;
+  column_oid_t
+  column_oid_for(const column_name_t& name) const;
+  column_oid_t
+  column_oid_for(column_index_t index) const;
 
-  vector<ColT>& all();
-  const vector<ColT>& all() const;
-  const vector<ColT>& columns() const;
+  buffer_offset_t
+  buffer_offset_for(column_index_t index) const;
+  buffer_offset_t
+  buffer_offset_for(const column_name_t& name) const;
 
-  virtual const string to_string() const = 0;
+  const ColT&
+  by_column_index(column_index_t index) const;
+  const ColT&
+  by_name(const column_name_t& name) const;
 
-  table_oid_t table_oid() const {
+  const vector<column_index_t>&
+  unlined_columns() const;
+
+  vector<ColT>&
+  all();
+  const vector<ColT>&
+  all() const;
+  const vector<ColT>&
+  columns() const;
+
+  bool
+  valid(const vector<Value>& values) const;
+
+  virtual const string
+  to_string() const = 0;
+
+  table_oid_t
+  table_oid() const {
     return table_oid_;
   }
 
-  bool operator==(const BaseSchema& other) const;
+  bool
+  operator==(const BaseSchema& other) const;
 
-  const ColT& operator[](const column_name_t& name) const;
+  const ColT&
+  operator[](const column_name_t& name) const;
+
+  const vector<column_oid_t>&
+  column_oids() const {
+    return column_oids_;
+  }
+
+  const TupleLayout&
+  layout() const {
+    return tuple_layout_;
+  }
 
 protected:
-  // Are all tuples inlined when stored on the page?
-  // If some of them are not inlined, the page layout will differ.
-  bool all_tuples_inlined_ = true;
-
+  TupleLayout tuple_layout_;
   vector<ColT> columns_;
   map<column_name_t, column_index_t> indexes_;
 
-  // keeps track of unlined columns, using logical position(start with 0)
-  vector<column_index_t> unlined_columns_;
-
-  map<column_name_t, column_oid_t> column_oids_;
-  vector<buffer_offset_t> offsets_;
+  vector<column_oid_t> column_oids_;
+  map<column_oid_t, column_index_t> column_oids_to_indices_;
+  map<column_name_t, column_oid_t> column_names_to_oids_;
 
   table_oid_t table_oid_ = INVALID_TABLE_OID;
-
-  // size of fixed length columns
-  // NOTE: This *must* be uint32_t to keep consistent with page
-  // layout offsets.
-  uint32_t tuple_length_;
 };
-

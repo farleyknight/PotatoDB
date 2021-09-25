@@ -42,25 +42,21 @@ public:
     return sessions_.back();
   }
 
-  ptr<BasePlan> sql_to_plan(const string& statement) const;
+  ptr<BasePlan>
+  sql_to_plan(const string& statement);
 
   int pool_size() {
     return 100;
   }
 
-  StatementResult run(const string& statement);
-
-  // TODO: Remove this? Not sure what we did here, but creating new SQL queries was kind of
-  // a bad idea.. Stick to in-memory data structures.
-  void run_create_table(const table_name_t table_name,
-                        const vector<ColumnDefExpr> column_list,
-                        Txn& txn,
-                        ExecCtx& exec_ctx);
+  StatementResult
+  run(const string& statement);
 
   void reset_installation();
   void verify_system_files();
 
-  fs::path table_file_for(const string& table_name);
+  fs::path
+  table_file_for(const string& table_name);
 
   const IndexSchema&
   index_for(const index_name_t index_name) const
@@ -72,11 +68,13 @@ public:
     return exec_eng_;
   }
 
-  SchemaMgr& schema_mgr() {
+  SchemaMgr&
+  schema_mgr() {
     return schema_mgr_;
   }
 
-  const SchemaMgr& schema_mgr() const {
+  const SchemaMgr&
+  schema_mgr() const {
     return schema_mgr_;
   }
 

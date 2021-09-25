@@ -1,20 +1,20 @@
 #pragma once
 
-#include "catalog/query_schema.hpp"
+#include "catalog/table_schema.hpp"
 
-class QuerySchemaPlan {
+class TableSchemaPlan {
 public:
-  QuerySchemaPlan(QuerySchema schema)
+  TableSchemaPlan(TableSchema& schema)
     : schema_ (schema)
   {
     assert(schema.column_count() > 0);
   }
 
-  const QuerySchema&
+  TableSchema&
   schema() {
     return schema_;
   }
 
 private:
-  QuerySchema schema_;
+  TableSchema& schema_;
 };

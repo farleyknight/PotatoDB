@@ -120,33 +120,21 @@ using SPtr      = const std::shared_ptr<T>;
 template<class T>
 using MutSPtr   = std::shared_ptr<T>;
 
+using std::list;
+using std::future;
+using task = future<void>;
+
+using cond_var = condition_variable;
 
 template<class T>
-using List      = const list<T>;
+using ref_wrap  = std::reference_wrapper<T>;
 template<class T>
-using MutList   = list<T>;
-
-template<typename T>
-using Future = future<T>;
-using Task = Future<void>;
-
-using CondVar = condition_variable;
-
+using opt_ref = std::optional<std::reference_wrapper<T>>;
 
 template<class T>
-using RefWrap   = std::reference_wrapper<T>;
-template<class T>
-using OptRef    = std::optional<std::reference_wrapper<T>>;
+using option = optional<T>;
 
 template<class T>
-using MutOption = optional<T>;
+using set = unordered_set<T>;
 
-template<class T>
-using Set       = const unordered_set<T>;
-template<class T>
-using MutSet    = unordered_set<T>;
-
-template<class T>
-using Deque     = const deque<T>;
-template<class T>
-using MutDeque  = deque<T>;
+using std::deque;

@@ -8,7 +8,7 @@
 #include "exprs/show_tables_expr.hpp"
 
 ptr<BasePlan>
-PlanFactory::create(const SchemaMgr& schema_mgr,
+PlanFactory::create(SchemaMgr& schema_mgr,
                     ptr<BaseExpr>&& expr)
 {
   switch (expr->expr_type()) {
@@ -70,23 +70,26 @@ PlanFactory::from_expr(const SchemaMgr& schema_mgr,
 }
 
 ptr<BasePlan>
-PlanFactory::from_expr(const SchemaMgr& schema_mgr,
+PlanFactory::from_expr(SchemaMgr& schema_mgr,
                        const UpdateExpr& expr)
 {
-  auto table_name = expr.table().name();
-  auto table_oid = schema_mgr.table_oid_for(table_name);
-  auto [maybe_pred, cols] = to_query_where(schema_mgr, table_name, expr.pred().get());
+  auto table_name   = expr.table().name();
+  auto table_oid    = schema_mgr.table_oid_for(table_name);
+  auto query_schema = schema_mgr.query_schema_for(table_name);
+  auto [maybe_pred, cols] =
+    to_query_where(schema_mgr, table_name, expr.pred().get());
 
-  auto schema = schema_mgr.query_schema_for(table_name);
+  auto &schema = schema_mgr.table_schema_for(table_oid);
 
-  auto scan_plan = make_unique<SeqScanPlan>(schema,
+  auto scan_plan = make_unique<SeqScanPlan>(query_schema,
                                             table_oid,
                                             move(maybe_pred));
 
   map<column_oid_t, ptr<BaseQuery>> update_values;
   for (const auto &[name, expr] : expr.update_values()) {
     auto oid = schema_mgr.column_oid_for(table_name, name);
-    auto [query_where_ptr, cols] = to_query_node(schema_mgr, table_name, expr);
+    auto [query_where_ptr, cols] =
+      to_query_node(schema_mgr, table_name, expr);
     update_values[oid] = move(query_where_ptr);
   }
 
@@ -99,7 +102,7 @@ PlanFactory::from_expr(const SchemaMgr& schema_mgr,
 }
 
 ptr<BasePlan>
-PlanFactory::from_expr(const SchemaMgr& schema_mgr,
+PlanFactory::from_expr(SchemaMgr& schema_mgr,
                        const DeleteFromExpr& expr)
 {
   auto table_name = expr.table().name();
@@ -107,9 +110,10 @@ PlanFactory::from_expr(const SchemaMgr& schema_mgr,
   auto [maybe_pred, cols] = to_query_where(schema_mgr, table_name,
                                            expr.pred().get());
 
-  auto schema = schema_mgr.query_schema_for(table_name);
+  auto query_schema = schema_mgr.query_schema_for(table_name);
+  auto &schema = schema_mgr.table_schema_for(table_oid);
 
-  auto scan_plan = make_unique<SeqScanPlan>(schema,
+  auto scan_plan = make_unique<SeqScanPlan>(query_schema,
                                             table_oid,
                                             move(maybe_pred));
 
@@ -187,7 +191,7 @@ PlanFactory::from_expr(const SchemaMgr& schema_mgr,
   auto left_scan_plan = make_scan_plan(schema_mgr, *left_select_ptr);
   auto order_by = expr.order_by();
 
-  auto schema = dynamic_cast<SchemaPlan*>(left_scan_plan.get())->schema();
+  auto schema = dynamic_cast<QuerySchemaPlan*>(left_scan_plan.get())->schema();
   return make_unique<SortPlan>(schema,
                                order_by,
                                move(left_scan_plan));
@@ -258,7 +262,7 @@ PlanFactory::make_sort_plan(const SchemaMgr& schema_mgr,
   auto scan_plan = make_scan_plan(schema_mgr, expr);
   auto order_by = expr.order_by();
 
-  auto schema = dynamic_cast<SchemaPlan*>(scan_plan.get())->schema();
+  auto schema = dynamic_cast<QuerySchemaPlan*>(scan_plan.get())->schema();
   return make_unique<SortPlan>(schema,
                                order_by,
                                move(scan_plan));
@@ -399,21 +403,23 @@ PlanFactory::to_query_where(const SchemaMgr& schema_mgr,
 }
 
 ptr<BasePlan>
-PlanFactory::from_expr(const SchemaMgr& schema_mgr,
+PlanFactory::from_expr(SchemaMgr& schema_mgr,
                        const InsertExpr& expr)
 {
   auto table_name = expr.table_name();
   auto table_oid = schema_mgr.table_oid_for(table_name);
 
-  auto schema = schema_mgr.query_schema_for(table_name,
-                                         expr.column_list());
+  auto &schema = schema_mgr.table_schema_for(table_oid);
+  auto query_schema = schema_mgr.query_schema_for(table_name,
+                                                  expr.column_list());
   assert(schema.column_count() > 0);
   // TODO: For now, we only support INSERT with it's own raw tuples.
   // However, we need to support SQL of the form:
   // > INSERT INTO ... (SELECT ...)
 
   auto raw_tuples = RawTuples(expr.tuple_list());
-  auto child_plan = make_unique<RawTuplesPlan>(schema, raw_tuples);
+  auto child_plan = make_unique<RawTuplesPlan>(query_schema,
+                                               raw_tuples);
 
   return make_unique<InsertPlan>(schema,
                                  table_oid,

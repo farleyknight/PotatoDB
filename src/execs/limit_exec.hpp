@@ -24,7 +24,7 @@ class LimitExec : public BaseExec {
 
   Tuple next() override {
     // TODO
-    return Tuple();
+    return Tuple(TupleSources::TABLE_HEAP);
   }
 
   const string message_on_completion(int32_t result_count) const override {

@@ -14,20 +14,23 @@ TEST(RecoveryCheckpointTest, DISABLED_CheckpointTest) {
   std::cout << "Create a test table" << std::endl;
   db.run("CREATE TABLE test_table ( a VARCHAR(20), b INTEGER ) ");
 
-  auto test_schema      = db.catalog().query_schema_for("test_table");
-  auto test_table_oid   = db.catalog().table_oid_for("test_table");
-  auto &test_table_heap = db.catalog().table_heap_for(test_table_oid);
+  auto test_schema      = db.schema_mgr().query_schema_for("test_table");
+  auto test_table_oid   = db.schema_mgr().table_oid_for("test_table");
+  auto &test_table_heap = db.schema_mgr().table_heap_for(test_table_oid);
 
   auto value_A = Value::make("x");
   auto value_B = Value::make(2);
 
-  auto tuple = Tuple({value_A, value_B}, test_schema);
+  auto &txn = db.txn_mgr().begin();
+
+  auto tuple = Tuple({value_A, value_B},
+                     test_schema.layout(),
+                     txn);
 
   // set log time out very high so that flush doesn't happen before checkpoint is performed
   db.log_mgr().set_log_timeout(std::chrono::seconds(15));
 
-  // insert a ton of tuples
-  auto &txn = db.txn_mgr().begin();
+
   for (int i = 0; i < 1000; ++i) {
     EXPECT_TRUE(test_table_heap.insert_tuple(tuple, txn));
   }

@@ -59,7 +59,7 @@ private:
   SocketFunc accept_func_, read_func_;
   vector<shared_ptr<ClientSocket>> sockets_;
 
-  vector<Task> tasks_;
+  vector<task> tasks_;
 
   // NOTE: Stale file descriptors are connections that can be dropped
   // Since another thread may be already accessing this vector, we
