@@ -63,7 +63,7 @@ TableSchema::missing_columns(const QuerySchema& query_schema) const {
 }
 
 deque<Value>
-TableSchema::defaults(const vector<TableColumn>& cols) {
+TableSchema::defaults(const vector<TableColumn>& missing) {
   // std::cout << "***********" << std::endl;
   // std::cout << "primary key: " << primary_key_ << std::endl;
   // std::cout << "***********" << std::endl;
@@ -78,7 +78,7 @@ TableSchema::defaults(const vector<TableColumn>& cols) {
     autoincrement_values_[offset]++;
   }
 
-  assert(cols.size() == values.size());
+  assert(missing.size() == values.size());
 
   return values;
 }

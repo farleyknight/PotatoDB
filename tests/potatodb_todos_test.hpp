@@ -49,7 +49,6 @@ TEST(TodoAppTest, CountStarTest) {
   EXPECT_EQ(result.set()->value_at<int32_t>("COUNT(*)", 0), size);
 }
 
-
 TEST(TodoAppTest, SortingTest) {
   PotatoDB db;
   db.reset_installation();
@@ -57,8 +56,8 @@ TEST(TodoAppTest, SortingTest) {
   create_todo_table(db, size);
 
   auto asc_result = db.run("SELECT * FROM todos ORDER BY id ASC");
-  EXPECT_TRUE(asc_result.set() != nullptr);
-  EXPECT_EQ(asc_result.set()->size(), 10);
+  ASSERT_TRUE(asc_result.set() != nullptr);
+  ASSERT_EQ(asc_result.set()->size(), 10);
   for (index_t i = 0; i < size; ++i) {
     auto name = asc_result.set()->value_at<string>("name", i);
     EXPECT_EQ(name, "Task #" + std::to_string(i));
@@ -66,7 +65,7 @@ TEST(TodoAppTest, SortingTest) {
 
   auto desc_result = db.run("SELECT * FROM todos ORDER BY id DESC");
   EXPECT_TRUE(desc_result.set() != nullptr);
-  EXPECT_EQ(desc_result.set()->size(), 10);
+  ASSERT_EQ(desc_result.set()->size(), 10);
   for (index_t i = 0; i < size; ++i) {
     auto name = desc_result.set()->value_at<string>("name", i);
     EXPECT_EQ(name, "Task #" + std::to_string(size - 1 - i));

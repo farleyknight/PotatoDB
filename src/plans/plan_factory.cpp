@@ -79,8 +79,6 @@ PlanFactory::from_expr(SchemaMgr& schema_mgr,
   auto [maybe_pred, cols] =
     to_query_where(schema_mgr, table_name, expr.pred().get());
 
-  auto &schema = schema_mgr.table_schema_for(table_oid);
-
   auto scan_plan = make_unique<SeqScanPlan>(query_schema,
                                             table_oid,
                                             move(maybe_pred));
@@ -93,9 +91,9 @@ PlanFactory::from_expr(SchemaMgr& schema_mgr,
     update_values[oid] = move(query_where_ptr);
   }
 
-  assert(false); // TODO: Inspect `update_values`
+  // assert(false); // TODO: Inspect `update_values`
 
-  return make_unique<UpdatePlan>(schema,
+  return make_unique<UpdatePlan>(query_schema,
                                  table_oid,
                                  move(scan_plan),
                                  move(update_values));
@@ -111,13 +109,12 @@ PlanFactory::from_expr(SchemaMgr& schema_mgr,
                                            expr.pred().get());
 
   auto query_schema = schema_mgr.query_schema_for(table_name);
-  auto &schema = schema_mgr.table_schema_for(table_oid);
 
   auto scan_plan = make_unique<SeqScanPlan>(query_schema,
                                             table_oid,
                                             move(maybe_pred));
 
-  return make_unique<DeletePlan>(schema,
+  return make_unique<DeletePlan>(query_schema,
                                  table_oid,
                                  move(scan_plan));
 }
@@ -409,10 +406,9 @@ PlanFactory::from_expr(SchemaMgr& schema_mgr,
   auto table_name = expr.table_name();
   auto table_oid = schema_mgr.table_oid_for(table_name);
 
-  auto &schema = schema_mgr.table_schema_for(table_oid);
   auto query_schema = schema_mgr.query_schema_for(table_name,
                                                   expr.column_list());
-  assert(schema.column_count() > 0);
+  assert(query_schema.column_count() > 0);
   // TODO: For now, we only support INSERT with it's own raw tuples.
   // However, we need to support SQL of the form:
   // > INSERT INTO ... (SELECT ...)
@@ -421,7 +417,7 @@ PlanFactory::from_expr(SchemaMgr& schema_mgr,
   auto child_plan = make_unique<RawTuplesPlan>(query_schema,
                                                raw_tuples);
 
-  return make_unique<InsertPlan>(schema,
+  return make_unique<InsertPlan>(query_schema,
                                  table_oid,
                                  move(child_plan));
 }

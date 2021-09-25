@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common/config.hpp"
+#include "value/value.hpp"
 #include "value/value_layout.hpp"
 
 class TupleLayout {
@@ -62,14 +64,7 @@ public:
   }
 
   tuple_length_t
-  tuple_length(const vector<Value>& values) const {
-    // Calculate the size of the tuple.
-    auto tuple_length = inlined_tuple_length_;
-    for (auto i : unlined_columns_) {
-      tuple_length += (values[i].length() + sizeof(string_size_t));
-    }
-    return tuple_length;
-  }
+  tuple_length(const vector<Value>& values) const;
 
   void
   set_inlined_tuple_length(tuple_length_t tuple_length) {
@@ -123,7 +118,7 @@ private:
   // Are all tuples inlined when stored on the page?
   // If some of them are not inlined, the tuple layout will differ.
   bool all_tuples_inlined_ = true;
-  bool inlined_tuple_length_ = INVALID_TUPLE_LENGTH;
+  int32_t inlined_tuple_length_ = INVALID_TUPLE_LENGTH;
   vector<column_index_t> unlined_columns_;
   vector<ValueLayout> value_layouts_;
 };

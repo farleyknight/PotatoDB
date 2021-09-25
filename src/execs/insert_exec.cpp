@@ -5,8 +5,9 @@ InsertExec::next() {
   auto &heap = exec_ctx_.schema_mgr().table_heap_for(plan_->table_oid());
   auto tuple = child_->next();
 
-  auto &table_schema = plan_->schema();
-  auto query_schema  = exec_ctx_.schema_mgr().query_schema_for(plan_->table_oid());
+  auto &query_schema = plan_->schema();
+  auto table_schema  =
+    exec_ctx_.schema_mgr().table_schema_for(plan_->table_oid());
 
   // TODO: Refactor this at some point?
   auto missing_columns = table_schema.missing_columns(query_schema);

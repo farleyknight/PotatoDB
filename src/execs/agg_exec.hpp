@@ -6,7 +6,7 @@
 #include "execs/has_child_exec.hpp"
 #include "execs/agg_ht.hpp"
 #include "execs/seq_scan_exec.hpp"
-#include "plans/schema_plan.hpp"
+#include "plans/query_schema_plan.hpp"
 #include "execs/has_child_exec.hpp"
 
 class AggExec : public BaseExec,

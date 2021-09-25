@@ -1,7 +1,7 @@
 #pragma once
 
 #include "query/query_comp.hpp"
-#include "plans/schema_plan.hpp"
+#include "plans/query_schema_plan.hpp"
 #include "plans/maybe_pred_plan.hpp"
 
 class NestedLoopJoinPlan : public BasePlan,

@@ -21,8 +21,8 @@ public:
   }
 
   template<typename T>
-  T value_at(const string name, size_t index) {
-    assert(results_.size() >= index + 1);
+  T value_at(const string name, int32_t index) {
+    assert(size() >= index + 1);
     return results_[index].value(schema_,
                                  schema_.column_index_for(name)).as<T>();
   }

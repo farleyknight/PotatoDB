@@ -3,7 +3,7 @@
 #include "common/config.hpp"
 #include "plans/base_plan.hpp"
 #include "plans/table_plan.hpp"
-#include "plans/schema_plan.hpp"
+#include "plans/query_schema_plan.hpp"
 #include "plans/maybe_pred_plan.hpp"
 
 class SeqScanPlan : public BasePlan,

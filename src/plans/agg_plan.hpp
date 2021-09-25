@@ -12,7 +12,7 @@
 #include "plans/agg_key.hpp"
 #include "plans/base_plan.hpp"
 #include "plans/has_child_plan.hpp"
-#include "plans/schema_plan.hpp"
+#include "plans/query_schema_plan.hpp"
 
 class AggPlan : public BasePlan,
                 public HasChildPlan,

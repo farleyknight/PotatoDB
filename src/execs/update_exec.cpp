@@ -8,20 +8,23 @@ UpdateExec::UpdateExec(ExecCtx& exec_ctx,
     child_   (move(child))
 {}
 
-
-const TableSchema& UpdateExec::schema() {
+const QuerySchema&
+UpdateExec::schema() {
   return plan_->schema();
 }
 
-void UpdateExec::init() {
+void
+UpdateExec::init() {
   child_->init();
 }
 
-bool UpdateExec::has_next() {
+bool
+UpdateExec::has_next() {
   return child_->has_next();
 }
 
-Tuple UpdateExec::next() {
+Tuple
+UpdateExec::next() {
   auto tuple = child_->next();
   auto rid   = tuple.rid();
 

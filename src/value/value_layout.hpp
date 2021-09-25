@@ -1,5 +1,8 @@
 #pragma once
 
+#include "common/ids.hpp"
+#include "types/type_id.hpp"
+
 class ValueLayout {
 public:
   ValueLayout(TypeId type_id,

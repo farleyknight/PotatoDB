@@ -2,7 +2,7 @@
 
 #include "plans/base_plan.hpp"
 #include "plans/raw_tuples.hpp"
-#include "plans/schema_plan.hpp"
+#include "plans/query_schema_plan.hpp"
 
 class RawTuplesPlan : public BasePlan,
                       public QuerySchemaPlan

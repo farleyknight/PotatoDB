@@ -1,21 +1,21 @@
 #pragma once
 
 #include "plans/base_plan.hpp"
-#include "plans/table_schema_plan.hpp"
+#include "plans/query_schema_plan.hpp"
 #include "plans/table_plan.hpp"
 #include "plans/has_child_plan.hpp"
 
 class InsertPlan : public BasePlan,
-                   public TableSchemaPlan,
+                   public QuerySchemaPlan,
                    public HasChildPlan,
                    public TablePlan
 {
 public:
-  InsertPlan(TableSchema& schema,
+  InsertPlan(const QuerySchema schema,
              table_oid_t table_oid,
              ptr<BasePlan>&& child)
     : BasePlan        (PlanType::INSERT),
-      TableSchemaPlan (schema),
+      QuerySchemaPlan (schema),
       HasChildPlan    (move(child)),
       TablePlan       (table_oid)
   {}

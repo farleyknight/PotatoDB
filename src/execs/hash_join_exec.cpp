@@ -2,7 +2,7 @@
 #include "execs/hash_join_exec.hpp"
 #include "execs/exec_ctx.hpp"
 #include "plans/hash_join_plan.hpp"
-#include "plans/schema_plan.hpp"
+#include "plans/query_schema_plan.hpp"
 
 HashJoinExec::HashJoinExec(ExecCtx& exec_ctx,
                            ptr<HashJoinPlan>&& plan,

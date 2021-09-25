@@ -74,7 +74,8 @@ public:
     return !at_the_end();
   }
 
-  Tuple next() override {
+  Tuple
+  next() override {
     if (sort_asc()) {
       auto tuple = table_iter_.tuple();
       ++table_iter_;
