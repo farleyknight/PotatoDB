@@ -32,6 +32,8 @@ public:
   inline_tuple_length() const;
 
   bool
+  has_column(column_oid_t oid) const;
+  bool
   has_column(const column_name_t& name) const;
 
   column_index_t
@@ -45,9 +47,9 @@ public:
   column_oid_for(column_index_t index) const;
 
   buffer_offset_t
-  buffer_offset_for(column_index_t index) const;
-  buffer_offset_t
   buffer_offset_for(const column_name_t& name) const;
+  buffer_offset_t
+  buffer_offset_for(column_index_t index) const;
 
   const ColT&
   by_column_index(column_index_t index) const;
@@ -81,6 +83,9 @@ public:
   const ColT&
   operator[](const column_name_t& name) const;
 
+  const ColT&
+  operator[](column_oid_t oid) const;
+
   const vector<column_oid_t>&
   column_oids() const {
     return column_oids_;
@@ -93,10 +98,11 @@ public:
 
 protected:
   TupleLayout tuple_layout_;
-  vector<ColT> columns_;
-  map<column_name_t, column_index_t> indexes_;
 
+  vector<ColT> columns_;
   vector<column_oid_t> column_oids_;
+
+  map<column_name_t, column_index_t> indexes_;
   map<column_oid_t, column_index_t> column_oids_to_indices_;
   map<column_name_t, column_oid_t> column_names_to_oids_;
 

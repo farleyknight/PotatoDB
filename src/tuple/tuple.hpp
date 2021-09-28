@@ -17,15 +17,41 @@ enum class TupleSources {
   LOG_RECOVERY = 2
 };
 
+// TODO:
+// There is an anti-pattern hidden in this class
+// We construct Tuples via vector<Value> but that
+// does not always work out.
+//
+// The problem is that that there are many parts of the code
+// that construct & manipulate tuples.
+//
+// But in actuality, we should really delegate Tuple reading/writing
+// into the ResultSet class.
+// Imagine if we set it up such that `ResultSet` automatically
+// maintains a vector<Tuple> and a QuerySchema for those tuples.
+//
+//
+// auto results = ResultSet(..)
+// while (exec_eng.has_next()) {
+//   /* Version 1 */
+//   exec_eng.fetch_next();
+//
+//   /* Version 2, if we need to do any processing on the value map */
+//   auto value_map = exec_eng.next_value_map();
+//   results.new_tuple(value_map);
+// }
+//
+// EXPECT_EQ(exec_eng.results(), results);
+
 class Tuple {
 public:
   Tuple(TupleSources source)
     : source_ (source)
   {}
 
-  explicit Tuple(int32_t size)
+  explicit Tuple(tuple_length_t length)
     : source_ (TupleSources::TABLE_HEAP),
-      buffer_ (size)
+      buffer_ (length)
   {}
 
   explicit Tuple(RID rid)
@@ -38,10 +64,6 @@ public:
       buffer_ (buffer)
   {}
 
-  explicit Tuple(const vector<Value>& values,
-                 const TupleLayout& layout,
-                 Txn& txn);
-
   // Destructor
   ~Tuple() = default;
 
@@ -51,10 +73,6 @@ public:
   bool is_valid() const {
     return rid_.has_value();
   }
-
-  buffer_offset_t
-  buffer_offset_for(const auto& schema,
-                    column_index_t index) const;
 
   void copy_from(const Tuple& tuple) {
     buffer_.copy_from(tuple.buffer_);
@@ -69,26 +87,14 @@ public:
                        tuple.buffer_.char_ptr(), buffer_.size()) == 0;
   }
 
-  Value value(const auto& schema, column_index_t column_index) const;
+  ///////////////////////////////////////////////////
+  // TODO: Move the methods BELOW into TupleLayout //
+  ///////////////////////////////////////////////////
 
-  Value
-  value_by_name(const QuerySchema& schema,
-                const column_name_t& name) const;
+  ///////////////////////////////////////////////////
+  // TODO: Move the methods ABOVE into TupleLayout //
+  ///////////////////////////////////////////////////
 
-  Value
-  value_by_oid(const QuerySchema& schema, column_oid_t oid) const;
-
-  Value
-  value_by_oid(const TableSchema& schema, column_oid_t oid) const;
-
-  bool is_null(const auto& schema,
-               column_index_t column_index) const;
-
-  Tuple
-  key_from_tuple(const QuerySchema& schema,
-                 const QuerySchema& key_schema,
-                 const vector<int32_t>& key_attrs,
-                 Txn& txn) const;
 
   const RID rid()               const { return rid_.value(); }
   void set_rid(RID rid)               { rid_.emplace(rid); }
@@ -101,16 +107,9 @@ public:
 
   const PageId page_id() const { return rid_->page_id(); }
 
-  vector<Value>
-  to_values(const QuerySchema& schema) const;
 
-  Tuple
-  add_defaults(deque<Value>& defaults,
-               const TableSchema& table_schema,
-               const QuerySchema& query_schema,
-               Txn& txn) const;
-
-  // TODO: Rename this method
+  // TODO: Rename this method to `copy_tuple` or something
+  // That is effectively what it's doing.
   void copy_n_bytes(buffer_offset_t source_offset,
                     buffer_offset_t dest_offset,
                     const Buffer& source_buffer,
@@ -121,13 +120,6 @@ public:
            source_buffer.const_ptr(source_offset),
            n_bytes);
   }
-
-  const string to_string(const TableSchema& schema) const;
-  const string to_string(const QuerySchema& schema) const;
-  const string to_payload(const QuerySchema& schema) const;
-
-  static Tuple
-  random_from(const QuerySchema& schema, Txn& txn);
 
   Buffer& buffer() {
     return buffer_;

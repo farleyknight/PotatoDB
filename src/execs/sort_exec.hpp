@@ -87,9 +87,11 @@ public:
     }
   }
 
-  SortKey make_key(const Tuple& tuple) {
+  SortKey
+  make_key(const Tuple& tuple) {
     auto col = plan_->order_by().column();
-    auto value = tuple.value_by_name(child_schema(), col.name());
+    auto oid = child_schema().column_oid_for(col.name());
+    auto value = tuple.value_by_oid(child_schema(), oid);
     return SortKey(value);
   }
 

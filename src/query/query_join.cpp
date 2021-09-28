@@ -4,7 +4,7 @@
 Value QueryJoin::eval(const Tuple& tuple,
                       const QuerySchema& schema) const
 {
-  return tuple.value(schema, column_index(schema));
+  return tuple.value_by_index(schema, column_index(schema));
 }
 
 Value QueryJoin::eval_join(const Tuple&  lt,
@@ -14,9 +14,9 @@ Value QueryJoin::eval_join(const Tuple&  lt,
 {
   switch (join_side_) {
   case JoinSide::LEFT:
-    return lt.value(ls, column_index(ls));
+    return lt.value_by_index(ls, column_index(ls));
   case JoinSide::RIGHT:
-    return rt.value(rs, column_index(rs));
+    return rt.value_by_index(rs, column_index(rs));
   case JoinSide::INVALID:
     throw Exception("Cannot eval join with INVALID_SIDE!");
   }

@@ -26,11 +26,12 @@ QueryColumn
 QueryColumn::from(TableColumn col) {
   return QueryColumn(col.type_id(),
                      col.table_oid(),
-                     col.column_oid(),
+                     col.oid(),
                      col.name());
 }
 
-size_t QueryColumn::fixed_length() {
+value_length_t
+QueryColumn::fixed_length() const {
   return Type::size_of(type_id_);
 }
 

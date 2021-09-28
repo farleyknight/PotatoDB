@@ -17,14 +17,14 @@ public:
 
   template<typename T>
   T value(const string name, const Tuple& tuple) {
-    return tuple.value(schema_, schema_.column_index_for(name)).as<T>();
+    return tuple.value_by_index(schema_, schema_.column_index_for(name)).as<T>();
   }
 
   template<typename T>
   T value_at(const string name, int32_t index) {
     assert(size() >= index + 1);
-    return results_[index].value(schema_,
-                                 schema_.column_index_for(name)).as<T>();
+    return results_[index].value_by_index(schema_,
+                                          schema_.column_index_for(name)).as<T>();
   }
 
   const vector<Tuple>&
@@ -38,7 +38,7 @@ public:
   }
 
   const Tuple&
-  operator[](uint32_t i) const {
+  operator[](int32_t i) const {
     return results_[i];
   }
 

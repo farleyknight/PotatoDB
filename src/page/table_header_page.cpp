@@ -111,7 +111,7 @@ TableHeaderPage::write_columns(buffer_offset_t columns_start,
     offset += sizeof(col.table_oid());
 
     // write_column_oid       - 4 bytes (int32)
-    page_->write_int32(offset, col.column_oid());
+    page_->write_int32(offset, col.oid());
     offset += sizeof(col.table_oid());
 
     // write_fixed_length     - 4 bytes (int32)

@@ -13,7 +13,6 @@ public:
 
   void insert_into_bucket(SortKey key, Tuple tuple) {
     logger->debug("INSERT INTO BUCKET -- SortKey: " + key.to_string());
-    // logger->debug("INSERT INTO BUCKET -- Tuple:   " + tuple.to_string());
     table_[key].push_back(tuple);
   }
 

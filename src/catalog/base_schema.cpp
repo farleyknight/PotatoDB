@@ -3,16 +3,15 @@
 
 template<class ColT>
 BaseSchema<ColT>::BaseSchema(vector<ColT> cols) {
-  size_t offset = 0;
+  int32_t offset = 0;
+  column_index_t cols_size = cols.size();
+  assert(cols_size > 0);
 
-  assert(cols.size() > 0); // NOTE: Empty schemas are not a thing :/
-  // NOTE: If we have a table_oid_ for the schema, it is because
-  // all columns have the same table_oid_
   table_oid_ = cols[0].table_oid();
 
-  for (uint32_t index = 0; index < cols.size(); ++index) {
-    auto &col        = cols[index];
-    auto oid         = col.column_oid();
+  for (int32_t index = 0; index < cols_size; ++index) {
+    const auto &col  = cols[index];
+    auto oid         = col.oid();
     const auto &name = col.name();
 
     // NOTE: If the 2nd column has a different table_oid,
@@ -23,6 +22,9 @@ BaseSchema<ColT>::BaseSchema(vector<ColT> cols) {
     }
 
     if (column_names_to_oids_.contains(name)) {
+      // TODO: ABORT!
+      // If we happen to hit a duplicate, we should probably ABORT with info
+      // about it
       continue; // NOTE: Skip duplicates
     }
 
@@ -34,7 +36,6 @@ BaseSchema<ColT>::BaseSchema(vector<ColT> cols) {
     indexes_.emplace(name, index);
     column_oids_to_indices_.emplace(oid, index);
     column_names_to_oids_.emplace(name, oid);
-
 
     column_oids_.push_back(oid);
     columns_.push_back(col);
@@ -49,12 +50,18 @@ BaseSchema<ColT>::has_column(const column_name_t& name) const {
   return column_names_to_oids_.contains(name);
 }
 
+
+template<class ColT>
+bool
+BaseSchema<ColT>::has_column(column_oid_t oid) const {
+  return column_oids_to_indices_.contains(oid);
+}
+
 template<class ColT>
 column_oid_t
 BaseSchema<ColT>::column_oid_for(const column_name_t& name) const
 {
-  assert(!column_names_to_oids_.contains(name));
-  if (column_names_to_oids_.count(name) == 0) {
+  if (!column_names_to_oids_.contains(name)) {
     std::cout << "Could not find column with name " << name << std::endl;
   }
   assert(column_names_to_oids_.contains(name));
@@ -142,8 +149,15 @@ BaseSchema<ColT>::operator[](const column_name_t& name) const {
 
 template<class ColT>
 const ColT&
+BaseSchema<ColT>::operator[](column_oid_t oid) const {
+  assert(column_oids_to_indices_.contains(oid));
+  return by_column_index(column_oids_to_indices_.at(oid));
+}
+
+template<class ColT>
+const ColT&
 BaseSchema<ColT>::by_column_index(column_index_t index) const {
-  auto size = static_cast<long>(columns_.size());
+  auto size = static_cast<int32_t>(columns_.size());
   assert(size >= index);
   return columns_.at(index);
 }

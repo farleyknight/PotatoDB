@@ -18,8 +18,7 @@ using frame_id_t      = std::int32_t;
 using page_id_t       = std::uint32_t;
 // The above can be decomposed into these two.
 //
-// NOTE: file_id_t and block_id_t must STAY as unsigned
-// because they are combined into a PageId object, using
+// NOTE: file_id_t and block_id_t must STAY as unsigned // because they are combined into a PageId object, using
 // some bit-manipulation.
 //
 // As such, I don't want the sign-bit to get in the way here.
@@ -32,6 +31,9 @@ using buffer_offset_t = std::int32_t;
 using column_index_t  = std::int32_t;
 // Length of string, used in byte-level read/write operations
 using string_size_t   = std::int32_t;
+
+// Length of value
+using value_length_t  = std::int32_t;
 
 // This is stored separately in a RID
 using slot_id_t       = std::int16_t;
@@ -50,6 +52,7 @@ using table_name_t    = std::string;
 using index_name_t    = std::string;
 using sql_statement_t = std::string;
 
+// TODO: Remove these uint32 types
 // Index type is mostly meant for for-loops
 using index_t         = std::uint32_t;
 using length_t        = std::uint32_t;

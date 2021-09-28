@@ -152,6 +152,14 @@ public:
     return *reinterpret_cast<const int32_t*>(const_ptr(offset));
   }
 
+  void write_offset(buffer_offset_t offset, buffer_offset_t n) {
+    *reinterpret_cast<buffer_offset_t*>(ptr(offset)) = n;
+  }
+
+  buffer_offset_t read_offset(buffer_offset_t offset) const {
+    return *reinterpret_cast<const buffer_offset_t*>(const_ptr(offset));
+  }
+
   void write_uint32(buffer_offset_t offset, int32_t n) {
     *reinterpret_cast<uint32_t*>(ptr(offset)) = n;
   }

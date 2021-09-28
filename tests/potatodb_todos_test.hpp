@@ -49,6 +49,13 @@ TEST(TodoAppTest, CountStarTest) {
   EXPECT_EQ(result.set()->value_at<int32_t>("COUNT(*)", 0), size);
 }
 
+TEST(TodoAppTest, InsertTest) {
+  // TODO:
+  // Use create_todo_table
+  // Create 10 TODOs
+  // Verify each of the `id`s are auto-incrementing.
+}
+
 TEST(TodoAppTest, SortingTest) {
   PotatoDB db;
   db.reset_installation();

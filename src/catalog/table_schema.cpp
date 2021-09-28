@@ -21,15 +21,15 @@ TableSchema::TableSchema(vector<TableColumn> columns,
 
   int32_t column_count = columns_.size();
 
-
   for (int32_t offset = 0; offset < column_count; ++offset) {
     if (columns_[offset].is_primary_key()) {
       primary_keys_.push_back(offset);
     }
 
     if (columns_[offset].is_autoincrement()) {
-      autoincrement_offsets_.push_back(offset);
-      autoincrement_values_[offset] = 0;
+      auto oid = columns_[offset].oid();
+      std::cout << "Initializing AUTO INCREMENT with column oid: " << oid << std::endl;
+      autoincrement_values_[oid] = 0;
     }
   }
 }
@@ -50,11 +50,12 @@ QueryColumn TableSchema::operator[](const column_name_t& col_name) const
 }
 
 vector<TableColumn>
-TableSchema::missing_columns(const QuerySchema& query_schema) const {
+TableSchema::missing_columns(const QuerySchema& query_schema) const
+{
   vector<TableColumn> missing;
   for (const auto &col : columns_) {
     if (!query_schema.has_column(col.name())) {
-      // std::cout << "Missing column: " << col.name() << std::endl;
+      std::cout << "Missing column: " << col.name() << std::endl;
       missing.push_back(col);
     }
   }
@@ -62,25 +63,32 @@ TableSchema::missing_columns(const QuerySchema& query_schema) const {
   return missing;
 }
 
-deque<Value>
-TableSchema::defaults(const vector<TableColumn>& missing) {
-  // std::cout << "***********" << std::endl;
-  // std::cout << "primary key: " << primary_key_ << std::endl;
-  // std::cout << "***********" << std::endl;
+// TODO!
+// We do NOT need multiple auto-increment values!
+// MySQL does NOT support them:
+// https://stackoverflow.com/questions/22824439/how-to-create-two-auto-increment-columns-in-mysql
 
-  deque<Value> values;
-  for (auto offset : autoincrement_offsets_) {
-    int32_t int_value = autoincrement_values_[offset];
-    // std::cout << "AUTO INCREMENT value " << autoincrement_ << std::endl;
-    auto value = Value::make(int_value);
-    values.push_back(value);
+const map<column_oid_t, Value>
+TableSchema::defaults(const vector<TableColumn>& missing) {
+  map<column_oid_t, Value> defaults;
+  for (const auto &col : missing) {
+    auto oid = col.oid();
+
+    assert(autoincrement_values_.contains(oid));
+    auto value_as_int32 = autoincrement_values_[oid];
+    std::cout << "AUTO INCREMENT before value " << value_as_int32 << std::endl;
+    defaults.emplace(oid, Value::make(value_as_int32));
     // TODO: After increment, these values should be persisted to disk somehow!
-    autoincrement_values_[offset]++;
+    // autoincrement_values_.emplace(oid, value_as_int32 + 1);
+
+    autoincrement_values_[oid]++;
+
+    std::cout << "AUTO INCREMENT after value " << autoincrement_values_[oid] << std::endl;
   }
 
-  assert(missing.size() == values.size());
+  assert(missing.size() == defaults.size());
 
-  return values;
+  return defaults;
 }
 
 const string

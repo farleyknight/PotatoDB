@@ -159,7 +159,7 @@ TableMgr::load_table_columns(const table_name_t& table_name,
                              const vector<TableColumn>& table_columns)
 {
   for (const auto &column : table_columns) {
-    column_mgr_.load_column_oid(column.column_oid(),
+    column_mgr_.load_column_oid(column.oid(),
                                 table_name,
                                 column.name());
   }

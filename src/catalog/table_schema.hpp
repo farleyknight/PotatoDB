@@ -37,7 +37,7 @@ public:
   vector<TableColumn>
   missing_columns(const QuerySchema& query_schema) const;
 
-  deque<Value>
+  const map<column_oid_t, Value>
   defaults(const vector<TableColumn>& cols);
 
   table_oid_t table_oid() const {
@@ -45,7 +45,8 @@ public:
   }
 
   // TODO: Put this in the Catalog
-  QuerySchema to_query_schema() const {
+  QuerySchema
+  to_query_schema() const {
     vector<QueryColumn> cols;
     for (const auto &table_col : columns_) {
       cols.push_back(QueryColumn::from(table_col));
@@ -53,24 +54,22 @@ public:
     return QuerySchema(cols);
   }
 
-  const string table_name() const {
+  const string
+  table_name() const {
     return table_name_;
   }
 
 private:
-  // TODO: This should be a mapping from the column offset to the actual autoincrement value
-  // TODO: Add a mutex around this.
-  map<column_offset_t, int32_t> autoincrement_values_;
+  // TODO!
+  // We do NOT need multiple auto-increment values!
+  // MySQL does NOT support them:
+  // https://stackoverflow.com/questions/22824439/how-to-create-two-auto-increment-columns-in-mysql
+  map<column_oid_t, int32_t> autoincrement_values_;
 
   // TODO: This is a list of column offsets. If a column offset exists here, it should be
   // considered a primary key.
   // TODO: Add a mutex around this.
   vector<column_offset_t> primary_keys_;
-
-  // TODO: This is a list of column offsets. If a column offset exists here, it should always
-  // be updating the corresponding autoincrement value.
-  // TODO: Add a mutex around this.
-  vector<column_offset_t> autoincrement_offsets_;
 
   table_oid_t table_oid_;
   table_name_t table_name_;

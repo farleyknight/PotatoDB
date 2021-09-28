@@ -20,8 +20,11 @@ InsertExec::next() {
                                       query_schema,
                                       exec_ctx().txn());
 
+  std::cout << "New INSERT Tuple : " << new_tuple.to_string(table_schema) << std::endl;
+
   // NOTE: At this point, the tuple should include all columns from
   // the table schema.
+  //
   // Hence we need to pass in the table schema.
 
   auto table_name = exec_ctx_.schema_mgr().table_name_for(plan_->table_oid());

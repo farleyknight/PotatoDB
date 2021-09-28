@@ -54,6 +54,6 @@ const QueryColumn QueryAgg::to_query_column() const {
   auto name = agg_type_string() + "(" + col_.name() + ")";
   return QueryColumn(col_.type_id(),
                      col_.table_oid(),
-                     col_.column_oid(),
+                     col_.oid(),
                      name);
 }

@@ -11,8 +11,8 @@
 #include "exprs/base_expr.hpp"
 #include "exprs/column_def_expr.hpp"
 
-static constexpr int32_t INVALID_FIXED_LENGTH    = -1;
-static constexpr int32_t INVALID_VARIABLE_LENGTH = -1;
+static constexpr value_length_t INVALID_FIXED_LENGTH    = -1;
+static constexpr value_length_t INVALID_VARIABLE_LENGTH = -1;
 
 class TableColumn {
 public:
@@ -101,18 +101,27 @@ public:
   // Default destructor
   ~TableColumn() = default;
 
-  const column_name_t& name()     const { return name_; }
+  const column_name_t&
+  name()             const { return name_; }
+  TypeId
+  type_id()          const { return type_id_; }
+  table_oid_t
+  table_oid()        const { return table_oid_; }
+  column_oid_t
+  oid()              const { return column_oid_; }
+  length_t
+  fixed_length()     const { return fixed_length_; }
+  string_size_t
+  variable_length()  const { return variable_length_; }
 
-  TypeId type_id()                const { return type_id_; }
-  table_oid_t table_oid()         const { return table_oid_; }
-  column_oid_t column_oid()       const { return column_oid_; }
-  length_t fixed_length()         const { return fixed_length_; }
-  string_size_t variable_length() const { return variable_length_; }
-
-  bool is_inlined()               const { return inlined_; }
-  bool is_primary_key()           const { return primary_key_; }
-  bool is_autoincrement()         const { return autoincrement_; }
-  bool is_nullable()              const { return nullable_; }
+  bool
+  is_inlined()       const { return inlined_; }
+  bool
+  is_primary_key()   const { return primary_key_; }
+  bool
+  is_autoincrement() const { return autoincrement_; }
+  bool
+  is_nullable()      const { return nullable_; }
 
   void set_nullable(bool nullable) {
     nullable_ = nullable;
@@ -181,19 +190,19 @@ public:
 
 private:
   column_name_t name_;
-  TypeId type_id_ = TypeId::INVALID;
+  TypeId type_id_          = TypeId::INVALID;
 
-  table_oid_t table_oid_;
-  column_oid_t column_oid_;
+  table_oid_t table_oid_   = INVALID_TABLE_OID;
+  column_oid_t column_oid_ = INVALID_COLUMN_OID;
 
   // is the column inlined ?
-  bool inlined_ = true;
+  bool inlined_            = true;
   // is the column nullable?
-  bool nullable_ = false; // TODO: Default should be true!
+  bool nullable_           = false; // TODO: Default should be true!
   // is the column a primary key?
-  bool primary_key_ = false;
+  bool primary_key_        = false;
   // is the column an autoincrement?
-  bool autoincrement_ = false;
+  bool autoincrement_      = false;
   int32_t fixed_length_    = -1;
   int32_t variable_length_ = -1;
 };

@@ -94,25 +94,62 @@ public:
 
   void
   write_values(const vector<Value>& values,
-               Buffer& buffer) const
-  {
-    auto var_len_offset  = inlined_tuple_length_;
-    int32_t column_count = value_layouts_.size();
+               Buffer& buffer) const;
 
-    for (column_index_t i = 0; i < column_count; i++) {
-      const auto &col = value_layouts_[i];
+  static Tuple
+  make(const map<column_oid_t, Value>& values,
+       const TupleLayout& layout,
+       Txn& txn);
 
-      if (col.is_inlined()) {
-        values[i].cast_as(col.type_id()).
-          serialize_to(col.offset(), buffer);
-      } else {
-        buffer.write_uint32(col.offset(), var_len_offset);
-        auto value = values[i].cast_as(col.type_id());
-        value.serialize_to(var_len_offset, buffer);
-        var_len_offset += (values[i].length() + sizeof(buffer_offset_t));
-      }
-    }
-  }
+  buffer_offset_t
+  buffer_offset_for(const Tuple& tuple,
+                    column_index_t index) const;
+
+  Value
+  value_by_index(const auto& schema,
+                 column_index_t column_index) const;
+
+  Value
+  value_by_name(const QuerySchema& schema,
+                const column_name_t& name) const;
+
+  Value
+  value_by_oid(const QuerySchema& schema,
+               column_oid_t oid) const;
+
+  Value
+  value_by_oid(const TableSchema& schema,
+               column_oid_t oid) const;
+
+  bool
+  is_null(const auto& schema,
+          column_index_t column_index) const;
+
+  Tuple
+  key_from_tuple(const QuerySchema& schema,
+                 const QuerySchema& key_schema,
+                 const vector<int32_t>& key_attrs,
+                 Txn& txn) const;
+
+
+  const vector<Value>
+  to_values(const QuerySchema& schema) const;
+
+  const map<column_oid_t, Value>
+  to_value_map(const QuerySchema& schema) const;
+
+  Tuple
+  add_defaults(const map<column_oid_t, Value>& defaults,
+               const TableSchema& table_schema,
+               const QuerySchema& query_schema,
+               Txn& txn) const;
+
+  const string to_string(const TableSchema& schema) const;
+  const string to_string(const QuerySchema& schema) const;
+  const string to_payload(const QuerySchema& schema) const;
+
+  static Tuple
+  random_from(const QuerySchema& schema, Txn& txn);
 
 private:
   // Are all tuples inlined when stored on the page?

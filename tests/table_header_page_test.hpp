@@ -41,7 +41,7 @@ TEST(TableHeaderPageTest, WriteThenReadOneColumn) {
 
     EXPECT_EQ(col_copy.type_id(),          col_orig.type_id());
     EXPECT_EQ(col_copy.table_oid(),        col_orig.table_oid());
-    EXPECT_EQ(col_copy.column_oid(),       col_orig.column_oid());
+    EXPECT_EQ(col_copy.oid(),              col_orig.oid());
     EXPECT_EQ(col_copy.fixed_length(),     col_orig.fixed_length());
     EXPECT_EQ(col_copy.variable_length(),  col_orig.variable_length());
 

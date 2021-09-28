@@ -79,9 +79,11 @@ public:
     return type_id_ != TypeId::VARCHAR;
   }
 
-  size_t fixed_length();
+  value_length_t
+  fixed_length() const;
 
-  size_t variable_length() const {
+  value_length_t
+  variable_length() const {
     return 0; // TODO!
   }
 
@@ -100,11 +102,13 @@ public:
     return name_ != other.name_;
   }
 
-  column_oid_t column_oid() const {
+  column_oid_t
+  oid() const {
     return column_oid_;
   }
 
-  table_oid_t table_oid() const {
+  table_oid_t
+  table_oid() const {
     return table_oid_;
   }
 
