@@ -3,6 +3,7 @@
 #include "common/config.hpp"
 #include "value/value.hpp"
 #include "value/value_layout.hpp"
+#include "txns/txn.hpp"
 
 class TupleLayout {
 public:
@@ -106,8 +107,8 @@ public:
                     column_index_t index) const;
 
   Value
-  value_by_index(const auto& schema,
-                 column_index_t column_index) const;
+  value_by_column_index(const auto& schema,
+                        column_index_t column_index) const;
 
   Value
   value_by_name(const QuerySchema& schema,
@@ -144,12 +145,13 @@ public:
                const QuerySchema& query_schema,
                Txn& txn) const;
 
-  const string to_string(const TableSchema& schema) const;
-  const string to_string(const QuerySchema& schema) const;
-  const string to_payload(const QuerySchema& schema) const;
+  const string
+  to_string(const Tuple& tuple) const;
+  const string
+  to_payload(const Tuple& tuple) const;
 
   static Tuple
-  random_from(const QuerySchema& schema, Txn& txn);
+  random_tuple();
 
 private:
   // Are all tuples inlined when stored on the page?

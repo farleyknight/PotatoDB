@@ -2,14 +2,9 @@
 
 #include "buffer/buffer.hpp"
 
-#include "catalog/query_schema.hpp"
-
 #include "tuple/rid.hpp"
-#include "tuple/tuple_layout.hpp"
 #include "value/value.hpp"
 #include "value/value_factory.hpp"
-
-class Txn;
 
 enum class TupleSources {
   TABLE_HEAP   = 0,
@@ -17,49 +12,27 @@ enum class TupleSources {
   LOG_RECOVERY = 2
 };
 
-// TODO:
-// There is an anti-pattern hidden in this class
-// We construct Tuples via vector<Value> but that
-// does not always work out.
-//
-// The problem is that that there are many parts of the code
-// that construct & manipulate tuples.
-//
-// But in actuality, we should really delegate Tuple reading/writing
-// into the ResultSet class.
-// Imagine if we set it up such that `ResultSet` automatically
-// maintains a vector<Tuple> and a QuerySchema for those tuples.
-//
-//
-// auto results = ResultSet(..)
-// while (exec_eng.has_next()) {
-//   /* Version 1 */
-//   exec_eng.fetch_next();
-//
-//   /* Version 2, if we need to do any processing on the value map */
-//   auto value_map = exec_eng.next_value_map();
-//   results.new_tuple(value_map);
-// }
-//
-// EXPECT_EQ(exec_eng.results(), results);
-
 class Tuple {
 public:
+  explicit
   Tuple(TupleSources source)
     : source_ (source)
   {}
 
-  explicit Tuple(tuple_length_t length)
+  explicit
+  Tuple(tuple_length_t length)
     : source_ (TupleSources::TABLE_HEAP),
       buffer_ (length)
   {}
 
-  explicit Tuple(RID rid)
+  explicit
+  Tuple(RID rid)
     : rid_    (rid),
       source_ (TupleSources::TABLE_HEAP)
   {}
 
-  explicit Tuple(Buffer buffer)
+  explicit
+  Tuple(Buffer buffer)
     : source_ (TupleSources::LOG_RECOVERY),
       buffer_ (buffer)
   {}
@@ -87,15 +60,6 @@ public:
                        tuple.buffer_.char_ptr(), buffer_.size()) == 0;
   }
 
-  ///////////////////////////////////////////////////
-  // TODO: Move the methods BELOW into TupleLayout //
-  ///////////////////////////////////////////////////
-
-  ///////////////////////////////////////////////////
-  // TODO: Move the methods ABOVE into TupleLayout //
-  ///////////////////////////////////////////////////
-
-
   const RID rid()               const { return rid_.value(); }
   void set_rid(RID rid)               { rid_.emplace(rid); }
   int32_t size()                const { return buffer_.size(); }
@@ -121,15 +85,18 @@ public:
            n_bytes);
   }
 
-  Buffer& buffer() {
+  Buffer&
+  buffer() {
     return buffer_;
   }
 
-  const Buffer& buffer() const {
+  const Buffer&
+  buffer() const {
     return buffer_;
   }
 
-  void set_source(TupleSources source) {
+  void
+  set_source(TupleSources source) {
     source_ = source;
   }
 

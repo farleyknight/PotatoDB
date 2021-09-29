@@ -147,7 +147,7 @@ TupleLayout::to_string(const TableSchema& schema) const
       os << ", ";
     }
 
-    auto val = value_by_index(schema, i);
+    auto val = value_by_index(tuple, i);
 
     // TODO: We need to properly implement NULL!
     if (val.is_null()) {
@@ -219,8 +219,8 @@ TupleLayout::to_payload(const Tuple& tuple) const
 }
 
 Value
-TupleLayout::value_by_index(const Tuple& tuple,
-                            column_index_t index) const
+TupleLayout::value_by_column_index(const Tuple& tuple,
+                                   column_index_t index) const
 {
   assert(index < column_count());
 

@@ -6,8 +6,6 @@
 #include "common/config.hpp"
 #include "tuple/rid.hpp"
 
-class Tuple;
-
 class Buffer {
 public:
   using Data = vector<byte_t>;
@@ -76,20 +74,25 @@ public:
                 n_bytes);
   }
 
-  const Tuple
-  read_tuple(buffer_offset_t offset);
+  const Buffer
+  read_buffer(buffer_offset_t offset);
 
-  void write_tuple(buffer_offset_t offset, const Tuple& tuple);
+  void
+  write_buffer(buffer_offset_t offset,
+               const Buffer& buffer);
 
-  void copy_from(const Buffer& other) {
+  void
+  copy_from(const Buffer& other) {
     data_ = other.data_;
   }
 
-  void reset_memory() {
+  void
+  reset_memory() {
     std::fill(data_.begin(), data_.end(), 0);
   }
 
-  void swap(Buffer& other) {
+  void
+  swap(Buffer& other) {
     data_.swap(other.data_);
   }
 
@@ -106,102 +109,127 @@ public:
   // This is only really used in one place: LogRecovery
   // However, it may be useful for other parts of the code?
   // At the very least, it felt more natural to add this here
-  void unshift(buffer_offset_t offset) {
+  void
+  unshift(buffer_offset_t offset) {
     std::memmove(ptr(), ptr(offset), data_.size() - offset);
   }
 
-  buffer_offset_t size() const {
+  buffer_offset_t
+  size() const {
     return data_.size();
   }
 
-  void resize(buffer_offset_t new_size) {
+  void
+  resize(buffer_offset_t new_size) {
     data_.resize(new_size);
   }
 
-  Data::iterator begin() {
+  Data::iterator
+  begin() {
     return data_.begin();
   }
 
-  Data::iterator end() {
+  Data::iterator
+  end() {
     return data_.end();
   }
 
   template<typename numeric_t>
-  void write_numeric(buffer_offset_t offset, numeric_t n) {
+  void
+  write_numeric(buffer_offset_t offset, numeric_t n) {
     *reinterpret_cast<numeric_t*>(ptr(offset)) = n;
   }
 
   template<typename numeric_t>
-  numeric_t read_numeric(buffer_offset_t offset) const {
+  numeric_t
+  read_numeric(buffer_offset_t offset) const {
     return *reinterpret_cast<const numeric_t*>(const_ptr(offset));
   }
 
-  void write_int64(buffer_offset_t offset, int64_t n) {
+  void
+  write_int64(buffer_offset_t offset, int64_t n) {
     *reinterpret_cast<int64_t*>(ptr(offset)) = n;
   }
 
-  int64_t read_int64(buffer_offset_t offset) const {
+  int64_t
+  read_int64(buffer_offset_t offset) const {
     return *reinterpret_cast<const int64_t*>(const_ptr(offset));
   }
 
-  void write_int32(buffer_offset_t offset, int32_t n) {
+  void
+  write_int32(buffer_offset_t offset, int32_t n) {
     *reinterpret_cast<int32_t*>(ptr(offset)) = n;
   }
 
-  int32_t read_int32(buffer_offset_t offset) const {
+  int32_t
+  read_int32(buffer_offset_t offset) const {
     return *reinterpret_cast<const int32_t*>(const_ptr(offset));
   }
 
-  void write_offset(buffer_offset_t offset, buffer_offset_t n) {
+  void
+  write_offset(buffer_offset_t offset, buffer_offset_t n) {
     *reinterpret_cast<buffer_offset_t*>(ptr(offset)) = n;
   }
 
-  buffer_offset_t read_offset(buffer_offset_t offset) const {
+  buffer_offset_t
+  read_offset(buffer_offset_t offset) const {
     return *reinterpret_cast<const buffer_offset_t*>(const_ptr(offset));
   }
 
-  void write_uint32(buffer_offset_t offset, int32_t n) {
+  void
+  write_uint32(buffer_offset_t offset, int32_t n) {
     *reinterpret_cast<uint32_t*>(ptr(offset)) = n;
   }
 
-  uint32_t read_uint32(buffer_offset_t offset) const {
+  uint32_t
+  read_uint32(buffer_offset_t offset) const {
     return *reinterpret_cast<const uint32_t*>(const_ptr(offset));
   }
 
-  void write_bool(buffer_offset_t offset, bool b) {
+  void
+  write_bool(buffer_offset_t offset, bool b) {
     *reinterpret_cast<bool*>(ptr(offset)) = b;
   }
 
-  bool read_bool(buffer_offset_t offset) const {
+  bool
+  read_bool(buffer_offset_t offset) const {
     return *reinterpret_cast<const bool*>(const_ptr(offset));
   }
 
-  void write_int8(buffer_offset_t offset, int8_t n) {
+  void
+  write_int8(buffer_offset_t offset, int8_t n) {
     *reinterpret_cast<int8_t*>(ptr(offset)) = n;
   }
 
-  int64_t read_int8(buffer_offset_t offset) const {
+  int8_t
+  read_int8(buffer_offset_t offset) const {
     return *reinterpret_cast<const int8_t*>(const_ptr(offset));
   }
 
-  void write_float(buffer_offset_t offset, float f) {
+  void
+  write_float(buffer_offset_t offset, float f) {
     *reinterpret_cast<float*>(ptr(offset)) = f;
   }
 
-  float read_float(buffer_offset_t offset) const {
+  float
+  read_float(buffer_offset_t offset) const {
     return *reinterpret_cast<const float*>(const_ptr(offset));
   }
 
-  void write_double(buffer_offset_t offset, double d) {
+  void
+  write_double(buffer_offset_t offset, double d) {
     *reinterpret_cast<double*>(ptr(offset)) = d;
   }
 
-  double read_double(buffer_offset_t offset) const {
+  double
+  read_double(buffer_offset_t offset) const {
     return *reinterpret_cast<const double*>(const_ptr(offset));
   }
 
-  void write_string(buffer_offset_t offset, const string& value);
-  const string read_string(buffer_offset_t offset) const;
+  void
+  write_string(buffer_offset_t offset, const string& value);
+  const string
+  read_string(buffer_offset_t offset) const;
 
   /**********************************************
    * DB specific types

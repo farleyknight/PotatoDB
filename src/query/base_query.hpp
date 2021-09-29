@@ -5,8 +5,8 @@
 
 #include "common/exceptions.hpp"
 #include "value/value.hpp"
+#include "tuple/tuple.hpp"
 
-class Tuple;
 class QuerySchema;
 class TableSchema;
 

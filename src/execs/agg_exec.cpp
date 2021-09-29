@@ -54,6 +54,10 @@ AggExec::next() {
   auto key = table_iter_.key();
   auto value = table_iter_.val();
 
+  // TODO: Rewrite this to use a map<column_oid_t, Value>
+  // New concept:
+  //
+  // ValueMap = map<column_oid_t, Value>
   vector<Value> tuple_values;
   for (auto const &col : schema().all()) {
     auto val = col.eval_agg(schema(),
@@ -66,7 +70,7 @@ AggExec::next() {
 
   auto &layout = schema().layout();
 
-  return Tuple(tuple_values, layout, exec_ctx().txn());
+  return layout.make(tuple_values, layout, exec_ctx().txn());
 }
 
 AggKey AggExec::make_key(const Tuple& tuple) {

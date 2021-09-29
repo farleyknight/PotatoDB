@@ -2,44 +2,30 @@
 
 A personal project to learn database internals and writing performant C++ code.
 
-## Build System
+## Required Build System Tools
 
-The build system currently uses
+I've been developing PotatoDB on MacBooks, so I'll describe how to build that way. I'm fairly certain these instructions could be translated to work on Linux, although Windows, is well.. Windows, as per usual. Anyways, I'm using the following build tools:
 
 * conan
+  * To install try `brew install conan`
 * CMake
+  * To install try `brew install cmake`
 * Ninja
+  * To install try `brew install ninja`
 
-Here's the commands you'll run.
-
-To install `conan`
-
-```bash
-$ conan install .
-```
-
-To generate the build scripts:
-
-```bash
-$ cmake . -G Ninja
-```
-
-To actually compile:
-
-```bash
-$ ninja
-```
-
-To compile a specific target, say the test suite:
-
-```bash
-$ ninja tests
-```
-
+Once you've got `conan` installed, you can run the conan installation process.
 
 ## Installation
 
-At the moment PotatoDB has no easy-to-use installers. This is because it is still under heavy develompent. Instead, you'll be building it from scratch. 
+### Making the conan packages
+
+At the moment PotatoDB has no easy-to-use installers. This project requires Java to be installed in order to complile the code. I've chained myself to Antlr4 and I will one day rid myself of this extra dependendency. But for now, it is a requirement. And the best way to manage that requirement, I've found, is a package manager called `conan`.
+
+Therefore, to get a predictable build situation, you'll be making two custom `conan` packages and then actually building PotatoDB.
+
+This is because it is still under heavy development. 
+
+Instead, you'll be building it from scratch. 
 
 At the moment, we have to build to extra `conan` packages in order to properly build the main one.
 
@@ -98,3 +84,39 @@ You might have to run this line
 ```
 $ conan profile update settings.compiler.version=12.0 default
 ```
+
+## Build System
+
+I've been developing PotatoDB on MacBooks, so I'll describe how to build that way. I'm fairly certain these instructions could be translated to work on Linux, although Windows, is well.. Windows, as per usual. Anyways, I'm using the following build tools:
+
+* conan
+  * To install try `brew install conan`
+* CMake
+  * To install try `brew install cmake`
+* Ninja
+  * To install try `brew install ninja`
+
+Once you've got `conan` installed, you can run the conan installation process.
+
+```bash
+$ conan install .
+```
+
+To generate the build scripts:
+
+```bash
+$ cmake . -G Ninja
+```
+
+To actually compile:
+
+```bash
+$ ninja
+```
+
+To compile a specific target, say the test suite:
+
+```bash
+$ ninja tests
+```
+
