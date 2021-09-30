@@ -5,23 +5,21 @@
 #include "value/value_layout.hpp"
 #include "txns/txn.hpp"
 
+#include "txns/txn.hpp"
+
 class TupleLayout {
 public:
   TupleLayout() = default;
 
+  static Tuple
+  make(const map<column_oid_t, Value>& values,
+       const TupleLayout& layout,
+       Txn& txn);
+
   void
   push_back(TypeId type_id,
             buffer_offset_t buffer_offset,
-            bool is_inlined)
-  {
-    if (!is_inlined) {
-      column_index_t index = value_layouts_.size();
-      unlined_columns_.push_back(index);
-      all_tuples_inlined_ = false;
-    }
-    auto new_layout = ValueLayout(type_id, buffer_offset, is_inlined);
-    value_layouts_.push_back(new_layout);
-  }
+            bool is_inlined);
 
   const ValueLayout&
   operator[](column_index_t index) const {
@@ -33,31 +31,8 @@ public:
     return value_layouts_[index];
   }
 
-  // TODO: Pass in ref to Txn and abort the txn if the validation fails.
   bool
-  validate(const vector<Value>& values) const
-  {
-    // Check size
-    int32_t values_size = values.size();
-
-    if (values_size != column_count()) {
-      std::cout << "values.size() == "
-                << values.size() << std::endl;
-      std::cout << "schema.column_count() == "
-                << column_count() << std::endl;
-      assert(values_size == column_count());
-    }
-
-    // Check value types versus schema types
-    //
-    // TODO: Write proper error handling should be a good next step
-    // towards being a robust database.
-    for (int32_t i = 0; i < values_size; ++i) {
-      assert(values[i].type_id() == find(i).type_id());
-    }
-
-    return true;
-  }
+  validate(const vector<Value>& values) const;
 
   column_index_t
   column_count() const {
@@ -83,55 +58,37 @@ public:
   }
 
   const string
-  to_string() const {
-    stringstream os;
-
-    os << "NumColumns:"         << value_layouts_.size()  << ", "
-       << "IsInlined:"          << all_tuples_inlined_    << ", "
-       << "InlinedTupleLength:" << inlined_tuple_length_;
-
-    return os.str();
-  }
+  to_string() const;
 
   void
   write_values(const vector<Value>& values,
                Buffer& buffer) const;
-
-  static Tuple
-  make(const map<column_oid_t, Value>& values,
-       const TupleLayout& layout,
-       Txn& txn);
 
   buffer_offset_t
   buffer_offset_for(const Tuple& tuple,
                     column_index_t index) const;
 
   Value
-  value_by_column_index(const auto& schema,
-                        column_index_t column_index) const;
+  value_by_index(const Tuple& tuple,
+                 column_index_t column_index) const;
 
   Value
-  value_by_name(const QuerySchema& schema,
+  value_by_name(const Tuple& tuple,
                 const column_name_t& name) const;
 
   Value
-  value_by_oid(const QuerySchema& schema,
-               column_oid_t oid) const;
-
-  Value
-  value_by_oid(const TableSchema& schema,
+  value_by_oid(const Tuple& tuple,
                column_oid_t oid) const;
 
   bool
-  is_null(const auto& schema,
+  is_null(const Tuple& tuple,
           column_index_t column_index) const;
 
   Tuple
-  key_from_tuple(const QuerySchema& schema,
+  key_from_tuple(const Tuple& tuple,
                  const QuerySchema& key_schema,
                  const vector<int32_t>& key_attrs,
                  Txn& txn) const;
-
 
   const vector<Value>
   to_values(const QuerySchema& schema) const;

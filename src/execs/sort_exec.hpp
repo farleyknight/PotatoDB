@@ -21,13 +21,15 @@ public:
     return exec_ctx_.schema_mgr().table_schema_for(table_oid);
   }
 
-  void init() override {
+  void
+  init() override {
     child_->init();
 
     while (child_->has_next()){
       auto tuple = child_->next();
+      auto layout = child_schema().layout();
       logger->debug("Adding tuple to SortHT: " +
-                    tuple.to_string(table_schema()));
+                    layout.to_string(tuple));
 
       auto sort_key = make_key(tuple);
 
@@ -91,7 +93,8 @@ public:
   make_key(const Tuple& tuple) {
     auto col = plan_->order_by().column();
     auto oid = child_schema().column_oid_for(col.name());
-    auto value = tuple.value_by_oid(child_schema(), oid);
+    auto layout = child_schema().layout();
+    auto value = layout.value_by_oid(tuple, oid);
     return SortKey(value);
   }
 
@@ -99,7 +102,8 @@ public:
     return "Sorted " + std::to_string(result_count) + " record(s)";
   }
 
-  const QuerySchema& child_schema() const {
+  const QuerySchema&
+  child_schema() const {
     auto child_exec = dynamic_cast<SeqScanExec*>(child_.get());
     return child_exec->schema();
   }

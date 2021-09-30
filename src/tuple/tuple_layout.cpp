@@ -276,7 +276,7 @@ Tuple::key_from_tuple(const Tuple& tuple,
 }
 
 Tuple
-TupleLayout::random_from(UNUSED Txn& txn)
+TupleLayout::random_from()
 {
   map<column_oid_t, Value> values;
   for (const auto &layout : value_layouts_) {
@@ -313,4 +313,53 @@ TupleLayout::random_from(UNUSED Txn& txn)
   return make(values, txn);
 }
 
+void
+TupleLayout::push_back(TypeId type_id,
+                       buffer_offset_t buffer_offset,
+                       bool is_inlined)
+{
+  if (!is_inlined) {
+    column_index_t index = value_layouts_.size();
+    unlined_columns_.push_back(index);
+    all_tuples_inlined_ = false;
+  }
+  auto new_layout = ValueLayout(type_id, buffer_offset, is_inlined);
+  value_layouts_.push_back(new_layout);
+}
 
+// TODO: Pass in ref to Txn and abort the txn if the validation fails.
+bool
+TupleLayout::validate(const vector<Value>& values) const
+{
+  // Check size
+  int32_t values_size = values.size();
+
+  if (values_size != column_count()) {
+    std::cout << "values.size() == "
+              << values.size() << std::endl;
+    std::cout << "schema.column_count() == "
+              << column_count() << std::endl;
+    assert(values_size == column_count());
+  }
+
+  // Check value types versus schema types
+  //
+  // TODO: Write proper error handling should be a good next step
+  // towards being a robust database.
+  for (int32_t i = 0; i < values_size; ++i) {
+    assert(values[i].type_id() == find(i).type_id());
+  }
+
+  return true;
+}
+
+const string
+TupleLayout::to_string() const {
+  stringstream os;
+
+  os << "NumColumns:"         << value_layouts_.size()  << ", "
+     << "IsInlined:"          << all_tuples_inlined_    << ", "
+     << "InlinedTupleLength:" << inlined_tuple_length_;
+
+  return os.str();
+}

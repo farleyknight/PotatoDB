@@ -64,8 +64,10 @@ public:
     return match.as<bool>();
   }
 
-  Tuple combine_tuples(const Tuple& left,
-                       const Tuple& right) {
+  Tuple
+  combine_tuples(const Tuple& left,
+                 const Tuple& right)
+  {
     vector<Value> values;
 
     auto &schema = plan_->schema();
@@ -73,18 +75,17 @@ public:
     for (auto join : schema.joins()) {
       JoinSide side = join.side();
 
+      auto &name = join.name();
       if (side == JoinSide::LEFT) {
-        values.push_back(left.value_by_name(plan_->left_schema(),
-                                            join.name()));
+        values.push_back(left.value_by_name(plan_->left_schema(), name));
       } else if (side == JoinSide::RIGHT) {
-        values.push_back(right.value_by_name(plan_->right_schema(),
-                                             join.name()));
+        values.push_back(right.value_by_name(plan_->right_schema(), name));
       } else if (side == JoinSide::INVALID) {
         throw Exception("Cannot combine tuples with INVALID_SIDE!");
       }
     }
 
-    return Tuple(move(values), schema.layout(), exec_ctx().txn());
+    return schema.layout().make(move(values), schema.layout(), exec_ctx().txn());
   }
 
   const string message_on_completion(int32_t result_count) const override {
