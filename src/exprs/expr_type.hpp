@@ -13,7 +13,9 @@ enum class ExprType {
   VALUE,
   TUPLE,
   TUPLE_LIST,
-  
+  VALUE_MAP,
+  VALUE_MAP_LIST,
+
   // DDL statement types
   // Data Definition Language
   CREATE_TABLE,

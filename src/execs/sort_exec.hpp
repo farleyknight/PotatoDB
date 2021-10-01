@@ -26,7 +26,7 @@ public:
     child_->init();
 
     while (child_->has_next()){
-      auto tuple = child_->next();
+      auto tuple = child_->next_tuple();
       auto layout = child_schema().layout();
       logger->debug("Adding tuple to SortHT: " +
                     layout.to_string(tuple));
@@ -77,7 +77,7 @@ public:
   }
 
   Tuple
-  next() override {
+  next_tuple() override {
     if (sort_asc()) {
       auto tuple = table_iter_.tuple();
       ++table_iter_;
@@ -98,7 +98,8 @@ public:
     return SortKey(value);
   }
 
-  const string message_on_completion(int32_t result_count) const override {
+  const string
+  message_on_completion(int32_t result_count) const override {
     return "Sorted " + std::to_string(result_count) + " record(s)";
   }
 

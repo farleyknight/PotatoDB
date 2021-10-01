@@ -21,8 +21,8 @@ public:
 
   explicit
   Tuple(tuple_length_t length)
-    : source_ (TupleSources::TABLE_HEAP),
-      buffer_ (length)
+    : buffer_ (length),
+      source_ (TupleSources::TABLE_HEAP)
   {}
 
   explicit
@@ -33,8 +33,8 @@ public:
 
   explicit
   Tuple(Buffer buffer)
-    : source_ (TupleSources::LOG_RECOVERY),
-      buffer_ (buffer)
+    : buffer_ (buffer),
+      source_ (TupleSources::LOG_RECOVERY)
   {}
 
   // Destructor

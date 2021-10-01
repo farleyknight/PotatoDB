@@ -4,8 +4,8 @@
 
 class ResultSet {
 public:
-  ResultSet(QuerySchema query_schema)
-    : query_schema_  (query_schema) {}
+  ResultSet(QuerySchema schema)
+    : schema_  (schema) {}
 
   ~ResultSet() = default;
   // No copy
@@ -16,7 +16,7 @@ public:
 
   void
   emplace_back(Tuple&& tuple) {
-    tuple_results_.emplace_back(move(tuple));
+    results_.emplace_back(move(tuple));
   }
 
   // TODO: Let's start moving away from using strings and instead use column OIDs
@@ -53,7 +53,7 @@ public:
 
   const Tuple&
   operator[](int32_t i) const {
-    return tuple_results_[i];
+    return results_[i];
   }
 
   const QuerySchema&
@@ -70,7 +70,7 @@ public:
   to_payload() {
     stringstream os;
 
-    for (index_t i = 0; i < tuple_results_.size(); ++i) {
+    for (index_t i = 0; i < results_.size(); ++i) {
       if (i > 0) {
         os << ",\n";
       }
@@ -82,5 +82,5 @@ public:
 
 private:
   const QuerySchema schema_;
-  const vector<Tuple> results_;
+  vector<Tuple> results_;
 };

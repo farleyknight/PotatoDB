@@ -21,29 +21,24 @@ public:
     child_->init();
   }
 
-  bool has_next() override {
+  bool
+  has_next() override {
     return child_->has_next();
   }
 
-  Tuple next() override {
-    auto tuple = child_->next();
-    vector<Value> vals;
+  Tuple
+  next_tuple() override {
+    auto tuple = child_->next_tuple();
+    map<column_oid_t, Value> value_map;
     auto old_schema = dynamic_cast<SeqScanExec*>(child_.get())->schema();
     auto new_schema = plan_->schema();
 
     for (const auto &col : new_schema.all()) {
-      // TODO: Let's eliminate `value_by_name` completely from
-      // the codebase. I want to discourage using strings to
-      // identify things, moving towards a global table of
-      // OID objects for the entire database.
-      //
-      // It could be a bitch to debug in some cases, but we can
-      // create tooling around that, as needed.
-      vals.push_back(tuple.value_by_name(old_schema,
-                                         col.name()));
+      auto value = old_schema.layout().value_by_oid(tuple, col.oid());
+      value_map.emplace(col.oid(), value);
     }
 
-    return Tuple(vals, new_schema.layout(), exec_ctx().txn());
+    return new_schema.layout().make(value_map, exec_ctx().txn());
   }
 
   const string message_on_completion(int32_t result_count) const override {

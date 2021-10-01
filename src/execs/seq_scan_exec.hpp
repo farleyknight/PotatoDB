@@ -10,12 +10,20 @@ public:
               ptr<SeqScanPlan>&& plan);
   ~SeqScanExec() = default;
 
-  void init() override;
-  bool has_next() override;
-  Tuple next() override;
+  void
+  init() override;
+  bool
+  has_next() override;
 
-  const QuerySchema& schema();
-  const TableSchema& table_schema();
+  Tuple
+  next_tuple() override;
+  map<column_oid_t, Value>
+  next_value_map() override;
+
+  const QuerySchema&
+  schema();
+  const TableSchema&
+  table_schema();
 
   const string message_on_completion(int32_t result_count) const override {
     return "Found " + std::to_string(result_count) + " record(s)";

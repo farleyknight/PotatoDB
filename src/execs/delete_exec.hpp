@@ -15,16 +15,19 @@ public:
       plan_    (move(plan)),
       child_   (move(child)) {}
 
-  void init() override {
+  void
+  init() override {
     child_->init();
   }
 
-  bool has_next() override {
+  bool
+  has_next() override {
     return child_->has_next();
   }
 
-  Tuple next() override {
-    auto tuple = child_->next();
+  Tuple
+  next_tuple() override {
+    auto tuple = child_->next_tuple();
     auto rid   = tuple.rid();
 
     table_heap().mark_delete(rid, exec_ctx_.txn());
@@ -38,7 +41,8 @@ public:
     return exec_ctx_.schema_mgr().table_heap_for(table_oid);
   }
 
-  const string message_on_completion(int32_t result_count) const override {
+  const string
+  message_on_completion(int32_t result_count) const override {
     return "Deleted " + std::to_string(result_count) + " record(s)";
   }
 

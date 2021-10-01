@@ -24,15 +24,24 @@ public:
     assert(child_ != nullptr);
   }
 
-  void init() override;
-  bool has_next() override;
-  Tuple next() override;
+  void
+  init() override;
+  bool
+  has_next() override;
+  Tuple
+  next_tuple() override;
+  map<column_oid_t, Value>
+  next_value_map() override;
 
-  bool at_the_end();
-  bool match_found();
+  bool
+  at_the_end();
+  bool
+  match_found();
 
-  AggKey make_key(const Tuple& tuple);
-  AggValue make_val(const Tuple& tuple);
+  AggKey
+  make_key(const Tuple& tuple);
+  AggValue
+  make_val(const Tuple& tuple);
 
   const QuerySchema&
   schema() const {

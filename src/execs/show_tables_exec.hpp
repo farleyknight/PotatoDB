@@ -20,14 +20,18 @@ public:
   }
 
   Tuple
-  next() override {
+  next_tuple() override {
+    return plan_->schema().layout().make(next_value_map(), exec_ctx().txn());
+  }
+
+  map<column_oid_t, Value>
+  next_value_map() override {
     table_name_t table_name = *table_names_iter_;
     table_names_iter_++;
-    vector<Value> values;
-    values.push_back(Value::make(table_name));
-    return Tuple(move(values),
-                 plan_->schema().layout(),
-                 exec_ctx().txn());
+    map<column_oid_t, Value> value_map;
+    value_map.emplace(TABLE_NAME_COLUMN_OID,
+                      Value::make(table_name));
+    return value_map;
   }
 
   const string

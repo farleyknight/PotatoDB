@@ -10,7 +10,7 @@ void AggExec::init() {
   table_.generate();
 
   while (child_->has_next()){
-    auto tuple = child_->next();
+    auto tuple = child_->next_tuple();
     auto agg_key = make_key(tuple);
     auto agg_value = make_val(tuple);
     table_.insert_combine(agg_key, agg_value);
@@ -49,7 +49,7 @@ bool AggExec::match_found() {
 }
 
 Tuple
-AggExec::next() {
+AggExec::next_tuple() {
   // create tuple according to output schema
   auto key = table_iter_.key();
   auto value = table_iter_.val();
@@ -67,10 +67,11 @@ AggExec::next() {
 
   auto &layout = schema().layout();
 
-  return layout.make(value_map, layout, exec_ctx().txn());
+  return layout.make(value_map, txn());
 }
 
-AggKey AggExec::make_key(const Tuple& tuple) {
+AggKey
+AggExec::make_key(const Tuple& tuple) {
   vector<Value> keys;
   for (auto const &node : plan_->group_bys()) {
     std::cout << "GROUP BY! " << std::endl;
@@ -79,7 +80,8 @@ AggKey AggExec::make_key(const Tuple& tuple) {
   return AggKey(keys);
 }
 
-AggValue AggExec::make_val(const Tuple& tuple) {
+AggValue
+AggExec::make_val(const Tuple& tuple) {
   vector<Value> values;
   for (auto const &node : plan_->aggs()) {
     values.emplace_back(node.eval(tuple, child_schema()));

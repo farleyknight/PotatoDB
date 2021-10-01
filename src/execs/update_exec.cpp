@@ -23,18 +23,26 @@ UpdateExec::has_next() {
   return child_->has_next();
 }
 
+map<column_oid_t, Value>
+UpdateExec::next_value_map() {
+  const auto &update_values = plan_->update_values();
+  auto value_map = child_->next_value_map();
+  const auto &query_schema  =
+    exec_ctx_.schema_mgr().query_schema_for(table_oid);
+
+  for (const auto &[oid, eval_query] : plan_->update_values()) {
+    value_map.emplace(oid, eval_query->eval(value_map, query_schema));
+  }
+}
+
 Tuple
-UpdateExec::next() {
-  auto tuple = child_->next();
-  auto rid   = tuple.rid();
-
-  logger->debug("[UpdateExec] Preparing to update our next tuple: " +
-                tuple.to_string(schema()));
-
-  auto new_tuple = updated_tuple(tuple);
+UpdateExec::next_tuple() {
+  auto value_map = child_->next_value_map();
+  auto rid       = tuple.rid();
+  auto new_tuple = layout.make(value_map, txn());
 
   logger->debug("[UpdateExec] Our tuple has been updated to now be: " +
-                new_tuple.to_string(schema()));
+                layout.to_string(new_tuple));
 
   table_heap().update_tuple(new_tuple,
                             rid,

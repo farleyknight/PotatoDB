@@ -29,11 +29,12 @@ public:
     return false;
   }
 
-  Tuple next() override {
+  Tuple
+  next_tuple() override {
     while (left_->has_next()) {
-      auto left_tuple = left_->next();
+      auto left_tuple = left_->next_tuple();
       while (right_->has_next()) {
-        auto right_tuple = right_->next();
+        auto right_tuple = right_->next_tuple();
         if (join_matches(left_tuple, right_tuple)) {
           return combine_tuples(left_tuple, right_tuple);
         }
@@ -68,24 +69,26 @@ public:
   combine_tuples(const Tuple& left,
                  const Tuple& right)
   {
-    vector<Value> values;
+    map<column_oid_t, Value> values;
 
     auto &schema = plan_->schema();
 
     for (auto join : schema.joins()) {
       JoinSide side = join.side();
 
-      auto &name = join.name();
+      auto name = join.name();
       if (side == JoinSide::LEFT) {
-        values.push_back(left.value_by_name(plan_->left_schema(), name));
+        values.emplace(join.column_oid(),
+                       plan_->left_schema().layout().value_by_name(left, name));
       } else if (side == JoinSide::RIGHT) {
-        values.push_back(right.value_by_name(plan_->right_schema(), name));
+        values.emplace(join.column_oid(),
+                       plan_->right_schema().layout().value_by_name(right, name));
       } else if (side == JoinSide::INVALID) {
         throw Exception("Cannot combine tuples with INVALID_SIDE!");
       }
     }
 
-    return schema.layout().make(move(values), schema.layout(), exec_ctx().txn());
+    return schema.layout().make(move(values), exec_ctx().txn());
   }
 
   const string message_on_completion(int32_t result_count) const override {

@@ -63,14 +63,14 @@ void HashJoinExec::init() {
     auto left_tuples = join_ht_.find_values(hash_value);
     for (auto &left_tuple : left_tuples) {
       if (match_found(left_tuple, right_tuple)) {
-        vector<Value> values;
+        map<column_oid_t, Value> value_map;
         for (size_t col_index = 0; col_index < col_total; ++col_index) {
-          values.push_back(make_value_at(col_index,
-                                         left_tuple, right_tuple));
+          auto &col = schema().by_column_index(col_index);
+          auto value = make_value_at(col_index, left_tuple, right_tuple);
+          value_map.emplace(col.oid(), value);
         }
-        output_tuples_.emplace_back(values,
-                                    schema().layout(),
-                                    exec_ctx().txn());
+        auto tuple = schema().layout().make(value_map, exec_ctx().txn());
+        output_tuples_.emplace_back(tuple);
       }
     }
   }

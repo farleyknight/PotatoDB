@@ -22,7 +22,10 @@ public:
   }
 
   Tuple
-  next() override;
+  next_tuple() override;
+
+  map<column_oid_t, Value>
+  next_value_map() override;
 
   const string message_on_completion(int32_t result_count) const override {
     return "Inserted " + std::to_string(result_count) + " record(s)";

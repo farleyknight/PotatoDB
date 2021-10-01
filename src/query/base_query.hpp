@@ -29,7 +29,9 @@ public:
       type_id_   (TypeId::INVALID)
   {}
 
-  BaseQuery(QueryNodeType type, TypeId type_id)
+  explicit
+  BaseQuery(QueryNodeType type,
+            TypeId type_id)
     : node_type_ (type),
       type_id_   (type_id)
   {}
@@ -65,6 +67,13 @@ public:
 
   virtual Value
   eval(UNUSED const Tuple& tuple,
+       UNUSED const TableSchema& schema) const
+  {
+    throw NotImplementedException("eval not implemented");
+  }
+
+  virtual Value
+  eval(UNUSED const map<column_oid_t, Value>& value_map,
        UNUSED const TableSchema& schema) const
   {
     throw NotImplementedException("eval not implemented");

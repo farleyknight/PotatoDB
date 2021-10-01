@@ -73,7 +73,7 @@ QuerySchema
 SchemaMgr::show_tables_schema() const
 {
   vector<QueryColumn> cols;
-  cols.push_back(QueryColumn(TypeId::VARCHAR, "table_name"));
+  cols.push_back(QueryColumn::table_name());
   return QuerySchema(cols);
 }
 
@@ -82,16 +82,20 @@ SchemaMgr::describe_table_schema() const
 {
   vector<QueryColumn> cols;
 
-  cols.push_back(QueryColumn(TypeId::VARCHAR, "field_name"));
+  cols.push_back(QueryColumn::column_name());
+
   // NOTE Can be "varchar(16)" or "date"
-  cols.push_back(QueryColumn(TypeId::VARCHAR, "type"));
+  cols.push_back(QueryColumn::column_type());
+
   // NOTE: Should be "YES" or "NO"
-  cols.push_back(QueryColumn(TypeId::VARCHAR, "nullable"));
-  cols.push_back(QueryColumn(TypeId::VARCHAR, "key"));
+  cols.push_back(QueryColumn::nullable());
+  cols.push_back(QueryColumn::primary_key());
+
   // NOTE: Can be "NULL"
-  cols.push_back(QueryColumn(TypeId::VARCHAR, "default"));
+  cols.push_back(QueryColumn::default_value());
+
   // NOTE: Should include info about "AUTOINCREMENT"
-  cols.push_back(QueryColumn(TypeId::VARCHAR, "extra"));
+  cols.push_back(QueryColumn::extra());
 
   return QuerySchema(cols);
 }

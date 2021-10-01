@@ -1,40 +1,21 @@
 #pragma once
 
 #include "value/value.hpp"
-#include "exprs/tuple_list_expr.hpp"
+#include "exprs/value_map_list_expr.hpp"
 
 class RawTuples {
 public:
-  using Data = vector<vector<Value>>;
+  using Data = vector<map<column_oid_t, Value>>;
 
   RawTuples() = default;
   RawTuples(Data data)
     : data_ (data)
   {}
 
-  RawTuples(TupleListExpr expr) {
-    for (const auto &tuple_expr : expr.list()) {
-      vector<Value> raw_tuple;
-      for (const auto &value_expr : tuple_expr.list()) {
-        auto value = value_expr.to_value();
-        // std::cout << "Got value " << value.to_string() << std::endl;
-        // TODO! What is the type for this value?
-        // That needs to be addressed somewhere..
-        raw_tuple.push_back(value);
-      }
-      data_.push_back(raw_tuple);
+  RawTuples(ValueMapListExpr expr) {
+    for (const auto &value_map_expr : expr.list()) {
+      data_.push_back(value_map_expr.to_value_map());
     }
-  }
-
-  const string to_string() const {
-    stringstream os;
-    for (const auto &row : data_) {
-      for (const auto &value : row) {
-        os << value.to_string() << ",";
-      }
-      os << ";" << std::endl;
-    }
-    return os.str();
   }
 
   // Allow copy constructor
@@ -48,12 +29,23 @@ public:
     return data_;
   }
 
+  const string to_string() const {
+    stringstream os;
+    for (const auto &value_map : data_) {
+      for (const auto &[column_oid, value] : value_map) {
+        os << column_oid << " => " << value.to_string() << "; ";
+      }
+      os << std::endl;
+    }
+    return os.str();
+  }
+
   class Iterator {
   public:
     Iterator(Data::const_iterator iter)
       : iter_(iter) {}
 
-    const vector<Value>& values() {
+    const map<column_oid_t, Value>& value_map() {
       return *iter_;
     }
 
@@ -62,8 +54,10 @@ public:
       return *this;
     }
 
-    bool operator==(const Iterator& other) const { return iter_ == other.iter_; }
-    bool operator!=(const Iterator& other) const { return iter_ != other.iter_; }
+    bool
+    operator==(const Iterator& other) const { return iter_ == other.iter_; }
+    bool
+    operator!=(const Iterator& other) const { return iter_ != other.iter_; }
 
   private:
     Data::const_iterator iter_;

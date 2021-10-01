@@ -33,12 +33,20 @@ public:
       create_table(plan_->expr(), exec_ctx_.txn());
   }
 
-  bool has_next() override {
+  bool
+  has_next() override {
     return false;
   }
 
-  Tuple next() override {
-    auto message = "next is not implemented for CreateTableExec!";
+  Tuple
+  next_tuple() override {
+    auto message = "next_tuple is not implemented for CreateTableExec!";
+    throw NotImplementedException(message);
+  }
+
+  map<column_oid_t, Value>
+  next_value_map() override {
+    auto message = "next_value_map is not implemented for CreateTableExec!";
     throw NotImplementedException(message);
   }
 

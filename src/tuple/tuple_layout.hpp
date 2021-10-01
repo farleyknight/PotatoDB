@@ -13,7 +13,6 @@ public:
 
   static Tuple
   make(const map<column_oid_t, Value>& values,
-       const TupleLayout& layout,
        Txn& txn);
 
   void

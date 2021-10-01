@@ -22,7 +22,8 @@ class LimitExec : public BaseExec {
     return false;
   }
 
-  Tuple next() override {
+  Tuple
+  next_tuple() override {
     // TODO
     return Tuple(TupleSources::TABLE_HEAP);
   }

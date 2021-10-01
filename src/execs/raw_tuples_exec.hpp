@@ -22,27 +22,28 @@ public:
     // NOTE: Taken care of in constructor
   }
 
-  bool has_next() override {
+  bool
+  has_next() override {
     return iter_ != plan_->raw_tuples().end();
   }
 
-  Tuple next() override {
-    auto values = iter_.values();
+  Tuple
+  next_tuple() override {
+    auto value_map = next_value_map();
 
-    // for (const auto &value : values) {
-    //  std::cout << "Building new tuple with value " << value.to_string() << std::endl;
-    // }
-
-    auto tuple = Tuple(iter_.values(),
-                       plan_->schema().layout(),
-                       exec_ctx().txn());
-    // std::cout << "Next Tuple " << tuple.to_string(plan_->schema()) << std::endl;
-
-    ++iter_;
+    auto tuple = plan_->schema().layout().make(value_map, exec_ctx().txn());
     return tuple;
   }
 
-  const string message_on_completion(int32_t result_count) const override {
+  map<column_oid_t, Value>
+  next_value_map() override {
+    auto value_map = iter_.value_map();
+    ++iter_;
+    return value_map;
+  }
+
+  const string
+  message_on_completion(int32_t result_count) const override {
     return "Inserted " + std::to_string(result_count) + " record(s)";
   }
 private:

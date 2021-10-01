@@ -5,16 +5,9 @@ TupleLayout::tuple_length(const vector<Value>& values) const
 {
   // Calculate the size of the tuple.
   auto length = inlined_tuple_length_;
-  // std::cout << "Tuple Length starts at " << length << std::endl;
   for (auto i : unlined_columns_) {
     auto var_length = values[i].length() + sizeof(string_size_t);
     length += var_length;
-    /*
-      std::cout << "First unlined " << i
-      << " w/ length " << var_length
-      << " giving current length as " << length
-      << std::endl;
-     */
   }
   return length;
 }
@@ -99,39 +92,28 @@ TupleLayout::to_values(const Tuple& tuple) const
 }
 
 void
-TupleLayout::add_defaults(Tuple& tuple,
+TupleLayout::add_defaults(map<column_oid_t, Value>& value_map,
                           const map<column_oid_t, Value>& defaults,
-                          const TableSchema& table_schema,
                           Txn& txn) const
 {
-  logger->debug("[Tuple] Query Schema is: " + query_schema.to_string());
+  for (const auto &value_layout : value_layouts_) {
+    auto oid   = value_layout.oid();
 
-  auto values = to_value_map(query_schema);
-  vector<Value> new_values;
-
-  for (const auto &col : table_schema.all()) {
-    auto oid   = col.oid();
-
-    if (has_column(oid)) {
-      logger->debug("[Tuple] Found col w/ name: " + col.name());
-      logger->debug("[Tuple] Size of values: " + std::to_string(values.size()));
-      auto value = values.at(oid);
-      logger->debug("[Tuple] Adding new value: " + value.to_string());
-      new_values.push_back(value);
-    } else if (defaults.contains(oid)) {
-      logger->debug("[Tuple] Could not find col w/ name: " + col.name());
+    if (defaults.contains(oid) && !value_map.contains(oid)) {
+      logger->debug("[TupleLayout] Could not find col w/ name: " + col.name());
       auto value = defaults.at(oid);
-      logger->debug("[Tuple] Adding new value: " + value.to_string());
-      new_values.push_back(value);
+      logger->debug("[TupleLayout] Adding new value: " + value.to_string());
+      value_map.emplace(oid, value);
+    } else if (value_map.contains(oid)) {
+      // NO-OP
+      auto value = value_map.at(oid);
+      logger->debug("[TupleLayout] Not touching existing value: " + value.to_string());
     } else {
+      logger->debug("[TupleLayout] ABORT!: " + value_map.to_string());
       assert(false);
       // TODO: Time to ABORT!
     }
   }
-
-  int32_t values_size = new_values.size();
-  assert(values_size == table_schema.column_count());
-  return Tuple(new_values, table_schema.layout(), txn);
 }
 
 const string
@@ -234,14 +216,6 @@ TupleLayout::value_by_column_index(const Tuple& tuple,
   //
   // Instead actually I would prefer the method be called `read_value/write_value`
   return Value::deserialize_from(offset, tuple.buffer(), type_id);
-}
-
-Value
-TupleLayout::value_by_name(const Tuple& tuple,
-                           const column_name_t& name) const
-{
-  auto index = column_index_for(name);
-  return value_by_index(schema, index);
 }
 
 Value

@@ -85,8 +85,8 @@ bool SeqScanExec::has_next() {
 
   while (!at_the_end()) {
     // logger->debug("[SeqScanExec] Got schema: " + schema().to_string());
-    logger->debug("[SeqScanExec] Checking Tuple: " +
-                  table_iter_->tuple().to_string(table_schema()));
+    auto tuple_as_string = table_schema().layout().to_string(table_iter_->tuple());
+    logger->debug("[SeqScanExec] Checking Tuple: " + tuple_as_string);
 
     if (match_found(table_iter_->tuple())) {
 
