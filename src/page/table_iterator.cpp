@@ -31,7 +31,8 @@ TableIterator::TableIterator(const TableIterator& other)
 }
 
 // TODO: This whole thing is begging for a good refactor.
-TableIterator& TableIterator::operator++() {
+TableIterator&
+TableIterator::operator++() {
   assert(tuple_);
 
   auto &buff_mgr  = table_heap_.buff_mgr();
@@ -98,17 +99,20 @@ TableIterator& TableIterator::operator++() {
   return *this;
 }
 
-TableIterator TableIterator::operator++(int) {
+TableIterator
+TableIterator::operator++(int) {
   TableIterator clone(*this);
   ++(*this);
   return clone;
 }
 
-table_oid_t TableIterator::table_oid() const {
+table_oid_t
+TableIterator::table_oid() const {
   return table_heap_.table_oid();
 }
 
-bool TableIterator::operator==(const TableIterator& iter) const {
+bool
+TableIterator::operator==(const TableIterator& iter) const {
   if (tuple_ == nullptr) {
     return false;
   }
@@ -116,11 +120,13 @@ bool TableIterator::operator==(const TableIterator& iter) const {
   return rid() == iter.rid();
 }
 
-bool TableIterator::stop_iterating() const {
+bool
+TableIterator::stop_iterating() const {
   return rid_.stop_iterating();
 }
 
-bool TableIterator::operator!=(const TableIterator& it) const {
+bool
+TableIterator::operator!=(const TableIterator& it) const {
   return !(*this == it);
 }
 

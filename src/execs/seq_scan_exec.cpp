@@ -48,9 +48,6 @@
 // whether it actually makes sense to forward every tuple
 // along. Also, how would you represent joins?
 //
-// Perhaps joins
-// You can't
-// think of them in terms of 
 
 SeqScanExec::SeqScanExec(ExecCtx& exec_ctx,
                          ptr<SeqScanPlan>&& plan)
@@ -58,7 +55,8 @@ SeqScanExec::SeqScanExec(ExecCtx& exec_ctx,
     plan_        (move(plan))
 {}
 
-bool SeqScanExec::match_found(const Tuple& tuple) {
+bool
+SeqScanExec::match_found(const Tuple& tuple) {
   if (plan_->has_pred()) {
     auto result = plan_->pred().
       eval(tuple, schema()).as<bool>();
@@ -70,11 +68,13 @@ bool SeqScanExec::match_found(const Tuple& tuple) {
   }
 }
 
-bool SeqScanExec::at_the_end() {
+bool
+SeqScanExec::at_the_end() {
   return table_iter_->stop_iterating();
 }
 
-bool SeqScanExec::has_next() {
+bool
+SeqScanExec::has_next() {
   logger->debug("[SeqScanExec] Checking if we have a tuple");
   if (!table_iter_->has_tuple()) {
     logger->debug("[SeqScanExec] NO TUPLE! :( :( :(");
@@ -84,12 +84,10 @@ bool SeqScanExec::has_next() {
   logger->debug("[SeqScanExec] We have a tuple! :)");
 
   while (!at_the_end()) {
-    // logger->debug("[SeqScanExec] Got schema: " + schema().to_string());
     auto tuple_as_string = table_schema().layout().to_string(table_iter_->tuple());
     logger->debug("[SeqScanExec] Checking Tuple: " + tuple_as_string);
 
     if (match_found(table_iter_->tuple())) {
-
       logger->debug("[SeqScanExec] MATCH FOUND! :) :) :)");
       return true;
     }
@@ -100,26 +98,38 @@ bool SeqScanExec::has_next() {
   return false;
 }
 
-Tuple SeqScanExec::next() {
+map<column_id_t, Value>
+SeqScanExec::next_value_map() {
+  auto value_map = table_iter_->tuple().to_value_map(schema());
+  ++(*table_iter_);
+  return value_map;
+}
+
+Tuple
+SeqScanExec::next_tuple() {
   auto tuple = table_iter_->tuple();
   ++(*table_iter_);
   return tuple;
 }
 
-TableHeap& SeqScanExec::table_heap() {
+TableHeap&
+SeqScanExec::table_heap() {
   auto table_oid = plan_->table_oid();
   return exec_ctx_.schema_mgr().table_heap_for(table_oid);
 }
 
-void SeqScanExec::init() {
+void
+SeqScanExec::init() {
   table_iter_ = make_unique<TableIterator>(table_heap().begin(txn()));
 }
 
-const QuerySchema& SeqScanExec::schema() {
+const QuerySchema&
+SeqScanExec::schema() {
   return plan_->schema();
 }
 
-const TableSchema& SeqScanExec::table_schema() {
+const TableSchema&
+SeqScanExec::table_schema() {
   auto table_oid = plan_->table_oid();
   return exec_ctx_.schema_mgr().table_schema_for(table_oid);
 }

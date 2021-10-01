@@ -3,7 +3,8 @@
 #include "common/config.hpp"
 #include "value/value.hpp"
 #include "value/value_layout.hpp"
-#include "txns/txn.hpp"
+
+#include "tuple/value_map.hpp"
 
 #include "txns/txn.hpp"
 
@@ -12,7 +13,7 @@ public:
   TupleLayout() = default;
 
   static Tuple
-  make(const map<column_oid_t, Value>& values,
+  make(const ValueMap& values,
        Txn& txn);
 
   void
@@ -89,18 +90,13 @@ public:
                  const vector<int32_t>& key_attrs,
                  Txn& txn) const;
 
-  const vector<Value>
-  to_values(const QuerySchema& schema) const;
-
-  const map<column_oid_t, Value>
+  const ValueMap
   to_value_map(const QuerySchema& schema) const;
 
-  Tuple
-  add_defaults(const map<column_oid_t, Value>& defaults,
-               const TableSchema& table_schema,
-               const QuerySchema& query_schema,
+  void
+  add_defaults(ValueMap& value_map,
+               const ValueMap& defaults,
                Txn& txn) const;
-
   const string
   to_string(const Tuple& tuple) const;
   const string

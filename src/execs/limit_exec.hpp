@@ -13,12 +13,13 @@ class LimitExec : public BaseExec {
       child_   (move(child))
   {}
 
-  void init() override {
+  void
+  init() override {
     child_->init();
-    // TODO
   }
 
-  bool has_next() override {
+  bool
+  has_next() override {
     return false;
   }
 
@@ -28,7 +29,13 @@ class LimitExec : public BaseExec {
     return Tuple(TupleSources::TABLE_HEAP);
   }
 
-  const string message_on_completion(int32_t result_count) const override {
+  ValueMap
+  next_value_map() override {
+    return ValueMap(0);
+  }
+
+  const string
+  message_on_completion(int32_t result_count) const override {
     return "Found " + std::to_string(result_count) + " record(s)";
   }
 

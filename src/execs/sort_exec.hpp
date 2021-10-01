@@ -89,6 +89,19 @@ public:
     }
   }
 
+  ValueMap
+  next_value_map() override {
+    if (sort_asc()) {
+      auto value_map = table_iter_.value_map();
+      ++table_iter_;
+      return value_map;
+    } else {
+      auto value_map = table_riter_.value_map();
+      ++table_riter_;
+      return value_map;
+    }
+  }
+
   SortKey
   make_key(const Tuple& tuple) {
     auto col = plan_->order_by().column();

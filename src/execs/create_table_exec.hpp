@@ -44,7 +44,7 @@ public:
     throw NotImplementedException(message);
   }
 
-  map<column_oid_t, Value>
+  ValueMap
   next_value_map() override {
     auto message = "next_value_map is not implemented for CreateTableExec!";
     throw NotImplementedException(message);

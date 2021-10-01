@@ -35,6 +35,16 @@ public:
     return tuple;
   }
 
+  ValueMap
+  next_value_map() override {
+    auto value_map = child_->next_value_map();
+    auto rid       = value_map.rid();
+
+    table_heap().mark_delete(rid, exec_ctx_.txn());
+
+    return value_map;
+  }
+
   TableHeap&
   table_heap() {
     auto table_oid = plan_->table_oid();

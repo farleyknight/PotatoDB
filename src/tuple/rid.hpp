@@ -13,13 +13,15 @@ class RID {
 public:
   RID() = default;
 
-  explicit RID(PageId page_id, slot_id_t slot_id) {
+  explicit
+  RID(PageId page_id, slot_id_t slot_id) {
     // TODO: Make slot number it's own type: slot_id_t
     page_id_ = page_id;
     slot_id_ = slot_id;
   }
 
-  explicit RID(uint64_t rid)  {
+  explicit
+  RID(uint64_t rid)  {
     // TODO: Maybe find a way to get a PageId (now two numbers)
     // From a 64 bit number?
     page_id_ = PageId::from(static_cast<page_id_t>(rid >> 32));
@@ -31,7 +33,8 @@ public:
     slot_id_ = static_cast<slot_id_t>(rid);
   }
 
-  static RID invalid() {
+  static RID
+  invalid() {
     uint64_t n = 0;
     return RID(n);
   }
@@ -44,15 +47,18 @@ public:
   ~RID() = default;
 
   // TODO: Delete this
-  static optional<RID> make_opt(PageId page_id, slot_id_t slot_id) {
+  static optional<RID>
+  make_opt(PageId page_id, slot_id_t slot_id) {
     return make_optional<RID>(page_id, slot_id);
   }
 
-  bool operator==(const RID& other) {
+  bool
+  operator==(const RID& other) {
     return as_uint64() == other.as_uint64();
   }
 
-  uint64_t as_uint64() const {
+  uint64_t
+  as_uint64() const {
     uint64_t result = static_cast<uint64_t>(page_id_.as_uint32());
     result = result << 32;
     return result | slot_id_;
@@ -62,20 +68,26 @@ public:
     return page_id_;
   }
 
-  slot_id_t slot_id() const {
+  slot_id_t
+  slot_id() const {
     return slot_id_;
   }
 
-  void set(PageId page_id, slot_id_t slot_id) {
+  void
+  set(PageId page_id,
+      slot_id_t slot_id)
+  {
     page_id_ = page_id;
     slot_id_ = slot_id;
   }
 
-  bool operator==(const RID& other) const {
+  bool
+  operator==(const RID& other) const {
     return page_id_ == other.page_id_ && slot_id_ == other.slot_id_;
   }
 
-  const string to_string() const {
+  const string
+  to_string() const {
     std::stringstream os;
     os << " file_id: " << page_id_.file_id();
     os << " block_id: " << page_id_.block_id();

@@ -24,7 +24,7 @@ public:
     return plan_->schema().layout().make(next_value_map(), exec_ctx().txn());
   }
 
-  map<column_oid_t, Value>
+  ValueMap
   next_value_map() override {
     table_name_t table_name = *table_names_iter_;
     table_names_iter_++;

@@ -23,7 +23,7 @@ UpdateExec::has_next() {
   return child_->has_next();
 }
 
-map<column_oid_t, Value>
+ValueMap
 UpdateExec::next_value_map() {
   const auto &update_values = plan_->update_values();
   auto value_map = child_->next_value_map();
@@ -38,7 +38,7 @@ UpdateExec::next_value_map() {
 Tuple
 UpdateExec::next_tuple() {
   auto value_map = child_->next_value_map();
-  auto rid       = tuple.rid();
+  auto rid       = value_map.rid();
   auto new_tuple = layout.make(value_map, txn());
 
   logger->debug("[UpdateExec] Our tuple has been updated to now be: " +

@@ -30,7 +30,7 @@ public:
   has_next() override;
   Tuple
   next_tuple() override;
-  map<column_oid_t, Value>
+  ValueMap
   next_value_map() override;
 
   bool

@@ -1,11 +1,12 @@
 #pragma once
 
 #include "value/value.hpp"
+#include "tuple/value_map.hpp"
 #include "exprs/value_map_list_expr.hpp"
 
 class RawTuples {
 public:
-  using Data = vector<map<column_oid_t, Value>>;
+  using Data = vector<ValueMap>;
 
   RawTuples() = default;
   RawTuples(Data data)
@@ -25,11 +26,13 @@ public:
   // Default destructor
   ~RawTuples() = default;
 
-  Data data() {
+  Data
+  data() {
     return data_;
   }
 
-  const string to_string() const {
+  const string
+  to_string() const {
     stringstream os;
     for (const auto &value_map : data_) {
       for (const auto &[column_oid, value] : value_map) {
@@ -45,7 +48,8 @@ public:
     Iterator(Data::const_iterator iter)
       : iter_(iter) {}
 
-    const map<column_oid_t, Value>& value_map() {
+    const ValueMap&
+    value_map() {
       return *iter_;
     }
 
@@ -63,14 +67,18 @@ public:
     Data::const_iterator iter_;
   };
 
-  Iterator begin() const { return Iterator(data_.begin()); }
-  Iterator end()   const { return Iterator(data_.end());   }
+  Iterator
+  begin() const { return Iterator(data_.begin()); }
+  Iterator
+  end()   const { return Iterator(data_.end());   }
 
-  size_t size() const {
+  int32_t
+  size() const {
     return data_.size();
   }
 
-  bool empty() const {
+  bool
+  empty() const {
     return data_.size() == 0;
   }
 

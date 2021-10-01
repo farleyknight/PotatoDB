@@ -24,7 +24,7 @@ public:
   Tuple
   next_tuple() override;
 
-  map<column_oid_t, Value>
+  ValueMap
   next_value_map() override;
 
   const string message_on_completion(int32_t result_count) const override {

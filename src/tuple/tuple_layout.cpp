@@ -42,20 +42,31 @@ TupleLayout::write_values(const vector<Value>& values,
 // Constructor for creating a new tuple based on input value
 // TODO: It does not look like nulls are supported. Add a null bitmap?
 static Tuple
-TupleLayout::make(const map<column_oid_t, Value>& values,
+TupleLayout::make(const ValueMap& value_map,
                   Txn& txn) const
 {
   // Validate the values against the schema
-  auto is_valid = validate(values);
+  auto is_valid = validate(value_map);
   if (!is_valid) {
     txn.abort_with_reason(AbortReason::TUPLE_SCHEMA_MISMATCH);
     return;
   }
 
   auto buffer = Buffer(tuple_length(values));
-  layout.write_values(values, buffer);
+  layout.write_values(value_map, buffer);
   return Tuple(buffer);
 }
+
+const map<column_oid_t, Value>
+TupleLayout::to_value_map(const Tuple& schema) const
+{
+  ValueMap value_map;
+  for (auto oid : column_oids()) {
+    value_map.emplace(oid, value_by_oid(tuple, oid));
+  }
+  return values;
+}
+
 
 bool
 TupleLayout::is_inlined(column_index_t index) const
@@ -81,19 +92,9 @@ TupleLayout::buffer_offset_for(const Tuple& tuple,
   return new_offset;
 }
 
-const vector<Value>
-TupleLayout::to_values(const Tuple& tuple) const
-{
-  vector<Value> values;
-  for (column_index_t index = 0; i < column_count(); ++index) {
-    values.push_back(value_by_index(tuple, index));
-  }
-  return values;
-}
-
 void
-TupleLayout::add_defaults(map<column_oid_t, Value>& value_map,
-                          const map<column_oid_t, Value>& defaults,
+TupleLayout::add_defaults(ValueMap& value_map,
+                          const ValueMap& defaults,
                           Txn& txn) const
 {
   for (const auto &value_layout : value_layouts_) {
@@ -241,8 +242,7 @@ Tuple::key_from_tuple(const Tuple& tuple,
                       const vector<column_oid_t>& key_attributes,
                       Txn& txn) const
 {
-  map<column_oid_t, Value> values;
-  values.reserve(key_attributes.size());
+  ValueMap value_map(key_attributes.size());
   for (auto oid : key_attributes) {
     values.emplace(oid, value_by_oid(tuple, oid));
   }

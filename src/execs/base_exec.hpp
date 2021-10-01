@@ -5,11 +5,15 @@
 
 class BaseExec {
 public:
-  explicit BaseExec(ExecCtx& exec_ctx)
+  explicit
+  BaseExec(ExecCtx& exec_ctx)
     : exec_ctx_(exec_ctx) {}
-  virtual ~BaseExec() = default;
 
-  virtual void init() = 0;
+  virtual
+  ~BaseExec() = default;
+
+  virtual void
+  init() = 0;
 
   virtual bool
   has_next() = 0;
@@ -21,7 +25,7 @@ public:
   // but they are better for debugging, and also easier to do defaults.
   //
   // In the future, we may find a better way to do this...
-  virtual map<column_oid_t, Value>
+  virtual ValueMap
   next_value_map() = 0;
 
   virtual const string

@@ -9,9 +9,14 @@ public:
              ptr<UpdatePlan>&& plan,
              ptr<BaseExec>&& child);
 
-  void init() override;
-  bool has_next() override;
-  Tuple next_tuple() override;
+  void
+  init() override;
+  bool
+  has_next() override;
+  Tuple
+  next_tuple() override;
+  ValueMap
+  next_value_map() override;
 
   const string
   message_on_completion(int32_t result_count) const override {
@@ -24,6 +29,7 @@ private:
 
   const QuerySchema&
   schema();
+
   ptr<UpdatePlan> plan_;
   ptr<BaseExec> child_;
 };

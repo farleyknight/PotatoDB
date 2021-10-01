@@ -30,12 +30,11 @@ public:
   Tuple
   next_tuple() override {
     auto value_map = next_value_map();
-
     auto tuple = plan_->schema().layout().make(value_map, exec_ctx().txn());
     return tuple;
   }
 
-  map<column_oid_t, Value>
+  ValueMap
   next_value_map() override {
     auto value_map = iter_.value_map();
     ++iter_;

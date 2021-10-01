@@ -47,7 +47,7 @@ public:
     return value_map;
   }
 
-  map<column_oid_t, Value>
+  ValueMap
   next_value_map() override {
     auto table_column = *table_columns_iter_;
     table_columns_iter_++;

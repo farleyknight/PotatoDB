@@ -12,7 +12,8 @@ public:
     : BaseExpr (ExprType::VALUE_MAP_LIST)
   {}
 
-  virtual const string to_string() const override {
+  virtual const string
+  to_string() const override {
     return ListExpr<ValueMapExpr>::to_string();
   }
 };
