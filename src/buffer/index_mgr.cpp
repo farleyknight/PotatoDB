@@ -4,6 +4,7 @@ IndexSchema
 IndexMgr::make_schema_from(index_oid_t index_oid,
                            table_oid_t table_oid,
                            const vector<column_oid_t> column_oids,
+                           const ColumnMgr& col_mgr,
                            const CreateIndexExpr& expr) const
 {
   auto index_name   = expr.index().name();
@@ -16,8 +17,8 @@ IndexMgr::make_schema_from(index_oid_t index_oid,
 
   auto root_page_id = default_root_page_id(file_id);
 
-  return IndexSchema(index_oid,   table_oid,
-                     index_name,  column_oids,
+  return IndexSchema(index_oid,   index_name,
+                     column_oids, col_mgr,
                      key_size,    root_page_id);
 }
 
@@ -51,7 +52,7 @@ IndexMgr::create_index_file(index_oid_t index_oid,
   auto file_id = disk_mgr_.create_index(index_name);
   allocate_header_and_first_page(file_id);
 
-  auto comp = IndexComp(index_schema, table_schema);
+  auto comp = IndexComp(index_schema.layout());
 
   auto index_header_page =
     disk_mgr_.index_header_page(file_id);
@@ -107,6 +108,10 @@ IndexMgr::allocate_header_and_first_page(file_id_t file_id) {
   auto header_page = IndexHeaderPage(header_page_ptr);
   header_page.wlatch();
   header_page.allocate(header_page_id, root_page_id);
+
+  header_page.to_schema();
+
+
   header_page.wunlatch();
 
   auto root_page_ptr = buff_mgr_.fetch_page(root_page_id);

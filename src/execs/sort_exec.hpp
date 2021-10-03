@@ -26,19 +26,19 @@ public:
     child_->init();
 
     while (child_->has_next()){
-      auto tuple = child_->next_tuple();
+      auto value_map = child_->next_value_map();
       auto layout = child_schema().layout();
       logger->debug("Adding tuple to SortHT: " +
-                    layout.to_string(tuple));
+                    layout.to_string(value_map));
 
-      auto sort_key = make_key(tuple);
+      auto sort_key = make_key(value_map);
 
       logger->debug("SortKey: " + sort_key.to_string());
       // NOTE: Multiple tuples might generate the same sort_key
       // Because of this, we are not sorting tuples but instead
       // sorting buckets of tuples, and the sort_key identifies
       // the buckets.
-      table_.insert_into_bucket(sort_key, tuple);
+      table_.insert_into_bucket(sort_key, value_map);
     }
 
     logger->debug("SortHT size: " + std::to_string(table_.size()));
@@ -52,7 +52,8 @@ public:
     }
   }
 
-  const string sort_dir() const {
+  const string
+  sort_dir() const {
     return plan_->order_by().direction();
   }
 
@@ -79,13 +80,13 @@ public:
   Tuple
   next_tuple() override {
     if (sort_asc()) {
-      auto tuple = table_iter_.tuple();
+      auto value_map = table_iter_.value_map();
       ++table_iter_;
-      return tuple;
+      return child_schema().layout().make(value_map, txn());
     } else {
-      auto tuple = table_riter_.tuple();
+      auto value_map = table_riter_.value_map();
       ++table_riter_;
-      return tuple;
+      return child_schema().layout().make(value_map, txn());
     }
   }
 
@@ -104,10 +105,16 @@ public:
 
   SortKey
   make_key(const Tuple& tuple) {
-    auto col = plan_->order_by().column();
-    auto oid = child_schema().column_oid_for(col.name());
+    auto oid = plan_->order_by().column().oid();
     auto layout = child_schema().layout();
     auto value = layout.value_by_oid(tuple, oid);
+    return SortKey(value);
+  }
+
+  SortKey
+  make_key(const ValueMap& value_map) {
+    auto oid = plan_->order_by().column().oid();
+    auto value = value_map.at(oid);
     return SortKey(value);
   }
 

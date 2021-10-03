@@ -4,19 +4,27 @@ class ValueMap {
 public:
   using Mapping = map<column_oid_t, Value>;
 
+  explicit
   ValueMap(int32_t size)
     : mapping_ (size)
   {}
 
+  explicit
   ValueMap(Mapping mapping)
     : mapping_ (mapping)
   {}
 
+  explicit
   ValueMap(RID rid,
            Mapping mapping)
     : mapping_ (mapping),
       rid_     (rid)
   {}
+
+  static ValueMap
+  invalid() {
+    return ValueMap(0);
+  }
 
   Mapping::iterator
   begin() {
@@ -66,8 +74,22 @@ public:
   }
 
   const Value
-  at(column_oid_t oid) {
+  at(column_oid_t oid) const {
     return mapping_.at(oid);
+  }
+
+  vector<column_oid_t>
+  oids() const {
+    vector<column_oid_t> oids;
+    for (const auto &[oid, value] : mapping_) {
+      oids.push_back(oid);
+    }
+    return oids;
+  }
+
+  void
+  erase(column_oid_t oid) {
+    mapping_.erase(oid);
   }
 
 private:

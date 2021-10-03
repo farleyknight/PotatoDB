@@ -13,22 +13,28 @@ public:
   TupleLayout() = default;
 
   static Tuple
-  make(const ValueMap& values,
+  make(const ValueMap& value_map,
        Txn& txn);
 
   void
-  push_back(TypeId type_id,
+  push_back(column_oid_t oid,
+            TypeId type_id,
             buffer_offset_t buffer_offset,
             bool is_inlined);
 
   const ValueLayout&
-  operator[](column_index_t index) const {
-    return find(index);
+  operator[](column_oid_t oid) const {
+    return find(oid);
   }
 
   const ValueLayout&
-  find(column_index_t index) const {
-    return value_layouts_[index];
+  find(column_oid_t oid) const {
+    return value_layouts_.at(oid);
+  }
+
+  const map<column_oid_t, ValueLayout>&
+  value_layouts() const {
+    return value_layouts_;
   }
 
   bool
@@ -38,9 +44,6 @@ public:
   column_count() const {
     return value_layouts_.size();
   }
-
-  tuple_length_t
-  tuple_length(const vector<Value>& values) const;
 
   void
   set_inlined_tuple_length(tuple_length_t tuple_length) {
@@ -52,7 +55,7 @@ public:
     return inlined_tuple_length_;
   }
 
-  const vector<column_index_t>&
+  const vector<column_oid_t>&
   unlined_columns() const {
     return unlined_columns_;
   }
@@ -65,16 +68,15 @@ public:
                Buffer& buffer) const;
 
   buffer_offset_t
-  buffer_offset_for(const Tuple& tuple,
+  buffer_offset_for(const Buffer& buffer,
                     column_index_t index) const;
 
-  Value
-  value_by_index(const Tuple& tuple,
-                 column_index_t column_index) const;
-
-  Value
-  value_by_name(const Tuple& tuple,
-                const column_name_t& name) const;
+  buffer_offset_t
+  buffer_offset_for(const Tuple& tuple,
+                    column_index_t index) const
+  {
+    return buffer_offset_for(tuple.buffer(), index);
+  }
 
   Value
   value_by_oid(const Tuple& tuple,
@@ -86,19 +88,21 @@ public:
 
   Tuple
   key_from_tuple(const Tuple& tuple,
-                 const QuerySchema& key_schema,
                  const vector<int32_t>& key_attrs,
                  Txn& txn) const;
 
   const ValueMap
-  to_value_map(const QuerySchema& schema) const;
+  to_value_map(const Tuple& tuple) const;
 
   void
   add_defaults(ValueMap& value_map,
                const ValueMap& defaults,
                Txn& txn) const;
+
   const string
   to_string(const Tuple& tuple) const;
+  const string
+  to_string(const ValueMap& value_map) const;
   const string
   to_payload(const Tuple& tuple) const;
 
@@ -110,6 +114,6 @@ private:
   // If some of them are not inlined, the tuple layout will differ.
   bool all_tuples_inlined_ = true;
   int32_t inlined_tuple_length_ = INVALID_TUPLE_LENGTH;
-  vector<column_index_t> unlined_columns_;
-  vector<ValueLayout> value_layouts_;
+  vector<column_oid_t> unlined_columns_;
+  map<column_oid_t, ValueLayout> value_layouts_;
 };

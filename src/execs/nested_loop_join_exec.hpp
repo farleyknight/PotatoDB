@@ -48,6 +48,12 @@ public:
     return Tuple(TupleSources::TABLE_HEAP);
   }
 
+  ValueMap
+  next_value_map() override {
+    // TODO: Finish me!
+    return ValueMap::invalid();
+  }
+
   bool join_matches(const Tuple& left,
                     const Tuple& right) {
     if (!plan_->has_pred()) {
@@ -69,29 +75,29 @@ public:
   combine_tuples(const Tuple& left,
                  const Tuple& right)
   {
-    map<column_oid_t, Value> values;
-
     auto &schema = plan_->schema();
+    ValueMap value_map(schema.joins().size());
 
     for (auto join : schema.joins()) {
       JoinSide side = join.side();
 
       auto name = join.name();
       if (side == JoinSide::LEFT) {
-        values.emplace(join.column_oid(),
-                       plan_->left_schema().layout().value_by_name(left, name));
+        value_map.emplace(join.column_oid(),
+                          plan_->left_schema().layout().value_by_name(left, name));
       } else if (side == JoinSide::RIGHT) {
-        values.emplace(join.column_oid(),
-                       plan_->right_schema().layout().value_by_name(right, name));
+        value_map.emplace(join.column_oid(),
+                          plan_->right_schema().layout().value_by_name(right, name));
       } else if (side == JoinSide::INVALID) {
         throw Exception("Cannot combine tuples with INVALID_SIDE!");
       }
     }
 
-    return schema.layout().make(move(values), exec_ctx().txn());
+    return schema.layout().make(value_map, exec_ctx().txn());
   }
 
-  const string message_on_completion(int32_t result_count) const override {
+  const string
+  message_on_completion(int32_t result_count) const override {
     return "Found " + std::to_string(result_count) + " record(s)";
   }
 

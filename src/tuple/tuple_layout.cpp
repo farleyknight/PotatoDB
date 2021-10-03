@@ -21,11 +21,12 @@ TupleLayout::write_values(const vector<Value>& values,
 
   for (column_index_t i = 0; i < column_count; i++) {
     const auto &col = value_layouts_[i];
+    const auto casted_value_string = casted_value.to_string();
 
     if (col.is_inlined()) {
       auto casted_value = values[i].cast_as(col.type_id());
-      std::cout << "Inlined offset: " << col.offset() << std::endl;
-      std::cout << "Inlined casted value: " << casted_value.to_string() << std::endl;
+      logger->debug("[TupleLayout] Inlined offset: {}, Inlined casted value: {}",
+                    col.offset(), casted_value_string);
       casted_value.serialize_to(col.offset(), buffer);
     } else {
       std::cout << "Unlined offset: " << col.offset() << std::endl;
@@ -57,10 +58,10 @@ TupleLayout::make(const ValueMap& value_map,
   return Tuple(buffer);
 }
 
-const map<column_oid_t, Value>
-TupleLayout::to_value_map(const Tuple& schema) const
+const ValueMap
+TupleLayout::to_value_map(const Tuple& tuple) const
 {
-  ValueMap value_map;
+  ValueMap value_map(column_oids().size());
   for (auto oid : column_oids()) {
     value_map.emplace(oid, value_by_oid(tuple, oid));
   }
@@ -71,11 +72,11 @@ TupleLayout::to_value_map(const Tuple& schema) const
 bool
 TupleLayout::is_inlined(column_index_t index) const
 {
-  return by_column_index(index).is_inlined();
+  return find(index).is_inlined();
 }
 
 buffer_offset_t
-TupleLayout::buffer_offset_for(const Tuple& tuple,
+TupleLayout::buffer_offset_for(const Buffer& buffer,
                                column_index_t index) const
 {
   if (find(index).is_inlined()) {
@@ -84,7 +85,7 @@ TupleLayout::buffer_offset_for(const Tuple& tuple,
 
   auto offset = find(index).offset();
   // We read the relative offset from the tuple data.
-  auto new_offset = tuple.read_offset(offset);
+  auto new_offset = buffer.read_offset(offset);
   buffer_offset_t buffer_size = buffer_.size();
   assert(new_offset < buffer_size);
   // And return the beginning address of the real data for the
@@ -207,7 +208,7 @@ TupleLayout::value_by_column_index(const Tuple& tuple,
 {
   assert(index < column_count());
 
-  TypeId type_id = by_column_index(index).type_id();
+  TypeId type_id = find(index).type_id();
   auto offset = buffer_offset_for(index);
 
   assert(offset < buffer_.size());
@@ -288,17 +289,18 @@ TupleLayout::random_from()
 }
 
 void
-TupleLayout::push_back(TypeId type_id,
+TupleLayout::push_back(column_oid_t oid,
+                       TypeId type_id,
                        buffer_offset_t buffer_offset,
                        bool is_inlined)
 {
   if (!is_inlined) {
     column_index_t index = value_layouts_.size();
-    unlined_columns_.push_back(index);
+    unlined_columns_.push_back(oid);
     all_tuples_inlined_ = false;
   }
   auto new_layout = ValueLayout(type_id, buffer_offset, is_inlined);
-  value_layouts_.push_back(new_layout);
+  value_layouts_.emplace(oid, new_layout);
 }
 
 // TODO: Pass in ref to Txn and abort the txn if the validation fails.

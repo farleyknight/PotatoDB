@@ -5,21 +5,26 @@
 
 class ColumnDefExpr : public BaseExpr {
 public:
-  ColumnDefExpr(column_name_t name, TypeId type_id)
-    : BaseExpr   (ExprType::COLUMN_DEF),
-      name_      (name),
-      type_id_   (type_id)
+  explicit
+  ColumnDefExpr(column_name_t name,
+                TypeId type_id)
+    : BaseExpr       (ExprType::COLUMN_DEF),
+      name_          (name),
+      type_id_       (type_id),
+      default_value_ (Value::make_null(type_id))
   {}
 
   // TODO: Rename type_length to variable_length, which is the same
   // variable on the TableColumn class
+  explicit
   ColumnDefExpr(column_name_t name,
                 TypeId type_id,
-                length_t type_length)
-    : BaseExpr     (ExprType::COLUMN_DEF),
-      name_        (name),
-      type_id_     (type_id),
-      type_length_ (type_length)
+                int32_t length)
+    : BaseExpr         (ExprType::COLUMN_DEF),
+      name_            (name),
+      type_id_         (type_id),
+      variable_length_ (length),
+      default_value_   (Value::make_null(type_id))
   {}
 
   virtual const string
@@ -35,11 +40,6 @@ public:
   TypeId
   type_id() const {
     return type_id_;
-  }
-
-  length_t
-  type_length() const {
-    return type_length_;
   }
 
   bool
@@ -72,12 +72,46 @@ public:
     autoincrement_ = value;
   }
 
+  bool
+  is_inlined() const {
+    return type_id_ == TypeId::VARCHAR;
+  }
+
+  int32_t
+  variable_length() const {
+    return variable_length_;
+  }
+
+  int32_t
+  fixed_length() const {
+    return Type::size_of(type_id_);
+  }
+
+  bool
+  has_default() const {
+    if (nullable_) {
+      return true;
+    }
+    return has_default_;
+  }
+
+  Value
+  default_value() const {
+    if (!nullable_ && default_value_.is_null()) {
+      throw Exception("Tried get default when there is none! Need to debug here.");
+    }
+    return default_value_;
+  }
+
 protected:
   column_name_t name_;
-  TypeId type_id_       = TypeId::INVALID;
-  length_t type_length_ = 0;
+  TypeId type_id_      = TypeId::INVALID;
+  int32_t variable_length_ = INVALID_VARIABLE_LENGTH;
 
   bool nullable_      = true;
   bool primary_key_   = false;
   bool autoincrement_ = false;
+  bool has_default_   = false;
+
+  Value default_value_;
 };

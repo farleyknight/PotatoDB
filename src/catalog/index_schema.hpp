@@ -3,27 +3,28 @@
 #include "catalog/table_column.hpp"
 #include "catalog/base_schema.hpp"
 
-class IndexSchema {
+
+// NOTE: This is the mapping relation between
+// key schema and tuple schema
+// TODO: Provide an example here.
+//
+// The command:
+//
+//   CREATE INDEX ???
+//
+// Means to map .. to ..
+
+class IndexSchema : public BaseSchema {
 public:
   IndexSchema(index_oid_t index_oid,
-              table_oid_t table_oid,
               index_name_t index_name,
-              // NOTE: This is the mapping relation between
-              // key schema and tuple schema
-              // TODO: Provide an example here.
-              //
-              // The command:
-              //
-              //   CREATE INDEX ???
-              //
-              // Means to map .. to ..
               vector<column_oid_t> column_oids,
+              const ColumnMgr& col_mgr,
               int32_t key_size,
               PageId root_page_id)
-    : index_oid_    (index_oid),
-      table_oid_    (table_oid),
+    : BaseSchema    (column_oids, col_mgr),
+      index_oid_    (index_oid),
       index_name_   (index_name),
-      column_oids_  (column_oids),
       key_size_     (key_size),
       root_page_id_ (root_page_id)
   {}
@@ -64,7 +65,6 @@ private:
   // a dependency on the TableSchema. Instead, let's keep this class separate,
   // and only hold `column_oid_t`s
   index_oid_t index_oid_;
-  table_oid_t table_oid_;
 
   const index_name_t index_name_;
 

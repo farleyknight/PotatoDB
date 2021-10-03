@@ -16,7 +16,8 @@ public:
       name_    (name)
   {}
 
-  TableExpr(table_oid_t table_oid, table_name_t name)
+  TableExpr(table_oid_t table_oid,
+            table_name_t name)
     : BaseExpr   (ExprType::TABLE),
       name_      (name),
       table_oid_ (table_oid)
@@ -26,11 +27,13 @@ public:
     name_ = name;
   }
 
-  const string& name() const {
+  const string&
+  name() const {
     return name_;
   }
 
-  virtual const string to_string() const override {
+  virtual const string
+  to_string() const override {
     return name_;
   }
 

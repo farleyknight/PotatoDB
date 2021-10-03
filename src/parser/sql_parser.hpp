@@ -54,9 +54,7 @@ public:
     try {
       tree::ParseTree* tree = parser.main();
       EvalParseVisitor visitor;
-      // TODO: We should pass in a reference to the `Catalog`
-      // like this:
-      // visitor.set_catalog(catalog)
+      visitor.set_catalog(catalog)
       visitor.visit(tree);
 
       if (visitor.results().size() > 0) {

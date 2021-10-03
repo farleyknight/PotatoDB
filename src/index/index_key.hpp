@@ -4,7 +4,7 @@
 
 #include "tuple/tuple.hpp"
 #include "value/value.hpp"
-#include "catalog/table_schema.hpp"
+#include "tuple/tuple_layout.hpp"
 
 class IndexKey {
 public:
@@ -39,42 +39,13 @@ public:
     data_.write_int64(0, key);
   }
 
-  Value to_value(const TableSchema& schema,
-                 column_index_t index) const
+  Value
+  to_value(const TupleLayout& layout,
+           column_index_t index) const
   {
-    size_t offset = 0;
-    const auto &col = schema.by_column_index(index);
-    const TypeId column_type = col.type_id();
-    const bool is_inlined = col.is_inlined();
-    if (is_inlined) {
-      offset = schema.buffer_offset_for(index);
-    } else {
-      auto schema_offset = schema.buffer_offset_for(index);
-      auto index_offset =
-        *reinterpret_cast<const buffer_offset_t *>(data_.const_ptr(schema_offset));
-      offset =
-        *reinterpret_cast<const buffer_offset_t *>(data_.const_ptr(index_offset));
-    }
-    return Value::deserialize_from(offset, data_, column_type);
-  }
-
-  Value to_value(const QuerySchema& schema,
-                 column_index_t index) const
-  {
-    size_t offset = 0;
-    const auto &col = schema.by_column_index(index);
-    const TypeId column_type = col.type_id();
-    const bool is_inlined = col.is_inlined();
-    if (is_inlined) {
-      offset = schema.buffer_offset_for(index);
-    } else {
-      auto schema_offset = schema.buffer_offset_for(index);
-      auto index_offset =
-        *reinterpret_cast<const buffer_offset_t *>(data_.const_ptr(schema_offset));
-      offset =
-        *reinterpret_cast<const buffer_offset_t *>(data_.const_ptr(index_offset));
-    }
-    return Value::deserialize_from(offset, data_, column_type);
+    auto offset = layout.buffer_offset_for(data_, index);
+    auto type_id = layout.find(index).type_id();
+    return Value::deserialize_from(offset, data_, type_id);
   }
 
   Buffer data_ {KEY_SIZE};

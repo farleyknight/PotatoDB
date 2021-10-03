@@ -1,7 +1,9 @@
 #pragma once
 
 #include "catalog/column_data.hpp"
+#include "catalog/schema_mgr.hpp"
 #include "catalog/table_schema.hpp"
+
 #include "page/page_layout.hpp"
 
 // TODO: Each table & index file should have a FileHeaderPage
@@ -37,22 +39,12 @@ public:
   static constexpr buffer_offset_t COLUMNS_START_OFFSET = 8;
   static constexpr buffer_offset_t TABLE_NAME_OFFSET    = 12;
 
-  TableHeaderPage(Page* page)
-    : PageLayout (page)
+  TableHeaderPage(Page* page,
+                  SchemaMgr& schema_mgr)
+    : PageLayout  (page),
+      schema_mgr_ (schema_mgr)
   {}
 
-  TableSchema
-  read_schema() const {
-    auto table_oid     = read_table_oid();
-    auto column_count  = read_column_count();
-    auto columns_start = read_columns_start();
-    auto table_name    = read_table_name();
-    auto cols          = read_columns(columns_start, column_count);
-
-    return TableSchema(cols,
-                       table_name,
-                       table_oid);
-  }
 
   void
   write_schema(const TableSchema& schema) {

@@ -10,7 +10,6 @@
 #include "exprs/create_table_expr.hpp"
 
 #include "page/table_heap.hpp"
-#include "page/table_header_page.hpp"
 
 class TableMgr {
 public:
@@ -71,19 +70,6 @@ public:
     return table_names_.at(table_oid);
   }
 
-  const vector<TableColumn>&
-  table_columns_for(table_oid_t table_oid) const {
-    assert(table_schemas_.contains(table_oid));
-    return table_schemas_.at(table_oid).all();
-  }
-
-  vector<TableColumn>&
-  table_columns_for(table_oid_t table_oid) {
-    assert(table_schemas_.contains(table_oid));
-    return table_schemas_.at(table_oid).all();
-  }
-
-
   table_oid_t
   create_table(const CreateTableExpr& expr, Txn& txn);
 
@@ -101,7 +87,7 @@ public:
     return column_mgr_.table_has_column_named(table_name, column_name);
   }
 
-  TableColumn
+  TableColumn&
   column_for(column_oid_t column_oid) {
     return column_mgr_.column_for(column_oid);
   }
@@ -180,16 +166,10 @@ private:
               const TableSchema& schema);
 
   void
-  load_table_header(table_oid_t table_oid, Page* page_ptr) {
-    table_headers_.emplace(table_oid,
-                           TableHeaderPage(page_ptr));
-  }
-
-  void
   load_table_schema(table_oid_t table_oid,
-                    const TableSchema& table_schema)
+                    TableSchema&& table_schema)
   {
-    table_schemas_.emplace(table_oid, table_schema);
+    table_schemas_.emplace(table_oid, move(table_schema));
   }
 
   void
@@ -200,7 +180,7 @@ private:
   load_table(file_id_t file_id,
              table_oid_t table_oid,
              const table_name_t& table_name,
-             const TableSchema& schema);
+             TableSchema&& schema);
 
   void
   load_table_heap(file_id_t file_id,
@@ -213,12 +193,10 @@ private:
 
   ColumnMgr column_mgr_;
 
-  map<file_id_t, TableHeaderPage> table_headers_;
-
   map<table_oid_t, table_name_t> table_names_;
   map<table_name_t, table_oid_t> table_oids_;
 
-  map<table_oid_t, TableSchema> table_schemas_;
+  map<table_oid_t, TableSchema&&> table_schemas_;
   map<table_oid_t, ptr<TableHeap>> table_heaps_;
 
   atomic<table_oid_t> next_table_oid_ = FIRST_TABLE_OID;

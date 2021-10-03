@@ -18,9 +18,9 @@ public:
     return table_columns_iter_ != table_columns_.cend();
   }
 
-  map<column_oid_t, Value>
+  ValueMap
   build_value_map(TableColumn column) {
-    map<column_oid_t, Value> value_map;
+    ValueMap value_map(6);
 
     value_map.emplace(COLUMN_NAME_COLUMN_OID,
                       Value::make(column.name()));

@@ -33,4 +33,3 @@ private:
   const buffer_offset_t buffer_offset_;
   const bool is_inlined_;
 };
-

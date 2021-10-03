@@ -6,46 +6,29 @@
 
 class TableSchema;
 
-class QuerySchema : public BaseSchema<QueryColumn> {
+class QuerySchema : public BaseSchema {
 public:
-  QuerySchema(vector<QueryColumn> cols)
-    : BaseSchema (cols)
+  QuerySchema(vector<column_oid_t> cols,
+              const ColumnMgr& col_mgr)
+    : BaseSchema (cols, col_mgr)
   {}
 
-  // Allow copy
-  QuerySchema(const QuerySchema&) = default;
-  // Allow copy-assign
-  QuerySchema& operator=(const QuerySchema&) = default;
+  // NO copy
+  QuerySchema(const QuerySchema&) = delete;
+  // NO copy-assign
+  QuerySchema& operator=(const QuerySchema&) = delete;
   // Default destructor
   ~QuerySchema() = default;
 
-  // TODO Remove copy, slice, merge
-  static QuerySchema copy(const TableSchema& original);
-  static QuerySchema copy(const QuerySchema& original);
-
-  static QuerySchema slice(const QuerySchema& from,
-                           const vector<column_oid_t>& oids);
-
-  static QuerySchema slice(const QuerySchema& from,
-                           const vector<string>& names);
-
-  static QuerySchema slice(const TableSchema& from,
-                           const vector<string>& names);
-
-  static QuerySchema merge(const QuerySchema& left,
-                           const QuerySchema& right);
-
   const string to_string() const;
-
-  const vector<column_name_t>& names() const {
-    return names_;
-  }
 
   const vector<QueryJoin>& joins() const {
     return joins_;
   }
 
 private:
+
   vector<column_name_t> names_;
+  vector<table_oid_t> tables_;
   vector<QueryJoin> joins_; // TODO: Need to populate this
 };

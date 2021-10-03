@@ -18,7 +18,8 @@ public:
 
   void init() override;
   bool has_next() override;
-  Tuple next() override;
+  Tuple next_tuple() override;
+  ValueMap next_value_map() override;
 
 private:
   hash_t compute_hash(const Tuple& tuple,

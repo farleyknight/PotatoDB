@@ -28,7 +28,7 @@ public:
   next_value_map() override {
     table_name_t table_name = *table_names_iter_;
     table_names_iter_++;
-    map<column_oid_t, Value> value_map;
+    ValueMap value_map(1);
     value_map.emplace(TABLE_NAME_COLUMN_OID,
                       Value::make(table_name));
     return value_map;

@@ -66,7 +66,7 @@ PotatoDB::sql_to_plan(const sql_statement_t& statement) {
   auto exprs = SQLParser::as_exprs(statement);
   // TODO: Allow for multiple statements
   if (exprs.size() == 0) {
-    logger->debug("[PotatoDB] No exprs for : " + statement);
+    logger->debug("[PotatoDB] :panic: No exprs for : " + statement);
   }
 
   assert(exprs.size() > 0);
@@ -190,6 +190,11 @@ PotatoDB::table_oid_for(table_name_t table_name) const {
 table_name_t
 PotatoDB::table_name_for(table_oid_t table_oid) const {
   return schema_mgr_.table_name_for(table_oid);
+}
+
+column_oid_t
+PotatoDB::column_oid_for(column_name_t full_column_name) const {
+  return schema_mgr_.column_oid_for(full_column_name);
 }
 
 void

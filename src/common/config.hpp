@@ -47,3 +47,5 @@ static constexpr int32_t      MAX_VARCHAR_SIZE = 128;
 
 using tuple_length_t = buffer_offset_t;
 static constexpr int32_t      INVALID_TUPLE_LENGTH  = -1;
+static constexpr value_length_t INVALID_FIXED_LENGTH    = -1;
+static constexpr value_length_t INVALID_VARIABLE_LENGTH = -1;

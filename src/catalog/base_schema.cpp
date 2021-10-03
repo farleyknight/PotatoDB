@@ -1,17 +1,16 @@
 #include "common/config.hpp"
 #include "catalog/base_schema.hpp"
 
-template<class ColT>
-BaseSchema<ColT>::BaseSchema(vector<ColT> cols) {
-  int32_t offset = 0;
-  column_index_t cols_size = cols.size();
-  assert(cols_size > 0);
+BaseSchema::BaseSchema(vector<column_oid_t> oids,
+                       const SchemaMgr& schema_mgr)
+{
+  int32_t oids_size = oids.size();
+  assert(oids_size > 0);
 
-  table_oid_ = cols[0].table_oid();
+  for (int32_t index = 0; index < oids_size; ++index) {
+    auto oid = oids[index];
 
-  for (int32_t index = 0; index < cols_size; ++index) {
-    const auto &col  = cols[index];
-    auto oid         = col.oid();
+    const auto &col  = schema_mgr.column_for(oid);
     const auto &name = col.name();
 
     // NOTE: If the 2nd column has a different table_oid,
@@ -28,7 +27,8 @@ BaseSchema<ColT>::BaseSchema(vector<ColT> cols) {
       continue; // NOTE: Skip duplicates
     }
 
-    tuple_layout_.push_back(col.type_id(),
+    tuple_layout_.push_back(col.oid(),
+                            col.type_id(),
                             offset,
                             col.is_inlined());
     offset += col.fixed_length();
@@ -38,7 +38,6 @@ BaseSchema<ColT>::BaseSchema(vector<ColT> cols) {
     column_names_to_oids_.emplace(name, oid);
 
     column_oids_.push_back(oid);
-    columns_.push_back(col);
   }
 
   tuple_layout_.set_inlined_tuple_length(offset);

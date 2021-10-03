@@ -4,8 +4,8 @@
 
 class ResultSet {
 public:
-  ResultSet(QuerySchema schema)
-    : schema_  (schema) {}
+  ResultSet(TupleLayout layout)
+    : layout_  (layout) {}
 
   ~ResultSet() = default;
   // No copy
@@ -19,26 +19,30 @@ public:
     results_.emplace_back(move(tuple));
   }
 
-  // TODO: Let's start moving away from using strings and instead use column OIDs
+  // NOTE: If you catch a part of the unit tests using column_name_t for this method
+  // try using the method on the main PotatoDB object:
+  //
+  // column_oid_t PotatoDB::column_oid_for(column_name_t name)
   template<typename T>
   T
-  value(const column_name_t name,
+  value(column_oid_t oid,
         const Tuple& tuple)
   {
-    auto column_index = schema_.column_index_for(name);
-    auto value        = schema_.layout().value_by_index(tuple, column_index);
-    return value.as<T>();
+    return layout_.value_by_oid(tuple, oid).as<T>();
   }
 
+  // NOTE: If you catch a part of the unit tests using column_name_t for this method
+  // try using the method on the main PotatoDB object:
+  //
+  // column_oid_t PotatoDB::column_oid_for(column_name_t name)
   template<typename T>
-  T value_at(const column_name_t name,
-             int32_t tuple_index)
+  T
+  value_at(column_oid_t oid,
+           int32_t tuple_index)
   {
     assert(size() >= tuple_index + 1);
-    auto column_index = schema_.column_index_for(name);
     const auto &tuple = results_[tuple_index];
-    const auto value  = schema_.layout().value_by_index(tuple, column_index);
-    return value.as<T>();
+    return layout_.value_by_oid(tuple, oid).as<T>();
   }
 
   const vector<Tuple>&
@@ -56,11 +60,6 @@ public:
     return results_[i];
   }
 
-  const QuerySchema&
-  schema() const {
-    return schema_;
-  }
-
   // NOTE: This method is different from ordinary `to_string`
   // In particular, it's formatted to be sent over the network to the client
   // Which means quoting strings, rendering boolean types to 'true'/'false'
@@ -74,13 +73,13 @@ public:
       if (i > 0) {
         os << ",\n";
       }
-      os << schema_.layout().to_payload(results_[i]);
+      os << layout_.to_payload(results_[i]);
     }
 
     return os.str();
   }
 
 private:
-  const QuerySchema schema_;
+  TupleLayout layout_;
   vector<Tuple> results_;
 };

@@ -4,11 +4,6 @@
 
 #include "common/config.hpp"
 
-#include "buffer/table_mgr.hpp"
-#include "buffer/index_mgr.hpp"
-
-#include "catalog/table_schema.hpp"
-#include "catalog/table_meta.hpp"
 
 #include "exprs/create_table_expr.hpp"
 #include "exprs/create_index_expr.hpp"
@@ -41,15 +36,6 @@ public:
   void
   build_system_catalog() {
     sys_catalog_.build_system_catalog();
-  }
-
-  vector<TableColumn>
-  table_columns_for(vector<column_oid_t> column_oids) {
-    vector<TableColumn> columns;
-    for (const auto oid : column_oids) {
-      columns.push_back(table_column_for(oid));
-    }
-    return columns;
   }
 
   bool
@@ -179,6 +165,9 @@ public:
 
   vector<QueryColumn>
   all_columns_for(table_oid_t table_oid) const;
+
+  bool
+  load_column_oid(column_oid_t oid, TableColumn&& column);
 
 private:
   SystemCatalog sys_catalog_;

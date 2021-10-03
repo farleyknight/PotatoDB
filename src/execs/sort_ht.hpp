@@ -8,12 +8,12 @@ class SortHT {
 public:
   SortHT() {}
 
-  using Bucket = vector<Tuple>;
+  using Bucket = vector<ValueMap>;
   using Table  = ordered_map<SortKey, Bucket>;
 
-  void insert_into_bucket(SortKey key, Tuple tuple) {
+  void insert_into_bucket(SortKey key, ValueMap value_map) {
     logger->debug("INSERT INTO BUCKET -- SortKey: " + key.to_string());
-    table_[key].push_back(tuple);
+    table_[key].push_back(value_map);
   }
 
   size_t size() const {
@@ -42,7 +42,7 @@ public:
       return count_ < size_;
     }
 
-    Tuple tuple() const {
+    ValueMap value_map() const {
       int32_t size = table_iter_->second.size();
       assert(index_ < size);
       assert(index_ >= 0);
@@ -87,7 +87,7 @@ public:
       return count_ < size_;
     }
 
-    Tuple tuple() const {
+    ValueMap value_map() const {
       int32_t size = table_iter_->second.size();
       assert(index_ < size);
       assert(index_ >= 0);

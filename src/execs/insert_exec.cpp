@@ -1,7 +1,7 @@
 #include "execs/insert_exec.hpp"
 
-map<column_oid_t, Value>
-InsertExec::next_tuple() {
+ValueMap
+InsertExec::next_value_map() {
   auto &heap        = exec_ctx_.schema_mgr().table_heap_for(plan_->table_oid());
   auto value_map    = child_->next_value_map();
 

@@ -18,20 +18,6 @@
 
 #include "txns/txn.hpp"
 
-// TODO:
-// Big refactor needed!
-// We are doing too much SQL in here.
-// We don't need to convert system internal stuff into SQL queries.
-// We should just interface with the buffer pool pages directly.
-// That would make this stuff faster.
-
-// TODO: Maybe rename to SchemaMgr?
-// I feel like that fits my general naming conventions.
-// The TableMgr has TableHeaps
-// The IndexMgr has BPlusTrees
-// The TxnMgr has Txns
-// The BuffMgr has Page/Buffer objects
-
 class SystemCatalog {
 public:
   SystemCatalog(DiskMgr& disk_mgr,
@@ -127,6 +113,11 @@ public:
                          const column_name_t& column_name) const {
     return table_mgr_.table_has_column_named(table_name,
                                              column_name);
+  }
+
+  void
+  load_column_oid(column_oid_t oid, TableColumn&& column) {
+    return table_mgr_.load_column_oid(oid, move(column));
   }
 
   TableColumn

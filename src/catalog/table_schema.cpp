@@ -8,59 +8,49 @@
 
 #include "query/query_column.hpp"
 
-TableSchema::TableSchema(vector<TableColumn> columns,
+TableSchema::TableSchema(vector<column_oid_t> columns,
                          const table_name_t& table_name,
-                         table_oid_t table_oid)
-  : BaseSchema   (columns),
+                         table_oid_t table_oid,
+                         SchemaMgr& schema_mgr)
+  : BaseSchema   (columns, schema_mgr),
+    defaults_    (columns.size()),
     table_oid_   (table_oid),
     table_name_  (table_name)
 {
-  // NOTE: Let's make the constructor arguments as simple as possible
-  // by moving this logic into the constructor instead of expecting
-  // the caller to do it.
-
-  int32_t column_count = columns_.size();
-
-  for (int32_t offset = 0; offset < column_count; ++offset) {
-    if (columns_[offset].is_primary_key()) {
-      primary_keys_.push_back(offset);
+  for (const auto &oid : oids) {
+    const auto &col = schema_mgr.column_for(column_oid);
+    if (col.is_primary_key()) {
+      primary_keys_.push_back(oid);
     }
 
-    if (columns_[offset].is_autoincrement()) {
-      auto oid = columns_[offset].oid();
-      std::cout << "Initializing AUTO INCREMENT with column oid: " << oid << std::endl;
-      autoincrement_values_[oid] = 0;
+    if (col.is_autoincrement()) {
+      auto name = col.name();
+      autoincrement_oid_ = oid;
+      logger->debug("[TableSchema] Found AUTOINCREMENT during construction: {}", name);
+    }
+
+    if (col.has_default()) {
+      auto default_value = col.default_value();
+      logger->debug("[TableSchema] Found column w/ default value: {}",
+                    default_value.to_string());
+      defaults_.emplace(oid, default_value);
     }
   }
 }
 
-QueryColumn TableSchema::operator[](const column_name_t& col_name) const
+QueryColumn
+TableSchema::operator[](const column_name_t& name) const
 {
   if (!has_column(col_name)) {
-    throw Exception("No such column " + col_name + " + on table " + table_name_);
+    throw Exception("No such column " + name + " + on table " + table_name_);
   }
 
-  auto column = by_name(col_name);
-  auto column_oid = column_oid_for(col_name);
+  auto column = by_name(name);
 
   return QueryColumn(column.type_id(),
                      table_oid_,
-                     column_oid,
-                     col_name);
-}
-
-vector<TableColumn>
-TableSchema::missing_columns(const QuerySchema& query_schema) const
-{
-  vector<TableColumn> missing;
-  for (const auto &col : columns_) {
-    if (!query_schema.has_column(col.name())) {
-      std::cout << "Missing column: " << col.name() << std::endl;
-      missing.push_back(col);
-    }
-  }
-
-  return missing;
+                     column.oid(),
+                     name);
 }
 
 // TODO!
@@ -68,27 +58,22 @@ TableSchema::missing_columns(const QuerySchema& query_schema) const
 // MySQL does NOT support them:
 // https://stackoverflow.com/questions/22824439/how-to-create-two-auto-increment-columns-in-mysql
 
-const map<column_oid_t, Value>
-TableSchema::defaults(const vector<TableColumn>& missing) {
-  map<column_oid_t, Value> defaults;
-  for (const auto &col : missing) {
-    auto oid = col.oid();
 
-    assert(autoincrement_values_.contains(oid));
-    auto value_as_int32 = autoincrement_values_[oid];
-    std::cout << "AUTO INCREMENT before value " << value_as_int32 << std::endl;
-    defaults.emplace(oid, Value::make(value_as_int32));
-    // TODO: After increment, these values should be persisted to disk somehow!
-    // autoincrement_values_.emplace(oid, value_as_int32 + 1);
+// TODO:
+// Each TableSchema should have a ValueMap object that holds defaults for each of the columns
+// The method `defaults` should actually produce a new ValueMap each time its called. The new
+// ValueMap will have the auto-increment field filled in.
 
-    autoincrement_values_[oid]++;
+ValueMap
+TableSchema::defaults() {
+  auto default_tuple = ValueMap(defaults_);
 
-    std::cout << "AUTO INCREMENT after value " << autoincrement_values_[oid] << std::endl;
+  if (autoincrement_oid_ != INVALID_COLUMN_OID) {
+    auto next_value = autoincrement_value_++;
+    default_tuple[autoincrement_oid_] = Value::make(next_value);
   }
 
-  assert(missing.size() == defaults.size());
-
-  return defaults;
+  return default_tuple;
 }
 
 const string

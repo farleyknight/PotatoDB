@@ -40,7 +40,7 @@ void HashJoinExec::init() {
 
   // First, add all left tuples to the HT.
   while (left_->has_next()) {
-    auto left_tuple = left_->next();
+    auto left_tuple = left_->next_tuple();
     hash_t hash_value = compute_hash(left_tuple, left_schema(),
                                      plan_->left_keys());
     join_ht_.insert(hash_value, left_tuple);
@@ -52,7 +52,7 @@ void HashJoinExec::init() {
   // final output tuple.
   size_t col_total = schema().column_count();
   while (right_->has_next()) {
-    auto right_tuple = right_->next();
+    auto right_tuple = right_->next_tuple();
     hash_t hash_value = compute_hash(right_tuple, right_schema(),
                                      plan_->right_keys());
 
@@ -63,13 +63,13 @@ void HashJoinExec::init() {
     auto left_tuples = join_ht_.find_values(hash_value);
     for (auto &left_tuple : left_tuples) {
       if (match_found(left_tuple, right_tuple)) {
-        map<column_oid_t, Value> value_map;
+        ValueMap value_map(col_total);
         for (size_t col_index = 0; col_index < col_total; ++col_index) {
           auto &col = schema().by_column_index(col_index);
           auto value = make_value_at(col_index, left_tuple, right_tuple);
-          value_map.emplace(col.oid(), value);
+          value_map.emplace(col.oid(), move(value));
         }
-        auto tuple = schema().layout().make(value_map, exec_ctx().txn());
+        auto tuple = schema().layout().make(value_map, txn());
         output_tuples_.emplace_back(tuple);
       }
     }
@@ -95,20 +95,24 @@ bool HashJoinExec::match_found(const Tuple& left,
   return result.as<bool>();
 }
 
-Tuple HashJoinExec::next() {
+Tuple
+HashJoinExec::next_tuple() {
   auto tuple = output_tuples_.back();
   output_tuples_.pop_back();
   return tuple;
 }
 
-const QuerySchema& HashJoinExec::schema() {
+const QuerySchema&
+HashJoinExec::schema() {
   return plan_->schema();
 }
 
-const QuerySchema& HashJoinExec::left_schema()  {
+const QuerySchema&
+HashJoinExec::left_schema()  {
   return dynamic_cast<QuerySchemaPlan*>(left_.get())->schema();
 }
 
-const QuerySchema& HashJoinExec::right_schema() {
+const QuerySchema&
+HashJoinExec::right_schema() {
   return dynamic_cast<QuerySchemaPlan*>(right_.get())->schema();
 }

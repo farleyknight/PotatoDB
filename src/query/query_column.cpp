@@ -23,7 +23,7 @@ QueryColumn::eval_join(UNUSED const Tuple& lt,
 }
 
 QueryColumn
-QueryColumn::from(TableColumn col) {
+QueryColumn::from(const TableColumn& col) {
   return QueryColumn(col.type_id(),
                      col.table_oid(),
                      col.oid(),

@@ -54,13 +54,13 @@ AggExec::next_tuple() {
   auto key = table_iter_.key();
   auto value = table_iter_.val();
 
-  map<column_oid_t, Value> value_map;
+  ValueMap value_map(schema().column_count());
   for (auto const &col : schema().all()) {
     auto oid = col.oid();
     auto evaled_value = col.eval_agg(schema(),
                                      key.group_bys_,
                                      value.aggs_);
-    value_map.emplace(oid, evaled_value);
+    value_map.emplace(oid, move(evaled_value));
   }
 
   ++table_iter_;

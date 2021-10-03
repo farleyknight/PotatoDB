@@ -2,8 +2,6 @@
 #include "types/type.hpp"
 
 void Value::serialize_to(buffer_offset_t offset, Buffer& buff) const {
-  // std::cout << "Serializing value " << to_string() << std::endl;
-  // std::cout << "TYPE ID " << Type::as_string(value_type()->type_id()) << std::endl;
   value_type()->serialize_to(offset, buff, *this);
 }
 
@@ -18,15 +16,17 @@ const ptr<Type>& Value::value_type() const {
   return Type::instance(type_id_);
 }
 
-size_t Value::size() const {
+int32_t
+Value::size() const {
   if (type_id_ == TypeId::VARCHAR) {
     return as<string>().size() + sizeof(string_size_t);
   }
   return value_type()->size();
 }
 
-bool Value::is_null() const {
-  return is_null_;
+bool
+Value::is_null() const {
+  return data_.index() == 0;
 }
 
 Value Value::cast_as(TypeId type_id) const {
@@ -86,3 +86,4 @@ Value Value::max(const Value& other) const {
 Value Value::min(const Value& other) const {
   return value_type()->min(*this, other);
 }
+

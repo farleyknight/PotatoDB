@@ -121,7 +121,8 @@ public:
     return (name_ == "COUNT(*)");
   }
 
-  static QueryColumn from(TableColumn col);
+  static QueryColumn
+  from(const TableColumn& col);
 
   Value eval(const Tuple& tuple,
              const QuerySchema& schema) const override;

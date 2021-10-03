@@ -23,11 +23,10 @@ vector<TableColumn>
 TableHeaderPage::read_columns(buffer_offset_t columns_start,
                               int32_t column_count) const
 {
-  logger->debug("[TableHeaderPage] Reading columns at offset " +
-                std::to_string(columns_start));
+  logger->debug("[TableHeaderPage] Reading columns at offset {}", columns_start);
 
   buffer_offset_t offset = columns_start;
-  vector<TableColumn> cols;
+  vector<column_oid_t> oids;
   for (int32_t i = 0; i < column_count; ++i) {
     // read_type_id          - 4 bytes (int32)
     auto type_id = page_->read_type_id(offset);
@@ -69,36 +68,44 @@ TableHeaderPage::read_columns(buffer_offset_t columns_start,
     auto column_name = page_->read_string(offset);
     offset += sizeof(string_length_t) + column_name.size();
 
-    if (type_id == TypeId::VARCHAR) {
-      auto col = TableColumn(table_oid,
-                             column_oid,
-                             column_name,
-                             variable_length,
-                             type_id,
-                             is_nullable,
-                             is_primary_key,
-                             is_autoincrement);
-      cols.push_back(col);
-    } else {
-      auto col = TableColumn(table_oid,
-                             column_oid,
-                             column_name,
-                             type_id,
-                             is_nullable,
-                             is_primary_key,
-                             is_autoincrement);
-      cols.push_back(col);
-    }
+    auto col = TableColumn(table_oid,
+                           column_oid,
+                           column_name,
+                           variable_length,
+                           type_id,
+                           is_nullable,
+                           is_primary_key,
+                           is_autoincrement);
+    schema_mgr.load_column_oid(column_oid, move(col));
+
+    oids.push_back(column_oid);
   }
 
-  return cols;
+  return oids;
+}
+
+table_oid_t
+TableHeaderPage::read_schema() const {
+  auto table_oid     = read_table_oid();
+  auto column_count  = read_column_count();
+  auto columns_start = read_columns_start();
+  auto table_name    = read_table_name();
+  auto oids          = read_columns(columns_start, column_count);
+
+  auto TableSchema(cols,
+                     table_name,
+                     table_oid);
+
+  schema_mgr_.load_table_oid(oid, )
+
+
 }
 
 void
 TableHeaderPage::write_columns(buffer_offset_t columns_start,
                                const vector<TableColumn>& columns)
 {
-  logger->debug("[TableHeaderPage] Writing columns at offset " + std::to_string(columns_start));
+  logger->debug("[TableHeaderPage] Writing columns at offset {}", columns_start));
 
   buffer_offset_t offset = columns_start;
   for (const auto &col : columns) {

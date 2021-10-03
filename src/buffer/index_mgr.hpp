@@ -27,9 +27,9 @@ public:
                    const vector<column_oid_t> column_oids,
                    const CreateIndexExpr& expr) const;
 
-  IndexSchema
+  void
   read_index_schema(file_id_t file_id) {
-    return index_headers_.at(file_id).read_schema();
+
   }
 
   index_oid_t
@@ -129,8 +129,7 @@ private:
   map<index_oid_t, index_name_t> index_names_;
   map<index_name_t, index_oid_t> index_oids_;
 
-  map<index_oid_t, IndexHeaderPage> index_headers_;
-  map<index_oid_t, IndexSchema> index_schemas_;
+  map<index_oid_t, IndexSchema&&> index_schemas_;
   map<index_oid_t, ptr<BTree<IndexKey, RID, IndexComp>>> btree_indexes_;
 
   atomic<index_oid_t> next_index_oid_ = FIRST_INDEX_OID;

@@ -50,6 +50,12 @@ TableMgr::make_schema_from(table_oid_t table_oid,
   return TableSchema(columns, table_name, table_oid);
 }
 
+const vector<column_oid_t>&
+TableMgr::table_columns_for(table_oid_t table_oid) const {
+  assert(table_schemas_.contains(table_oid));
+  return table_schemas_.at(table_oid).oids();
+}
+
 table_oid_t
 TableMgr::create_table(const CreateTableExpr& expr, Txn& txn)
 {
@@ -59,8 +65,8 @@ TableMgr::create_table(const CreateTableExpr& expr, Txn& txn)
   auto file_id    = disk_mgr_.create_table(table_name);
   allocate_header_and_first_page(file_id, txn);
 
-  load_table(file_id, table_oid, table_name, schema);
-  write_table(file_id, table_oid, table_name, schema);
+  load_table(file_id, table_oid, table_name, move(schema));
+  write_table(file_id, table_oid, table_name, move(schema));
 
   return table_oid;
 }
@@ -129,7 +135,7 @@ TableMgr::open_all_tables() {
     auto table_name   = read_table_name(file_id);
     assert(table_name.size() > 0);
     auto table_schema = read_table_schema(file_id);
-    load_table(file_id, table_oid, table_name, table_schema);
+    load_table(file_id, table_oid, table_name, move(table_schema));
   }
 }
 
@@ -169,10 +175,10 @@ void
 TableMgr::load_table(file_id_t file_id,
                      table_oid_t table_oid,
                      const table_name_t& table_name,
-                     const TableSchema& schema)
+                     TableSchema&& schema)
 {
   load_table_name(table_oid, table_name);
-  load_table_schema(table_oid, schema);
+  load_table_schema(table_oid, move(schema));
   load_table_heap(file_id, table_oid);
   load_table_columns(table_name, schema.all());
 

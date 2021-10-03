@@ -11,93 +11,40 @@
 #include "exprs/base_expr.hpp"
 #include "exprs/column_def_expr.hpp"
 
-static constexpr value_length_t INVALID_FIXED_LENGTH    = -1;
-static constexpr value_length_t INVALID_VARIABLE_LENGTH = -1;
-
 class TableColumn {
 public:
-  explicit TableColumn(table_oid_t table_oid,
-                       column_oid_t column_oid,
-                       const column_name_t column_name,
-                       TypeId type_id,
-                       bool nullable,
-                       bool primary_key,
-                       bool autoincrement)
-    : name_            (column_name),
-      type_id_         (type_id),
-      table_oid_       (table_oid),
-      column_oid_      (column_oid),
-      inlined_         (true),
-      nullable_        (nullable),
-      primary_key_     (primary_key),
-      autoincrement_   (autoincrement),
-      fixed_length_    (Type::size_of(type_id_)),
-      variable_length_ (INVALID_VARIABLE_LENGTH)
-  {
-    assert(type_id_ != TypeId::VARCHAR);
-  }
-
-  explicit TableColumn(table_oid_t table_oid,
-                       column_oid_t column_oid,
-                       const column_name_t column_name,
-                       length_t length,
-                       TypeId type_id,
-                       bool nullable,
-                       bool primary_key,
-                       bool autoincrement)
-    : name_            (column_name),
-      type_id_         (type_id),
-      table_oid_       (table_oid),
-      column_oid_      (column_oid),
-      inlined_         (false),
-      nullable_        (nullable),
-      primary_key_     (primary_key),
-      autoincrement_   (autoincrement),
-      fixed_length_    (INVALID_FIXED_LENGTH),
-      variable_length_ (length)
-  {
-    assert(type_id_ == TypeId::VARCHAR);
-  }
-
-  explicit TableColumn(table_oid_t table_oid,
-                       column_oid_t column_oid,
-                       length_t length,
-                       const ColumnDefExpr& expr)
+  explicit
+  TableColumn(table_oid_t table_oid,
+              column_oid_t column_oid,
+              const ColumnDefExpr& expr)
     : name_            (expr.name()),
       type_id_         (expr.type_id()),
       table_oid_       (table_oid),
       column_oid_      (column_oid),
-      inlined_         (false),
-      nullable_        (expr.is_nullable()),
-      primary_key_     (expr.is_primary_key()),
-      autoincrement_   (expr.is_autoincrement()),
-      fixed_length_    (INVALID_FIXED_LENGTH),
-      variable_length_ (length)
-  {
-    assert(type_id_ == TypeId::VARCHAR);
-  }
+      inlined_         (expr.is_inlined()),
 
-  explicit TableColumn(table_oid_t table_oid,
-                       column_oid_t column_oid,
-                       const ColumnDefExpr& expr)
-    : name_            (expr.name()),
-      type_id_         (expr.type_id()),
-      table_oid_       (table_oid),
-      column_oid_      (column_oid),
-      inlined_         (true),
+      // NOT NULL
       nullable_        (expr.is_nullable()),
-      primary_key_     (expr.is_primary_key()),
-      autoincrement_   (expr.is_autoincrement()),
-      fixed_length_    (Type::size_of(type_id_)),
-      variable_length_ (INVALID_VARIABLE_LENGTH)
-  {
-    assert(type_id_ != TypeId::VARCHAR);
-  }
 
-  // Allow copy
-  TableColumn(const TableColumn&) = default;
-  // Allow copy assign
-  TableColumn& operator=(const TableColumn&) = default;
+      // PRIMARY KEY
+      primary_key_     (expr.is_primary_key()),
+
+      // AUTOINCREMENT
+      autoincrement_   (expr.is_autoincrement()),
+
+      // DEFAULT 'static_value'
+      // TODO: DEFAULT NOW() -- Dynamic value
+      default_value_   (expr.default_value()),
+
+      // Size, in bytes, of the column
+      fixed_length_    (expr.fixed_length()),
+      variable_length_ (expr.variable_length())
+  {}
+
+  // NO copy
+  TableColumn(const TableColumn&) = delete;
+  // NO copy assign
+  TableColumn& operator=(const TableColumn&) = delete;
   // Default destructor
   ~TableColumn() = default;
 
@@ -109,9 +56,9 @@ public:
   table_oid()        const { return table_oid_; }
   column_oid_t
   oid()              const { return column_oid_; }
-  length_t
+  int32_t
   fixed_length()     const { return fixed_length_; }
-  string_size_t
+  int32_t
   variable_length()  const { return variable_length_; }
 
   bool
@@ -122,6 +69,8 @@ public:
   is_autoincrement() const { return autoincrement_; }
   bool
   is_nullable()      const { return nullable_; }
+  bool
+  has_default()      const { return has_default_; }
 
   void set_nullable(bool nullable) {
     nullable_ = nullable;
@@ -135,6 +84,11 @@ public:
     autoincrement_ = autoincrement;
   }
 
+  // TODO: Remove `is_splat` and `is_count_splat`.
+  //
+  // They are too specific. These methods should live on outside objects.
+  //
+  // This method should be called on a TableColumn object and default to `false`
   bool is_splat() const {
     return false;
   }
@@ -143,7 +97,8 @@ public:
     return false;
   }
 
-  const string to_string() const {
+  const string
+  to_string() const {
     std::ostringstream os;
 
     os << "TableColumn[" << std::endl <<
@@ -203,6 +158,16 @@ private:
   bool primary_key_        = false;
   // is the column an autoincrement?
   bool autoincrement_      = false;
-  int32_t fixed_length_    = -1;
-  int32_t variable_length_ = -1;
+  // does this column have a default?
+  bool has_default_        = false;
+
+  // 
+  Value default_value_;
+
+  // Length of value.
+  // TODO: Maybe we can merge these two?
+  int32_t fixed_length_    = INVALID_FIXED_LENGTH;
+  int32_t variable_length_ = INVALID_VARIABLE_LENGTH;
+
+
 };

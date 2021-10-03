@@ -60,8 +60,9 @@ SchemaMgr::all_columns_for(const table_name_t& table_name) const {
 }
 
 vector<QueryColumn>
-SchemaMgr::all_columns_for(table_oid_t table_oid) const {
-  auto table_schema = sys_catalog_.table_schema_for(table_oid);
+SchemaMgr::all_columns_for(table_oid_t table_oid) const
+{
+  const auto &table_schema = sys_catalog_.table_schema_for(table_oid);
   vector<QueryColumn> cols;
   for (const auto &col : table_schema.columns()) {
     cols.push_back(QueryColumn::from(col));
@@ -159,4 +160,9 @@ SchemaMgr::query_column_for(const vector<table_name_t>& table_names,
   } else {
     return candidates[0];
   }
+}
+
+bool
+SchemaMgr::load_column_oid(column_oid_t oid, TableColumn&& column) {
+  sys_catalog_.load_column_oid(oid, move(column));
 }

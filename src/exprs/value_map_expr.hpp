@@ -11,17 +11,18 @@ public:
     : BaseExpr (ExprType::VALUE_MAP)
   {}
 
-  const map<column_oid_t, Value>
+  ValueMap
   to_value_map() const {
-    map<column_oid_t, Value> value_map;
+    ValueMap value_map(size());
     for (int32_t i = 0; i < size(); ++i) {
       value_map.emplace(column_oids_[i],
-                        values_[i]);
+                        move(values_[i]));
     }
     return value_map;
   }
 
-  int32_t size() const {
+  int32_t
+  size() const {
     return column_oids_.size();
   }
 

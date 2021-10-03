@@ -98,9 +98,10 @@ SeqScanExec::has_next() {
   return false;
 }
 
-map<column_id_t, Value>
+ValueMap
 SeqScanExec::next_value_map() {
-  auto value_map = table_iter_->tuple().to_value_map(schema());
+  auto tuple = table_iter_->tuple();
+  auto value_map = schema().layout().to_value_map(tuple);
   ++(*table_iter_);
   return value_map;
 }

@@ -17,7 +17,8 @@ public:
 
   ~ProjectionExec() = default;
 
-  void init() override {
+  void
+  init() override {
     child_->init();
   }
 
@@ -28,20 +29,27 @@ public:
 
   Tuple
   next_tuple() override {
-    auto tuple = child_->next_tuple();
-    map<column_oid_t, Value> value_map;
-    auto old_schema = dynamic_cast<SeqScanExec*>(child_.get())->schema();
-    auto new_schema = plan_->schema();
-
-    for (const auto &col : new_schema.all()) {
-      auto value = old_schema.layout().value_by_oid(tuple, col.oid());
-      value_map.emplace(col.oid(), value);
-    }
-
-    return new_schema.layout().make(value_map, exec_ctx().txn());
+    auto value_map = next_value_map();
+    return plan_->schema().layout().make(value_map, exec_ctx().txn());
   }
 
-  const string message_on_completion(int32_t result_count) const override {
+  ValueMap
+  next_value_map() override {
+    auto value_map = child_->next_value_map();
+    auto old_schema = dynamic_cast<SeqScanExec*>(child_.get())->schema();
+    auto &new_schema = plan_->schema();
+
+    for (const auto &oid : value_map.oids()) {
+      if (!new_schema.contains(oid)) {
+        value_map.erase(oid);
+      }
+    }
+
+    return value_map;
+  }
+
+  const string
+  message_on_completion(int32_t result_count) const override {
     return "Found " + std::to_string(result_count) + " record(s)";
   }
 
